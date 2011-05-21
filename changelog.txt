@@ -1,3 +1,9 @@
 2011-05-21 COAH96KoxU <queue glasscore.net>
 
-	* release 0
+	* *.php: BOM の除去
+	* script/Read/Index.js: disabled の指定方法を修正
+	* script/Read/Edit.js: disabled の指定方法を修正
+
+2011-05-21 COAH96KoxU <queue glasscore.net>
+
+	* initial

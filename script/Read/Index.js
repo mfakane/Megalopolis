@@ -4,7 +4,7 @@ megalopolis.read =
 	evaluate: function(point)
 	{
 		var form = $("#evaluateform");
-		var inputs = $("input", form).attr("disabled", "disabled");
+		var inputs = $("input", form).attr("disabled", true);
 		var lastError = form.children(".notify");
 		
 		function updatePoints(pt)
@@ -117,7 +117,7 @@ megalopolis.read =
 				},
 				complete: function()
 				{
-					inputs.attr("disabled", "");
+					inputs.attr("disabled", false);
 				}
 			});
 		}
@@ -134,7 +134,7 @@ megalopolis.read =
 	comment: function(data)
 	{
 		var form = $("#commentform");
-		var inputs = $("input, textarea, select", form).attr("disabled", "disabled");
+		var inputs = $("input, textarea, select", form).attr("disabled", true);
 		var lastError = form.children(".notify");
 		
 		function callback()
@@ -233,7 +233,7 @@ megalopolis.read =
 				},
 				complete: function()
 				{
-					inputs.attr("disabled", "");
+					inputs.attr("disabled", false);
 				}
 			});
 		}

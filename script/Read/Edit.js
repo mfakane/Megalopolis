@@ -73,9 +73,9 @@ $(function()
 {
 	$("#unpostCheck").change(function()
 	{
-		$("#unpostSubmit").attr("disabled", $(this).attr("checked") ? "" : "disabled");
+		$("#unpostSubmit").attr("disabled", !$(this).attr("checked"));
 	});
-	$("#unpostSubmit").attr("disabled", "disabled");
+	$("#unpostSubmit").attr("disabled", true);
 	
 	$("#unpostForm").submit(function()
 	{
