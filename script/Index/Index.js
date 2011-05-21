@@ -1,0 +1,158 @@
+megalopolis.index =
+{
+	loadDropDown: function(useTitle, useName, usePageCount, useReadCount, useSize, useEvaluationCount, usePoints, useRate)
+	{
+		if ($.browser.msie &&
+			$.browser.version < 8)
+			return;
+		
+		var lastSort =
+		{
+			label: "投稿日時",
+			value: "dateTime",
+			selector: function(x, y)
+			{
+				var arr = $.map([x, y], function(_) { return $("time", _).text(); });
+				
+				return arr[0] == arr.sort()[0] ? -1 : 1;
+			}
+		};
+		var ascending = false;
+		var dropDown = $("<ul />")
+			.append($.map
+				([
+					!useTitle ? null :
+					{
+						label: "作品名",
+						value: "title",
+						selector: function(x, y)
+						{
+							var arr = $.map([x, y], function(_) { return $("h2>a", _).text(); });
+							
+							return arr[0] == arr.sort()[0] ? -1 : 1;
+						}
+					},
+					!useName ? null :
+					{
+						label: "作者",
+						value: "name",
+						selector: function(x, y)
+						{
+							var arr = $.map([x, y], function(_) { return $(".name", _).text(); });
+							
+							return arr[0] == arr.sort()[0] ? -1 : 1;
+						}
+					},
+					!usePageCount ? null :
+					{
+						label: "ページ数",
+						value: "pageCount"
+					},
+					!useReadCount ? null :
+					{
+						label: "閲覧数",
+						value: "readCount"
+					},
+					!useSize ? null :
+					{
+						label: "サイズ",
+						value: "size"
+					},
+					!useEvaluationCount ? null :
+					{
+						label: "評価数",
+						value: "evaluationCount"
+					},
+					!usePoints ? null :
+					{
+						label: "POINT",
+						value: "points"
+					},
+					!useRate ? null :
+					{
+						label: "Rate",
+						value: "rate"
+					},
+					lastSort
+				],
+				function(_)
+				{
+					if (_ != null)
+						return $("<li />")
+							.text(_.label)
+							.click(function()
+							{
+								if (lastSort == _)
+									ascending = !ascending;
+								
+								lastSort = _;
+								megalopolis.index.sort(control, ascending, _.selector
+									? _.selector
+									: function(x, y) { return $("." + _.value, x).text() - $("." + _.value, y).text(); });
+								label.text(_.label);
+								
+								return false;
+							})[0];
+				}))
+			.hide();
+		var label = $("<span />")
+			.text("投稿日時");
+		var button = $("<div />")
+			.addClass("button");
+		var control = $("<div />")
+			.addClass("dropDown")
+			.append(label)
+			.append(button)
+			.append(dropDown)
+			.appendTo($("header+h1"))
+			.mouseenter(function()
+			{
+				control.addClass("open");
+				dropDown.show();
+				
+				return false;
+			})
+			.mouseleave(function()
+			{
+				control.removeClass("open");
+				dropDown.hide();
+				
+				return false;
+			})
+			.click(function()
+			{
+				ascending = !ascending;
+				megalopolis.index.sort(control, ascending, lastSort.selector
+					? lastSort.selector
+					: function(x, y) { return $("." + lastSort.value, x).text() - $("." + lastSort.value, y).text(); });
+				
+				return false;
+			});
+	},
+	sort: function(control, ascending, selector)
+	{
+		if (ascending)
+			control.addClass("ascending");
+		else
+			control.removeClass("ascending");
+		
+		var div = $(".entries");
+		
+		div.append($("article", div).sort(function(x, y)
+		{
+			return ascending ? selector($(x), $(y)) : selector($(y), $(x));
+		}));
+	}
+};
+
+$(function()
+{
+	$("#moveButton").click(function()
+	{
+		return window.confirm("本当に作品を移動してよろしいですか？");
+	});
+	$("#unpostButton").click(function()
+	{
+		return window.confirm("本当に作品を削除してよろしいですか？");
+	});
+});

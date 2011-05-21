@@ -1,0 +1,32 @@
+.read #body
+{
+	overflow: visible;
+}
+
+.read #body.vertical>div
+{
+	writing-mode: tb-rl;
+	-ms-writing-mode: tb-rl;
+	letter-spacing: 1px;
+	line-height: 160%;
+}
+
+.read #body.vertical h1
+{
+	height: auto;
+	margin-left: 8px;
+}
+
+.read #body.vertical>div>address
+{
+	margin-left: 8px;
+	margin-bottom: 0px;
+}
+
+.read #body.vertical #afterword
+{
+	margin: -8px 6px -8px 0px;
+	padding: 8px;
+	border-top: none;
+	border-right: #999999 1px solid;
+}

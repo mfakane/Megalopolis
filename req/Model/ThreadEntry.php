@@ -1,0 +1,711 @@
+<?php
+class ThreadEntry
+{
+	static $threadEntrySchema = array
+	(
+		"id" => "integer primary key not null",
+		"subject" => "integer primary key not null",
+		
+		"title" => "text",
+		"name" => "text",
+		"summary" => "text",
+		"link" => "text",
+		"mail" => "text",
+		"host" => "text",
+		"dateTime" => "integer",
+		"lastUpdate" => "integer",
+		"pageCount" => "integer",
+		"size" => "real"
+	);
+	static $threadEvaluationSchema = array
+	(
+		"id" => "integer primary key not null",
+
+		"points" => "integer",
+		"responseCount" => "integer",
+		"commentCount" => "integer",
+		"evaluationCount" => "integer",
+		"readCount" => "integer"
+	);
+	static $threadTagSchema = array
+	(
+		"id" => "integer primary key not null",
+
+		"tag" => "text primary key not null"
+	);
+	
+	const SEARCH_RANDOM = 0;
+	const SEARCH_ASCENDING = 1;
+	const SEARCH_DESCENDING = 2;
+	
+	public $id = 0;
+	public $subject = 0;
+	public $title = null;
+	public $name = null;
+	public $summary = null;
+	public $link = null;
+	public $mail = null;
+	public $host = null;
+	public $dateTime = 0;
+	public $lastUpdate = 0;
+	public $pageCount = 0;
+	public $size = 0.0;
+	
+	public $points = 0;
+	public $rate = 0.0;
+	public $responseCount = 0;
+	public $commentCount = 0;
+	public $evaluationCount = 0;
+	public $readCount = 0;
+	
+	public $tags = array();
+	
+	public $loaded = false;
+	
+	function __construct(PDO $db = null)
+	{
+		if ($db)
+		{
+			$this->id = time();
+			$this->dateTime = time();
+			$s = Board::getLatestSubject($db);
+			$this->subject = max($s, 1);
+			
+			if ($s > 0 &&
+				count(ThreadEntry::getEntriesBySubject($db, $s)) >= Configuration::$instance->subjectSplitting)
+				Board::$latestSubject = ++$this->subject;
+		}
+	}
+	
+	/**
+	 * @param int $id
+	 * @return ThreadEntry
+	 */
+	static function load(PDO $db, $id)
+	{	
+		$rt = self::query($db, sprintf
+		('
+			where %s.id = ?',
+			App::THREAD_ENTRY_TABLE
+		), array($id));
+		
+		if ($rt)
+		{
+			$rt = array_pop($rt);
+			$tags = self::queryTags($db, 'where id = ?', array($id));
+			
+			if (isset($tags[$rt->id]))
+				$rt->tags = $tags[$rt->id];
+			
+			$rt->calculateRate();
+			$rt->loaded = true;
+		
+			return $rt;
+		}
+		else
+			return null;
+	}
+	
+	/**
+	 * @return array
+	 */
+	function toArray()
+	{
+		$c = &Configuration::$instance;
+		
+		return array
+		(
+			"id" => intval($this->id),
+			"subject" => intval($this->subject),
+			"title" => $this->title,
+			"name" => $c->showName[Configuration::ON_ENTRY] ? $this->name : null,
+			"summary" => $c->showSummary[Configuration::ON_ENTRY] ? $this->summary : null,
+			"link" => $c->showName[Configuration::ON_ENTRY] ? $this->link : null,
+			"mail" => $c->showName[Configuration::ON_ENTRY] ? $this->mail : null,
+			"dateTime" => intval($this->dateTime),
+			"lastUpdate" => intval($this->lastUpdate),
+			"pageCount" => $c->showPages[Configuration::ON_ENTRY] ? intval($this->pageCount) : null,
+			"size" => $c->showSize[Configuration::ON_ENTRY] ? intval($this->size) : null,
+			"points" => $c->showPoint[Configuration::ON_ENTRY] ? intval($this->points) : null,
+			"responseCount" => $c->showComment[Configuration::ON_ENTRY] ? intval($this->responseCount) : null,
+			"commentCount" => $c->showComment[Configuration::ON_ENTRY] ? intval($this->commentCount) : null,
+			"evaluationCount" => $c->showComment[Configuration::ON_ENTRY] ? intval($this->evaluationCount) : null,
+			"readCount" => $c->showReadCount[Configuration::ON_ENTRY] ? intval($this->readCount) : null
+		);
+	}
+	
+	function incrementReadCount(PDO $db)
+	{
+		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			update %s
+			set readCount = ?
+			where id = ?',
+			App::THREAD_EVALUATION_TABLE
+		))), array(++$this->readCount, $this->id));
+	}
+	
+	function updateCount(Thread $thread)
+	{
+		$this->responseCount = count($thread->nonCommentEvaluations) + count($thread->comments);
+		$this->evaluationCount = count($thread->evaluations);
+		$this->commentCount = count($thread->comments);
+		$this->points = array_reduce($thread->evaluations, create_function('$x, $y', 'return $x + $y->point;'), 0);
+		$this->calculateRate();
+	}
+	
+	private function calculateRate()
+	{
+		switch (Configuration::$instance->rateType)
+		{
+			case Configuration::RATE_FIVE:
+				$this->rate = round(($this->points + 25) / (($this->evaluationCount + 1) * 50) * 10, 2);
+				
+				break;
+			case Configuration::RATE_AVERAGE:
+				$this->rate = $this->evaluationCount == 0 ? 0 : round($this->points / $this->evaluationCount, 2);
+				
+				break;
+		}
+	}
+	
+	function delete(PDO $db)
+	{
+		foreach (array
+		(
+			App::THREAD_ENTRY_TABLE => "id",
+			App::THREAD_EVALUATION_TABLE => "id",
+			App::THREAD_TAG_TABLE => "id",
+			App::THREAD_TABLE => "id",
+			App::THREAD_STYLE_TABLE => "id",
+			App::THREAD_PASSWORD_TABLE => "id",
+			App::COMMENT_TABLE => "entryID",
+			App::EVALUATION_TABLE => "entryID"
+		) as $k => $v)
+			Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf
+			('
+				delete from %s
+				where %s = ?',
+				$k,
+				$v
+			))), array($this->id));
+		
+		$this->loaded = false;
+	}
+	
+	function save(PDO $db)
+	{
+		Util::saveToTable($db, $this, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE);
+		Util::saveToTable($db, $this, self::$threadEvaluationSchema, App::THREAD_EVALUATION_TABLE);
+		
+		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			delete from %s
+			where id = %d',
+			App::THREAD_TAG_TABLE,
+			$this->id
+		))));
+		
+		foreach ($this->tags as $i)
+		{
+			$st = Util::ensureStatement($db, $db->prepare(sprintf
+			('
+				insert into %s
+				(
+					%s
+				)
+				values
+				(
+					:%s
+				)',
+				App::THREAD_TAG_TABLE,
+				implode(", ", array_keys(self::$threadTagSchema)),
+				implode(", :", array_keys(self::$threadTagSchema))
+			)));
+			Util::bindValues($st, $this, self::$threadTagSchema);
+			$st->bindParam("tag", $i);
+			Util::executeStatement($st);
+		}
+		
+		$this->loaded = true;
+	}
+	
+	static function ensureTable(PDO $db)
+	{
+		Util::createTableIfNotExists($db, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE);
+		Util::createTableIfNotExists($db, self::$threadEvaluationSchema, App::THREAD_EVALUATION_TABLE);
+		Util::createTableIfNotExists($db, self::$threadTagSchema, App::THREAD_TAG_TABLE);
+		
+		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index if not exists %sSubjectIndex on %1$s(subject)', App::THREAD_ENTRY_TABLE))));
+		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index if not exists %sNameIndex on %1$s(name)', App::THREAD_ENTRY_TABLE))));
+		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index if not exists %sTagIndex on %1$s(tag)', App::THREAD_TAG_TABLE))));
+	}
+	
+	/**
+	 * @param string $options [optional]
+	 * @return mixed
+	 */
+	private static function query(PDO $db, $options = "", array $params = array(), array $columns = array("*"))
+	{
+		static $queryCache = array();
+		
+		$rt = array();
+		$sql = sprintf
+		('
+			select %s from %s
+			left join %s on %2$s.id = %3$s.id
+			%s',
+			implode(", ", $columns),
+			App::THREAD_ENTRY_TABLE,
+			App::THREAD_EVALUATION_TABLE,
+			trim($options)
+		);
+		$st = isset($queryCache[$sql]) ? $queryCache[$sql] : $queryCache[$sql] = Util::ensureStatement($db, $db->prepare($sql));
+		Util::executeStatement($st, $params);
+		
+		if ($columns == array("*"))
+		{
+			foreach ($st->fetchAll(PDO::FETCH_CLASS, "ThreadEntry") as $i)
+				$rt[$i->id] = $i;
+			
+			return $rt;
+		}
+		else
+			return $st->fetchAll();
+	}
+	
+	/**
+	 * @param string $options [optional]
+	 * @return array of (array of string) by string
+	 */
+	private static function queryTags(PDO $db, $options = "", array $params = array())
+	{
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			select id, tag from %s
+			%s',
+			App::THREAD_TAG_TABLE,
+			trim($options)
+		)));
+		$st->execute($params);
+		
+		return $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
+	}
+	
+	/**
+	 * @param int $subject
+	 * @param int $order [optional]
+	 * @return array of ThreadEntry
+	 */
+	static function getEntriesBySubject(PDO $db, $subject, $order = Board::ORDER_DESCEND)
+	{
+		$rt = self::query($db, sprintf
+		('
+			where %s.subject = %d
+			group by %1$s.id',
+			App::THREAD_ENTRY_TABLE,
+			$subject
+		));
+		$tags = self::queryTags($db, sprintf
+		('
+			where id in (%s)',
+			implode(", ", array_map(create_function('$_', 'return $_->id;'), $rt))
+		));
+		
+		if (Configuration::$instance->convertOnDemand &&
+			is_file($path = "Megalith/sub/" . ($subject == Board::getLatestSubject($db) ? "subject.txt" : "subject{$subject}.txt")))
+			foreach (array_reverse(file($path, FILE_IGNORE_NEW_LINES)) as $i)
+			{
+				$entry = Util::convertLineToThreadEntry(mb_convert_encoding($i, "UTF-8", "SJIS"));
+				
+				if (!$entry ||
+					isset($rt[$entry->id]))
+					continue;
+				
+				$entry->subject = $subject;
+				$entry->size = is_file($file = "Megalith/dat/{$entry->id}.dat") ? round(filesize($file) / 1024, 2) : 0;
+				$rt[$entry->id] = $entry;
+			}
+		
+		foreach ($rt as $i)
+		{
+			if (!$i->tags && isset($tags[$i->id]))
+				$i->tags = $tags[$i->id];
+			
+			$i->calculateRate();
+			$i->loaded = true;
+		}
+		
+		if ($order == Board::ORDER_DESCEND)
+			krsort($rt);
+		else
+			ksort($rt);
+
+		return $rt;
+	}
+	
+	/**
+	 * @param string $name
+	 * @param int $order [optional]
+	 * @return array of ThreadEntry
+	 */
+	static function getEntriesByName(PDO $db, $name, $order = Board::ORDER_DESCEND)
+	{
+		$rt = self::query($db, sprintf
+		('
+			where %s.name = ?
+			order by %1$s.id %s',
+			App::THREAD_ENTRY_TABLE,
+			$order == Board::ORDER_ASCEND ? "asc" : "desc"
+		), array($name));
+		$tags = self::queryTags($db, sprintf
+		('
+			where id in (%s)',
+			implode(", ", array_map(create_function('$_', 'return $_->id;'), $rt))
+		));
+		
+		if (Configuration::$instance->convertOnDemand &&
+			is_dir("Megalith/sub"))
+		{
+			foreach (glob("Megalith/sub/subject*.txt") as $i)
+				if (($n = basename($i)) != "subjects.txt")
+				{
+					$subject = $n == "subject.txt"
+						? Board::getLatestSubject($db)
+						: intval(strtr($n, array
+						(
+							"subject" => "",
+							".txt" => ""
+						)));
+					
+					foreach (array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "SJIS");'), file($i, FILE_IGNORE_NEW_LINES)) as $j)
+					{
+						$line = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", $j));
+
+						if (count($line) > 2 && $line[2] == $name)
+						{
+							$entry = Util::convertLineToThreadEntry($j);
+							$entry->subject = $subject;
+							$rt[$entry->id] = $entry;
+						}
+					}
+				}
+			
+			krsort($rt);
+		}
+		
+		foreach ($rt as $i)
+		{
+			if (!$i->tags && isset($tags[$i->id]))
+				$i->tags = $tags[$i->id];
+			
+			$i->calculateRate();
+			$i->loaded = true;
+		}
+		
+		return $rt;
+	}
+	
+	/**
+	 * @param string $tag
+	 * @param int $offset
+	 * @param int $limit
+	 * @param int $order [optional]
+	 * @return array of ThreadEntry
+	 */
+	static function getEntriesByTag(PDO $db, $tag, $offset = 0, $limit = null, $order = Board::ORDER_DESCEND)
+	{
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			select id from %s
+			where tag = ?',
+			App::THREAD_TAG_TABLE
+		)));
+		Util::executeStatement($st, array($tag));
+		$ids = implode(", ", $st->fetchAll(PDO::FETCH_COLUMN));
+		
+		$rt = self::query($db, sprintf
+		('
+			where %s.id in (%s)
+			order by %1$s.id %s
+			%s',
+			App::THREAD_ENTRY_TABLE,
+			$ids,
+			$order == Board::ORDER_ASCEND ? "asc" : "desc",
+			is_null($limit) ? "" : "limit {$limit} offset {$offset}"
+		));
+		$tags = self::queryTags($db, sprintf
+		('
+			where id in (%s)',
+			$ids
+		));
+		
+		if (Configuration::$instance->convertOnDemand &&
+			is_dir("Megalith/sub"))
+		{
+			foreach (glob("Megalith/sub/subject*.txt") as $i)
+				if (($n = basename($i)) != "subjects.txt")
+				{
+					$subject = $n == "subject.txt"
+						? Board::getLatestSubject($db)
+						: intval(strtr($n, array
+						(
+							"subject" => "",
+							".txt" => ""
+						)));
+					
+					foreach (array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "SJIS");'), file($i, FILE_IGNORE_NEW_LINES)) as $j)
+					{
+						$line = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", $j));
+
+						if (count($line) > 13 && in_array($tag, Util::splitTags($line[13])))
+						{
+							$entry = Util::convertLineToThreadEntry($j);
+							$entry->subject = $subject;
+							$rt[$entry->id] = $entry;
+						}
+					}
+				}
+			
+			krsort($rt);
+		}
+		
+		foreach ($rt as $i)
+		{
+			if (isset($tags[$i->id]))
+				$i->tags = $tags[$i->id];
+			
+			$i->loaded = true;
+		}
+		
+		return $rt;
+	}
+	
+	/**
+	 * @return int
+	 */
+	static function getNameCount(PDO $db)
+	{
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			select count(1) from %s
+			group by name',
+			App::THREAD_ENTRY_TABLE
+		)));
+		Util::executeStatement($st);
+		$rt = $st->fetchAll(PDO::FETCH_COLUMN);
+		
+		return $rt ? $rt[0] : 0;
+	}
+	
+	/**
+	 * @return int
+	 */
+	static function getTagCount(PDO $db)
+	{
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			select count(1) from %s
+			group by tag',
+			App::THREAD_TAG_TABLE
+		)));
+		Util::executeStatement($st);
+		$rt = $st->fetchAll(PDO::FETCH_COLUMN);
+		
+		return $rt ? $rt[0] : 0;
+	}
+
+	/**
+	 * @param int $offset
+	 * @param int $limit
+	 * @param int $order [optional]
+	 * @return array
+	 */
+	static function getNames(PDO $db, $offset = 0, $limit = null, $order = Board::ORDER_DESCEND)
+	{
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			select name, count(id) from %s
+			where name != ""
+			group by name
+			order by count(id) %s
+			%s',
+			App::THREAD_ENTRY_TABLE,
+			$order == Board::ORDER_ASCEND ? "asc" : "desc",
+			is_null($limit) ? "" : "limit {$limit} offset {$offset}"
+		)));
+		Util::executeStatement($st);
+		$rt = $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
+		
+		return array_map(create_function('$_', 'return $_[0];'), $rt);
+	}
+
+	/**
+	 * @param int $offset
+	 * @param int $limit
+	 * @param int $order [optional]
+	 * @return array
+	 */
+	static function getTags(PDO $db, $offset = 0, $limit = null, $order = Board::ORDER_DESCEND)
+	{
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			select tag, count(id) from %s
+			group by tag
+			order by count(id) %s
+			%s',
+			App::THREAD_TAG_TABLE,
+			$order == Board::ORDER_ASCEND ? "asc" : "desc",
+			is_null($limit) ? "" : "limit {$limit} offset {$offset}"
+		)));
+		Util::executeStatement($st);
+		$rt = $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
+		
+		return array_map(create_function('$_', 'return $_[0];'), $rt);
+	}
+	
+	/**
+	 * @param string $name
+	 * @return int
+	 */
+	static function getEntryCountByName(PDO $db, $name)
+	{
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			select count(1) from %s
+			where name = ?',
+			App::THREAD_ENTRY_TABLE
+		)));
+		Util::executeStatement($st, array($name));
+		$rt = $st->fetchAll(PDO::FETCH_COLUMN);
+		
+		return $rt[0];
+	}
+	
+	/**
+	 * @param string $tag
+	 * @return int
+	 */
+	static function getEntryCountByTag(PDO $db, $tag)
+	{
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			select count(1) from %s
+			where tag = ?',
+			App::THREAD_TAG_TABLE
+		)));
+		Util::executeStatement($st, array($tag));
+		$rt = $st->fetchAll(PDO::FETCH_COLUMN);
+		
+		return $rt[0];
+	}
+	
+	/**
+	 * @return ThreadEntry
+	 */
+	static function getRandomEntry(PDO $db)
+	{
+		$st = Util::ensureStatement($db, $db->query(sprintf
+		('
+			select id from %s',
+			App::THREAD_ENTRY_TABLE
+		)));
+		$rt = $st->fetchAll(PDO::FETCH_COLUMN);
+		
+		if ($rt)
+			return self::load($db, $rt[array_rand($rt)]);
+		else
+			return null;
+	}
+	
+	static function getMaxMinValues(PDO $db)
+	{
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			select
+				max(dateTime) as maxDateTime,
+				min(dateTime) as minDateTime,
+				max(evaluationCount) as maxEval,
+				min(evaluationCount) as minEval,
+				max(points) as maxPoints,
+				min(points) as minPoints
+				from %s
+			left join %s on %1$s.id = %2$s.id',
+			App::THREAD_ENTRY_TABLE,
+			App::THREAD_EVALUATION_TABLE
+		)));
+		Util::executeStatement($st);
+		
+		return $st->fetch();
+	}
+	
+	/**
+	 * @param int $offset [optional]
+	 * @param int $limit [optional]
+	 * @param int $option [optional]
+	 * @param string $sort [optional]
+	 * @return array|ThreadEntry
+	 */
+	static function search(PDO $db, PDO $idb, array $query, $offset = 0, $limit = null, $option = self::SEARCH_DESCENDING, $sort = "1")
+	{
+		$ids = null;
+		
+		if (isset($query["query"]) && $query["query"])
+			$ids = array_merge
+			(
+				SearchIndex::search($idb, $query["query"], "title"),
+				SearchIndex::search($idb, $query["query"], "name"),
+				SearchIndex::search($idb, $query["query"], "summary"),
+				SearchIndex::search($idb, $query["query"], "afterword"),
+				SearchIndex::search($idb, $query["query"], "tags")
+			);
+		
+		if (isset($query["title"]) && $query["title"])
+			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["title"], "title")) : SearchIndex::search($idb, $query["title"], "title");
+		
+		if (isset($query["name"]) && $query["name"])
+			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["name"], "name")) : SearchIndex::search($idb, $query["name"], "name");
+		
+		if (isset($query["summary"]) && $query["summary"])
+			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["summary"], "summary")) : SearchIndex::search($idb, $query["summary"], "summary");
+		
+		if (isset($query["afterword"]) && $query["afterword"])
+			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["afterword"], "afterword")) : SearchIndex::search($idb, $query["afterword"], "afterword");
+		
+		if (isset($query["tags"]) && $query["tags"])
+			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["tags"], "tag")) : SearchIndex::search($idb, $query["tags"], "tags");
+		
+		$where = array
+		(
+			!is_null($ids) ? App::THREAD_ENTRY_TABLE . ".id in (" . implode(", ", $ids) . ")" : null,
+			isset($query["eval"]) && $query["eval"] ? "evaluationCount between {$query['eval'][0]} and {$query['eval'][1]}" : null,
+			isset($query["points"]) && $query["points"] ? "points between {$query['points'][0]} and {$query['points'][1]}" : null,
+			isset($query["dateTime"]) && $query["dateTime"] ? "dateTime between {$query['dateTime'][0]} and {$query['dateTime'][1]}" : null
+		);
+		$whereString = "where " . implode(" and ", array_filter($where));
+		Util::executeStatement($st = Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			select count(1) from %s
+			left join %s on %1$s.id = %2$s.id
+			%s',
+			App::THREAD_ENTRY_TABLE,
+			App::THREAD_EVALUATION_TABLE,
+			$whereString
+		))));
+		$count = $st->fetch();
+		
+		if ($option == self::SEARCH_RANDOM)
+		{
+			$rt = self::query($db, $whereString, array(), array(App::THREAD_ENTRY_TABLE . ".id"));
+			
+			return ThreadEntry::load($db, $rt[array_rand($rt)][0]);
+		}
+		else
+			return array
+			(
+				"result" => self::query($db, "{$whereString} order by {$sort} " . ($option == self::SEARCH_DESCENDING ? "desc" : "asc") . ($limit ? " limit {$limit} offset {$offset}" : null)),
+				"count" => $count[0]
+			);
+	}
+}
+?>

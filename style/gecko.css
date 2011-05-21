@@ -1,0 +1,25 @@
+input[type="submit"], input[type="reset"], input[type="button"], button
+{
+	padding: 1px 5px 1px 5px;
+}
+
+body>header form input[name="query"]:-moz-placeholder
+{
+	color: #666666;
+}
+
+.read #body.vertical>div
+{
+	right: -551px;
+	height: 925px;
+	width: 519px;
+	-moz-transform: rotate(90deg);
+	-moz-transform-origin: 0% 0%;
+	letter-spacing: 1px;
+	line-height: 160%;
+}
+
+.read #body.vertical img
+{
+	-moz-transform: rotate(-90deg);
+}

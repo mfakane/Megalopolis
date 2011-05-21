@@ -1,0 +1,51 @@
+.convert p input
+{
+	margin: 0px;
+}
+
+.convert
+{
+	text-align: center;
+}
+
+.convert p+p
+{
+	margin-bottom: 8px;
+}
+
+.progress
+{
+	margin: 0px auto 8px auto;
+	border: #005019 1px solid;
+	border-radius: 4px;
+	width: 240px;
+	height: 24px;
+	background: #ffffff url("progress.gif") repeat-x scroll left top;
+	text-align: left;
+	overflow: hidden;
+}
+
+.progress div
+{
+	margin-right: auto;
+	border-right: #005019 1px solid;
+	border-radius: 4px 0px 0px 4px;
+	background: transparent url("progress.png") repeat-x scroll right top;
+	height: 100%;
+}
+
+.progress.pending
+{
+	border-color: #ffffff;
+	background: #ffffff url("indicator.gif") no-repeat scroll center center;
+}
+
+.progress.pending div
+{
+	border-right: none;
+}
+
+.progress.complete
+{
+	background-image: none;
+}

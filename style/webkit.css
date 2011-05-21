@@ -1,0 +1,54 @@
+body>header form input[name="query"]::-webkit-input-placeholder
+{
+	color: #666666;
+}
+
+.read #body.vertical>div
+{
+	right: -552px;
+	height: 926px;
+	width: 520px;
+	-webkit-transform: rotate(90deg);
+	-webkit-transform-origin: 0% 0%;
+	line-height: 180%;
+}
+
+.read #body.vertical img
+{
+	-webkit-transform: rotate(-90deg);
+}
+
+input[type="submit"], input[type="reset"], input[type="button"], button
+{
+	-webkit-box-sizing: border-box;
+	-webkit-box-shadow: 1px 1px 0px #ffffff inset, -1px 1px 0px #ffffff inset, -1px -1px 0px #ffffff inset, 1px -1px 0px #ffffff inset;
+}
+
+input[type="submit"][disabled], input[type="reset"][disabled], input[type="button"][disabled], button[disabled]
+{
+	box-shadow: 1px 1px 0px #ffffff inset, -1px 1px 0px #ffffff inset, -1px -1px 0px #ffffff inset, 1px -1px 0px #ffffff inset !important;
+}
+
+form[action="unpost"] button, button.unpost
+{
+	box-shadow: 1px 1px 0px #ff6633 inset, -1px 1px 0px #ff6633 inset, -1px -1px 0px #ff6633 inset, 1px -1px 0px #ff6633 inset;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="search"],
+input[type="email"],
+input[type="url"],
+input[type="color"],
+input[type="number"],
+input[type="date"],
+textarea,
+select
+{
+	-webkit-box-sizing: content-box;
+}
+
+select
+{
+	-webkit-box-sizing: border-box;
+}

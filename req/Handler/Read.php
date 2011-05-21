@@ -1,0 +1,626 @@
+<?php
+class ReadHandler extends Handler
+{
+	/**
+	 * @var ReadHandler
+	 */
+	static $instance;
+	
+	public $subject;
+	/**
+	 * @var ThreadEntry
+	 */
+	public $entry;
+	/**
+	 * @var Thread
+	 */
+	public $thread;
+	public $page;
+	
+	function index($_subject = "0", $_id = "0", $_page = "1")
+	{
+		$subject = intval($_subject);
+		$id = intval($_id);
+		$page = max(intval($_page), 1);
+		$c = &Configuration::$instance;
+		
+		if (App::$actionName == "index" && Auth::hasSession() && !Auth::hasSession(true))
+			Auth::logout();
+		else
+			Auth::cleanSession();
+		
+		if (!$c->showTitle[Configuration::ON_SUBJECT])
+			throw new ApplicationException("作品の閲覧は許可されていません", 403);
+		
+		$db = App::openDB("data", false);
+		
+		if ($subject == 0)
+			$subject = Board::getLatestSubject($db);
+		
+		$this->subject = $subject;
+		$this->thread = self::loadThread($db, $id);
+		$this->entry = &$this->thread->entry;
+		$this->page = $page;
+
+		if (Cookie::getCookie(Cookie::LAST_ID_KEY) != $id)
+		{
+			$this->entry->incrementReadCount($db);
+			Cookie::setCookie(Cookie::LAST_ID_KEY, $id);
+			Cookie::sendCookie();
+		}
+		
+		if (isset($_POST["admin"]))
+		{
+			Auth::ensureSessionID();
+			
+			if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+				Auth::loginError("管理者パスワードが一致しません");
+			
+			$ids = array_map("intval", array_map(array("Util", "escapeInput"), isset($_POST["id"]) ? (is_array($_POST["id"]) ? $_POST["id"] : array($_POST["id"])) : array()));
+			
+			switch ($mode = Util::escapeInput($_POST["admin"]))
+			{
+				case "unevaluate":
+					foreach ($ids as $i)
+						if (isset($this->thread->evaluations[$i]))
+							$this->thread->unevaluate($db, $this->thread->evaluations[$i]);
+					
+					break;
+				case "uncomment":
+					foreach ($ids as $i)
+						if (isset($this->thread->comments[$i]))
+							$this->thread->uncomment($db, $this->thread->comments[$i]);
+					
+					break;
+			}
+		}
+		
+		App::closeDB($db, false, false);
+		
+		if (App::$handlerType == "json")
+			return Visualizer::json($this->thread->toArray());
+		else
+			return Visualizer::visualize("Read/Index");
+	}
+	
+	function _new($_page = null)
+	{
+		$this->page = !is_null($_page) ? intval($_page) : 1;
+		
+		$this->thread = new Thread();
+		$this->entry = &$this->thread->entry;
+		
+		if (Configuration::$instance->adminOnly)
+		{
+			Auth::$caption = "管理者ログイン";
+			Auth::$label = "管理者パスワード";
+			Auth::$details = '<p class="notify info">管理者のみ新規投稿が可能です。続行するにはパスワードを入力してください</p>';
+			
+			if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+				Auth::loginError("パスワードが一致しません");
+		}
+		
+		if (!$_POST)
+		{
+			$this->entry->name = Cookie::getCookie(Cookie::NAME_KEY);
+			$this->entry->mail = Cookie::getCookie(Cookie::MAIL_KEY);
+			$this->entry->link = Cookie::getCookie(Cookie::LINK_KEY);
+		}
+		else
+		{
+			Cookie::setCookie(Cookie::NAME_KEY, self::param("name"));
+			Cookie::setCookie(Cookie::MAIL_KEY, self::param("mail"));
+			Cookie::setCookie(Cookie::LINK_KEY, self::param("link"));
+			Cookie::setCookie(Cookie::PASSWORD_KEY, self::param("password", self::param(Auth::SESSION_PASSWORD)));
+			Cookie::sendCookie();
+		}
+		
+		self::setValues($this->entry, $this->thread);
+		
+		if ($_POST || !is_null($_page))
+		{
+			Visualizer::$data = self::checkValues($this->entry, $this->thread, false);
+			
+			if (!is_null($_page) ||
+				self::param("preview", null, true) == "true" && !Visualizer::$data)
+				return Visualizer::visualize("Read/Index");
+		}
+		 
+		return Visualizer::visualize("Read/Edit");
+	}
+	
+	function edit($_subject = "0", $_id = "0")
+	{
+		$this->subject = intval($_subject);
+		$id = intval($_id);
+		$this->page = max(intval($_page = self::param("p", null, true)), 1);
+		
+		$db = App::openDB();
+		$this->thread = self::loadThread($db, $id);
+		$this->entry = &$this->thread->entry;
+		
+		Auth::$caption = "{$this->entry->title} の編集";
+		Auth::$label = "編集キー";
+		
+		if (!Auth::hasSession(true) &&
+			!($type = Util::hashEquals(Configuration::$instance->adminHash, $login = Auth::login())) &&
+			!($type = Util::hashEquals($this->thread->hash, $login)))
+			Auth::loginError("編集キーが一致しません");
+		
+		if (!$_POST)
+		{
+			$this->entry->name = Cookie::getCookie(Cookie::NAME_KEY);
+			$this->entry->mail = Cookie::getCookie(Cookie::MAIL_KEY);
+			$this->entry->link = Cookie::getCookie(Cookie::LINK_KEY);
+		}
+		else
+		{
+			Cookie::setCookie(Cookie::NAME_KEY, self::param("name"));
+			Cookie::setCookie(Cookie::MAIL_KEY, self::param("mail"));
+			Cookie::setCookie(Cookie::LINK_KEY, self::param("link"));
+			Cookie::setCookie(Cookie::PASSWORD_KEY, self::param("password", self::param(Auth::SESSION_PASSWORD)));
+			Cookie::sendCookie();
+		}
+		
+		self::setValues($this->entry, $this->thread);
+		Visualizer::$data = self::checkValues($this->entry, $this->thread, true);
+		
+		if ($type != Util::HASH_TYPE_LATEST)
+			Visualizer::$data[] = "サーバに保存されている編集キーの形式が古いので、編集キーを再度入力するか変更することを推奨します。";
+		
+		if (!is_null($_page) ||
+			$_POST && self::param("preview", null, true) == "true" && !Visualizer::$data)
+			return Visualizer::visualize("Read/Index");
+		 
+		return Visualizer::visualize("Read/Edit");
+	}
+	
+	function post($_subject = "0", $_id = "0")
+	{
+		$subject = intval($_subject);
+		$id = intval($_id);
+		
+		$db = App::openDB();
+		
+		if ($vacuum = $id == 0)
+			$this->thread = new Thread($db);
+		else
+			$this->thread = self::loadThread($db, $id);
+		
+		$this->entry = &$this->thread->entry;
+		self::setValues($this->entry, $this->thread);
+		
+		if ($id == 0 || !Util::isEmpty(self::param("password")))
+			$this->thread->hash = Util::hash(self::param("password"));
+		
+		$errors = self::checkValues($this->entry, $this->thread, $id != 0);
+		
+		if ($errors)
+			throw new ApplicationException(implode("\r\n", $errors), 400);
+		
+		$this->thread->save($db);
+		App::closeDB($db, $vacuum && !ThreadEntry::getEntriesBySubject($db, $this->entry->subject));
+		
+		$idb = App::openDB(App::INDEX_DATABASE);
+		SearchIndex::register($idb, $this->thread);
+		App::closeDB($idb, true);
+		
+		if (!Auth::hasSession(true))
+			Auth::logout();
+		else
+			Auth::cleanSession();
+		
+		return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}");
+	}
+	
+	function unpost($_subject = "0", $_id = "0")
+	{
+		$this->subject = intval($_subject);
+		$id = intval($_id);
+		$this->page = 1;
+		$isAdmin = Auth::hasSession(true);
+		
+		$db = App::openDB();
+		
+		if (!$_POST)
+			if (!$isAdmin)
+				Auth::logout();
+			else
+				Auth::unsetSession();
+		
+		$this->thread = self::loadThread($db, $id);
+		$this->entry = &$this->thread->entry;
+		Auth::$caption = "{$this->entry->title} の削除";
+		Auth::$label = "編集キー";
+		Auth::$details = "<div class='notify warning'>本当に {$this->entry->title} を削除してよろしいですか？続行する場合は編集キーを入力します</div>";
+		
+		if (!Util::hashEquals($this->thread->hash, $login = Auth::login()) &&
+			!Util::hashEquals(Configuration::$instance->adminHash, $login))
+			Auth::loginError("編集キーが一致しません");
+		
+		if (!Auth::ensureSessionID("sessionID", false))
+			return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}/edit");
+		
+		$this->thread->delete($db);
+		App::closeDB($db);
+		
+		if (!$isAdmin)
+			Auth::logout();
+		else
+			Auth::cleanSession();
+		
+		return Visualizer::redirect("{$this->entry->subject}");
+	}
+	
+	function comment($_subject = "0", $_id = "0")
+	{
+		$subject = intval($_subject);
+		$id = intval($_id);
+		$db = App::openDB();
+		
+		$error = array();
+		$name = self::param("name");
+		$mail = self::param("mail");
+		$body = self::param("body");
+		$password = self::param("password", self::param("pass"));
+		$postPassword = self::param("postPassword", self::param("compass"));
+		$point = intval(self::param("point"));
+		
+		Cookie::setCookie(Cookie::NAME_KEY, $name);
+		Cookie::setCookie(Cookie::MAIL_KEY, $mail);
+		Cookie::setCookie(Cookie::PASSWORD_KEY, $password);
+		Cookie::sendCookie();
+		
+		if (Configuration::$instance->requireName[Configuration::ON_COMMENT] && Util::isEmpty($name))
+			$error[] = "名前が入力されていません";
+			
+		if (Util::isEmpty(trim($body)))
+			$error[] = "本文が入力されていません";
+		
+		if ($point != 0 && !in_array($point, Configuration::$instance->commentPointMap))
+			$error[] = "評価が不正です";
+			
+		if (Configuration::$instance->requirePassword[Configuration::ON_COMMENT] && Util::isEmpty($password))
+			$error[] = "削除キーが入力されていません";
+		
+		if (!Util::isEmpty(Configuration::$instance->postPassword))
+			if (Util::isEmpty($postPassword))
+				$error[] = "投稿キーが入力されていません";
+			else if ($postPassword != Configuration::$instance->postPassword)
+				$error[] = "投稿キーが一致しません";	
+		
+		$this->thread = self::loadThread($db, $id);
+		$this->entry = &$this->thread->entry;
+		
+		if ($point && array_filter($this->thread->evaluations, create_function('$_', 'return $_->host == $_SERVER["REMOTE_ADDR"];')))
+			$error[] = "多重評価はできません";
+		
+		foreach (Configuration::$instance->disallowedWordsForComment as $i)
+			foreach (array
+			(
+				"名前" => $name,
+				"本文" => $body,
+			) as $k => $v)
+				if (mb_strstr($v, $i))
+				{
+					$error[] = "{$k}に禁止ワードが含まれています";
+						
+					break;
+				}
+		
+		if ($error)
+		{
+			App::closeDB($db);
+			Visualizer::$data = $error;
+			header("HTTP/1.1 400 Bad Request");
+			
+			if (App::$handlerType == "json")
+				return Visualizer::json(array
+				(
+					"error" => $error
+				));
+			else
+				return $this->index($subject, $id);
+		}
+		else
+		{
+			$comment = $this->thread->comment($db, $name, $mail, $body, $password, $point);
+			App::closeDB($db);
+			
+			if (App::$handlerType == "json")
+			{
+				return Visualizer::json($comment->toArray() + array
+				(
+					"num" => count($this->thread->comments),
+					"formattedBody" => Visualizer::escapeSummary($comment->body),
+					"deleteAction" => Util::getAbsoluteUrl() . "{$this->entry->subject}/{$this->entry->id}/uncomment?id={$comment->id}"
+				));
+			}
+			else
+				return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}");
+		}
+	}
+	
+	function uncomment($_subject = "0", $_id = "0")
+	{
+		$subject = intval($_subject);
+		$id = intval($_id);
+		$commentID = intval(self::param("id", 0, true));
+		$isAdmin = Auth::hasSession(true);
+		
+		if (!$_POST)
+			if (!$isAdmin)
+				Auth::unsetSession();
+			else
+				Auth::cleanSession();
+		
+		$db = App::openDB();
+		$this->thread = self::loadThread($db, $id);
+		$this->entry = &$this->thread->entry;
+		
+		if (!($comment = $this->thread->getCommentByID($db, $commentID)))
+			throw new ApplicationException("指定された番号 {$commentID} のコメントは {$id} の作品に存在しません", 404);
+		
+		Auth::$caption = "コメントの削除";
+		Auth::$label = "削除キー";
+		
+		if (!Util::hashEquals(Configuration::$instance->adminHash, $login = Auth::login(false, false)) &&
+			!Util::hashEquals($comment->hash, $login))
+			Auth::loginError("削除キーが一致しません");
+		else if (!$isAdmin)
+			Auth::logout();
+		else
+			Auth::cleanSession();
+		
+		$this->thread->uncomment($db, $comment);
+		App::closeDB($db);
+		
+		if (App::$handlerType == "json")
+			return Visualizer::json(null);
+		else
+			return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}");
+	}
+	
+	function evaluate($_subject = "0", $_id = "0")
+	{
+		$subject = intval($_subject);
+		$id = intval($_id);
+		$db = App::openDB();
+		
+		$error = array();
+		$point = intval(self::param("point"));
+	
+		if ($point != 0 && !in_array($point, Configuration::$instance->pointMap))
+			$error[] = "評価が不正です";
+		
+		if (!Util::isEmpty(Configuration::$instance->postPassword))
+			if (Util::isEmpty(self::param("postPassword")))
+				$error[] = "投稿キーが入力されていません";
+			else if (self::param("postPassword") != Configuration::$instance->postPassword)
+				$error[] = "投稿キーが一致しません";	
+		
+		$this->thread = self::loadThread($db, $id);
+		$this->entry = &$this->thread->entry;
+			
+		if (array_filter($this->thread->evaluations, create_function('$_', 'return $_->host == $_SERVER["REMOTE_ADDR"];')))
+			$error[] = "多重評価はできません";
+		
+		if ($error)
+		{
+			App::closeDB($db);
+			Visualizer::$data = $error;
+			header("HTTP/1.1 400 Bad Request");
+			
+			if (App::$handlerType == "json")
+				return Visualizer::json(array
+				(
+					"error" => $error
+				));
+			else
+				return $this->index($subject, $id);
+		}
+		else
+		{
+			$eval = $this->thread->evaluate($db, $point);
+			App::closeDB($db);
+			
+			if (App::$handlerType == "json")
+				return Visualizer::json(array
+				(
+					"id" => intval($eval->id),
+					"dateTime" => intval($eval->dateTime),
+					"point" => $eval->point
+				));
+			else
+				return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}");
+		}
+	}
+
+	function unevaluate($_subject = "0", $_id = "0")
+	{
+		$subject = intval($_subject);
+		$id = intval($_id);
+		$evaluationID = intval(self::param("id", 0, true));
+		
+		$db = App::openDB();
+		$this->thread = self::loadThread($db, $id);
+		$this->entry = &$this->thread->entry;
+		
+		if (!($eval = $this->thread->getEvaluationByID($db, $evaluationID)))
+			throw new ApplicationException("指定された番号 {$evaluationID} の簡易評価は {$id} の作品に存在しません", 404);
+		else if ($eval->host != $_SERVER["REMOTE_ADDR"])
+			throw new ApplicationException("指定された簡易評価の送信元が現在の送信元と一致しません", 403);
+		
+		$this->thread->unevaluate($db, $eval);
+		App::closeDB($db);
+		
+		if (App::$handlerType == "json")
+			return Visualizer::json(null);
+		else
+			return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}");
+	}
+	
+	/**
+	 * @param int $id
+	 * @return Thread
+	 */
+	private static function loadThread(PDO $db, $id)
+	{
+		if (!($rt = Thread::load($db, $id)))
+			if (Configuration::$instance->convertOnDemand &&
+				is_dir("Megalith/sub") &&
+				is_file($path = "Megalith/dat/{$id}.dat"))
+			{
+				$idb = App::openDB(App::INDEX_DATABASE);
+				$subject = 0;
+				
+				foreach (glob("Megalith/sub/subject*.txt") as $i)
+					if (($n = basename($i)) != "subjects.txt" &&
+						strpos(file_get_contents($i), "{$id}.dat") !== false)
+						$subject = $n == "subject.txt"
+							? Board::getLatestSubject($db)
+							: intval(strtr($n, array
+							(
+								"subject" => "",
+								".txt" => ""
+							)));
+				
+				$rt = Util::convertAndSaveToThread($db, $idb, $subject, $path, "Megalith/com/{$id}.res.dat", "Megalith/aft/{$id}.aft.dat");
+				
+				App::closeDB($idb);
+			}
+			else
+				throw new ApplicationException("指定された番号 {$id} の作品は存在しません", 404);
+		
+		return $rt;
+	}
+	
+	/**
+	 * @param bool $isEdit
+	 * @return array
+	 */
+	private static function checkValues(ThreadEntry $entry, Thread $thread, $isEdit)
+	{
+		$rt = array();
+		
+		if (Util::isEmpty($entry->title))
+			$rt[] = "作品名が入力されていません";
+		
+		if (Configuration::$instance->requireName[Configuration::ON_ENTRY] && Util::isEmpty($entry->name))
+			$rt[] = "名前が入力されていません";
+		
+		if (Configuration::$instance->requirePassword[Configuration::ON_ENTRY] && Util::isEmpty(self::param("password")) && !$isEdit)
+			$rt[] = "編集キーが入力されていません";
+		
+		if (count($entry->tags) > Configuration::$instance->maxTags)
+			$rt[] = "分類タグは " . Configuration::$instance->maxTags . " 個以内でなければなりません";
+		
+		if ($m = array_filter($entry->tags, create_function('$_', 'return preg_match("/^([0-9]+|random)$/i", $_);')))
+			$rt[] = "次の分類タグは使用できません: " . implode(", ", $m);
+		
+		if (!Util::isEmpty(Configuration::$instance->postPassword))
+			if (Util::isEmpty(self::param("postPassword")))
+				$rt[] = "投稿キーが入力されていません";
+			else if (self::param("postPassword") != Configuration::$instance->postPassword)
+				$rt[] = "投稿キーが一致しません";
+		
+		if (mb_strstr($entry->link, ":") &&
+			!preg_match("/^http:/", trim($entry->link)))
+			$rt[] = "リンクに不明なプロトコルが指定されています";
+		
+		if (Util::isEmpty(trim($thread->body)))
+			$rt[] = "本文が入力されていません";
+		
+		if (!Util::isEmpty($thread->foreground) && !preg_match('/^(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}|rgba?\s*\(\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*(,\s*[0-9](\.[0-9]+)?\s*)?\))$/', $thread->foreground))
+			$rt[] = "文字色の指定が不正です";
+		
+		if (!Util::isEmpty($thread->background) && !preg_match('/^(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}|rgba?\s*\(\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*(,\s*[0-9](\.[0-9]+)?\s*)?\))$/', $thread->background))
+			$rt[] = "背景色の指定が不正です";
+		
+		foreach (Configuration::$instance->disallowedWordsForEntry as $i)
+			foreach (array
+			(
+				"作品名" => $entry->title,
+				"分類タグ" => implode(" ", $entry->tags),
+				"名前" => $entry->name,
+				"概要" => $entry->summary,
+				"本文" => $thread->body,
+				"あとがき" => $thread->afterword,
+			) as $k => $v)
+				if (mb_strstr($v, $i))
+				{
+					$rt[] = "{$k}に禁止ワードが含まれています";
+						
+					break;
+				}
+		
+		return $rt;
+	}
+	
+	private static function setValues(ThreadEntry $entry, Thread $thread)
+	{
+		if (!is_null(self::param("title")))				$entry->title = self::param("title");
+		if (!is_null(self::param("name")))				$entry->name = self::param("name");
+		if (!is_null(self::param("mail")))				$entry->mail = self::param("mail");
+		if (!is_null(self::param("link")))				$entry->link = self::param("link");
+		if (!is_null(self::param("tags")))				$entry->tags = Util::splitTags(self::param("tags"));
+		if (!is_null(self::param("summary")))			$entry->summary = self::param("summary");
+		if (!is_null(self::param("body")))				$thread->body = self::param("body");
+		if (!is_null(self::param("afterword")))			$thread->afterword = self::param("afterword");
+		if (!is_null(self::param("foreground")))		$thread->foreground = self::param("foreground") == "#000000" ? null : self::param("foreground");
+		if (!is_null(self::param("background")))		$thread->background = self::param("background") == "#000000" ? null : self::param("background");
+		if (!is_null(self::param("backgroundImage")))	$thread->backgroundImage = self::param("backgroundImage");
+		if (!is_null(self::param("convertLineBreak")))	$thread->convertLineBreak = self::param("convertLineBreak") == "true";
+		
+		$entry->pageCount = $thread->pageCount();
+		$entry->size = round(strlen(bin2hex(mb_convert_encoding($thread->body, "SJIS", "UTF-8"))) / 2 / 1024, 2);
+		$entry->lastUpdate = time();
+		$entry->host = $_SERVER["REMOTE_ADDR"];
+	}
+	
+	/**
+	 * @param string $name
+	 * @param string $default
+	 * @param bool $tryGet
+	 * @return string
+	 */
+	static function param($name, $default = null, $tryGet = false)
+	{
+		if (isset($_POST[$name]))
+		{
+			$rt = Util::escapeInput(is_array($_POST[$name]) ? $_POST[$name][count($_POST[$name]) - 1] : $_POST[$name]);
+
+			if (isset($_POST["encoded"]) &&
+				$_POST["encoded"] == "true")
+				if (($rt = base64_decode($rt, true)) === false)
+					throw new ApplicationException("パラメータ {$name} のデコードに失敗しました", 404);
+				else
+					$rt = Util::escapeInput($rt);
+			
+			if ($name != "preview" &&
+				$name != "encoded")
+				$_SESSION[$name] = $rt;
+			
+			return $rt;
+		}
+		else if (isset($_SESSION[$name]))
+			return Util::escapeInput($_SESSION[$name]);
+		else if ($tryGet && isset($_GET[$name]))
+			return Util::escapeInput($_GET[$name]);
+		else
+			return $default;
+	}
+	
+	static function printHiddenParams()
+	{
+		echo '<input type="hidden" name="encoded" value="true" />', "\r\n";
+		
+		foreach ($_POST ? $_POST : $_SESSION as $k => $v)
+			if ($k != "preview" &&
+				$k != "encoded" &&
+				$k != Auth::SESSION_IS_ADMIN &&
+				$k != Auth::SESSION_PASSWORD)
+			echo '<input type="hidden" name="', Visualizer::escapeOutput($k), '" value="', Visualizer::escapeOutput(base64_encode(Util::escapeInput($v))), '" />', "\r\n";
+	}
+}
+?>

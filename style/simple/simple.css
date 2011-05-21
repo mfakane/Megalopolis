@@ -1,0 +1,89 @@
+h1
+{
+	margin: 0px;
+}
+
+h2
+{
+	margin: 0px 0px 8px 0px;
+}
+
+.entries
+{
+	margin: 4px 0px 0px 0px;
+	padding: 0px 0px 4px 0px;
+}
+
+.entries li
+{
+	margin: 0px 0px 4px 0px;
+	padding: 0px;
+	border-top: #999999 1px solid;
+}
+
+.dateTime, .name, .points, .rate, .size, .tags
+{
+	margin: 0px 8px 0px 0px;
+	font-size: 75%;
+}
+
+.dateTime
+{
+	float: right;
+	margin: 0px;
+	color: #999999;
+}
+
+.points, .rate, .size
+{
+	color: #666666;
+}
+
+.pager
+{
+	margin: 0px;
+	padding: 4px 0px 0px 0px;
+	border-top: #999999 1px solid;
+}
+
+.pager li
+{
+	display: inline;
+	margin: 0px 4px 0px 0px;
+}
+
+.pager li a.active
+{
+	font-weight: bold;
+}
+
+.menu, .content, .afterword
+{
+	margin: 4px 0px 4px 0px;
+	padding: 4px 0px 0px 0px;
+	border-top: #999999 1px solid;
+}
+
+.menu li
+{
+	display: block;
+	margin: 0px;
+	padding: 0px;
+}
+
+form, div
+{
+	margin: 0px;
+	padding: 0px;
+}
+
+.search
+{
+	margin: 4px 0px 4px 0px;
+}
+
+.active
+{
+	color: inherit;
+	text-decoration: none;
+}
