@@ -350,6 +350,7 @@ class Util
 		$input = self::escapeAmpersand($input);
 		$input = self::decodeNumericEntity($input);
 		$input = self::escapeControlChars($input);
+		$input = mb_convert_encoding($input, "UTF-8");
 		
 		return $input;
 	}
