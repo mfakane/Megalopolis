@@ -140,8 +140,6 @@ class Util
 			return $pathInfo = self::escapeInput($_GET[self::PATH_INFO_QUERY_PARAM]);
 		else if ($rt = self::escapeInput(getenv("PATH_INFO")))
 			return $pathInfo = $rt;
-		else if ($rt = self::escapeInput(getenv("ORIG_PATH_INFO")))
-			return $pathInfo = $rt;
 		else
 			return $pathInfo = mb_substr(mb_strstr(self::escapeInput($_SERVER["PHP_SELF"]), self::INDEX_FILE_NAME), mb_strlen(self::INDEX_FILE_NAME));
 	}

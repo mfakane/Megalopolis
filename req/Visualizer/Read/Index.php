@@ -155,7 +155,7 @@ Visualizer::doctype();
 			<?endif ?>
 			<div id="content">
 				<script>
-					megalopolis.read.loadOptions('<?+Visualizer::actionHref() ?>');
+					megalopolis.read.loadOptions('<?+Visualizer::$basePath ?>');
 				</script>
 				<? Visualizer::convertedBody($h->thread, $h->page) ?>
 			</div>

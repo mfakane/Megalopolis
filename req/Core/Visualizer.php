@@ -154,7 +154,7 @@ class Visualizer
 						$values = explode(", ", $i);
 						?>
 						<li>
-							<a href="<?php self::converted(self::$basePath . $values[0]) ?>">
+							<a href="<?php self::converted(self::$basePath . Util::getSuffix() . $values[0]) ?>">
 								<?php if (isset($values[2])): ?><img src='<?php self::converted(self::$basePath . "style/" . $values[2]) ?>' width='16' height='16' /><?php endif ?><?php self::converted($values[1]) ?>
 							</a>
 						</li>
@@ -652,7 +652,7 @@ class Visualizer
 		if ($status)
 			self::statusCode($status);
 		
-		header("Location: " . Util::getAbsoluteUrl() . $path);
+		header("Location: " . Util::getAbsoluteUrl($path));
 		
 		return true;
 	}

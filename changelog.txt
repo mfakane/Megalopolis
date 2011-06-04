@@ -1,4 +1,12 @@
-﻿2011-05-26 COAH96KoxU <queue glasscore.net>
+﻿2011-06-04 COAH96KoxU <queue glasscore.net>
+
+	* req/Core/Util.php: CGI モード時など PATH_INFO が取得不可な状況で
+	  ORIG_PATH_INFO を使わないときよりも使うときのほうが処理が変になってたため
+	  ORIG_PATH_INFO の使用部分を削除
+	* req/Core/Visualizer.php: リダイレクトにおける絶対パス出力およびヘッダの相対パス出力を修正
+	* req/Visualizer/Read/Index.php: Javascript から出力される画像のパスを修正
+
+2011-05-26 COAH96KoxU <queue glasscore.net>
 
 	* req/Core/Util.php: 制御文字などを処理した後再度エンコードし直すように
 
