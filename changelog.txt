@@ -3,8 +3,8 @@
 	* config.php: /config を見ようとすると config.php を見に行ってしまう環境対策に設定情報のリンクに .html を付加
 	* config.php,
 	  req/Core/Configuration.php,
-      req/Visualizer/Index/Index.php,
-      style/style.css: 一列表示のオプション Configuration::LIST_SINGLE を追加
+	  req/Visualizer/Index/Index.php,
+	  style/style.css: 一列表示のオプション Configuration::LIST_SINGLE を追加
 	* config.php,
 	  req/Core/Configuration.php,
 	  req/Handler/Read.php: バイト数 (Shift_JIS 換算) での本文最小および最大文字数制限を実装

@@ -321,14 +321,14 @@ class Util
 	{
 		try
 		{
-			if (empty($raw))
-				return empty($hash);
-			else if (strlen($hash) == 13 && crypt($raw, mb_substr($hash, 0, 2)) == $hash)
+			if (strlen($hash) == 13 && crypt($raw, mb_substr($hash, 0, 2)) == $hash)
 				return self::HASH_TYPE_ANTHOLOGYS;
 			else if (strlen($hash) == 40 && sha1($raw) == $hash)
 				return self::HASH_TYPE_MEGALITH;
 			else if (mb_substr($hash, 0, 1) == 1 && self::hash($raw, 1, mb_substr($hash, -16), intval(mb_substr($hash, 1, 4))) == $hash)
 				return self::HASH_TYPE_MEGALOPOLIS1;
+			else if (empty($raw))
+				return empty($hash);
 			else
 				return false;
 		}
