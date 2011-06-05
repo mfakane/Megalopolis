@@ -1,4 +1,18 @@
-﻿2011-06-04 COAH96KoxU <queue glasscore.net>
+﻿2011-06-05 COAH96KoxU <queue glasscore.net>
+
+	* config.php: /config を見ようとすると config.php を見に行ってしまう環境対策に設定情報のリンクに .html を付加
+	* config.php,
+	  req/Core/Configuration.php,
+      req/Visualizer/Index/Index.php,
+      style/style.css: 一列表示のオプション Configuration::LIST_SINGLE を追加
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Handler/Read.php: バイト数 (Shift_JIS 換算) での本文最小および最大文字数制限を実装
+	* req/Core/Util.php: 空のパスワードで投稿された作品を空のパスワードで認証できなかったのを修正
+	* req/Handler/Megalith.php: Megalith 互換ハンドラの後書きの出力条件が逆になっていたのを修正
+	* req/Handler/Megalith.php: Megalith 互換ハンドラの subjects.txt の出力が間違っていたのを修正
+
+2011-06-04 COAH96KoxU <queue glasscore.net>
 
 	* req/Core/Util.php: CGI モード時など PATH_INFO が取得不可な状況で
 	  ORIG_PATH_INFO を使わないときよりも使うときのほうが処理が変になってたため
@@ -13,8 +27,8 @@
 2011-05-21 COAH96KoxU <queue glasscore.net>
 
 	* *.php: BOM の除去
-	* script/Read/Index.js: disabled の指定方法を修正
-	* script/Read/Edit.js: disabled の指定方法を修正
+	* script/Read/Index.js,
+	  script/Read/Edit.js: disabled の指定方法を修正
 
 2011-05-21 COAH96KoxU <queue glasscore.net>
 

@@ -21,7 +21,7 @@ class MegalithHandler extends Handler
 			$content = null;
 			
 			if ($matches[1] == "s")
-				$content = implode("\r\n", array_map(create_function('$_', 'return "subject{$_}.txt";'), array_merge(array(""), range(1, Board::getSubjectCount($db) - 1))));
+				$content = implode("\r\n", array_map(create_function('$_', 'return "subject{$_}.txt";'), array_merge(array(""), Board::getSubjectCount($db) > 1 ? range(1, Board::getSubjectCount($db) - 1) : array())));
 			else
 			{
 				$latest = Board::getLatestSubject($db);
