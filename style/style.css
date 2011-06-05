@@ -392,6 +392,12 @@ ul.notify
 	overflow: hidden;
 }
 
+.entries.single article
+{
+	display: block;
+	width: auto;
+}
+
 .entries input[type="checkbox"]
 {
 	margin-right: 4px;

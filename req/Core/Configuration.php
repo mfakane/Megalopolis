@@ -17,6 +17,8 @@ class Configuration
 	const ON_ENTRY = "Entry";
 	const ON_COMMENT = "Comment";
 	const ON_SUBJECT = "Subject";
+	const LIST_DOUBLE = 0;
+	const LIST_SINGLE = 1;
 	
 	public $debug = false;
 	
@@ -120,6 +122,7 @@ class Configuration
 	public $notes = null;
 	public $showFooterVersion = true;
 	public $footers = array();
+	public $listType = self::LIST_DOUBLE;
 	public $showTitle = array
 	(
 		self::ON_SUBJECT => true,
@@ -172,6 +175,7 @@ class Configuration
 		self::ON_ENTRY => true,
 	);
 	public $showTweetButton = false;
+	
 	public $convertDivision = 50;
 	public $convertOnDemand = false;
 	

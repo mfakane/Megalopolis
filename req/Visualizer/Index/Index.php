@@ -84,7 +84,7 @@ Visualizer::doctype();
 			<?if ($isAdmin): ?>
 				<form action="" method="post" id="entriesForm">
 			<?endif ?>
-			<div class="entries">
+			<div class="entries<?=$c->listType == Configuration::LIST_SINGLE ? " single" : null ?>">
 				<?foreach ($h->entries as $idx => $i): ?><article>
 						<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
 							<h2>
