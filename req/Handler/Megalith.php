@@ -182,9 +182,9 @@ class MegalithHandler extends Handler
 			App::closeDB($db);
 			
 			if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
-				return Visualizer::text("", "Shift_JIS");
-			else
 				return Visualizer::text(Visualizer::escapeAfterword($thread), "Shift_JIS");
+			else
+				return Visualizer::text("", "Shift_JIS");
 		}
 		else
 			throw new ApplicationException("ファイルが見つかりません", 404);
