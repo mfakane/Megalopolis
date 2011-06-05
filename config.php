@@ -220,7 +220,7 @@ $config->footers = array
 (
 	'<a href="' . Visualizer::actionHref("tag") . '">タグ一覧</a>',
 	'<a href="' . Visualizer::actionHref("author") . '">作者一覧</a>',
-	'<a href="' . Visualizer::actionHref("config") . '">設定情報</a>',
+	'<a href="' . Visualizer::actionHref("config.html") . '">設定情報</a>',
 );
 
 // 作品名を表示するか (true/false)
