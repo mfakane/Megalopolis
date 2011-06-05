@@ -322,7 +322,7 @@ class Util
 		try
 		{
 			if (empty($raw))
-				return false;
+				return empty($hash);
 			else if (strlen($hash) == 13 && crypt($raw, mb_substr($hash, 0, 2)) == $hash)
 				return self::HASH_TYPE_ANTHOLOGYS;
 			else if (strlen($hash) == 40 && sha1($raw) == $hash)
