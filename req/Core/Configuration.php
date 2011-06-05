@@ -113,6 +113,8 @@ class Configuration
 		"regex:on.*"
 	);
 	public $showDisallowedWords = false;
+	public $minBodySize = 0;
+	public $maxBodySize = 0;
 	
 	public $subjectOrder = self::ORDER_DESCEND;
 	public $rateType = self::RATE_AVERAGE;

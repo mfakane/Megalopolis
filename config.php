@@ -180,6 +180,14 @@ $config->disallowedWordsForComment = array
 // 禁止ワードにより投稿がエラーになったとき、原因となったワードを表示するか (true/false)
 $config->showDisallowedWords = false;
 
+// 本文の最小サイズ (bytes)
+// 0 の場合無制限になります
+$config->minBodySize = 0;
+
+// 本文の最大サイズ (bytes)
+// 0 の場合無制限になります
+$config->maxBodySize = 0;
+
 /*
  * 表示に関する設定
  */

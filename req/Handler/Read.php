@@ -530,6 +530,15 @@ class ReadHandler extends Handler
 		
 		if (Util::isEmpty(trim($thread->body)))
 			$rt[] = "本文が入力されていません";
+		else
+		{
+			$bytes = strlen(bin2hex(mb_convert_encoding($thread->body, "SJIS", "UTF-8"))) / 2;
+			
+			if (Configuration::$instance->minBodySize > 0 && Configuration::$instance->minBodySize > $bytes)
+				$rt[] = "本文が {$bytes} バイトです。" . Configuration::$instance->minBodySize . " バイト以上である必要があります。";
+			else if (Configuration::$instance->maxBodySize > 0 && Configuration::$instance->maxBodySize < $bytes)
+				$rt[] = "本文が {$bytes} バイトです。" . Configuration::$instance->maxBodySize . " バイト以下である必要があります。";
+		}
 		
 		if (!Util::isEmpty($thread->foreground) && !preg_match('/^(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}|rgba?\s*\(\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*(,\s*[0-9](\.[0-9]+)?\s*)?\))$/', $thread->foreground))
 			$rt[] = "文字色の指定が不正です";
