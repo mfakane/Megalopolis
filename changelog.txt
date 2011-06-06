@@ -1,5 +1,6 @@
 ﻿2011-06-07 COAH96KoxU <queue glasscore.net>
 
+	* style/style.css: レイアウトの調整
 	* style/style.css,
 	  style/trident.css,
 	  style/gecko.css,

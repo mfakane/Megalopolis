@@ -283,6 +283,7 @@ body>footer
 	position: relative;
 	margin: 0px 0px 0px 0px;
 	padding: 0px;
+	font-size: 9pt;
 }
 
 body>footer>ul:first-child
@@ -334,6 +335,7 @@ body>footer>ul:first-child+a
 	min-height: 16px;
 	background: #ffffcc none no-repeat scroll 8px 8px;
 	line-height: 17px;
+	font-size: 9pt;
 }
 
 .notify.info
@@ -427,6 +429,7 @@ ul.notify
 	margin: 4px 0px 0px 0px;
 	padding: 4px;
 	background: #efefef;
+	font-size: 9pt;
 }
 
 .entries article time+dl
@@ -588,7 +591,7 @@ h2
 	margin: 0px 0px 8px -72px;
 	padding: 2px 2px 2px 0px;
 	color: #005019;
-	font-size: inherit;
+	font-size: 9pt;
 	font-weight: bold;
 	line-height: 16px;
 }
@@ -1018,6 +1021,7 @@ body.read>h1
 	margin: 0px;
 	padding: 0px;
 	color: #666666;
+	font-size: 9pt;
 }
 
 .read .status+.status
