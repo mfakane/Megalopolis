@@ -3,12 +3,17 @@
 	overflow: visible;
 }
 
+.read #body.vertical #summary
+{
+	margin: -8px 0px -8px 24px !important;
+}
+
 .read #body.vertical>div
 {
 	writing-mode: tb-rl;
 	-ms-writing-mode: tb-rl;
 	letter-spacing: 1px;
-	line-height: 160%;
+	line-height: 130%;
 }
 
 .read #body.vertical h1

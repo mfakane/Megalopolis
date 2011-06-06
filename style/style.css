@@ -1183,7 +1183,7 @@ body.read>h1
 	z-index: 1;
 }
 
-.read #summary
+.read #body #summary
 {
 	margin: 0px -8px 24px -8px;
 	padding: 8px;
@@ -1212,7 +1212,7 @@ body.read>h1
 .read #body .taketori-ttb
 {
 	margin: 0px -16px -31px -16px;
-	line-height: 160%;
+	line-height: 130%;
 }
 
 .read #body .taketori-ttb>.taketori-col

@@ -10,7 +10,7 @@ body>header form input[name="query"]::-webkit-input-placeholder
 	width: 520px;
 	-webkit-transform: rotate(90deg);
 	-webkit-transform-origin: 0% 0%;
-	line-height: 180%;
+	line-height: 140%;
 }
 
 .read #body.vertical img

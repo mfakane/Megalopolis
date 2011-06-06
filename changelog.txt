@@ -1,4 +1,12 @@
-﻿2011-06-05 COAH96KoxU <queue glasscore.net>
+﻿2011-06-07 COAH96KoxU <queue glasscore.net>
+
+	* style/style.css,
+	  style/trident.css,
+	  style/gecko.css,
+	  style/presto.css,
+	  style/webkit.css: 縦書き時のレイアウトを調整
+
+2011-06-05 COAH96KoxU <queue glasscore.net>
 
 	* config.php: /config を見ようとすると config.php を見に行ってしまう環境対策に設定情報のリンクに .html を付加
 	* config.php,
