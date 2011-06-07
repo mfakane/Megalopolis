@@ -528,6 +528,14 @@ class ReadHandler extends Handler
 			!preg_match("/^http:/", trim($entry->link)))
 			$rt[] = "リンクに不明なプロトコルが指定されています";
 		
+		$summaryLines = mb_substr_count(strtr($entry->summary, array("\r\n" => "\n", "\r" => "\n")), "\n") + 1;
+		$summaryBytes = strlen(bin2hex(mb_convert_encoding($entry->summary, "SJIS", "UTF-8"))) / 2;
+		
+		if (Configuration::$instance->maxSummaryLines > 0 && $summaryLines > Configuration::$instance->maxSummaryLines)
+			$rt[] = "概要が {$summaryLines} 行です。" . Configuration::$instance->maxSummaryLines . " 行以下である必要があります。";
+		else if (Configuration::$instance->maxSummarySize > 0 && Configuration::$instance->maxSummarySize < $summaryBytes)
+			$rt[] = "概要が {$summaryBytes} バイトです。" . Configuration::$instance->maxSummarySize . " バイト以下である必要があります。";
+		
 		if (Util::isEmpty(trim($thread->body)))
 			$rt[] = "本文が入力されていません";
 		else

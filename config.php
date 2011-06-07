@@ -188,6 +188,14 @@ $config->minBodySize = 0;
 // 0 の場合無制限になります
 $config->maxBodySize = 0;
 
+// 概要の最大行数 (整数)
+// 0 の場合無制限になります
+$config->maxSummaryLines = 0;
+
+// 概要の最大サイズ (bytes)
+// 0 の場合無制限になります
+$config->maxSummarySize = 0;
+
 /*
  * 表示に関する設定
  */

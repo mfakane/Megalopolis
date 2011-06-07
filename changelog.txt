@@ -1,5 +1,8 @@
 ﻿2011-06-07 COAH96KoxU <queue glasscore.net>
 
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Handler/Read.php: 概要の最大行数と最大サイズを指定する設定を追加
 	* style/style.css: レイアウトの調整
 	* style/style.css,
 	  style/trident.css,
