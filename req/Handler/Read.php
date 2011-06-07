@@ -27,10 +27,13 @@ class ReadHandler extends Handler
 		if (App::$actionName == "index" && Auth::hasSession() && !Auth::hasSession(true))
 			Auth::logout();
 		else
-			Auth::cleanSession();
+			Auth::cleanSession(!Auth::hasSession(true));
 		
 		if (!$c->showTitle[Configuration::ON_SUBJECT])
 			throw new ApplicationException("作品の閲覧は許可されていません", 403);
+		
+		if (!Auth::hasToken())
+			Auth::createToken();
 		
 		$db = App::openDB("data", false);
 		
@@ -51,7 +54,8 @@ class ReadHandler extends Handler
 		
 		if (isset($_POST["admin"]))
 		{
-			Auth::ensureSessionID();
+			Auth::ensureToken();
+			Auth::createToken();
 			
 			if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
 				Auth::loginError("管理者パスワードが一致しません");
@@ -171,7 +175,9 @@ class ReadHandler extends Handler
 		if (!is_null($_page) ||
 			$_POST && self::param("preview", null, true) == "true" && !Visualizer::$data)
 			return Visualizer::visualize("Read/Index");
-		 
+		
+		Auth::createToken();
+		
 		return Visualizer::visualize("Read/Edit");
 	}
 	
@@ -238,7 +244,7 @@ class ReadHandler extends Handler
 			!Util::hashEquals(Configuration::$instance->adminHash, $login))
 			Auth::loginError("編集キーが一致しません");
 		
-		if (!Auth::ensureSessionID("sessionID", false))
+		if (!Auth::ensureToken("token", false))
 			return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}/edit");
 		
 		$this->thread->delete($db);

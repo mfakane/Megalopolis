@@ -113,7 +113,7 @@ Visualizer::doctype();
 		<form action="unpost" method="post" id="unpostForm">
 			<section>
 				<h2>作品の削除</h2>
-				<label><input type="checkbox" name="sessionID" id="unpostCheck" value="<?+Auth::getSessionID() ?>" />作品を削除する</label>
+				<label><input type="checkbox" name="token" id="unpostCheck" value="<?+$_SESSION[Auth::SESSION_TOKEN] ?>" />作品を削除する</label>
 				<ul class="buttons">
 					<li>
 						<button type="submit" id="unpostSubmit">

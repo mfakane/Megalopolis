@@ -1,5 +1,15 @@
 ﻿2011-06-07 COAH96KoxU <queue glasscore.net>
 
+	* config.php,
+	  req/Core/Auth.php,
+	  req/Core/Util.php,
+	  req/Handler/Index.php,
+	  req/Handler/Read.php,
+	  req/Visualizer/Auth.php,
+	  req/Visualizer/Index/Index.php,
+	  req/Visualizer/Index/Search.php,
+	  req/Visualizer/Read/Edit.php,
+	  req/Visualizer/Read/Index.php: 認証を補強
 	* req/Core/Auth.php: セッションの取り扱いを補強
 	* config.php,
 	  req/Core/Configuration.php,

@@ -164,7 +164,7 @@ Visualizer::doctype();
 					</article><?endforeach ?>
 			</div>
 			<?if ($isAdmin): ?>
-					<input type="hidden" name="sessionID" value="<?+Auth::getSessionID() ?>" />
+					<input type="hidden" name="token" value="<?+$_SESSION[Auth::SESSION_TOKEN] ?>" />
 					<section class="admin">
 						<ul class="buttons">
 							<li>

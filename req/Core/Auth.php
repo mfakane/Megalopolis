@@ -4,6 +4,7 @@ class Auth
 	const SESSION_PASSWORD = "Auth::password";
 	const SESSION_IS_ADMIN = "Auth::isAdmin";
 	const SESSION_FINGERPRINT = "Auth::fingerprint";
+	const SESSION_TOKEN = "Auth::token";
 	
 	static $caption = "認証";
 	static $label = "パスワード";
@@ -25,23 +26,22 @@ class Auth
 			
 			$currentFingerprint = self::createFingerprint();
 			
-			if (!isset($_SESSION[self::SESSION_FINGERPRINT]) ||
-				$_SESSION[self::SESSION_FINGERPRINT] != $currentFingerprint)
+			if (!isset($_SESSION[self::SESSION_FINGERPRINT]))
+				$_SESSION[self::SESSION_FINGERPRINT] = $currentFingerprint;
+			else if ($_SESSION[self::SESSION_FINGERPRINT] != $currentFingerprint)
 				self::logout();
-
-			$_SESSION[self::SESSION_FINGERPRINT] = $currentFingerprint;
 		}
 	}
 	
 	private static function createFingerprint()
 	{
-		return Util::hash(implode(", ", array
+		return hash(Util::HASH_ALGORITHM, implode(", ", array
 		(
 			self::getSessionID(),
 			$_SERVER["REMOTE_ADDR"],
 			isset($_SERVER["HTTP_USER_AGENT"]) ? $_SERVER["HTTP_USER_AGENT"] : null,
 			isset($_SERVER["HTTP_ACCEPT_LANGUAGE"]) ? $_SERVER["HTTP_ACCEPT_LANGUAGE"] : null,
-			isset($_SERVER["HTTP_ACCEPT_CHARSET"]) ? $$_SERVER["HTTP_ACCEPT_CHARSET"] : null
+			isset($_SERVER["HTTP_ACCEPT_CHARSET"]) ? $_SERVER["HTTP_ACCEPT_CHARSET"] : null
 		)));
 	}
 	
@@ -62,6 +62,41 @@ class Auth
 		self::unsetSession();
 		session_destroy();
 		self::$isAdmin = false;
+	}
+	
+	static function hasToken()
+	{
+		return isset($_SESSION[self::SESSION_TOKEN])
+			&& !empty($_SESSION[self::SESSION_TOKEN]);
+	}
+	
+	static function createToken()
+	{
+		return $_SESSION[self::SESSION_TOKEN] = hash(Util::HASH_ALGORITHM, mt_rand() . self::createFingerprint());
+	}
+	
+	static function clearToken()
+	{
+		if (isset($_SESSION[self::SESSION_TOKEN]))
+			unset($_SESSION[self::SESSION_TOKEN]);
+	}
+	
+	/**
+	 * @param string $key [optional]
+	 * @param bool $throw [optional]
+	 * @return bool
+	 */
+	static function ensureToken($key = "token", $throw = true)
+	{
+		if (!isset($_POST[$key]) ||
+			!isset($_SESSION[self::SESSION_TOKEN]) ||
+			$_POST[$key] != $_SESSION[self::SESSION_TOKEN])
+			if ($throw)
+				throw new ApplicationException("不正なリクエストです", 403);
+			else
+				return false;
+		
+		return true;
 	}
 	
 	static function unsetSession()
@@ -112,13 +147,13 @@ class Auth
 				&& (!$hasAdminOnly || isset($_SESSION[self::SESSION_IS_ADMIN]) && (self::$isAdmin = $_SESSION[self::SESSION_IS_ADMIN] && Util::hashEquals(Configuration::$instance->adminHash, $_SESSION[self::SESSION_PASSWORD])));
 	}
 	
-	static function cleanSession()
+	static function cleanSession($clearToken = true)
 	{
 		if (!self::isSessionEnabled())
 			return;
 		
 		foreach ($_SESSION as $k => $v)
-			if (!in_array($k, array(self::SESSION_IS_ADMIN, self::SESSION_PASSWORD, self::SESSION_FINGERPRINT)))
+			if (!in_array($k, array(self::SESSION_IS_ADMIN, self::SESSION_PASSWORD, self::SESSION_FINGERPRINT, $clearToken ? null : self::SESSION_TOKEN)))
 				unset($_SESSION[$k]);
 		
 		self::$isAdmin = false;
@@ -143,20 +178,22 @@ class Auth
 	
 	/**
 	 * @param bool $hasAdminOnly [optional]
-	 * @param bool $ensureSessionID [optional]
+	 * @param bool $ensureToken [optional]
 	 * @return string
 	 */
-	static function login($admin = false, $ensureSessionID = true)
+	static function login($admin = false, $ensureToken = true)
 	{
 		if (self::hasSession($admin))
 			return $_SESSION[self::SESSION_PASSWORD];
 		else if (isset($_POST["password"]))
 		{
-			if ($ensureSessionID)
-				self::ensureSessionID();
+			if ($ensureToken)
+				self::ensureToken();
 			
+			self::clearToken();
 			self::resetSession();
 			$_SESSION[self::SESSION_IS_ADMIN] = $admin;
+			$_SESSION[self::SESSION_FINGERPRINT] = self::createFingerprint();
 			
 			return $_SESSION[self::SESSION_PASSWORD] = $_POST["password"];
 		}
@@ -169,7 +206,8 @@ class Auth
 	 */
 	static function loginError($error = null)
 	{
-		self::unsetSession();
+		self::cleanSession();
+		self::createToken();
 		Visualizer::$data = $error;
 		Visualizer::visualize("Auth");
 		

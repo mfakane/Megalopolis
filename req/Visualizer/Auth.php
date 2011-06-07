@@ -21,7 +21,7 @@ $d = &Visualizer::$data;
 			<button type="submit">
 				<img src="<?+Visualizer::actionHref("style", "sendButtonIcon.png") ?>" />送信
 			</button>
-			<input type="hidden" name="sessionID" value="<?+Auth::getSessionID() ?>">
+			<input type="hidden" name="token" value="<?+$_SESSION[Auth::SESSION_TOKEN] ?>">
 		</section>
 	</form>
 	<?if (Auth::$details): ?>

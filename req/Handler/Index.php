@@ -29,12 +29,17 @@ class IndexHandler extends Handler
 		
 		$subject = intval($_subject);
 		
-		Auth::cleanSession();
+		Auth::cleanSession(!Auth::hasSession(true));
+		
+		if (!Auth::hasToken())
+			Auth::createToken();
+		
 		$db = App::openDB();
 		
 		if (isset($_POST["admin"]))
 		{
-			Auth::ensureSessionID();
+			Auth::ensureToken();
+			Auth::createToken();
 			
 			if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
 				Auth::loginError("管理者パスワードが一致しません");
@@ -173,9 +178,13 @@ class IndexHandler extends Handler
 			$this->entries = $rt["result"];
 		}
 		
+		if (!Auth::hasToken())
+			Auth::createToken();
+		
 		if (isset($_POST["admin"]) && $this->entries)
 		{
-			Auth::ensureSessionID();
+			Auth::ensureToken();
+			Auth::createToken();
 			
 			if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
 				Auth::loginError("管理者パスワードが一致しません");
