@@ -1,5 +1,6 @@
 ﻿2011-06-07 COAH96KoxU <queue glasscore.net>
 
+	* req/Core/Auth.php: セッションの取り扱いを補強
 	* config.php,
 	  req/Core/Configuration.php,
 	  req/Handler/Read.php: 概要の最大行数と最大サイズを指定する設定を追加

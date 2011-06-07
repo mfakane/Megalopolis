@@ -3,6 +3,7 @@ class Auth
 {
 	const SESSION_PASSWORD = "Auth::password";
 	const SESSION_IS_ADMIN = "Auth::isAdmin";
+	const SESSION_FINGERPRINT = "Auth::fingerprint";
 	
 	static $caption = "認証";
 	static $label = "パスワード";
@@ -13,9 +14,35 @@ class Auth
 	{
 		if (!self::isSessionEnabled())
 		{
+			ini_set("session.use_cookies", 1);
+			ini_set("session.use_only_cookies", 1);
+			ini_set("session.use_trans_sid", 0);
+			ini_set("session.cookie_httponly", 1);
+			
+			session_set_cookie_params(0);
 			session_name("MEGALOPOLIS_" . basename(dirname(dirname(dirname(__FILE__)))));
 			session_start();
+			
+			$currentFingerprint = self::createFingerprint();
+			
+			if (!isset($_SESSION[self::SESSION_FINGERPRINT]) ||
+				$_SESSION[self::SESSION_FINGERPRINT] != $currentFingerprint)
+				self::logout();
+
+			$_SESSION[self::SESSION_FINGERPRINT] = $currentFingerprint;
 		}
+	}
+	
+	private static function createFingerprint()
+	{
+		return Util::hash(implode(", ", array
+		(
+			self::getSessionID(),
+			$_SERVER["REMOTE_ADDR"],
+			isset($_SERVER["HTTP_USER_AGENT"]) ? $_SERVER["HTTP_USER_AGENT"] : null,
+			isset($_SERVER["HTTP_ACCEPT_LANGUAGE"]) ? $_SERVER["HTTP_ACCEPT_LANGUAGE"] : null,
+			isset($_SERVER["HTTP_ACCEPT_CHARSET"]) ? $$_SERVER["HTTP_ACCEPT_CHARSET"] : null
+		)));
 	}
 	
 	static function commitSession()
@@ -47,10 +74,10 @@ class Auth
 		}
 	}
 	
-	static function resetSession()
+	static function resetSession($deleteOld = true)
 	{
 		if (self::isSessionEnabled())
-			session_regenerate_id(true);
+			session_regenerate_id($deleteOld);
 		
 		self::$isAdmin = false;
 	}
@@ -91,7 +118,7 @@ class Auth
 			return;
 		
 		foreach ($_SESSION as $k => $v)
-			if (!in_array($k, array(self::SESSION_IS_ADMIN, self::SESSION_PASSWORD)))
+			if (!in_array($k, array(self::SESSION_IS_ADMIN, self::SESSION_PASSWORD, self::SESSION_FINGERPRINT)))
 				unset($_SESSION[$k]);
 		
 		self::$isAdmin = false;
