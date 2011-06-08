@@ -1,6 +1,7 @@
 ﻿2011-06-09 COAH96KoxU <queue glasscore.net>
 
 	* readme.txt: 内容を強化
+	* style.css: 注釈文のスタイルを調整
 	* req/Model/ThreadEntry.php: 検索時にタグおよび Rate が正しく表示されないのを修正
 	* config.php,
 	  req/Core/Configuration.php,
