@@ -4,6 +4,7 @@ $h = &IndexHandler::$instance;
 $d = &Visualizer::$data;
 $isAdmin = Auth::hasSession(true);
 Visualizer::doctype();
+App::load(VISUALIZER_DIR . "Template/Index");
 ?>
 <html>
 <head>
@@ -46,85 +47,7 @@ Visualizer::doctype();
 			<?if ($isAdmin): ?>
 				<form action="" method="post" id="entriesForm">
 			<?endif ?>
-			<div class="entries">
-				<?foreach ($h->entries as $idx => $i): ?><article>
-					<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
-						<h2>
-							<?if ($isAdmin): ?>
-								<label>
-									<input type="checkbox" name="id[]" value="<?+$i->id ?>" />
-							<?endif ?>
-							<a href="<?+Visualizer::actionHref($i->subject, $i->id) ?>"><?+$i->title ?></a>
-							<?if ($isAdmin): ?>
-								</label>
-							<?endif ?>
-						</h2>
-					<?endif ?>
-					<time pubdate="pubdate" datetime="<?+date("c", $i->lastUpdate) ?>">
-						<?+Visualizer::formatDateTime($i->lastUpdate) ?>
-					</time>
-					<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
-						<a href="<?+Visualizer::actionHref("author", $i->name) ?>"><? Visualizer::convertedName($i->name) ?></a>
-					<?endif ?>
-					<?if ($c->showPages[Configuration::ON_SUBJECT] ||
-						  $c->showSize[Configuration::ON_SUBJECT] ||
-						  $c->showReadCount[Configuration::ON_SUBJECT] ||
-						  $c->useAnyPoints() && ($c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT])): ?>
-					<dl>
-						<?if ($c->showPages[Configuration::ON_SUBJECT]): ?>
-							<dt>ページ数</dt>
-							<dd>
-								<?+$i->pageCount ?>
-							</dd>
-						<?endif ?>
-						<?if ($c->showSize[Configuration::ON_SUBJECT]): ?>
-							<dt>サイズ</dt>
-							<dd>
-								<?+$i->size ?>KB
-							</dd>
-						<?endif ?>
-						<?if ($c->showReadCount[Configuration::ON_SUBJECT]): ?>
-							<dt>閲覧数</dt>
-							<dd>
-								<?+$i->readCount ?>
-							</dd>
-						<?endif ?>
-						<?if ($c->useAnyPoints()): ?>
-							<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-								<dt>評価数</dt>
-								<dd>
-									<?+$i->evaluationCount ?>
-								</dd>
-								<dt>POINT</dt>
-								<dd>
-									<?+$i->points ?>
-								</dd>
-							<?endif ?>
-							<?if ($c->showRate[Configuration::ON_SUBJECT]): ?>
-								<dt>Rate</dt>
-								<dd>
-									<?+sprintf("%.2f", $i->rate) ?>
-								</dd>
-							<?endif ?>
-						<?endif ?>
-					</dl>
-					<?endif ?>
-					<?if ($i->tags && $c->showTags[Configuration::ON_SUBJECT]): ?>
-						<ul class="tags">
-							<?foreach ($i->tags as $j): ?>
-								<li>
-									<a href="<?+Visualizer::actionHref("tag", $j) ?>"><?+$j ?></a>
-								</li>
-							<?endforeach ?>
-						</ul>
-					<?endif ?>
-					<?if (!Util::isEmpty($i->summary) && $c->showSummary[Configuration::ON_SUBJECT]): ?>
-						<p>
-							<? Visualizer::convertedSummary($i->summary) ?>
-						</p>
-					<?endif ?>
-				</article><?endforeach ?>
-			</div>
+			<? entries($h->entries, $isAdmin, true) ?>
 			<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref("search", array
 			(
 				"query" => IndexHandler::param("query"),

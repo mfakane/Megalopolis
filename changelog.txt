@@ -1,5 +1,8 @@
 ﻿2011-06-09 COAH96KoxU <queue glasscore.net>
 
+	* req/Visualizer/Index/Index.php,
+	  req/Visualizer/Index/Search.php,
+	  req/Visualizer/Template/Index.php: 一覧表示を共通化
 	* req/Core/Auth.php: 一度パスワードを間違えると次にパスワードが一致しても認証されないのを修正
 
 2011-06-08 COAH96KoxU <queue glasscore.net>
