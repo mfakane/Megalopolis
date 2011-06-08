@@ -15,6 +15,7 @@
 
 2011-06-08 COAH96KoxU <queue glasscore.net>
 
+	* release 1
 	* config.php,
 	  req/Core/Cookie.php,
 	  req/Visualizer/Index/Index.php,
