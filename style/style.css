@@ -1528,7 +1528,7 @@ body.read>h1
 	margin: 0px;
 	padding: 1px 1px 1px 3px;
 	border: #005019 1px solid;
-	border-radius: 3px;
+	border-radius: 3px 0px 0px 3px;
 	width: 76px;
 	height: 18px;
 	background-color: #ffffff;
@@ -1536,6 +1536,12 @@ body.read>h1
 	font-weight: normal;
 	line-height: 18px;
 	vertical-align: top;
+}
+
+.dropDown+.dropDown
+{
+	border-left: none;
+	border-radius: 0px 3px 3px 0px;
 }
 
 .dropDown .button
@@ -1551,10 +1557,15 @@ body.read>h1
 
 .dropDown.open
 {
-	border-radius: 3px 3px 0px 0px;
+	border-radius: 3px 0px 0px 0px;
 	color: #ffffff;
 	background-color: #005019;
 	box-shadow: 0px 0px 4px #005019;
+}
+
+.dropDown+.dropDown.open
+{
+	border-radius: 0px 3px 0px 0px;
 }
 
 .dropDown.open .button

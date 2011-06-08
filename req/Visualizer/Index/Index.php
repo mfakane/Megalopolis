@@ -54,7 +54,8 @@ Visualizer::doctype();
 			<?=$c->showSize[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
 			<?=$c->useAnyPoints() && $c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
 			<?=$c->useAnyPoints() && $c->showPoint[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-			<?=$c->useAnyPoints() && $c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>
+			<?=$c->useAnyPoints() && $c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+			<?=$c->listType ?>
 		);
 	</script>
 	<?if (App::$actionName == "index" && $h->subjectCount > 1): ?>
@@ -84,7 +85,7 @@ Visualizer::doctype();
 			<?if ($isAdmin): ?>
 				<form action="" method="post" id="entriesForm">
 			<?endif ?>
-			<div class="entries<?=$c->listType == Configuration::LIST_SINGLE ? " single" : null ?>">
+			<div class="entries<?=Cookie::getCookie(Cookie::LIST_TYPE_KEY, $c->listType == Configuration::LIST_SINGLE ? "single" : "double") == "single" ? " single" : null ?>">
 				<?foreach ($h->entries as $idx => $i): ?><article>
 						<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
 							<h2>

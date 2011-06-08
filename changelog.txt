@@ -1,4 +1,13 @@
-﻿2011-06-07 COAH96KoxU <queue glasscore.net>
+﻿2011-06-08 COAH96KoxU <queue glasscore.net>
+
+	* config.php,
+	  req/Core/Cookie.php,
+	  req/Visualizer/Index/Index.php,
+	  script/Index/Index.js,
+	  script/Read/Index.js,
+	  style/style.css: ユーザ側で一覧表示形式を選択可能に
+
+2011-06-07 COAH96KoxU <queue glasscore.net>
 
 	* config.php,
 	  req/Core/Auth.php,

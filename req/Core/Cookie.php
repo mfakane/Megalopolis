@@ -9,6 +9,7 @@ class Cookie
 	const LAST_ID_KEY = "LastID";
 	const FONT_SIZE_KEY = "FontSize";
 	const ORIENTATION_KEY = "Orientation";
+	const LIST_TYPE_KEY = "ListType";
 	
 	static $data = null;
 	
@@ -42,14 +43,14 @@ class Cookie
 			);
 	}
 	
-	static function getCookie($key)
+	static function getCookie($key, $defaultValue = null)
 	{
 		self::checkCookie();
 		
 		if (isset(self::$data[$key]))
 			return self::$data[$key];
 		else
-			return null;
+			return $defaultValue;
 	}
 	
 	static function setCookie($key, $value)

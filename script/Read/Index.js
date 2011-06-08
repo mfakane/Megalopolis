@@ -254,7 +254,7 @@ megalopolis.read =
 	loadOptions: function(basePath)
 	{
 		var content = $("#body");
-		var cookie = megalopolis.mainCookie("fontSize");
+		var cookie = megalopolis.mainCookie("FontSize");
 		var f = 0;
 		var working = false;
 		
@@ -275,7 +275,7 @@ megalopolis.read =
 		{
 			var val = f.replace(/%$/, "") - 0 + add;
 			
-			content.css("fontSize", megalopolis.mainCookie("fontSize", f = val + "%"));
+			content.css("fontSize", megalopolis.mainCookie("FontSize", f = val + "%"));
 			content.css("lineHeight", val + 30 + "%");
 			$("<span />")
 				.addClass("hint")
@@ -309,11 +309,11 @@ megalopolis.read =
 				},
 				{
 					title: "文字方向の切り替え",
-					image: megalopolis.mainCookie("vertical") == "yes" ? "horizontalIcon.png" : "verticalIcon.png",
+					image: megalopolis.mainCookie("Vertical") == "yes" ? "horizontalIcon.png" : "verticalIcon.png",
 					separator: true,
 					click: function(sender)
 					{
-						var rt = megalopolis.mainCookie("vertical", megalopolis.mainCookie("vertical") == "yes" ? "no" : "yes");
+						var rt = megalopolis.mainCookie("Vertical", megalopolis.mainCookie("Vertical") == "yes" ? "no" : "yes");
 						
 						megalopolis.read.toggleVertical();
 						$("img", sender).attr("src", basePath + "style/" + (rt == "yes" ? "horizontalIcon.png" : "verticalIcon.png"));
@@ -347,7 +347,7 @@ megalopolis.read =
 			}))
 			.insertBefore(content);
 		
-		if (megalopolis.mainCookie("vertical") == "yes")
+		if (megalopolis.mainCookie("Vertical") == "yes")
 			megalopolis.read.toggleVertical(true);
 	},
 	loadForms: function()
@@ -390,7 +390,7 @@ megalopolis.read =
 	},
 	toggleVertical: function(onLoad)
 	{
-		if (megalopolis.mainCookie("vertical") == "yes")
+		if (megalopolis.mainCookie("Vertical") == "yes")
 			if (this.taketori)
 				this.taketori.toggleAll();
 			else if (!$.browser.msie && ($.browser.mozilla || navigator.platform.indexOf("Win") == -1))

@@ -1,6 +1,6 @@
 megalopolis.index =
 {
-	loadDropDown: function(useTitle, useName, usePageCount, useReadCount, useSize, useEvaluationCount, usePoints, useRate)
+	loadDropDown: function(useTitle, useName, usePageCount, useReadCount, useSize, useEvaluationCount, usePoints, useRate, defaultStyle)
 	{
 		if ($.browser.msie &&
 			$.browser.version < 8)
@@ -20,80 +20,80 @@ megalopolis.index =
 		var ascending = false;
 		var dropDown = $("<ul />")
 			.append($.map
-				([
-					!useTitle ? null :
-					{
-						label: "作品名",
-						value: "title",
-						selector: function(x, y)
-						{
-							var arr = $.map([x, y], function(_) { return $("h2>a", _).text(); });
-							
-							return arr[0] == arr.sort()[0] ? -1 : 1;
-						}
-					},
-					!useName ? null :
-					{
-						label: "作者",
-						value: "name",
-						selector: function(x, y)
-						{
-							var arr = $.map([x, y], function(_) { return $(".name", _).text(); });
-							
-							return arr[0] == arr.sort()[0] ? -1 : 1;
-						}
-					},
-					!usePageCount ? null :
-					{
-						label: "ページ数",
-						value: "pageCount"
-					},
-					!useReadCount ? null :
-					{
-						label: "閲覧数",
-						value: "readCount"
-					},
-					!useSize ? null :
-					{
-						label: "サイズ",
-						value: "size"
-					},
-					!useEvaluationCount ? null :
-					{
-						label: "評価数",
-						value: "evaluationCount"
-					},
-					!usePoints ? null :
-					{
-						label: "POINT",
-						value: "points"
-					},
-					!useRate ? null :
-					{
-						label: "Rate",
-						value: "rate"
-					},
-					lastSort
-				],
-				function(_)
+			([
+				!useTitle ? null :
 				{
-					if (_ != null)
-						return $("<li />")
-							.text(_.label)
-							.click(function()
-							{
-								if (lastSort == _)
-									ascending = !ascending;
-								
-								lastSort = _;
-								megalopolis.index.sort(control, ascending, _.selector
-									? _.selector
-									: function(x, y) { return $("." + _.value, x).text() - $("." + _.value, y).text(); });
-								label.text(_.label);
-								
-								return false;
-							})[0];
-				}))
+					label: "作品名",
+					value: "title",
+					selector: function(x, y)
+					{
+						var arr = $.map([x, y], function(_) { return $("h2>a", _).text(); });
+						
+						return arr[0] == arr.sort()[0] ? -1 : 1;
+					}
+				},
+				!useName ? null :
+				{
+					label: "作者",
+					value: "name",
+					selector: function(x, y)
+					{
+						var arr = $.map([x, y], function(_) { return $(".name", _).text(); });
+						
+						return arr[0] == arr.sort()[0] ? -1 : 1;
+					}
+				},
+				!usePageCount ? null :
+				{
+					label: "ページ数",
+					value: "pageCount"
+				},
+				!useReadCount ? null :
+				{
+					label: "閲覧数",
+					value: "readCount"
+				},
+				!useSize ? null :
+				{
+					label: "サイズ",
+					value: "size"
+				},
+				!useEvaluationCount ? null :
+				{
+					label: "評価数",
+					value: "evaluationCount"
+				},
+				!usePoints ? null :
+				{
+					label: "POINT",
+					value: "points"
+				},
+				!useRate ? null :
+				{
+					label: "Rate",
+					value: "rate"
+				},
+				lastSort
+			],
+			function(_)
+			{
+				if (_ != null)
+					return $("<li />")
+						.text(_.label)
+						.click(function()
+						{
+							if (lastSort == _)
+								ascending = !ascending;
+							
+							lastSort = _;
+							megalopolis.index.sort(control, ascending, _.selector
+								? _.selector
+								: function(x, y) { return $("." + _.value, x).text() - $("." + _.value, y).text(); });
+							label.text(_.label);
+							
+							return false;
+						})[0];
+			}))
 			.hide();
 		var label = $("<span />")
 			.text("投稿日時");
@@ -128,6 +128,57 @@ megalopolis.index =
 				
 				return false;
 			});
+		
+		var styleMap =
+		[
+			{
+				name: "二列表示",
+				value: "double"
+			},
+			{
+				name: "一列表示",
+				value: "single"
+			}
+		];
+		var currentStyleValue = megalopolis.mainCookie("ListType");
+		var currentStyle = $.grep(styleMap, function(_) { return _.value == currentStyleValue });
+		
+		currentStyle = currentStyle.length ? currentStyle[0] : styleMap[defaultStyle];
+		
+		var styleControl = $("<div />")
+			.addClass("dropDown")
+			.append($("<span />").text(currentStyle.name))
+			.append($("<ul />")
+				.append($.map
+				(
+					styleMap,
+					function(_)
+					{
+						return $("<li />")
+							.text(_.name)
+							.click(function()
+							{
+								megalopolis.mainCookie("ListType", _.value);
+								location.href = location.href;
+							})[0];
+					}
+				))
+				.hide())
+			.mouseenter(function()
+			{
+				styleControl.addClass("open");
+				$("ul", styleControl).show();
+				
+				return false;
+			})
+			.mouseleave(function()
+			{
+				styleControl.removeClass("open");
+				$("ul", styleControl).hide();
+				
+				return false;
+			})
+			.appendTo($("header+h1"));
 	},
 	sort: function(control, ascending, selector)
 	{
