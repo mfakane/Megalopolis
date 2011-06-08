@@ -24,6 +24,16 @@ Visualizer::doctype();
 	(
 		"{$h->subject}/{$h->entry->id}, 作品に戻る, returnIcon.png"
 	)) ?>
+	<?if (in_array(Util::getBrowserType(), array
+	(
+		Util::BROWSER_TYPE_MSIE6,
+		Util::BROWSER_TYPE_MSIE7,
+		Util::BROWSER_TYPE_FIREFOX2,
+	))): ?>
+		<p class="notify warning">
+			古いブラウザを使っているため、表示が乱れたり、ページの一部が使用不能になる可能性があります。最新のバージョンへ変更することを推奨します。
+		</p>
+	<?endif ?>
 	<?if (Visualizer::$data): ?>
 		<ul class="notify warning">
 			<?foreach (Visualizer::$data as $i): ?>
