@@ -29,6 +29,7 @@ class Configuration
 	public $useBBQ = self::BBQ_NONE;
 	public $denyRead = array();
 	public $denyWrite = array();
+	public $registerBodyToSearchIndex = true;
 	
 	public $useComments = true;
 	public $pointMap = array();

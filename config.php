@@ -55,6 +55,12 @@ $config->denyWrite = array
 	// "*.example.com",
 );
 
+// 本文も検索の対象として登録するか (true/false)
+// 投稿時に本文も検索用作品を作成するかどうかを指定します。
+// 投稿に時間がかかったり、ログ変換に失敗したりするようであれば false にすることを推奨します。
+// すでに投稿されている作品に対しては反映されません
+$config->registerBodyToSearchIndex = true;
+
 /*
  * 評価に関する設定
  */
@@ -326,7 +332,8 @@ $config->showTweetButton = true;
 // Megalith 形式のログを変換する時の一呼び出し毎の変換作品数を指定します。
 // この数を下げることにより PHP の最大実行時間により強制終了されることなく変換処理が続行できます。
 // その代わりに、変換に要する時間はより長くなります。
-// 変換中に Maximum execution time of ～ seconds exceeded などとエラーが出て中止される場合は適当に下げてみてください
+// 変換中に Maximum execution time of ～ seconds exceeded などとエラーが出て中止される場合は適当に下げてみてください。
+// また、本文の検索作品を作成することで実行時間が長くなり失敗することもあるので、そちらの設定 (registerBodyToSearchIndex) もご確認ください
 $config->convertDivision = 100;
 
 // 必要に応じて Megalith のログを読み込むかどうか (true/false)

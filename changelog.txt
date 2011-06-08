@@ -1,5 +1,9 @@
 ﻿2011-06-09 COAH96KoxU <queue glasscore.net>
 
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Model/SearchIndex.php: 本文を検索索引に登録する設定を追加
+	* req/Handler/Index.php: タグが検索できないのを修正
 	* req/Visualizer/Index/Index.php,
 	  req/Visualizer/Index/Search.php,
 	  req/Visualizer/Template/Index.php: 一覧表示を共通化

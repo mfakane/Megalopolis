@@ -12,15 +12,15 @@ class SearchIndex
 	static function register(PDO $idb, Thread $thread)
 	{
 		self::unregister($idb, $thread->id);
-		$words = array
+		$words = array_filter(array
 		(
 			"title" => self::getWords($thread->entry->title),
 			"name" => self::getWords($thread->entry->name),
 			"summary" => self::getWords($thread->entry->summary),
-			//"body" => self::getWords($thread->body),
+			"body" => Configuration::$instance->registerBodyToSearchIndex ? self::getWords($thread->body) : null,
 			"afterword" => self::getWords($thread->afterword),
 			"tag" => call_user_func_array(array("SearchIndex", "getWords"), $thread->entry->tags)
-		);
+		));
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
 			insert into %s(id, type, word)
