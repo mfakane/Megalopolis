@@ -37,32 +37,6 @@
 * iPhone および iPod touch については専用の出力となります
 * 一般的な携帯電話については簡易出力となります
 
-Megalith からの移行
-===================
-
-二種類の方法があります。お好きな方をどうぞ。
-
-Megalith のログを一括変換する
------------------------------
-
-Megalith 形式のログの変換ツール を使用し Megalopolis へログを一括変換します。
-ログの容量によっては長い時間がかかることがありますが、Megalith で何らかの原因で作品集から外れてしまった作品も
-再度作品集に登録できる可能性があります。
-
-1. Megalith/ ディレクトリを作成し以下に dat/ com/ aft/ sub/ ログディレクトリをコピーします。
-2. 管理者用パスワードを使用し、スクリプトの /util/convert へログインします。
-3. 変換を開始します。
-   変換中に失敗する場合は、環境設定の $config->convertDivision の値を変更してみるか、諦めてみてください。
-
-Megalith ログを必要に応じて読み込みその場で変換する
----------------------------------------------------
-
-Megalopolis から必要になったときに Megalith のログを読み込み使用します。
-更新したデータは Megalopolis ログに記録されます。
-
-1. Megalith/ ディレクトリを作成し以下に dat/ com/ aft/ sub/ ログディレクトリをコピーします。
-2. 環境設定の $config->convertOnDemand を true にします。
-
 環境設定
 ========
 
@@ -122,6 +96,33 @@ Megalith 形式のログの変換ツール
 Megalith/ のディレクトリを作成しその中に dat/ com/ aft/ sub/ の Megalith ログディレクトリをコピーすると
 スクリプトの /util/convert から Megalopolis へログをインポートできます。
 
+Megalith からの移行
+===================
+
+Megalith http://9.dotpp.net/software/megalith/ からのログ変換機能を有しています。
+二種類の方法があります。お好きな方をどうぞ。
+
+Megalith のログを一括変換する
+-----------------------------
+
+Megalith 形式のログの変換ツール を使用し Megalopolis へログを一括変換します。
+ログの容量によっては長い時間がかかることがありますが、Megalith で何らかの原因で作品集から外れてしまった作品も
+再度作品集に登録できる可能性があります。
+
+1. Megalith/ ディレクトリを作成し以下に dat/ com/ aft/ sub/ ログディレクトリをコピーします。
+2. 管理者用パスワードを使用し、スクリプトの /util/convert へログインします。
+3. 変換を開始します。
+   変換中に失敗する場合は、環境設定の $config->convertDivision の値を変更してみるか、諦めてみてください。
+
+Megalith ログを必要に応じて読み込みその場で変換する
+---------------------------------------------------
+
+Megalopolis から必要になったときに Megalith のログを読み込み使用します。
+更新したデータは Megalopolis ログに記録されます。
+
+1. Megalith/ ディレクトリを作成し以下に dat/ com/ aft/ sub/ ログディレクトリをコピーします。
+2. 環境設定の $config->convertOnDemand を true にします。
+
 その他
 ======
 
@@ -130,3 +131,48 @@ Megalith/ のディレクトリを作成しその中に dat/ com/ aft/ sub/ の 
 
 * 縦書き表示は IE もしくは Mac 上の Safari において一番きれいに表示されます。
   WebKit 上ではスクロールバーが正常に表示されない可能性があります。
+
+更新履歴
+--------
+
+changelog.txt をご覧ください。
+
+ライセンス
+----------
+
+本プログラムはフリーウェアです。完全に無保証で提供されるものであり
+これを使用したことにより発生した、または発生させた、あるいは
+発生させられたなどしたいかなる問題に関して製作者は一切の責任を負いません。
+別途ライセンスが明記されている場所またはファイルを除き、使用者は本プログラムを
+Do What The Fuck You Want To Public License, Version 2 (WTFPL) および自らの責任において
+自由に複製、改変、再配布、などが可能です。WTFPL についての詳細は次の URL か、
+以下の条文を参照してください。http://sam.zoy.org/wtfpl/
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
+                    Version 2, December 2004 
+
+ Copyright (C) 2004 Sam Hocevar <sam@hocevar.net> 
+
+ Everyone is permitted to copy and distribute verbatim or modified 
+ copies of this license document, and changing it is allowed as long 
+ as the name is changed. 
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
+   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION 
+
+  0. You just DO WHAT THE FUCK YOU WANT TO.
+
+ライブラリ
+----------
+
+* jQuery http://jquery.com/ および jQuery Mobile http://jquerymobile.com/ を使用しています。
+* Simple HTML Parser http://sourceforge.net/projects/simplehtmldom/ を使用しています。
+* PHP Classes CSS parser を使用しています。
+* 一部の PC 向けに縦書きエンジンとして 竹取 JS http://taketori.org/js.html を使用しています。
+* 携帯向けに縦書きエンジンとして Nehan 2 http://code.google.com/p/nehan/ を使用しています。
+* 携帯向けに ChocolateChip-UI http://www.chocolatechip-ui.com/ のアイコンを使用しています。
+
+連絡先
+------
+
+* 製作: COAH96KoxU <queue@glasscore.net> http://9.dotpp.net/
