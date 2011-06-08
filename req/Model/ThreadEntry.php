@@ -701,11 +701,33 @@ class ThreadEntry
 			return ThreadEntry::load($db, $rt[array_rand($rt)][0]);
 		}
 		else
+		{
+			$rt = self::query($db, "{$whereString} order by {$sort} " . ($option == self::SEARCH_DESCENDING ? "desc" : "asc") . ($limit ? " limit {$limit} offset {$offset}" : null));
+			
+			if ($rt)
+			{
+				$tags = self::queryTags($db, sprintf
+				('
+					where id in (%s)',
+					implode(", ", array_map(create_function('$_', 'return $_->id;'), $rt))
+				));
+				
+				foreach ($rt as $i)
+				{
+					if (!$i->tags && isset($tags[$i->id]))
+						$i->tags = $tags[$i->id];
+					
+					$i->calculateRate();
+					$i->loaded = true;
+				}
+			}
+			
 			return array
 			(
-				"result" => self::query($db, "{$whereString} order by {$sort} " . ($option == self::SEARCH_DESCENDING ? "desc" : "asc") . ($limit ? " limit {$limit} offset {$offset}" : null)),
+				"result" => $rt,
 				"count" => $count[0]
 			);
+		}
 	}
 }
 ?>

@@ -1,5 +1,6 @@
 ﻿2011-06-09 COAH96KoxU <queue glasscore.net>
 
+	* req/Model/ThreadEntry.php: 検索時にタグおよび Rate が正しく表示されないのを修正
 	* config.php,
 	  req/Core/Configuration.php,
 	  req/Model/SearchIndex.php: 本文を検索索引に登録する設定を追加
