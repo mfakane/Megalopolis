@@ -207,6 +207,8 @@ class Auth
 	static function loginError($error = null)
 	{
 		self::cleanSession();
+		unset($_SESSION[self::SESSION_PASSWORD]);
+		unset($_SESSION[self::SESSION_IS_ADMIN]);
 		self::createToken();
 		Visualizer::$data = $error;
 		Visualizer::visualize("Auth");
