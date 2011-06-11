@@ -69,7 +69,7 @@ Visualizer::doctype();
 						</header>
 						<?if ($c->showSummary[Configuration::ON_ENTRY] && !Util::isEmpty($h->entry->summary)): ?>
 							<p>
-								<? Visualizer::convertedSummary($g->entry->summary) ?>
+								<? Visualizer::convertedSummary($h->entry->summary) ?>
 							</p>
 						<?endif ?>
 						<div>
