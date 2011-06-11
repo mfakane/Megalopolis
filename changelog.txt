@@ -1,4 +1,9 @@
-﻿2011-06-09 COAH96KoxU <queue glasscore.net>
+﻿2011-06-12 COAH96KoxU <queue glasscore.net>
+
+	* release 1
+	* req/Visualizer/mobile/Read/Index.php: 携帯表示で概要が正常に表示されないのを修正
+
+2011-06-09 COAH96KoxU <queue glasscore.net>
 
 	* readme.txt: 内容を強化
 	* style.css: 注釈文のスタイルを調整
@@ -15,7 +20,6 @@
 
 2011-06-08 COAH96KoxU <queue glasscore.net>
 
-	* release 1
 	* config.php,
 	  req/Core/Cookie.php,
 	  req/Visualizer/Index/Index.php,
