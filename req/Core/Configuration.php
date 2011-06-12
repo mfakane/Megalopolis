@@ -116,6 +116,7 @@ class Configuration
 	public $showDisallowedWords = false;
 	public $minBodySize = 0;
 	public $maxBodySize = 0;
+	public $useSummary = true;
 	public $maxSummaryLines = 0;
 	public $maxSummarySize = 0;
 	

@@ -40,7 +40,7 @@ $maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
 		<?endif ?>
 		<? Visualizer::pager($h->page, $maxPage, 5, Visualizer::actionHref($h->entry->subject, $h->entry->id) . "/") ?>
 		<div class="content">
-			<?if ($h->page == 1 && $c->showSummary[Configuration::ON_ENTRY]): ?>
+			<?if ($h->page == 1 && $c->useSummary && $c->showSummary[Configuration::ON_ENTRY]): ?>
 				<div>
 					<? Visualizer::convertedSummary($h->entry->summary) ?>
 				</div>

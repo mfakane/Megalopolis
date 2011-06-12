@@ -104,8 +104,10 @@ Visualizer::doctype();
 				<label for="tags">分類タグ</label><input type="text" name="tags" id="tags" value="<?+implode(" ", $h->entry->tags) ?>" /><br />
 				<p>スペース区切りで <?+$c->maxTags ?> 個まで入力できます</p>
 			<?endif ?>
+			<?if ($c->useSummary): ?>
 			<label for="summary">概要</label>
 			<textarea name="summary" id="summary" rows="2" cols="60"><?+$h->entry->summary ?></textarea>
+			<?endif ?>
 			<hr />
 			<label for="body">本文</label><textarea name="body" id="body" rows="20" cols="60"><?+$h->thread->body ?></textarea><br />
 			<label for="afterword">あとがき</label><textarea name="afterword" id="afterword" rows="4" cols="60"><?+$h->thread->afterword ?></textarea>

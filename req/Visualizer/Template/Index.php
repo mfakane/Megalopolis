@@ -95,7 +95,7 @@ function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 						<?php endforeach ?>
 					</ul>
 				<?php endif ?>
-				<?php if (!Util::isEmpty($i->summary) && $c->showSummary[Configuration::ON_SUBJECT]): ?>
+				<?php if (!Util::isEmpty($i->summary) && $c->useSummary && $c->showSummary[Configuration::ON_SUBJECT]): ?>
 					<p>
 						<?php Visualizer::convertedSummary($i->summary) ?>
 					</p>

@@ -30,7 +30,7 @@ else
 					<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
 						<author><?+$i->name ?></author>
 					<?endif ?>
-					<?if ($c->showSummary[Configuration::ON_SUBJECT]): ?>
+					<?if ($c->useSummary && $c->showSummary[Configuration::ON_SUBJECT]): ?>
 						<description><? Visualizer::convertedSummary($i->summary) ?></description>
 					<?endif ?>
 					<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>

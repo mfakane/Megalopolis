@@ -119,7 +119,7 @@ class ThreadEntry
 			"subject" => intval($this->subject),
 			"title" => $this->title,
 			"name" => $c->showName[Configuration::ON_ENTRY] ? $this->name : null,
-			"summary" => $c->showSummary[Configuration::ON_ENTRY] ? $this->summary : null,
+			"summary" => $c->useSummary && $c->showSummary[Configuration::ON_ENTRY] ? $this->summary : null,
 			"link" => $c->showName[Configuration::ON_ENTRY] ? $this->link : null,
 			"mail" => $c->showName[Configuration::ON_ENTRY] ? $this->mail : null,
 			"dateTime" => intval($this->dateTime),
@@ -655,7 +655,7 @@ class ThreadEntry
 			(
 				SearchIndex::search($idb, $query["query"], "title"),
 				Configuration::$instance->showName[Configuration::ON_SUBJECT] ? SearchIndex::search($idb, $query["query"], "name") : array(),
-				Configuration::$instance->showSummary[Configuration::ON_SUBJECT] ? SearchIndex::search($idb, $query["query"], "summary") : array(),
+				Configuration::$instance->useSummary && Configuration::$instance->showSummary[Configuration::ON_SUBJECT] ? SearchIndex::search($idb, $query["query"], "summary") : array(),
 				SearchIndex::search($idb, $query["query"], "afterword"),
 				Configuration::$instance->showTags[Configuration::ON_SUBJECT] ? SearchIndex::search($idb, $query["query"], "tags") : array()
 			);
@@ -666,7 +666,7 @@ class ThreadEntry
 		if (isset($query["name"]) && $query["name"] && Configuration::$instance->showName[Configuration::ON_SUBJECT])
 			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["name"], "name")) : SearchIndex::search($idb, $query["name"], "name");
 		
-		if (isset($query["summary"]) && $query["summary"] && Configuration::$instance->showSummary[Configuration::ON_SUBJECT])
+		if (isset($query["summary"]) && $query["summary"] && Configuration::$instance->useSummary && Configuration::$instance->showSummary[Configuration::ON_SUBJECT])
 			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["summary"], "summary")) : SearchIndex::search($idb, $query["summary"], "summary");
 		
 		if (isset($query["afterword"]) && $query["afterword"])

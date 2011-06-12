@@ -194,6 +194,9 @@ $config->minBodySize = 0;
 // 0 の場合無制限になります
 $config->maxBodySize = 0;
 
+// 概要を使用可能にするか (true/false)
+$config->useSummary = true;
+
 // 概要の最大行数 (整数)
 // 0 の場合無制限になります
 $config->maxSummaryLines = 0;

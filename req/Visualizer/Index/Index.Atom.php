@@ -36,7 +36,7 @@ else
 				<link href="<?+Visualizer::absoluteHref($i->subject, $i->id) ?>"/>
 				<published><?+date("c", $i->dateTime) ?></published>
 				<updated><?+date("c", $i->lastUpdate) ?></updated>
-				<?if ($c->showSummary[Configuration::ON_SUBJECT]): ?>
+				<?if ($c->useSummary && $c->showSummary[Configuration::ON_SUBJECT]): ?>
 					<summary><? Visualizer::convertedSummary($i->summary) ?></summary>
 				<?endif ?>
 				<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>

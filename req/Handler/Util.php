@@ -234,6 +234,16 @@ class UtilHandler extends Handler
 					array("作品集最大件数", $c->subjectSplitting),
 				"rateType" =>
 					array("rate 種別", implode("", array_slice(array("((points + 25) / ((evals + 1) * 50)) * 10", "average"), $c->rateType, 1))),
+				"minBodySize" =>
+					array("最小本文バイト", $c->minBodySize),
+				"maxBodySize" =>
+					array("最大本文バイト", $c->maxBodySize),
+				"useSummary" =>
+					array("概要可否", $c->useSummary),
+				"maxSummaryLines" =>
+					array("最大概要行数", $c->maxSummaryLines),
+				"maxSummarySize" =>
+					array("最大概要バイト", $c->maxSummarySize),
 				
 				"showTitleOnSubject" =>
 					array("一覧上作品名表示", $c->showTitle[Configuration::ON_SUBJECT]),

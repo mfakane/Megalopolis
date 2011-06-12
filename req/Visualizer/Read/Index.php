@@ -147,7 +147,7 @@ Visualizer::doctype();
 						<?endif ?>
 					</address>
 				<?endif ?>
-				<?if (!Util::isEmpty($h->entry->summary) && $c->showSummary[Configuration::ON_ENTRY]): ?>
+				<?if (!Util::isEmpty($h->entry->summary) && $c->useSummary && $c->showSummary[Configuration::ON_ENTRY]): ?>
 					<p id="summary">
 						<? Visualizer::convertedSummary($h->entry->summary) ?>
 					</p>
