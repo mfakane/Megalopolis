@@ -337,6 +337,12 @@ class IndexHandler extends Handler
 			$this->subjectCount = Board::getSubjectCount($db);
 			Visualizer::$data = $name;
 		}
+		
+		if (!$isNameList && !Configuration::$instance->showName[Configuration::ON_SUBJECT])
+		{
+			$pageCount = 0;
+			$this->entries = array();
+		}
 
 		App::closeDB($db);
 		
@@ -407,6 +413,12 @@ class IndexHandler extends Handler
 			$this->subject = 0;
 			$this->subjectCount = Board::getSubjectCount($db);
 			Visualizer::$data = $tag;
+		}
+		
+		if (!$isTagList && !Configuration::$instance->showTags[Configuration::ON_SUBJECT])
+		{
+			$pageCount = 0;
+			$this->entries = array();
 		}
 		
 		App::closeDB($db);
