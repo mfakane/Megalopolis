@@ -216,7 +216,10 @@ class ReadHandler extends Handler
 		else
 			Auth::cleanSession();
 		
-		return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}");
+		if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
+			return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}");
+		else
+			return Visualizer::visualize("Read/Success");
 	}
 	
 	function unpost($_subject = "0", $_id = "0")

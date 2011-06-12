@@ -1616,3 +1616,9 @@ body.read>h1
 	color: #ffffff;
 	background-color: #005019;
 }
+
+.success
+{
+	padding: 8px;
+	text-align: center;
+}

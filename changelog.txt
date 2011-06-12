@@ -1,4 +1,10 @@
-﻿2011-06-12 COAH96KoxU <queue glasscore.net>
+﻿2011-06-13 COAH96KoxU <queue glasscore.net>
+
+	* style/style.css,
+	  req/Handler/Read.php,
+	  req/Visualizer/Read/Success.php: 作品閲覧不可設定時に投稿時エラーとして表示されてしまうのを修正
+
+2011-06-12 COAH96KoxU <queue glasscore.net>
 
 	* release 1
 	* req/Visualizer/mobile/Read/Index.php: 携帯表示で概要が正常に表示されないのを修正
@@ -6,7 +12,7 @@
 2011-06-09 COAH96KoxU <queue glasscore.net>
 
 	* readme.txt: 内容を強化
-	* style.css: 注釈文のスタイルを調整
+	* style/style.css: 注釈文のスタイルを調整
 	* req/Visualizer/Read/Edit.php: 古いブラウザ向けの表示を追加
 	* req/Model/ThreadEntry.php: 検索時にタグおよび Rate が正しく表示されないのを修正
 	* config.php,
