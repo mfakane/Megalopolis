@@ -6,6 +6,7 @@
 	* req/Core/Visualizer.php,
 	  req/Model/ThreadEntry.php,
 	  req/Visualizer/Index/Search.php: 検索が各種非表示設定を反映しないのを修正
+	* req/Visualizer/Index/Tag.php: 戻る表記の修正
 
 2011-06-12 COAH96KoxU <queue glasscore.net>
 

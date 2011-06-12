@@ -15,11 +15,11 @@ Visualizer::doctype();
 	<? Visualizer::header(App::$actionName == "author" ? "作者の一覧" : "タグの一覧", App::$actionName == "author"
 		? array
 		(
-			", トップに戻る, returnIcon.png"
+			", ホームに戻る, returnIcon.png"
 		)
 		: array
 		(
-			", トップに戻る, returnIcon.png",
+			", ホームに戻る, returnIcon.png",
 			"tag/random, おまかせ表示, refreshIcon.png"
 		)
 	) ?>
