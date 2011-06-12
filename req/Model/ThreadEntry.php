@@ -654,25 +654,25 @@ class ThreadEntry
 			$ids = array_merge
 			(
 				SearchIndex::search($idb, $query["query"], "title"),
-				SearchIndex::search($idb, $query["query"], "name"),
-				SearchIndex::search($idb, $query["query"], "summary"),
+				Configuration::$instance->showName[Configuration::ON_SUBJECT] ? SearchIndex::search($idb, $query["query"], "name") : array(),
+				Configuration::$instance->showSummary[Configuration::ON_SUBJECT] ? SearchIndex::search($idb, $query["query"], "summary") : array(),
 				SearchIndex::search($idb, $query["query"], "afterword"),
-				SearchIndex::search($idb, $query["query"], "tags")
+				Configuration::$instance->showTags[Configuration::ON_SUBJECT] ? SearchIndex::search($idb, $query["query"], "tags") : array()
 			);
 		
 		if (isset($query["title"]) && $query["title"])
 			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["title"], "title")) : SearchIndex::search($idb, $query["title"], "title");
 		
-		if (isset($query["name"]) && $query["name"])
+		if (isset($query["name"]) && $query["name"] && Configuration::$instance->showName[Configuration::ON_SUBJECT])
 			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["name"], "name")) : SearchIndex::search($idb, $query["name"], "name");
 		
-		if (isset($query["summary"]) && $query["summary"])
+		if (isset($query["summary"]) && $query["summary"] && Configuration::$instance->showSummary[Configuration::ON_SUBJECT])
 			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["summary"], "summary")) : SearchIndex::search($idb, $query["summary"], "summary");
 		
 		if (isset($query["afterword"]) && $query["afterword"])
 			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["afterword"], "afterword")) : SearchIndex::search($idb, $query["afterword"], "afterword");
 		
-		if (isset($query["tags"]) && $query["tags"])
+		if (isset($query["tags"]) && $query["tags"] && Configuration::$instance->showTags[Configuration::ON_SUBJECT])
 			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["tags"], "tag")) : SearchIndex::search($idb, $query["tags"], "tags");
 		
 		$where = array

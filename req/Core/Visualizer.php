@@ -133,18 +133,20 @@ class Visualizer
 			<a href="<?php self::converted(self::$basePath) ?>">
 				<?php self::converted(Configuration::$instance->title) ?>
 			</a>
-			<form action="<?php self::converted(self::actionHref("search")) ?>" method="get">
-				<div>
-					<input type="search" name="query" placeholder="検索" />
-					<input type="submit" value="検索" />
-					<?php
-					if (App::$actionName == "tag" && !is_array(Visualizer::$data))
-						echo '<input type="hidden" name="tags" value="', Visualizer::$data, '" />';
-					else if (App::$actionName == "author" && !is_array(Visualizer::$data))
-						echo '<input type="hidden" name="name" value="', Visualizer::$data, '" />';
-					?>
-				</div>
-			</form>
+			<?php if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT]): ?>
+				<form action="<?php self::converted(self::actionHref("search")) ?>" method="get">
+					<div>
+						<input type="search" name="query" placeholder="検索" />
+						<input type="submit" value="検索" />
+						<?php
+						if (App::$actionName == "tag" && !is_array(Visualizer::$data))
+							echo '<input type="hidden" name="tags" value="', Visualizer::$data, '" />';
+						else if (App::$actionName == "author" && !is_array(Visualizer::$data))
+							echo '<input type="hidden" name="name" value="', Visualizer::$data, '" />';
+						?>
+					</div>
+				</form>
+			<?php endif ?>
 			<nav>
 				<ul>
 					<?php foreach ($menu as $i): ?>

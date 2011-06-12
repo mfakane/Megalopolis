@@ -23,10 +23,18 @@ App::load(VISUALIZER_DIR . "Template/Index");
 		<section>
 			<label for="query">検索文字列</label><input type="text" name="query" id="query" value="<?+IndexHandler::param("query") ?>" />
 			<label for="title">作品名</label><input type="text" name="title" id="title" value="<?+IndexHandler::param("title") ?>" />
-			<label for="name">作者</label><input type="text" name="name" id="name" value="<?+IndexHandler::param("name") ?>" />
-			<label for="tags">タグ</label><input type="text" name="tags" id="tags" value="<?+IndexHandler::param("tags") ?>" />
-			<label for="eval">評価数</label><input type="number" name="evalBegin" id="eval" value="<?+$d["evalBegin"] ?>" min="<?+$d["evalMin"] ?>" max="<?+$d["evalMax"] ?>" /><span>～</span><input type="number" name="evalEnd" value="<?+$d["evalEnd"] ?>" min="<?+$d["evalMin"] ?>" max="<?+$d["evalMax"] ?>" />
-			<label for="points">POINT</label><input type="number" name="pointsBegin" id="points" value="<?+$d["pointsBegin"] ?>" min="<?+$d["pointsMin"] ?>" max="<?+$d["pointsMax"] ?>" /><span>～</span><input type="number" name="pointsEnd" value="<?+$d["pointsEnd"] ?>" min="<?+$d["pointsMin"] ?>" max="<?+$d["pointsMax"] ?>" />
+			<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
+				<label for="name">作者</label><input type="text" name="name" id="name" value="<?+IndexHandler::param("name") ?>" />
+			<?endif ?>
+			<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>
+				<label for="tags">タグ</label><input type="text" name="tags" id="tags" value="<?+IndexHandler::param("tags") ?>" />
+			<?endif ?>
+			<?if ($c->useAnyPoints() && $c->showRate[Configuration::ON_SUBJECT]): ?>
+				<label for="eval">評価数</label><input type="number" name="evalBegin" id="eval" value="<?+$d["evalBegin"] ?>" min="<?+$d["evalMin"] ?>" max="<?+$d["evalMax"] ?>" /><span>～</span><input type="number" name="evalEnd" value="<?+$d["evalEnd"] ?>" min="<?+$d["evalMin"] ?>" max="<?+$d["evalMax"] ?>" />
+			<?endif ?>
+			<?if ($c->useAnyPoints() && $c->showPoint[Configuration::ON_SUBJECT]): ?>
+				<label for="points">POINT</label><input type="number" name="pointsBegin" id="points" value="<?+$d["pointsBegin"] ?>" min="<?+$d["pointsMin"] ?>" max="<?+$d["pointsMax"] ?>" /><span>～</span><input type="number" name="pointsEnd" value="<?+$d["pointsEnd"] ?>" min="<?+$d["pointsMin"] ?>" max="<?+$d["pointsMax"] ?>" />
+			<?endif ?>
 			<label for="dateTime">投稿日時</label><input type="date" name="dateTimeBegin" id="dateTime" value="<?+$d["dateTimeBegin"] ?>" min="<?+$d["dateTimeMin"] ?>" max="<?+$d["dateTimeMax"] ?>" /><span>～</span><input type="date" name="dateTimeEnd" value="<?+$d["dateTimeEnd"] ?>" min="<?+$d["dateTimeMin"] ?>" max="<?+$d["dateTimeMax"] ?>" />
 			<ul class="buttons">
 				<li>
