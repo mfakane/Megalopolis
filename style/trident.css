@@ -35,3 +35,8 @@
 	border-top: none;
 	border-right: #999999 1px solid;
 }
+
+*:first-child+html .taglist li
+{
+	display: inline;
+}

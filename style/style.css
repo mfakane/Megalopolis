@@ -509,7 +509,7 @@ body>ul
 
 .taglist li
 {
-	display: inline;
+	display: inline-block;
 	margin-right: 16px;
 	font-size: 125%;
 }
