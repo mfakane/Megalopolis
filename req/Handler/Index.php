@@ -349,9 +349,6 @@ class IndexHandler extends Handler
 		$this->page = $page + 1;
 		$this->pageCount = $pageCount;
 		
-		$this->page = $page + 1;
-		$this->pageCount = $pageCount;
-		
 		switch (App::$handlerType)
 		{
 			case "json":
