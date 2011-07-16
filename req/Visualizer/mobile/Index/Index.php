@@ -44,11 +44,11 @@ function entries($h, $c)
 						<?if ($c->showSize[Configuration::ON_SUBJECT]): ?>
 							<span class="size"><?+$i->size ?>KB</span>
 						<?endif ?>
-						<?if ($c->useAnyPoints() && $c->showPoint[Configuration::ON_SUBJECT]): ?>
+						<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
 							<span class="evaluationCount"><?+$i->evaluationCount ?></span>
 							<span class="points"><?+$i->points ?></span>
 						<?endif ?>
-						<?if ($c->useAnyPoints() && $c->showRate[Configuration::ON_SUBJECT]): ?>
+						<?if ($c->showRate[Configuration::ON_SUBJECT]): ?>
 							<span class="rate"><?+sprintf("%.2f", $i->rate) ?></span>
 						<?endif ?>
 						<span class="dateTime"><?+Visualizer::formatShortDateTime($i->dateTime) ?></span>
@@ -263,7 +263,7 @@ Visualizer::doctype();
 								</a>
 							</li>
 						<?endif ?>
-						<?if ($c->useAnyPoints()): ?>
+						<?if ($c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
 							<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
 								<li>
 									<a href="#sort-evaluationCount">

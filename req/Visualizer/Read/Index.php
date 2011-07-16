@@ -84,7 +84,8 @@ Visualizer::doctype();
 		<?endif ?>
 	</dl>
 	<?if ($c->showReadCount[Configuration::ON_ENTRY] ||
-		  $c->useAnyPoints() && ($c->showPoint[Configuration::ON_ENTRY] || $c->showRate[Configuration::ON_ENTRY])): ?>
+		  $c->showPoint[Configuration::ON_ENTRY] ||
+		  $c->showRate[Configuration::ON_ENTRY]): ?>
 		<dl class="status">
 			<?if ($c->showReadCount[Configuration::ON_ENTRY]): ?>
 				<dt>閲覧数</dt>
@@ -92,7 +93,7 @@ Visualizer::doctype();
 					<?+$h->entry->readCount ?>
 				</dd>
 			<?endif ?>
-			<?if ($c->useAnyPoints()): ?>
+			<?if ($c->showPoint[Configuration::ON_ENTRY] || $c->showRate[Configuration::ON_ENTRY]): ?>
 				<?if ($c->showPoint[Configuration::ON_ENTRY]): ?>
 					<dt>評価数</dt>
 					<dd id="evaluationCount">

@@ -53,9 +53,9 @@ App::load(VISUALIZER_DIR . "Template/Index");
 			<?=$c->showPages[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
 			<?=$c->showReadCount[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
 			<?=$c->showSize[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-			<?=$c->useAnyPoints() && $c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-			<?=$c->useAnyPoints() && $c->showPoint[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-			<?=$c->useAnyPoints() && $c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+			<?=$c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+			<?=$c->showPoint[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+			<?=$c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
 			<?=$c->listType ?>
 		);
 	</script>

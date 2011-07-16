@@ -69,7 +69,7 @@ Visualizer::doctype();
 				<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
 					<span class="name"><? Visualizer::convertedName($i->name) ?></span>
 				<?endif ?>
-				<?if ($c->useAnyPoints()): ?>
+				<?if ($c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
 					<br />
 					<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
 						<span class="points">Pt:<?+$i->points ?></span>
@@ -97,8 +97,8 @@ Visualizer::doctype();
 			"random" => "おまかせ表示",
 			"s=title" => ($c->showTitle[Configuration::ON_SUBJECT] ? "作品名順" : null),
 			"s=name" => ($c->showName[Configuration::ON_SUBJECT] ? "作者順" : null),
-			"s=points" => ($c->useAnyPoints() && $c->showPoint[Configuration::ON_SUBJECT] ? "POINT順" : null),
-			"s=rate" => ($c->useAnyPoints() && $c->showPoint[Configuration::ON_SUBJECT] ? "Rate順" : null),
+			"s=points" => ($c->showPoint[Configuration::ON_SUBJECT] ? "POINT順" : null),
+			"s=rate" => ($c->showPoint[Configuration::ON_SUBJECT] ? "Rate順" : null),
 			"s=size" => ($c->showSize[Configuration::ON_SUBJECT] ? "サイズ順" : null),
 			"s=dateTime" => "日時順"
 		) as $k => $v): ?>

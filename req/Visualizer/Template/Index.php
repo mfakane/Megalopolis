@@ -46,7 +46,8 @@ function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 				<?php if ($c->showPages[Configuration::ON_SUBJECT] ||
 					  $c->showSize[Configuration::ON_SUBJECT] ||
 					  $c->showReadCount[Configuration::ON_SUBJECT] ||
-					  $c->useAnyPoints() && ($c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT])): ?>
+					  $c->showPoint[Configuration::ON_SUBJECT] ||
+					  $c->showRate[Configuration::ON_SUBJECT]): ?>
 				<dl>
 					<?php if ($c->showPages[Configuration::ON_SUBJECT]): ?>
 						<dt>ページ数</dt>
@@ -66,7 +67,7 @@ function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 							<?php Visualizer::converted($i->readCount) ?>
 						</dd>
 					<?php endif ?>
-					<?php if ($c->useAnyPoints()): ?>
+					<?php if ($c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
 						<?php if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
 							<dt>評価数</dt>
 							<dd class="evaluationCount">
