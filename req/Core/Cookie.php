@@ -38,7 +38,7 @@ class Cookie
 			(
 				self::COOKIE_NAME,
 				"<" . implode("<", array_map(create_function('$k, $v', 'return urlencode($k) . ">" . urlencode($v);'), array_keys(self::$data), array_values(self::$data))),
-				time() + 60 * 60 * 24 * 7,
+				time() + 60 * 60 * 24 * 30,
 				"/"
 			);
 	}
