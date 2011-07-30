@@ -232,7 +232,7 @@ $config->head = trim
 ');
 
 // 作品一覧表示時に作品集一覧の上に表示されるお知らせ (HTML)
-$config->notes = trim 
+$config->notes = trim
 ('
 	Hello!
 ');
@@ -252,6 +252,10 @@ $config->footers = array
 // - Configuration::LIST_DOUBLE		二列で表示します。
 // - Configuration::LIST_SINGLE		一列で表示します。
 $config->listType = Configuration::LIST_DOUBLE;
+
+// New や Up と表示される期間 (日)
+// 0 の場合無効になります
+$config->updatePeriod = 3;
 
 // 作品名を表示するか (true/false)
 $config->showTitle = array

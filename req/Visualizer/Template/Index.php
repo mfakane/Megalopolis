@@ -40,6 +40,15 @@ function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 				<time pubdate="pubdate" datetime="<?php Visualizer::converted(date("c", $i->dateTime)) ?>">
 					<?php Visualizer::converted(Visualizer::formatDateTime($i->dateTime)) ?>
 				</time>
+				<?php if (time() - $i->dateTime < $c->updatePeriod * 24 * 60 * 60): ?>
+					<span class="update">
+						NEW
+					</span>
+				<?php elseif (time() - $i->lastUpdate < $c->updatePeriod * 24 * 60 * 60): ?>
+					<span class="update">
+						UP
+					</span>
+				<?php endif ?>
 				<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
 					<a href="<?php Visualizer::converted(Visualizer::actionHref("author", $i->name)) ?>" class="name"><?php Visualizer::convertedName($i->name) ?></a>
 				<?php endif ?>

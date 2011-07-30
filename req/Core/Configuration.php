@@ -129,6 +129,7 @@ class Configuration
 	public $showFooterVersion = true;
 	public $footers = array();
 	public $listType = self::LIST_DOUBLE;
+	public $updatePeriod = 3;
 	public $showTitle = array
 	(
 		self::ON_SUBJECT => true,

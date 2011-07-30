@@ -418,6 +418,16 @@ ul.notify
 	text-align: right;
 }
 
+.entries article .update
+{
+	float: right;
+	display: block;
+	padding: 0px 4px 0px 0px;
+	color: #005019;
+	font-weight: bold;
+	text-align: right;
+}
+
 .entries article h2
 {
 	margin: 0px 0px 4px 0px;
