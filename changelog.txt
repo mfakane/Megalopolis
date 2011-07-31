@@ -1,4 +1,27 @@
-﻿2011-06-13 COAH96KoxU <queue glasscore.net>
+﻿2011-08-01 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 3
+	* req/Core/Cookie.php,
+	  req/Visualizer/Template/Index.php,
+	  script/Index/Index.js,
+	  style/dropDownIcon.png,
+	  style/style.css: 作品情報のユーザによる表示切替を可能に
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Visualizer/Template/Index.php,
+	  style/style.css: 投稿日時または更新日時が設定の期間内の場合 NEW または UP と表示する設定を追加
+	* req/Core/Cookie.php: Cookie の有効期限を延長
+	* req/Visualizer/Read/Edit.php: 作品の編集キーの入力が必須のときに編集時に一部のブラウザで空欄にできないのを修正
+	* req/Visualizer/Index/Index.php,
+	  req/Visualizer/Index/Search.php
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/Template/Index.php,
+	  req/Visualizer/mobile/Index/Index.php,
+	  req/Visualizer/simple/Index/Index.php: pointMap または commentPointMap が空のとき得点関連情報が表示設定にかかわらず表示されないのを修正
+	* style/style.css,
+	  style/trident.css: 作者およびタグ一覧が一部のブラウザで改行されずに表示されるのを修正
+
+2011-06-13 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 2
 	* style/style.css,
