@@ -428,6 +428,11 @@ ul.notify
 	text-align: right;
 }
 
+.entries article .hidden
+{
+	display: none;
+}
+
 .entries article h2
 {
 	margin: 0px 0px 4px 0px;
@@ -1560,7 +1565,7 @@ body.read>h1
 	float: right;
 	margin: 0px 0px 0px 3px;
 	padding: 0px;
-	background: transparent url("dropDownIcon.png") no-repeat scroll left bottom;
+	background: transparent url("dropDownIcon.png") no-repeat scroll 0 -18px;
 	width: 18px;
 	height: 18px;
 	cursor: pointer;
@@ -1581,17 +1586,17 @@ body.read>h1
 
 .dropDown.open .button
 {
-	background-position: right bottom;
+	background-position: -18px -18px;
 }
 
 .dropDown.ascending .button
 {
-	background-position: left top;
+	background-position: 0px 0px;
 }
 
 .dropDown.ascending.open .button
 {
-	background-position: right top;
+	background-position: -18px 0px;
 }
 
 .dropDown ul
@@ -1614,6 +1619,7 @@ body.read>h1
 
 .dropDown ul li
 {
+	position: relative;
 	display: block;
 	padding: 2px 3px 2px 3px;
 	height: 16px;
@@ -1625,6 +1631,30 @@ body.read>h1
 {
 	color: #ffffff;
 	background-color: #005019;
+}
+
+.dropDown ul li.listType+.listVisibility,
+.dropDown ul li.listVisibility+.dateType
+{
+	border-top: #005019 1px solid;
+}
+
+.dropDown ul li .button
+{
+	position: absolute;
+	right: 1px;
+	top: 1px;
+	background-image: none;
+}
+
+.dropDown ul li.selected .button
+{
+	background: transparent url("dropDownIcon.png") no-repeat scroll 0px -36px;
+}
+
+.dropDown ul li:hover.selected .button
+{
+	background-position: -18px -36px;
 }
 
 .success

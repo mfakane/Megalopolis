@@ -56,7 +56,11 @@ megalopolis.index =
 				!useSize ? null :
 				{
 					label: "サイズ",
-					value: "size"
+					value: "size",
+					selector: function(x, y)
+					{
+						return $(".size", x).text().replace(/KB$/, "") - $(".size", y).text().replace(/KB$/, "");
+					}
 				},
 				!useEvaluationCount ? null :
 				{
@@ -145,6 +149,7 @@ megalopolis.index =
 		
 		currentStyle = currentStyle.length ? currentStyle[0] : styleMap[defaultStyle];
 		
+		var visibilityCookie = $.grep([megalopolis.mainCookie("ListVisibility"), "pageCount,readCount,size,evaluationCount,points,rate,dateTime"], function(_) { return _; })[0].split(",");
 		var styleControl = $("<div />")
 			.addClass("dropDown")
 			.append($("<span />").text(currentStyle.name))
@@ -155,11 +160,142 @@ megalopolis.index =
 					function(_)
 					{
 						return $("<li />")
+							.addClass("listType")
+							.addClass(_ == currentStyle ? "selected" : null)
 							.text(_.name)
+							.append($("<div />").addClass("button"))
 							.click(function()
 							{
 								megalopolis.mainCookie("ListType", _.value);
 								location.href = location.href;
+							})[0];
+					}
+				))
+				.append($.map
+				(
+					[
+						!usePageCount ? null :
+						{
+							label: "ページ数",
+							value: "pageCount"
+						},
+						!useReadCount ? null :
+						{
+							label: "閲覧数",
+							value: "readCount"
+						},
+						!useSize ? null :
+						{
+							label: "サイズ",
+							value: "size"
+						},
+						!useEvaluationCount ? null :
+						{
+							label: "評価数",
+							value: "evaluationCount"
+						},
+						!useEvaluationCount ? null :
+						{
+							label: "コメント数",
+							value: "commentCount"
+						},
+						!usePoints ? null :
+						{
+							label: "POINT",
+							value: "points"
+						},
+						!useRate ? null :
+						{
+							label: "Rate",
+							value: "rate"
+						}
+					],
+					function(_)
+					{
+						if (_ != null)
+							return $("<li />")
+								.addClass("listVisibility")
+								.addClass($.inArray(_.value, visibilityCookie) != -1 ? "selected" : null)
+								.text(_.label)
+								.append($("<div />").addClass("button"))
+								.click(function()
+								{
+									var elem = $(this);
+									var idx = $.inArray(_.value, visibilityCookie);
+									
+									elem.toggleClass("selected");
+									
+									$(".entries>article dd." + _.value).each(function(k, v)
+									{
+										$([$(v), $(v).prev("dt")]).toggleClass("hidden");
+									});
+									
+									if (idx != -1)
+										delete visibilityCookie[idx];
+									else
+										visibilityCookie.push(_.value);
+									
+									megalopolis.mainCookie("ListVisibility", visibilityCookie.join(","));
+									
+									return false;
+								})[0];
+					}
+				))
+				.append($.map
+				(
+					[
+						{
+							label: "投稿日時",
+							value: "dateTime"
+						},
+						{
+							label: "更新日時",
+							value: "lastUpdate"
+						}
+					],
+					function(_)
+					{
+						return $("<li />")
+							.addClass("dateType")
+							.addClass($.inArray(_.value, visibilityCookie) != -1 ? "selected" : null)
+							.text(_.label)
+							.append($("<div />").addClass("button"))
+							.click(function()
+							{
+								var elem = $(this);
+								var dateTimeIndex = $.inArray("dateTime", visibilityCookie);
+								var lastUpdateIndex = $.inArray("lastUpdate", visibilityCookie);
+								
+								$(".dropDown ul li.dateType").each(function(k, v)
+								{
+									var e = $(v);
+									
+									if (e.text().indexOf(_.label) != -1)
+										e.addClass("selected");
+									else
+										e.removeClass("selected");
+								});
+								$(".entries>article time").each(function(k, v)
+								{
+									var e = $(v);
+									
+									if (e.hasClass(_.value))
+										e.removeClass("hidden");
+									else
+										e.addClass("hidden");
+								});
+								
+								if (dateTimeIndex != -1)
+									delete visibilityCookie[dateTimeIndex];
+								
+								if (lastUpdateIndex != -1)
+									delete visibilityCookie[lastUpdateIndex];
+								
+								
+								visibilityCookie.push(_.value);
+								megalopolis.mainCookie("ListVisibility", visibilityCookie.join(","));
+								
+								return false;
 							})[0];
 					}
 				))

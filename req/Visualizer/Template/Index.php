@@ -1,4 +1,14 @@
 <?php
+function entryInfo($i, $visibility, $label, $member, $value = null)
+{
+	?>
+	<dt<?php echo in_array($member, $visibility) ? null : ' class="hidden"' ?>><?php Visualizer::converted($label) ?></dt>
+	<dd class="<?php echo $member . (in_array($member, $visibility) ? null : " hidden") ?>">
+		<?php Visualizer::converted($value ? $value : $i->{$member}) ?>
+	</dd>
+	<?php
+}
+
 function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 {
 	$c = Configuration::$instance;
@@ -22,6 +32,7 @@ function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 		$listType == "single")
 		$listType = "double";
 	
+	$visibility = explode(",", Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "pageCount,readCount,size,evaluationCount,points,rate,dateTime"));
 	?>
 	<div class="entries<?php echo $listType == "single" ? " single" : null ?>">
 		<?php foreach ($entries as $idx => $i): ?><article>
@@ -37,8 +48,11 @@ function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 						<?php endif ?>
 					</h2>
 				<?php endif ?>
-				<time pubdate="pubdate" datetime="<?php Visualizer::converted(date("c", $i->dateTime)) ?>">
+				<time class="dateTime<?php echo in_array("dateTime", $visibility) ? null : " hidden" ?>" pubdate="pubdate" datetime="<?php Visualizer::converted(date("c", $i->dateTime)) ?>">
 					<?php Visualizer::converted(Visualizer::formatDateTime($i->dateTime)) ?>
+				</time>
+				<time class="lastUpdate<?php echo in_array("lastUpdate", $visibility) ? null : " hidden" ?>" datetime="<?php Visualizer::converted(date("c", $i->lastUpdate)) ?>">
+					<?php Visualizer::converted(Visualizer::formatDateTime($i->lastUpdate)) ?>
 				</time>
 				<?php if (time() - $i->dateTime < $c->updatePeriod * 24 * 60 * 60): ?>
 					<span class="update">
@@ -58,41 +72,16 @@ function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 					  $c->showPoint[Configuration::ON_SUBJECT] ||
 					  $c->showRate[Configuration::ON_SUBJECT]): ?>
 				<dl>
-					<?php if ($c->showPages[Configuration::ON_SUBJECT]): ?>
-						<dt>ページ数</dt>
-						<dd class="pageCount">
-							<?php Visualizer::converted($i->pageCount) ?>
-						</dd>
-					<?php endif ?>
-					<?php if ($c->showSize[Configuration::ON_SUBJECT]): ?>
-						<dt>サイズ</dt>
-						<dd>
-							<span class="size"><?php Visualizer::converted($i->size) ?></span>KB
-						</dd>
-					<?php endif ?>
-					<?php if ($c->showReadCount[Configuration::ON_SUBJECT]): ?>
-						<dt>閲覧数</dt>
-						<dd class="readCount">
-							<?php Visualizer::converted($i->readCount) ?>
-						</dd>
-					<?php endif ?>
+					<?php if ($c->showPages[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "ページ数", "pageCount") ?>
+					<?php if ($c->showSize[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "サイズ", "size", "{$i->size}KB") ?>
+					<?php if ($c->showReadCount[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "閲覧数", "readCount") ?>
 					<?php if ($c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
 						<?php if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-							<dt>評価数</dt>
-							<dd class="evaluationCount">
-								<?php Visualizer::converted($i->evaluationCount) ?>
-							</dd>
-							<dt>POINT</dt>
-							<dd class="points">
-								<?php Visualizer::converted($i->points) ?>
-							</dd>
+							<?php entryInfo($i, $visibility, "評価数", "evaluationCount") ?>
+							<?php entryInfo($i, $visibility, "コメント数", "commentCount") ?>
+							<?php entryInfo($i, $visibility, "POINT", "points") ?>
 						<?php endif ?>
-						<?php if ($c->showRate[Configuration::ON_SUBJECT]): ?>
-							<dt>Rate</dt>
-							<dd class="rate">
-								<?php Visualizer::converted(sprintf("%.2f", $i->rate)) ?>
-							</dd>
-						<?php endif ?>
+						<?php if ($c->showRate[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "Rate", "rate", sprintf("%.2f", $i->rate)) ?>
 					<?php endif ?>
 				</dl>
 				<?php endif ?>

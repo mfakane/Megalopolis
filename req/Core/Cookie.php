@@ -10,6 +10,7 @@ class Cookie
 	const FONT_SIZE_KEY = "FontSize";
 	const ORIENTATION_KEY = "Orientation";
 	const LIST_TYPE_KEY = "ListType";
+	const LIST_VISIBILITY_KEY = "ListVisibility";
 	
 	static $data = null;
 	
