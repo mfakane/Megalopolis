@@ -1,0 +1,6 @@
+<?php Visualizer::header("サンプル") ?>
+<section>
+	<p>
+		任意の HTML 文章を設定できるサンプルです。
+	</p>
+</section>

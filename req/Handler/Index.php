@@ -504,6 +504,17 @@ NETWORK:
 		return null;
 	}
 	
+	function notice($_name = "")
+	{
+		$name = Util::escapeInput($_name);
+		Visualizer::$data = DATA_DIR . "notice/{$name}.txt";
+		
+		if (is_file(Visualizer::$data))
+			return Visualizer::visualize();
+		else
+			throw new ApplicationException("ファイルが見つかりません", 404);
+	}
+	
 	// Megalith compatibility layer
 	function sub()
 	{
