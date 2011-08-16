@@ -316,7 +316,7 @@ megalopolis.read =
 						var rt = megalopolis.mainCookie("Vertical", megalopolis.mainCookie("Vertical") == "yes" ? "no" : "yes");
 						
 						megalopolis.read.toggleVertical();
-						$("img", sender).attr("src", basePath + "style/" + (rt == "yes" ? "horizontalIcon.png" : "verticalIcon.png"));
+						$("img", sender).attr("src", basePath + (rt == "yes" ? "horizontalIcon.png" : "verticalIcon.png"));
 					}
 				}
 			], function(i)
@@ -329,7 +329,7 @@ megalopolis.read =
 					})
 						.append($("<img />",
 						{
-							src: basePath + "style/" + i.image,
+							src: basePath + i.image,
 							alt: i.title,
 							title: i.title
 						}))

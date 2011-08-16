@@ -120,6 +120,7 @@ class Configuration
 	public $maxSummaryLines = 0;
 	public $maxSummarySize = 0;
 	
+	public $skin = null;
 	public $subjectOrder = self::ORDER_DESCEND;
 	public $rateType = self::RATE_AVERAGE;
 	public $searchPaging = 30;

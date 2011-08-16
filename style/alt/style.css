@@ -1,0 +1,217 @@
+html
+{
+	background-image: url("background.png");
+	background-color: #ffffff;
+}
+
+hr
+{
+	border-color: #480000;
+}
+
+input[type="submit"]:hover, input[type="reset"]:hover, input[type="button"]:hover, button:hover
+{
+	border-color: #772200;
+	color: #480000;
+}
+
+input[type="submit"]:active, input[type="reset"]:active, input[type="button"]:active, button:active
+{
+	border-color: #480000;
+	box-shadow: 0px 0px 4px #772200;
+}
+
+button:hover img
+{
+	background-color: #772200;
+}
+
+button:active img
+{
+	background-color: #480000;
+}
+
+body
+{
+	overflow-x: hidden;
+}
+
+body>header
+{
+	background: #480000;
+}
+
+body>header nav
+{
+	right: 237px;
+}
+
+body>header form
+{
+	right: 5px;
+}
+
+body>header form>div
+{
+	margin: -5px -5px 0px -8px;
+	height: 32px;
+	border-radius: 0px 4px 4px 0px;
+	background: #ffffff;
+}
+
+body>header>a:first-child
+{
+	color: #ffffff;
+}
+
+body>header nav ul
+{
+	margin-top: -8px;
+	margin-right: -8px;
+	padding: 8px;
+	padding-left: 0px;
+	border-radius: 4px 0px 0px 4px;
+	background-color: #ffffff;
+}
+
+body>header nav ul li a img
+{
+	background-color: #480000;
+}
+
+body>footer>ul:first-child+a
+{
+	background-color: #ffffff;
+}
+
+.entries article
+{
+	border-color: #480000;
+}
+
+.entries article .update
+{
+	color: #480000;
+}
+
+section, .taglist, body>ul
+{
+	border-color: #480000;
+}
+
+h1
+{
+	color: #480000;
+	background-image: url("h1.png");
+}
+
+h2
+{
+	color: #480000;
+}
+
+.edit label[for], .edit section h2, .auth label, #commentform label, .config dt, .search section label[for]
+{
+	color: #480000;
+}
+
+#commentform, #evaluateform
+{
+	border-color: #480000;
+}
+
+#evaluateform
+{
+	background: #ffffff;
+}
+
+#commentformHeadding, #evaluateformHeadding
+{
+	border-color: #480000;
+	background: #480000;
+}
+
+#commentformHeadding.inactive, #evaluateformHeadding.inactive
+{
+	border-bottom: #480000 1px solid;
+}
+
+.search section ul.filter li
+{
+	border-bottom: #480000 1px solid;
+}
+
+.read .status+.status
+{
+	border-color: #480000;
+	color: #ffffff;
+	background: #480000;
+}
+
+.read ul.options
+{
+	border-color: #480000;
+	background: #480000 !important;
+}
+
+.read #comments
+{
+	border-color: #480000;
+}
+
+.read #evaluateform>div label
+{
+	color: #480000;
+}
+
+.pager li a[href="#"], .pager li a[href=""]
+{
+	border-color: #480000;
+	background: #480000;
+}
+
+.index .pagerContainer
+{
+	border-color: #480000;
+	color: #ffffff;
+	background: #480000;
+}
+
+.dropDown
+{
+	border-color: #480000;
+}
+
+.dropDown.open
+{
+	background-color: #480000;
+	box-shadow: 0px 0px 4px #480000;
+}
+
+.dropDown ul
+{
+	border-color: #480000;
+	color: #480000;
+	box-shadow: 0px 0px 4px #480000;
+}
+
+.dropDown ul li:hover
+{
+	background-color: #480000;
+}
+
+.dropDown ul li.listType+.listVisibility,
+.dropDown ul li.listVisibility+.dateType
+{
+	border-color: #480000;
+}
+
+.dropDown .button
+{
+	background-color: #480000;
+}
+
+.dropDown ul li.selected .button
+{
+	background-color: #480000;
+}

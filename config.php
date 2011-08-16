@@ -209,6 +209,11 @@ $config->maxSummarySize = 0;
  * 表示に関する設定
  */
 
+// 見た目の設定 (特定値)
+// - null							既定の緑ベースのもの
+// - "alt"							Megalith ライクな赤ベースのもの
+$config->skin = null;
+
 // 作品集表示順 (特定値)
 // - Configuration::ORDER_ASCEND	昇順
 // - Configuration::ORDER_DESCEND	降順
