@@ -292,6 +292,122 @@ class ThreadEntry
 		return $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
 	}
 	
+	private static function getAllMegalithEntryIDs($latest)
+	{
+		$rt = array();
+		
+		foreach (glob("Megalith/sub/subject*.txt") as $i)
+			if (($n = basename($i)) != "subjects.txt")
+			{
+				$subject = $n == "subject.txt"
+					? $latest
+					: intval(strtr($n, array
+					(
+						"subject" => "",
+						".txt" => ""
+					)));
+				
+				foreach (array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "SJIS");'), file($i, FILE_IGNORE_NEW_LINES)) as $j)
+					if (strstr($id, "<>"))
+						$rt[] = intval(array_shift(explode("<>", $j)));
+			}
+		
+		return $rt;
+	}
+	
+	private static function getAllMegalithEntries($latest, $getSize = false)
+	{
+		$rt = array();
+		
+		foreach (glob("Megalith/sub/subject*.txt") as $i)
+			if (($n = basename($i)) != "subjects.txt")
+			{
+				$subject = $n == "subject.txt"
+					? $latest
+					: intval(strtr($n, array
+					(
+						"subject" => "",
+						".txt" => ""
+					)));
+				
+				foreach (array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "SJIS");'), file($i, FILE_IGNORE_NEW_LINES)) as $j)
+				{
+					$entry = Util::convertLineToThreadEntry($j);
+					
+					if (!$entry)
+						continue;
+					
+					$entry->subject = $subject;
+					$entry->size = $getSize && is_file($file = "Megalith/dat/{$entry->id}.dat") ? round(filesize($file) / 1024, 2) : 0;
+					
+					$rt[] = $entry;
+				}
+			}
+		
+		return $rt;
+	}
+	
+	private static function searchAllMegalithEntries(PDO $db, array $query)
+	{
+		$rt = array();
+		
+		foreach (self::getAllMegalithEntries(Board::getLatestSubject($db)) as $i)
+		{
+			$matches = true;
+			
+			if ($matches && isset($query["title"]) && $query["title"])
+				foreach ($query["title"] as $j)
+					$matches = $matches && mb_strpos($i->title, $j) !== false;
+			
+			if ($matches && isset($query["name"]) && $query["name"] && Configuration::$instance->showName[Configuration::ON_SUBJECT])
+				foreach ($query["name"] as $j)
+					$matches = $matches && mb_strpos($i->name, $j) !== false;
+			
+			if ($matches && isset($query["tag"]) && $query["tag"] && Configuration::$instance->showTags[Configuration::ON_SUBJECT])
+			{
+				$tags = implode(" ", $i->tags);
+				
+				foreach ($query["tag"] as $j)
+					$matches = $matches && mb_strpos($tags, $j) !== false;
+			}
+			
+			if ($matches && isset($query["eval"]) && $query["eval"])
+				$matches = $matches && $i->evaluationCount >= $query["eval"][0] && $i->evaluationCount <= $query["eval"][1];
+			
+			if ($matches && isset($query["points"]) && $query["points"])
+				$matches = $matches && $i->points >= $query["points"][0] && $i->points <= $query["points"][1];
+			
+			if ($matches && isset($query["dateTime"]) && $query["dateTime"])
+				$matches = $matches && $i->dateTime >= $query["dateTime"][0] && $i->dateTime <= $query["dateTime"][1];
+			
+			$body = $matches && is_file($aft = "Megalith/dat/{$i->id}.dat") ? mb_convert_encoding(implode("\r\n", file($aft, FILE_IGNORE_NEW_LINES)), "UTF-8", "SJIS") : "";
+			$afterword = $matches && is_file($aft = "Megalith/aft/{$i->id}.aft.dat") ? mb_convert_encoding(implode("\r\n", file($aft, FILE_IGNORE_NEW_LINES)), "UTF-8", "SJIS") : "";
+			
+			if ($matches && isset($query["body"]) && $query["body"])
+				foreach ($query["body"] as $j)
+					$matches = $matches && mb_strpos($body, $j) !== false;
+			
+			if ($matches && isset($query["afterword"]) && $query["afterword"])
+				foreach ($query["afterword"] as $j)
+					$matches = $matches && mb_strpos($afterword, $j) !== false;
+			
+			if ($matches && isset($query["query"]) && $query["query"])
+				foreach ($query["query"] as $j)
+					$matches = $matches &&
+					(
+						mb_strpos($i->title, $j) !== false ||
+						mb_strpos($i->name, $j) !== false ||
+						mb_strpos($body, $j) !== false ||
+						mb_strpos($afterword, $j) !== false
+					);
+			
+			if ($matches)
+				$rt[] = $i;
+		}
+
+		return $rt;
+	}
+	
 	/**
 	 * @param int $subject
 	 * @param int $order [optional]
@@ -367,29 +483,9 @@ class ThreadEntry
 		if (Configuration::$instance->convertOnDemand &&
 			is_dir("Megalith/sub"))
 		{
-			foreach (glob("Megalith/sub/subject*.txt") as $i)
-				if (($n = basename($i)) != "subjects.txt")
-				{
-					$subject = $n == "subject.txt"
-						? Board::getLatestSubject($db)
-						: intval(strtr($n, array
-						(
-							"subject" => "",
-							".txt" => ""
-						)));
-					
-					foreach (array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "SJIS");'), file($i, FILE_IGNORE_NEW_LINES)) as $j)
-					{
-						$line = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", $j));
-
-						if (count($line) > 2 && $line[2] == $name)
-						{
-							$entry = Util::convertLineToThreadEntry($j);
-							$entry->subject = $subject;
-							$rt[$entry->id] = $entry;
-						}
-					}
-				}
+			foreach (self::getAllMegalithEntries(Board::getLatestSubject($db), true) as $i)
+				if (!isset($rt[$i->id]) && $i->name == $name)
+					$rt[$i->id] = $i;
 			
 			krsort($rt);
 		}
@@ -443,29 +539,9 @@ class ThreadEntry
 		if (Configuration::$instance->convertOnDemand &&
 			is_dir("Megalith/sub"))
 		{
-			foreach (glob("Megalith/sub/subject*.txt") as $i)
-				if (($n = basename($i)) != "subjects.txt")
-				{
-					$subject = $n == "subject.txt"
-						? Board::getLatestSubject($db)
-						: intval(strtr($n, array
-						(
-							"subject" => "",
-							".txt" => ""
-						)));
-					
-					foreach (array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "SJIS");'), file($i, FILE_IGNORE_NEW_LINES)) as $j)
-					{
-						$line = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", $j));
-
-						if (count($line) > 13 && in_array($tag, Util::splitTags($line[13])))
-						{
-							$entry = Util::convertLineToThreadEntry($j);
-							$entry->subject = $subject;
-							$rt[$entry->id] = $entry;
-						}
-					}
-				}
+			foreach (self::getAllMegalithEntries(Board::getLatestSubject($db)) as $i)
+				if (!isset($rt[$i->id]) && in_array($tag, $i->tags))
+					$rt[$i->id] = $i;
 			
 			krsort($rt);
 		}
@@ -536,8 +612,21 @@ class ThreadEntry
 		)));
 		Util::executeStatement($st);
 		$rt = $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
+		$rt = array_map(create_function('$_', 'return $_[0];'), $rt);
 		
-		return array_map(create_function('$_', 'return $_[0];'), $rt);
+		if (Configuration::$instance->convertOnDemand &&
+			is_dir("Megalith/sub"))
+		{
+			foreach (self::getAllMegalithEntries(0) as $i)
+				if (isset($rt[$i->name]))
+					$rt[$i->name]++;
+				else
+					$rt[$i->name] = 1;
+			
+			uasort($rt, create_function('$x, $y', 'return $y - $x;'));
+		}
+		
+		return $rt;
 	}
 
 	/**
@@ -560,8 +649,22 @@ class ThreadEntry
 		)));
 		Util::executeStatement($st);
 		$rt = $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
+		$rt = array_map(create_function('$_', 'return $_[0];'), $rt);
 		
-		return array_map(create_function('$_', 'return $_[0];'), $rt);
+		if (Configuration::$instance->convertOnDemand &&
+			is_dir("Megalith/sub"))
+		{
+			foreach (self::getAllMegalithEntries(0) as $i)
+				foreach ($i->tags as $j)
+					if (isset($rt[$j]))
+						$rt[$j]++;
+					else
+						$rt[$j] = 1;
+			
+			uasort($rt, create_function('$x, $y', 'return $y - $x;'));
+		}
+		
+		return $rt;
 	}
 	
 	/**
@@ -578,8 +681,15 @@ class ThreadEntry
 		)));
 		Util::executeStatement($st, array($name));
 		$rt = $st->fetchAll(PDO::FETCH_COLUMN);
+		$rt = $rt[0];
 		
-		return $rt[0];
+		if (Configuration::$instance->convertOnDemand &&
+			is_dir("Megalith/sub"))
+			foreach (self::getAllMegalithEntries(0) as $i)
+				if ($i->name == $name)
+					$rt++;
+		
+		return $rt;
 	}
 	
 	/**
@@ -596,8 +706,15 @@ class ThreadEntry
 		)));
 		Util::executeStatement($st, array($tag));
 		$rt = $st->fetchAll(PDO::FETCH_COLUMN);
+		$rt = $rt[0];
 		
-		return $rt[0];
+		if (Configuration::$instance->convertOnDemand &&
+			is_dir("Megalith/sub"))
+			foreach (self::getAllMegalithEntries(0) as $i)
+				if (in_array($tag, $i->tags))
+					$rt++;
+		
+		return $rt;
 	}
 	
 	/**
@@ -611,6 +728,10 @@ class ThreadEntry
 			App::THREAD_ENTRY_TABLE
 		)));
 		$rt = $st->fetchAll(PDO::FETCH_COLUMN);
+		
+		if (Configuration::$instance->convertOnDemand &&
+			is_dir("Megalith/sub"))
+			$rt = array_unique(array_merge($rt, self::getAllMegalithEntryIDs(0)));
 		
 		if ($rt)
 			return self::load($db, $rt[array_rand($rt)]);
@@ -636,7 +757,22 @@ class ThreadEntry
 		)));
 		Util::executeStatement($st);
 		
-		return $st->fetch();
+		$rt = $st->fetch();
+		
+		if (Configuration::$instance->convertOnDemand &&
+			is_dir("Megalith/sub"))
+			foreach (self::getAllMegalithEntries(0) as $i)
+				$rt = array
+				(
+					"maxDateTime" => max($rt["maxDateTime"], $i->dateTime),
+					"minDateTime" => min($rt["minDateTime"], $i->dateTime),
+					"maxEval" => max($rt["maxEval"], $i->evaluationCount),
+					"minEval" => min($rt["minEval"], $i->evaluationCount),
+					"maxPoints" => max($rt["maxPoints"], $i->points),
+					"minPoints" => min($rt["minPoints"], $i->points),
+				);
+		
+		return $rt;
 	}
 	
 	/**
@@ -656,6 +792,7 @@ class ThreadEntry
 				SearchIndex::search($idb, $query["query"], "title"),
 				Configuration::$instance->showName[Configuration::ON_SUBJECT] ? SearchIndex::search($idb, $query["query"], "name") : array(),
 				Configuration::$instance->useSummary && Configuration::$instance->showSummary[Configuration::ON_SUBJECT] ? SearchIndex::search($idb, $query["query"], "summary") : array(),
+				SearchIndex::search($idb, $query["query"], "body"),
 				SearchIndex::search($idb, $query["query"], "afterword"),
 				Configuration::$instance->showTags[Configuration::ON_SUBJECT] ? SearchIndex::search($idb, $query["query"], "tags") : array()
 			);
@@ -669,11 +806,14 @@ class ThreadEntry
 		if (isset($query["summary"]) && $query["summary"] && Configuration::$instance->useSummary && Configuration::$instance->showSummary[Configuration::ON_SUBJECT])
 			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["summary"], "summary")) : SearchIndex::search($idb, $query["summary"], "summary");
 		
+		if (isset($query["body"]) && $query["body"])
+			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["body"], "body")) : SearchIndex::search($idb, $query["body"], "body");
+		
 		if (isset($query["afterword"]) && $query["afterword"])
 			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["afterword"], "afterword")) : SearchIndex::search($idb, $query["afterword"], "afterword");
 		
-		if (isset($query["tags"]) && $query["tags"] && Configuration::$instance->showTags[Configuration::ON_SUBJECT])
-			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["tags"], "tag")) : SearchIndex::search($idb, $query["tags"], "tags");
+		if (isset($query["tag"]) && $query["tag"] && Configuration::$instance->showTags[Configuration::ON_SUBJECT])
+			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["tag"], "tag")) : SearchIndex::search($idb, $query["tag"], "tags");
 		
 		$where = array
 		(
@@ -698,7 +838,13 @@ class ThreadEntry
 		{
 			$rt = self::query($db, $whereString, array(), array(App::THREAD_ENTRY_TABLE . ".id"));
 			
-			return ThreadEntry::load($db, $rt[array_rand($rt)][0]);
+			if (Configuration::$instance->convertOnDemand &&
+				is_dir("Megalith/sub"))
+				$rt = array_merge($rt, self::searchAllMegalithEntries($db, $query));
+			
+			$val = $rt[array_rand($rt)];
+			
+			return ThreadEntry::load($db, is_array($val) ? $val[0] : $val->id);
 		}
 		else
 		{
@@ -720,6 +866,19 @@ class ThreadEntry
 					$i->calculateRate();
 					$i->loaded = true;
 				}
+			}
+			
+			if (Configuration::$instance->convertOnDemand &&
+				is_dir("Megalith/sub"))
+			{
+				$entries = self::searchAllMegalithEntries($db, $query);
+				$count[0] += count($entries);
+				
+				foreach ($entries as $i)
+					if (isset($rt[$i->id]))
+						$count[0]--;
+					else
+						$rt[$i->id] = $i;
 			}
 			
 			return array
