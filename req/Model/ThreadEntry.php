@@ -872,13 +872,15 @@ class ThreadEntry
 				is_dir("Megalith/sub"))
 			{
 				$entries = self::searchAllMegalithEntries($db, $query);
-				$count[0] += count($entries);
+				$c = count($entries);
 				
-				foreach ($entries as $i)
+				foreach (array_slice($entries, $offset + $count[0]) as $i)
 					if (isset($rt[$i->id]))
-						$count[0]--;
-					else
+						$c--;
+					else if (!$limit || count($rt) < $limit)
 						$rt[$i->id] = $i;
+				
+				$count[0] += $c;
 			}
 			
 			return array
