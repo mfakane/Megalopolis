@@ -1,4 +1,23 @@
-﻿2011-08-01 COAH96KoxU <queue glasscore.net>
+﻿2011-08-18 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 4
+	* req/Handler/Index.php,
+	  req/Visualizer/Index/Notice.php,
+	  store/notice/sample.txt: 任意の HTML 文章を Megalopolis のコンテンツとして表示する機能の追加
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Core/Visualizer.php,
+	  req/Visualizer/Read/Index.php,
+	  script/Read/Index.js,
+	  style/alt/*,
+	  style/dropDownIcon.png,
+	  style/style.css: 見た目の設定を追加、また見た目の追加
+	* req/Model/ThreadEntry.php: 必要に応じて Megalith のログを読み込むとき、Megalith ログの検索ができないのを修正
+	* req/Model/ThreadEntry.php: 必要に応じて Megalith のログを読み込むとき、検索でページ分けが正常にされないのを修正
+	* req/Model/ThreadEntry.php: 必要に応じて Megalith のログを読み込む時、詳細検索のおまかせ表示でエラーが出る可能性があるのを修正
+	* .htaccess: .sqlite ファイルへのアクセスを既定で拒否
+
+2011-08-01 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 3
 	* req/Core/Cookie.php,
