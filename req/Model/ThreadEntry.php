@@ -844,7 +844,7 @@ class ThreadEntry
 			
 			$val = $rt[array_rand($rt)];
 			
-			return ThreadEntry::load($db, is_array($val) ? $val[0] : $val->id);
+			return is_array($val) ? ThreadEntry::load($db, $val[0]) : $val;
 		}
 		else
 		{
