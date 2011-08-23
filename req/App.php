@@ -34,7 +34,6 @@ class App
 		{
 			self::precondition(version_compare(PHP_VERSION, "5.2.5", ">="), "PHP 5.2.5");
 			self::precondition(extension_loaded("mbstring"), "mbstring");
-			self::precondition(!get_magic_quotes_gpc(), "magic_quotes_gpc disabled");
 			self::precondition(in_array(Util::HASH_ALGORITHM, hash_algos()), "hash_algos() " . Util::HASH_ALGORITHM);
 			
 			mb_internal_encoding("UTF-8");
@@ -52,6 +51,17 @@ class App
 		}
 		else if (!$cond)
 			throw new ApplicationException("Precondition {$desc} failed.");
+	}
+	
+	static function stripMagicQuotesSlashes()
+	{
+		if (get_magic_quotes_gpc())
+		{
+			$_GET = array_map('stripslashes', $_GET);
+			$_POST = array_map('stripslashes', $_POST);
+			$_REQUEST = array_map('stripslashes', $_REQUEST);
+			$_COOKIE = array_map('stripslashes', $_COOKIE);
+		}
 	}
 	
 	private static function isBBQed()
@@ -251,6 +261,7 @@ App::load(array
 ));
 App::load(CORE_DIR . "Util");
 App::precondition();
+App::stripMagicQuotesSlashes();
 App::load(array
 (
 	CORE_DIR . "Auth",
