@@ -246,13 +246,13 @@ App::$startTime = microtime(true);
 App::load(array
 (
 	"Library/cssparser",
-	"Library/simple_html_dom"
+	"Library/simple_html_dom",
+	CORE_DIR . "ApplicationException"
 ));
 App::load(CORE_DIR . "Util");
 App::precondition();
 App::load(array
 (
-	CORE_DIR . "ApplicationException",
 	CORE_DIR . "Auth",
 	CORE_DIR . "Configuration",
 	CORE_DIR . "Cookie",
