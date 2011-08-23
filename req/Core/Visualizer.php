@@ -251,7 +251,7 @@ class Visualizer
 								&lt; 次
 							</a>
 						</li>
-					<?endif ?>
+					<?php endif ?>
 				<?php elseif ($current > 1 || !$isSimple): ?>
 					<?php if ($max > $range): ?>
 						<li class="nav">
@@ -268,7 +268,7 @@ class Visualizer
 				<?php endif ?>
 				<?php foreach (range($reverse ? $end : max(min($current - floor($range / 2), $max - $range + 1), 1), $reverse ? $start : $end, $reverse ? -1 : 1) as $i): ?>
 					<li>
-						<a href="<?php self::converted($i == $current ? $loopback : $link . $i) ?>"<?=$i == $current ? ' class="active"' : null ?>>
+						<a href="<?php self::converted($i == $current ? $loopback : $link . $i) ?>"<?php echo $i == $current ? ' class="active"' : null ?>>
 							<?php self::converted($i) ?>
 						</a>
 					</li>

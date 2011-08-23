@@ -498,7 +498,7 @@ CACHE MANIFEST
 		?>
 NETWORK:
 *
-		<?
+		<?php
 		echo Util::getAbsoluteUrl();
 		
 		return null;

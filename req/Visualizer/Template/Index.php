@@ -87,7 +87,7 @@ function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 				<?php endif ?>
 				<?php if ($i->tags && $c->showTags[Configuration::ON_SUBJECT]): ?>
 					<ul class="tags">
-						<?foreach ($i->tags as $j): ?>
+						<?php foreach ($i->tags as $j): ?>
 							<li>
 								<a href="<?php Visualizer::converted(Visualizer::actionHref("tag", $j)) ?>"><?php Visualizer::converted($j) ?></a>
 							</li>
