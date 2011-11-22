@@ -622,7 +622,7 @@ class Visualizer
 		eval("?" . ">" . $content);
 		$output = ob_get_contents();
 		ob_end_clean();
-		$output = preg_replace('/\s+</S', '<', preg_replace('/>\s+/S', '>', $output));
+		$output = mb_ereg_replace('\s+<', '<', mb_ereg_replace('>\s+', '>', $output));
 		
 		echo strtr($output, array
 		(
