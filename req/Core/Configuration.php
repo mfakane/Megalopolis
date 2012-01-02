@@ -6,6 +6,10 @@ class Configuration
 	 */
 	static $instance;
 	
+	const LINK_AUTO = 0;
+	const LINK_REWRITE = 1;
+	const LINK_PATH = 2;
+	const LINK_QUERY = 3;
 	const ORDER_ASCEND = Board::ORDER_ASCEND;
 	const ORDER_DESCEND = Board::ORDER_DESCEND;
 	const RATE_FIVE = 0;
@@ -26,6 +30,7 @@ class Configuration
 	public $adminHash = null;
 	public $utilsEnabled = false;
 	public $htaccessAutoConfig = false;
+	public $linkType = self::LINK_AUTO;
 	public $useBBQ = self::BBQ_NONE;
 	public $denyRead = array();
 	public $denyWrite = array();

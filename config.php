@@ -28,6 +28,13 @@ $config->utilsEnabled = true;
 // 設置後一度設定の反映を確認したら false にすることを推奨します
 $config->htaccessAutoConfig = true;
 
+// URL の形式 (特定値)
+// - Configuration::LINK_AUTO		自動検出
+// - Configuration::LINK_REWRITE	直接
+// - Configuration::LINK_PATH		PATH_INFO 形式
+// - Configuration::LINK_QUERY		クエリ形式
+$config->linkType = Configuration::LINK_AUTO;
+
 // BBQ (http://bbq.uso800.net/) による公開プロキシ規制を使用するか (特定値)
 // - Configuration::BBQ_NONE		使用しない
 // - Configuration::BBQ_READ		閲覧に対して使用する

@@ -84,12 +84,15 @@ class Util
 	static function getAbsoluteUrl($path = "")
 	{
 		$script = $_SERVER["SCRIPT_NAME"];
-		
-		if (is_file(".htaccess") &&
+		$linkType = Configuration::$instance->linkType;
+
+		if ($linkType == Configuration::LINK_REWRITE ||
+			$linkType == Configuration::LINK_AUTO &&
+			is_file(".htaccess") &&
 			mb_strstr(file_get_contents(".htaccess"), Util::INDEX_FILE_NAME))
 			$script = mb_substr($script, 0, -mb_strlen(Util::INDEX_FILE_NAME));
 		else if (!Util::isEmpty($path) && !is_file($path))
-			if (/* PATH_INFO available */ true)
+			if ($linkType == Configuration::LINK_PATH || /* PATH_INFO available */ $linkType == Configuration::LINK_AUTO)
 				$script .= "/";
 			else
 				$script .= "?" . self::PATH_INFO_QUERY_PARAM . "=";
@@ -104,10 +107,14 @@ class Util
 		if ($suffix)
 			return $suffix;
 		
-		if (is_file(".htaccess") &&
+		$linkType = Configuration::$instance->linkType;
+
+		if ($linkType == Configuration::LINK_REWRITE ||
+			$linkType == Configuration::LINK_AUTO &&
+			is_file(".htaccess") &&
 			mb_strstr(file_get_contents(".htaccess"), Util::INDEX_FILE_NAME))
 			$suffix = "";
-		else if (/* PATH_INFO available */ true)
+		else if ($linkType == Configuration::LINK_PATH || /* PATH_INFO available */ $linkType == Configuration::LINK_AUTO)
 			$suffix = Util::INDEX_FILE_NAME . "/";
 		else
 			$suffix = "?" . self::PATH_INFO_QUERY_PARAM . "=";
