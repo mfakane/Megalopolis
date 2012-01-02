@@ -50,7 +50,7 @@ Visualizer::doctype();
 			<header data-role="header" data-position="fixed" data-backbtn="false" data-theme="b">
 				<h1><?+$h->entry->title ?></h1>
 				<h2 class="currentPage"></h2>
-				<a href="#" data-direction="reverse" data-rel="back">戻る</a>
+				<a href="<?+Visualizer::absoluteHref($h->entry->subject) ?>" data-direction="reverse">戻る</a>
 				<div data-role="controlgroup" data-type="horizontal" class="ui-btn-right">
 					<button class="nextPageButton" data-theme="b">次頁</button>
 					<button class="previousPageButton" data-theme="b">前頁</button>
@@ -105,7 +105,7 @@ Visualizer::doctype();
 			<header data-role="header" data-backbtn="false">
 				<h1>コメント</h1>
 				<?if ($c->useComments): ?>
-					<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id, "p") ?>" data-icon="plus" data-iconpos="notext" data-transition="slideup" class="ui-btn-right">評価する</a>
+					<a href="<?+Visualizer::absoluteHref($h->entry->subject, $h->entry->id, "p") ?>" data-icon="plus" data-iconpos="notext" data-transition="slideup" class="ui-btn-right">評価する</a>
 				<?endif ?>
 			</header>
 			<div data-role="content">
