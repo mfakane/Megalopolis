@@ -624,6 +624,8 @@ class Visualizer
 		ob_end_clean();
 		$output = mb_ereg_replace('\s+<', '<', mb_ereg_replace('>\s+', '>', $output));
 		
+        header("Content-Type: text/html; charset=utf-8");
+
 		echo strtr($output, array
 		(
 			"<!DOCTYPE html>" => "<!DOCTYPE html>\r\n",
