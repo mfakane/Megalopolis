@@ -16,7 +16,7 @@ else
 	<link href="<?+Visualizer::absoluteHref() ?>" />
 	<generator version="<?+App::VERSION ?>"><?+App::NAME ?></generator>
 	<?if ($h->entries): ?>
-		<updated><?+date("c", $h->entries[0]->lastUpdate) ?></updated>
+		<updated><?+date("c", $h->entries[array_shift(array_keys($h->entries))]->lastUpdate) ?></updated>
 		<?foreach ($h->entries as $i): ?>
 			<entry>
 				<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
