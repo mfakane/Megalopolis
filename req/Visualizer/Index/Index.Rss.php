@@ -19,7 +19,7 @@ else
 		<description><?+$c->notes ?></description>
 		<generator><?+App::NAME ?> <?+App::VERSION ?></generator>
 		<?if ($h->entries): ?>
-			<lastBuildDate><?+date("r", $h->entries[0]->lastUpdate) ?></lastBuildDate>
+			<lastBuildDate><?+date("r", $h->entries[array_shift(array_keys($h->entries))]->lastUpdate) ?></lastBuildDate>
 			<?foreach ($h->entries as $i): ?>
 				<item>
 					<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
