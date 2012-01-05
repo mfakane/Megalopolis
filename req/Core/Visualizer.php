@@ -495,7 +495,7 @@ class Visualizer
 				{
 					error_reporting(E_ALL ^ E_NOTICE);
 					$css = new cssparser();
-					$css->ParseStr("c {" . preg_replace_callback('/\\\([0-9A-Fa-f]{1,6})/i', create_function('$_', '$a = intval($_[1], 16); return $a >= 32 && $a <= 126 ? chr($a) : $_[0];'), $v) . "}");
+					$css->ParseStr('c {' . preg_replace_callback('/\\\([0-9A-Fa-f]{1,6})/i', create_function('$_', '$a = intval($_[1], 16); return $a >= 32 && $a <= 126 ? chr($a) : $_[0];'), $v) . "}");
 					
 					foreach ($css->css as $selector => $properties)
 					{

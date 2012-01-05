@@ -1,4 +1,22 @@
-﻿2011-08-18 COAH96KoxU <queue glasscore.net>
+﻿2012-01-05 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 5
+	* req/Visualizer/Index/Index.Rss.php: RSS 出力の更新日時の取得がエラーが出ることがあるのを修正
+	* req/Visualizer/Index/Index.Atom.php: Atom 出力の更新日時の取得がエラーが出ることがあるのを修正
+	* req/Visualizer/mobile/Read/Index.php: 携帯向け表示で作品本文から作品集へ戻れないことがあるのを修正
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Core/Util.php: URL の形式を選択可能に
+	* req/Core/Visualizer.php: HTML 出力時に Content-Type, charset の指定を追加
+	* req/Core/Visualizer.php: メニューの文字が化けることがあるのを修正
+	* req/App.php: PDO がロードされているかの確認を追加
+	* req/App.php: magic_quotes_gpc = On 時に対応
+	* req/App.php: 事前条件に失敗したときに ApplicationException が定義されていないエラーが出るのを修正
+	* req/Core/Visualizer.php,
+	  req/Handler/Index.php,
+	  req/Visualizer/Template/Index.php: php.ini の short_open_tag = Off 時に動かないのを修正
+
+2011-08-18 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 4
 	* req/Handler/Index.php,
