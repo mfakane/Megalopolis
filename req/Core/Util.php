@@ -75,7 +75,7 @@ class Util
 			if (mb_strstr($ua, $k))
 				return $browserType = $v;
 		
-		return $browserType = BROWSER_TYPE_UNKNOWN;
+		return $browserType = self::BROWSER_TYPE_UNKNOWN;
 	}
 	
 	/**
