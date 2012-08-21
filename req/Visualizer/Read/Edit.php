@@ -13,7 +13,7 @@ Visualizer::doctype();
 		-
 		<?+$c->title ?>
 	</title>
-	<?if ($c->foregroundMap || $c->backgroundMap || $c->backgroundImageMap): ?>
+	<?if ($c->foregroundMap || $c->backgroundMap || $c->backgroundImageMap || $c->borderMap): ?>
 		<script src="<?+Visualizer::actionHref("script", "Read", "Edit.js") ?>"></script>
 	<?endif ?>
 </head>
@@ -78,6 +78,16 @@ Visualizer::doctype();
 				<?if ($c->backgroundImageMap): ?>
 					<script>
 						megalopolis.edit.backgroundImagePalette([<?=implode(", ", array_map(create_function('$_', 'return "\'" . Visualizer::escapeOutput($_) . "\'";'), $c->backgroundImageMap)) ?>]);
+					</script>
+				<?else: ?>
+					<br />
+				<?endif ?>
+			<?endif ?>
+			<?if ($c->borderEnabled): ?>
+				<label for="border">枠色</label><input type="color" name="border" id="border" onchange="updateBorder()" value="<?+$h->thread->border ?>" />
+				<?if ($c->borderMap): ?>
+					<script>
+						megalopolis.edit.borderPalette([<?=implode(", ", array_map(create_function('$_', 'return "\'" . Visualizer::escapeOutput($_) . "\'";'), $c->borderMap)) ?>]);
 					</script>
 				<?else: ?>
 					<br />

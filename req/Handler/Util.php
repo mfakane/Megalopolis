@@ -230,6 +230,8 @@ class UtilHandler extends Handler
 					array("背景色使用可否", $c->backgroundEnabled),
 				"backgroundImageEnabled" =>
 					array("背景画像使用可否", $c->backgroundImageEnabled),
+				"borderEnabled" =>
+					array("枠色使用可否", $c->borderEnabled),
 				"subjectSplitting" =>
 					array("作品集最大件数", $c->subjectSplitting),
 				"rateType" =>

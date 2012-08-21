@@ -22,6 +22,10 @@ megalopolis.edit =
 	{
 		megalopolis.edit.setBodyBoxStyle("backgroundImage", "backgroundImage", value);
 	},
+	updateBorder: function(value)
+	{
+		megalopolis.edit.setBodyBoxStyle("border", "borderColor", value);
+	},
 	palette: function(values, func, cssProperty)
 	{
 		var id = "a" + this.paletteID++;
@@ -66,6 +70,10 @@ megalopolis.edit =
 	backgroundImagePalette: function(values)
 	{
 		this.palette(values, this.updateBackgroundImage, "backgroundImage");
+	},
+	borderPalette: function(values)
+	{
+		this.palette(values, this.updateBorder, "backgroundColor");
 	}
 };
 

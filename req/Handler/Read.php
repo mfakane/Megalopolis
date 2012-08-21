@@ -563,6 +563,9 @@ class ReadHandler extends Handler
 		if (!Util::isEmpty($thread->background) && !preg_match('/^(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}|rgba?\s*\(\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*(,\s*[0-9](\.[0-9]+)?\s*)?\))$/', $thread->background))
 			$rt[] = "背景色の指定が不正です";
 		
+		if (!Util::isEmpty($thread->border) && !preg_match('/^(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}|rgba?\s*\(\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*(,\s*[0-9](\.[0-9]+)?\s*)?\))$/', $thread->border))
+			$rt[] = "枠色の指定が不正です";
+		
 		foreach (Configuration::$instance->disallowedWordsForEntry as $i)
 			foreach (array
 			(
@@ -596,6 +599,7 @@ class ReadHandler extends Handler
 		if (!is_null(self::param("foreground")))		$thread->foreground = self::param("foreground") == "#000000" ? null : self::param("foreground");
 		if (!is_null(self::param("background")))		$thread->background = self::param("background") == "#000000" ? null : self::param("background");
 		if (!is_null(self::param("backgroundImage")))	$thread->backgroundImage = self::param("backgroundImage");
+		if (!is_null(self::param("border")))			$thread->border = self::param("border") == "#000000" ? null : self::param("border");
 		if (!is_null(self::param("convertLineBreak")))	$thread->convertLineBreak = self::param("convertLineBreak") == "true";
 		
 		$entry->pageCount = $thread->pageCount();

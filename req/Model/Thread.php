@@ -11,6 +11,7 @@ class Thread
 		"body" => "text",
 		"afterword" => "text"
 	);
+	static $threadStyleSchemaVersion = 2;
 	static $threadStyleSchema = array
 	(
 		"id" => "integer primary key not null",
@@ -18,7 +19,8 @@ class Thread
 		"convertLineBreak" => "bit",
 		"foreground" => "text",
 		"background" => "text",
-		"backgroundImage" => "text"
+		"backgroundImage" => "text",
+		"border" => "text"
 	);
 	static $threadPasswordSchema = array
 	(
@@ -42,6 +44,7 @@ class Thread
 	public $foreground = null;
 	public $background = null;
 	public $backgroundImage = null;
+	public $border = null;
 	
 	public $hash = null;
 	
@@ -72,6 +75,7 @@ class Thread
 			"foreground" => $this->foreground,
 			"background" => $this->background,
 			"backgroundImage" => $this->backgroundImage,
+			"border" => $this->border,
 			"nonCommentEvaluation" => array_reduce($this->nonCommentEvaluations, create_function('$x, $y', 'return $x + $y->point;'), 0),
 			"comments" => array_map(create_function('$_', 'return $_->toArray();'), $this->comments)
 		);
@@ -270,6 +274,12 @@ class Thread
 		Util::createTableIfNotExists($db, self::$threadSchema, App::THREAD_TABLE);
 		Util::createTableIfNotExists($db, self::$threadStyleSchema, App::THREAD_STYLE_TABLE);
 		Util::createTableIfNotExists($db, self::$threadPasswordSchema, App::THREAD_PASSWORD_TABLE);
+		
+		if (intval(Meta::get($db, App::THREAD_STYLE_TABLE, "1")) < self::$threadStyleSchemaVersion)
+		{
+			Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column border text', App::THREAD_STYLE_TABLE))));
+			Meta::set($db, App::THREAD_STYLE_TABLE, strval(self::$threadStyleSchemaVersion));
+		}
 	}
 	
 	/**

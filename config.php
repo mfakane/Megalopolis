@@ -172,6 +172,19 @@ $config->backgroundImageMap = array
 	// "style/addIcon.png",
 );
 
+// 枠色を指定できるかどうか (true/false)
+$config->borderEnabled = true;
+
+// 枠色パレットの一覧 (HTML 色一覧)
+$config->borderMap = array
+(
+	"#0c0c0c",
+	"#05057f",
+	"#057f05",
+	"#7f7f05",
+	"#7f0505",
+);
+
 // 作品集分割件数 (整数)
 // 現在の作品集にこの数の作品があったら、新規投稿される作品は新しい作品集に所属します。
 $config->subjectSplitting = 100;
