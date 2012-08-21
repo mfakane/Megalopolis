@@ -13,19 +13,20 @@ class Meta
 	
 	/**
 	 * @param string $name
+	 * @param string $defaultValue
 	 * @return string
 	 */
-	static function get(PDO $db, $name)
+	static function get(PDO $db, $name, $defaultValue = null)
 	{
-		if ($meta == null)
+		if (self::$meta == null)
 		{
-			$meta = array();
+			self::$meta = array();
 			
-			foreach (Util::ensureStatement($db, $db->query("select * from" . self::META_TABLE))->fetchAll() as $i)
-				$meta[$i["name"]] = $i["value"];
+			foreach (Util::ensureStatement($db, $db->query("select * from " . App::META_TABLE))->fetchAll() as $i)
+				self::$meta[$i["name"]] = $i["value"];
 		}
 		
-		return $meta[$name];
+		return isset(self::$meta[$name]) ? self::$meta[$name] : $defaultValue;
 	}
 	
 	/**
@@ -53,7 +54,7 @@ class Meta
 			$value
 		));
 		
-		$meta[$name] = $value;
+		self::$meta[$name] = $value;
 	}
 	
 	static function ensureTable(PDO $db)
