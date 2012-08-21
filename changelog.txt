@@ -1,4 +1,33 @@
-﻿2012-01-05 COAH96KoxU <queue glasscore.net>
+﻿2012-08-21 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 6
+	* style/horizontalIcon.png,
+	  style/minusFontIcon.png,
+	  style/plusFontIcon.png,
+	  style/verticalIcon.png: 表示設定ボタン画像の色変更
+	* config.php,
+	  req/Handler/Read.php,
+	  req/Handler/Util.php,
+	  req/Model/Thread.php,
+	  req/Visualizer/Read/Edit.php,
+	  req/Visualizer/Read/Index.php,
+	  script/Read/Edit.js,
+	  script/Read/Index.js: 作品に枠色を追加
+	* req/Handler/Read.php: パスワード変更推奨文言の変更
+	* req/Core/Visualizer.php,
+	  req/Visualizer/Read/Index.php: 作品の背景色でページ全体の背景色が変更されるように変更
+	* req/Model/Meta.php: メタテーブルが動作しないのを修正
+	* config.php,
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/mobile/Read/Index.php: 本文枠内に作品名と作者のヘッダを表示するかどうかの設定を追加
+	* req/Visualizer/Index/Index.php: 管理者のみ投稿可能なとき管理者ログインしても新規投稿のリンクが出ないのを修正
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Visualizer/Read/Index.php,
+	  script/Read/Index.js: コメントと簡易評価のタブのどちらを既定にするか設定可能に
+	* req/Core/Util.php: 不明な User Agent からアクセスされた時の BROWSER_TYPE_UNKNOWN の指定が間違っていたため Notice が出るのを修正
+
+2012-01-05 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 5
 	* req/Visualizer/Index/Index.Rss.php: RSS 出力の更新日時の取得がエラーが出ることがあるのを修正
