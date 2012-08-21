@@ -40,7 +40,7 @@ App::load(VISUALIZER_DIR . "Template/Index");
 		Visualizer::isMobile() || Visualizer::isSimple() ? "?visualizer=auto, 携帯表示, " : null
 	);
 	
-	if ($c->adminOnly)
+	if ($c->adminOnly && !$isAdmin)
 		array_shift($arr);
 	
 	Visualizer::header($title, $arr, count($h->entries) . " 件");
