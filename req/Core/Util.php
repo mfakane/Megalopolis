@@ -639,7 +639,7 @@ class Util
 	 */
 	static function isEmpty($str)
 	{
-		return !isset($str{0});
+		return !isset($str[0]);
 	}
 }
 ?>

@@ -45,7 +45,7 @@ class App
 			{
 				function lcfirst($str)
 				{
-					$str{0} = strtolower($str{0});
+					$str[0] = strtolower($str[0]);
 					
 					return $str;
 				}
