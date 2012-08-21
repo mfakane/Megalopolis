@@ -6,7 +6,7 @@ $isEdit = in_array(App::$actionName, array("new", "edit"));
 $isAdmin = Auth::hasSession(true);
 Visualizer::doctype();
 ?>
-<html>
+<html<?if (!Util::isEmpty($h->thread->background)): ?> style="background-color: <?+$h->thread->background ?>;"<?endif ?>>
 <head>
 	<? Visualizer::head() ?>
 	<meta name="author" content="<?+$h->entry->name ?>" />
@@ -426,6 +426,6 @@ Visualizer::doctype();
 			<?endif ?>
 		<?endif ?>
 	<?endif ?>
-	<? Visualizer::footer() ?>
+	<? Visualizer::footer($h->thread->background) ?>
 </body>
 </html>
