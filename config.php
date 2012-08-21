@@ -269,6 +269,9 @@ $config->listType = Configuration::LIST_DOUBLE;
 // 0 の場合無効になります
 $config->updatePeriod = 3;
 
+// 本文枠内に作品名および名前を表示するか (true/false)
+$config->showHeaderInsideBorder = false;
+
 // コメントおよび簡易評価両方が有効な場合の既定の評価方法 (特定値)
 // - Configuration::EVAL_POINT		簡易評価タブを既定にします。
 // - Configuration::EVAL_COMMENT	コメントタブを既定にします。

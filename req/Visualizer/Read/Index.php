@@ -135,7 +135,7 @@ Visualizer::doctype();
 		: Visualizer::actionHref($h->subject, $h->entry->id) . "/") ?>
 	<section id="body" style="color: <?+$h->thread->foreground ?>; background-color: <?+$h->thread->background ?>; background-image: <?+!Util::isEmpty($h->thread->backgroundImage) ? "url('{$h->thread->backgroundImage}')" : "none" ?>;">
 		<div id="contentWrapper">
-			<?if ($h->page == 1): ?>
+			<?if ($h->page == 1 && $c->showHeaderInsideBorder): ?>
 				<h1>
 					<?+$h->entry->title ?>
 				</h1>

@@ -59,14 +59,16 @@ Visualizer::doctype();
 			<div data-role="content" data-theme="e">
 				<div class="content">
 					<article class="contentWrapper">
-						<header>
-							<h1><?+$h->entry->title ?></h1>
-							<?if ($c->showName[Configuration::ON_ENTRY]): ?>
-								<address>
-									<? Visualizer::convertedName($h->entry->name) ?>
-								</address>
-							<?endif ?>
-						</header>
+						<?if ($c->showHeaderInsideBorder): ?>
+							<header>
+								<h1><?+$h->entry->title ?></h1>
+								<?if ($c->showName[Configuration::ON_ENTRY]): ?>
+									<address>
+										<? Visualizer::convertedName($h->entry->name) ?>
+									</address>
+								<?endif ?>
+							</header>
+						<?endif ?>
 						<?if ($c->useSummary && $c->showSummary[Configuration::ON_ENTRY] && !Util::isEmpty($h->entry->summary)): ?>
 							<p>
 								<? Visualizer::convertedSummary($h->entry->summary) ?>
