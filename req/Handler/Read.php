@@ -170,7 +170,7 @@ class ReadHandler extends Handler
 		Visualizer::$data = self::checkValues($this->entry, $this->thread, true);
 		
 		if ($type != Util::HASH_TYPE_LATEST)
-			Visualizer::$data[] = "サーバに保存されている編集キーの形式が古いので、編集キーを再度入力するか変更することを推奨します。";
+			Visualizer::$data[] = "サーバに保存されている編集キーの形式が古いため、編集キーを再度入力するか変更することを推奨します。";
 		
 		if (!is_null($_page) ||
 			$_POST && self::param("preview", null, true) == "true" && !Visualizer::$data)
