@@ -269,6 +269,11 @@ $config->listType = Configuration::LIST_DOUBLE;
 // 0 の場合無効になります
 $config->updatePeriod = 3;
 
+// コメントおよび簡易評価両方が有効な場合の既定の評価方法 (特定値)
+// - Configuration::EVAL_POINT		簡易評価タブを既定にします。
+// - Configuration::EVAL_COMMENT	コメントタブを既定にします。
+$config->defaultEvaluator = Configuration::EVAL_POINT;
+
 // 作品名を表示するか (true/false)
 $config->showTitle = array
 (

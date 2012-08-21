@@ -350,7 +350,7 @@ megalopolis.read =
 		if (megalopolis.mainCookie("Vertical") == "yes")
 			megalopolis.read.toggleVertical(true);
 	},
-	loadForms: function()
+	loadForms: function(defaultEvaluator)
 	{
 		var forms = ["evaluateform", "commentform"];
 		
@@ -386,7 +386,7 @@ megalopolis.read =
 			});
 		switchForm(location.hash.length > 0 && location.hash.match(/Headding$/)
 			? location.hash.substring(1, location.hash.length - "Headding".length)
-			: "evaluateform");
+			: forms[defaultEvaluator]);
 	},
 	toggleVertical: function(onLoad)
 	{

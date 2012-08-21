@@ -305,7 +305,7 @@ Visualizer::doctype();
 		<?endif ?>
 		<?if ($c->usePoints() && $c->useComments): ?>
 			<script>
-				megalopolis.read.loadForms();
+				megalopolis.read.loadForms(<?+$c->defaultEvaluator ?>);
 			</script>
 		<?endif ?>
 		<?if ($c->showComment[Configuration::ON_ENTRY]): ?>

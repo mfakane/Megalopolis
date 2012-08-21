@@ -23,6 +23,8 @@ class Configuration
 	const ON_SUBJECT = "Subject";
 	const LIST_DOUBLE = 0;
 	const LIST_SINGLE = 1;
+	const EVAL_POINT = 0;
+	const EVAL_COMMENT = 1;
 	
 	public $debug = false;
 	
@@ -136,6 +138,7 @@ class Configuration
 	public $footers = array();
 	public $listType = self::LIST_DOUBLE;
 	public $updatePeriod = 3;
+	public $defaultEvaluator = self::EVAL_POINT;
 	public $showTitle = array
 	(
 		self::ON_SUBJECT => true,
