@@ -76,6 +76,15 @@ class Configuration
 	);
 	public $backgroundImageEnabled = false;
 	public $backgroundImageMap = array();
+	public $borderEnabled = true;
+	public $borderMap = array
+	(
+		"#0c0c0c",
+		"#05057f",
+		"#057f05",
+		"#7f7f05",
+		"#7f0505",
+	);
 	public $subjectSplitting = 100;
 	public $disallowedWordsForEntry = array();
 	public $disallowedWordsForComment = array();
