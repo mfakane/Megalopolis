@@ -174,10 +174,10 @@ Visualizer::doctype();
 								<br />
 							<?endif ?>
 							<?if (!Util::isEmpty($h->entry->mail)): ?>
-								<a href="mailto:<?+$h->entry->mail ?>">[メール]</a>
+								<a href="mailto:<?+$h->entry->mail ?>"><?+$h->entry->mail ?></a>
 							<?endif ?>
 							<?if (!Util::isEmpty($h->entry->link)): ?>
-								<a href="<?+$h->entry->link ?>">[リンク]</a>
+								<a href="<?+$h->entry->link ?>"><?+$h->entry->link ?></a>
 							<?endif ?>
 						</address>
 					<?endif ?>
