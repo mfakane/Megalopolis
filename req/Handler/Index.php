@@ -230,7 +230,18 @@ class IndexHandler extends Handler
 			"dateTimeMax" => date("Y-m-d", $vals["maxDateTime"])
 		);
 		
-		return Visualizer::visualize();
+		switch (App::$handlerType)
+		{
+			case "json":
+				return Visualizer::json(array
+				(
+					"entries" => array_map(create_function('$_', 'return $_->toArray();'), $this->entries),
+					"page" => $this->page,
+					"pageCount" => $this->pageCount
+				));
+			default:
+				return Visualizer::visualize();
+		}
 	}
 	
 	static function param($name, $value = null)
