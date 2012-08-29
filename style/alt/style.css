@@ -150,8 +150,12 @@ h2
 
 .read ul.options
 {
-	border-color: #480000;
-	background: #480000 !important;
+	border: none;
+}
+
+.read #body
+{
+	border-color: #efefef;
 }
 
 .read #comments
