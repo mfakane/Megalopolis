@@ -405,7 +405,7 @@ class ThreadEntry
 					);
 			
 			if ($matches)
-				$rt[] = $i;
+				$rt[$i->id] = $i;
 		}
 
 		return $rt;
@@ -875,7 +875,7 @@ class ThreadEntry
 				is_dir("Megalith/sub"))
 			{
 				$entries = self::searchAllMegalithEntries($db, $query);
-				$c = count($entries);
+				$c = count(array_diff_key($entries, $rt));
 				
 				foreach (array_slice($entries, $offset + $count[0]) as $i)
 					if (isset($rt[$i->id]))
