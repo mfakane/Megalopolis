@@ -13,17 +13,6 @@ class UtilHandler extends Handler
 		return Visualizer::visualize();
 	}
 	
-	function select()
-	{
-		self::ensureTestMode();
-		
-		$db = App::openDB();
-		Visualizer::$data = print_r($db->query('select * from sqlite_master')->fetchAll(PDO::FETCH_ASSOC), true);
-		App::closeDB($db);
-		
-		return Visualizer::visualize();
-	}
-	
 	function hash()
 	{
 		self::ensureTestMode(false);
