@@ -3,12 +3,12 @@ class Evaluation
 {
 	static $evaluationSchema = array
 	(
-		"entryID" => "integer primary key not null",
-		"id" => "integer primary key not null",
+		"entryID" => "bigint primary key not null",
+		"id" => "bigint primary key not null",
 		
 		"point" => "integer",
-		"host" => "text",
-		"dateTime" => "integer",
+		"host" => "varchar(512)",
+		"dateTime" => "bigint",
 	);
 	
 	public $entryID = 0;

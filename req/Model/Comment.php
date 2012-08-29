@@ -3,16 +3,16 @@ class Comment
 {
 	static $commentSchema = array
 	(
-		"entryID" => "integer primary key not null",
-		"id" => "integer primary key not null",
+		"entryID" => "bigint primary key not null",
+		"id" => "bigint primary key not null",
 		
-		"name" => "text",
-		"mail" => "text",
-		"body" => "text",
-		"host" => "text",
-		"dateTime" => "integer",
-		"hash" => "text",
-		"evaluation" => "integer"
+		"name" => "varchar(255)",
+		"mail" => "varchar(255)",
+		"body" => "mediumtext",
+		"host" => "varchar(512)",
+		"dateTime" => "bigint",
+		"hash" => "varchar(512)",
+		"evaluation" => "bigint"
 	);
 	
 	public $entryID = 0;

@@ -3,9 +3,9 @@ class SearchIndex
 {
 	static $searchIndexSchema = array
 	(
-		"id" => "integer",
-		"type" => "text",
-		"word" => "text"
+		"id" => "bigint",
+		"type" => "varchar(127)",
+		"word" => "varchar(127)"
 	);
 	static $endchars = "　｛｝「」【】（）〈〉≪≫『』〔〕［］＜＞、。・…／＆！”＃＄％’ー＝＾～｜￥＋＊‘＠：；？＿";
 	

@@ -3,23 +3,23 @@ class ThreadEntry
 {
 	static $threadEntrySchema = array
 	(
-		"id" => "integer primary key not null",
+		"id" => "bigint primary key not null",
 		"subject" => "integer primary key not null",
 		
-		"title" => "text",
-		"name" => "text",
+		"title" => "varchar(255)",
+		"name" => "varchar(255)",
 		"summary" => "text",
-		"link" => "text",
-		"mail" => "text",
-		"host" => "text",
-		"dateTime" => "integer",
-		"lastUpdate" => "integer",
+		"link" => "varchar(512)",
+		"mail" => "varchar(255)",
+		"host" => "varchar(512)",
+		"dateTime" => "bigint",
+		"lastUpdate" => "bigint",
 		"pageCount" => "integer",
 		"size" => "real"
 	);
 	static $threadEvaluationSchema = array
 	(
-		"id" => "integer primary key not null",
+		"id" => "bigint primary key not null",
 
 		"points" => "integer",
 		"responseCount" => "integer",
@@ -29,9 +29,9 @@ class ThreadEntry
 	);
 	static $threadTagSchema = array
 	(
-		"id" => "integer primary key not null",
+		"id" => "bigint primary key not null",
 
-		"tag" => "text primary key not null"
+		"tag" => "varchar(255) primary key not null"
 	);
 	
 	const SEARCH_RANDOM = 0;
@@ -232,13 +232,16 @@ class ThreadEntry
 	
 	static function ensureTable(PDO $db)
 	{
-		Util::createTableIfNotExists($db, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE);
+		Util::createTableIfNotExists($db, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE, array
+		(
+			App::THREAD_ENTRY_TABLE . "SubjectIndex" => array("subject"),
+			App::THREAD_ENTRY_TABLE . "NameIndex" => array("name")
+		));
 		Util::createTableIfNotExists($db, self::$threadEvaluationSchema, App::THREAD_EVALUATION_TABLE);
-		Util::createTableIfNotExists($db, self::$threadTagSchema, App::THREAD_TAG_TABLE);
-		
-		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index if not exists %sSubjectIndex on %1$s(subject)', App::THREAD_ENTRY_TABLE))));
-		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index if not exists %sNameIndex on %1$s(name)', App::THREAD_ENTRY_TABLE))));
-		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index if not exists %sTagIndex on %1$s(tag)', App::THREAD_TAG_TABLE))));
+		Util::createTableIfNotExists($db, self::$threadTagSchema, App::THREAD_TAG_TABLE, array
+		(
+			App::THREAD_TAG_TABLE . "TagIndex" => array("tag")
+		));
 	}
 	
 	/**

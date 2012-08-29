@@ -5,28 +5,28 @@ class Thread
 	
 	static $threadSchema = array
 	(
-		"id" => "integer primary key not null",
+		"id" => "bigint primary key not null",
 		"subject" => "integer primary key not null",
 		
-		"body" => "text",
-		"afterword" => "text"
+		"body" => "mediumtext",
+		"afterword" => "mediumtext"
 	);
 	static $threadStyleSchemaVersion = 2;
 	static $threadStyleSchema = array
 	(
-		"id" => "integer primary key not null",
+		"id" => "bigint primary key not null",
 
 		"convertLineBreak" => "bit",
-		"foreground" => "text",
-		"background" => "text",
-		"backgroundImage" => "text",
-		"border" => "text"
+		"foreground" => "varchar(127)",
+		"background" => "varchar(127)",
+		"backgroundImage" => "varchar(512)",
+		"border" => "varchar(127)"
 	);
 	static $threadPasswordSchema = array
 	(
-		"id" => "integer primary key not null",
+		"id" => "bigint primary key not null",
 	
-		"hash" => "text"
+		"hash" => "varchar(512)"
 	);
 	
 	/**
@@ -273,7 +273,7 @@ class Thread
 	{
 		if (intval(Meta::get($db, App::THREAD_STYLE_TABLE, "1")) < self::$threadStyleSchemaVersion &&
 			Util::hasTable($db, App::THREAD_STYLE_TABLE))
-			Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column border text', App::THREAD_STYLE_TABLE))));
+			Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column border varchar(127)', App::THREAD_STYLE_TABLE))));
 		
 		Util::createTableIfNotExists($db, self::$threadSchema, App::THREAD_TABLE);
 		Util::createTableIfNotExists($db, self::$threadStyleSchema, App::THREAD_STYLE_TABLE);

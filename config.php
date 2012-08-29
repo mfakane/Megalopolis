@@ -75,7 +75,11 @@ $config->registerBodyToSearchIndex = true;
 // データストアの種類 (特定値)
 // - new SQLiteDataStore()			SQLite を使用して、ファイルにデータを保存します。デフォルトでは store/ ディレクトリに保存されます。
 // - new SQLiteDataStore("foo/")	SQLite を使用して、ファイルにデータを保存します。この場合 foo/ ディレクトリに保存されます。
+// - new MySQLDataStore(...)		MySQL を使用して、データベースにデータを保存します。詳細については以下の例を参照してください。
 $config->dataStore = new SQLiteDataStore();
+// MySQL を使用する場合は、以下のいずれかの形式に設定してください
+// - new MySQLDataStore("データベース名", array("ホスト名", 3306), "ユーザ名", "パスワード");
+// - new MySQLDataStore("データベース名", "UNIX ソケットパス", "ユーザ名", "パスワード");
 
 /*
  * 評価に関する設定

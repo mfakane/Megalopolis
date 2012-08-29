@@ -7,8 +7,8 @@ class Meta
 	static $meta = null;
 	static $metaTableSchema = array
 	(
-		"name" => "text primary key not null",
-		"value" => "text"
+		"name" => "varchar(255) primary key not null",
+		"value" => "varchar(255)"
 	);
 	
 	/**
@@ -36,7 +36,7 @@ class Meta
 	{
 		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf
 		('
-			insert or replace into %s
+			replace into %s
 			(
 				name,
 				value

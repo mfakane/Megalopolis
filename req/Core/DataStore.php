@@ -71,7 +71,7 @@ abstract class DataStore
 	/**
 	 * @param string $name
 	 */
-	function createTableIfNotExists(PDO $db, array $schema, $name)
+	function createTableIfNotExists(PDO $db, array $schema, $name, array $index = null)
 	{
 		$arr = array_map(create_function('$x, $y', 'return "{$x} {$y}";'), array_keys($schema), array_values($schema));
 
@@ -87,6 +87,10 @@ abstract class DataStore
 			implode(", ", array_map(create_function('$_', 'return array_shift(explode(" ", $_));'), array_filter($arr, create_function('$_', 'return mb_strstr($_, "primary key");'))))
 		), array(",
 				primary key()" => "")))));
+		
+		if (is_array($index))
+			foreach ($index as $k => $v)
+				$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf('create index if not exists %s on %s(%s)', $k, $name, is_array($v) ? implode(", ", $v) : $v))));
 	}
 	
 	/**
@@ -123,7 +127,7 @@ abstract class DataStore
 			$type = explode(" ", $v, 2);
 			$type = $type[0];
 			
-			if ($type == "integer")
+			if (strpos($type, "int") !== false)
 				$type = PDO::PARAM_INT;
 			else if ($type == "bit")
 				$type = PDO::PARAM_BOOL;
@@ -197,6 +201,129 @@ class SQLiteDataStore extends DataStore
 		$this->executeStatement($st, array($name));
 		
 		return count($st->fetchAll()) > 0;
+	}
+}
+
+class MySQLDataStore extends DataStore
+{
+	/**
+	 * @var string
+	 */
+	private $host;
+	/**
+	 * @var int
+	 */
+	private $port;
+	/**
+	 * @var string
+	 */
+	private $databaseName;
+	/**
+	 * @var string
+	 */
+	private $unixSocket;
+	/**
+	 * @var string
+	 */
+	private $userName;
+	/**
+	 * @var string
+	 */
+	private $password;
+	
+	/**
+	 * @param string $databaseName
+	 * @param string $userName
+	 * @param string $password
+	 */
+	function __construct($databaseName, $hostAndPortOrUnixSocket, $userName, $password)
+	{
+		App::precondition(extension_loaded("pdo_mysql"), "PDO MySQL");
+		
+		$this->databaseName = $databaseName;
+		
+		if (is_array($hostAndPortOrUnixSocket))
+			list($this->host, $this->port) = $hostAndPortOrUnixSocket;
+		else
+			$this->unixSocket = $hostAndPortOrUnixSocket;
+		
+		$this->userName = $userName;
+		$this->password = $password;
+	}
+	
+	/**
+	 * @param string $name
+	 * @param bool $beginTransaction [optional]
+	 * @return PDO
+	 */
+	function open($name = "data", $beginTransaction = true)
+	{
+		$db = new PDO
+		(
+			sprintf("mysql:%s;dbname=%s;charset=utf8", is_null($this->unixSocket) ? "host={$this->host};port={$this->port}" : "unixsocket={$this->unixSocket}", $this->databaseName),
+			$this->userName,
+			$this->password,
+			array(PDO::MYSQL_ATTR_INIT_COMMAND => "set names utf8")
+		);
+		
+		if ($beginTransaction)
+			$db->beginTransaction();
+		
+		if ($name == App::INDEX_DATABASE)
+			SearchIndex::ensureTable($db);
+		else
+		{
+			Meta::ensureTable($db);
+			Board::ensureTable($db);
+		}
+		
+		return $db;
+	}
+	
+	/**
+	 * @param bool $vacuum [optional]
+	 * @param bool $commitTransaction [optional]
+	 */
+	function close(PDO &$db, $vacuum = false, $commitTransaction = true)
+	{
+		if ($commitTransaction)
+			$db->commit();
+		
+		$db = null;
+	}
+	
+	/**
+	 * @param string $name
+	 */
+	function hasTable(PDO $db, $name)
+	{
+		$st = $this->ensureStatement($db, $db->prepare("show tables like ?"));
+		$this->executeStatement($st, array($name));
+		
+		return count($st->fetchAll()) > 0;
+	}
+	
+	/**
+	 * @param string $name
+	 */
+	function createTableIfNotExists(PDO $db, array $schema, $name, array $index = null)
+	{
+		$arr = array_map(create_function('$x, $y', 'return "{$x} {$y}";'), array_keys($schema), array_values($schema));
+
+		$this->executeStatement($this->ensureStatement($db, $db->prepare(strtr(sprintf
+		("
+			create table if not exists %s
+			(
+				%s,
+				primary key(%s)%s
+			)
+			default character set utf8",
+			$name,
+			implode(", ", array_map(create_function('$_', 'return strtr($_, array(" primary key" => ""));'), $arr)),
+			implode(", ", array_map(create_function('$_', 'return array_shift(explode(" ", $_));'), array_filter($arr, create_function('$_', 'return mb_strstr($_, "primary key");')))),
+			is_array($index) ? ", key " . implode(", key ", array_map(create_function('$x, $y', 'return "{$x}(" . (is_array($y) ? implode(", ", $y) : $y) . ")";'), array_keys($index), array_values($index))) : ""
+		), array(",
+				primary key()" => "")))));
 	}
 }
 ?>

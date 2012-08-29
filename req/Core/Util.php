@@ -181,9 +181,9 @@ class Util
 	/**
 	 * @param string $name
 	 */
-	static function createTableIfNotExists(PDO $db, array $schema, $name)
+	static function createTableIfNotExists(PDO $db, array $schema, $name, array $index = null)
 	{
-		return Configuration::$instance->dataStore->createTableIfNotExists($db, $schema, $name);
+		return Configuration::$instance->dataStore->createTableIfNotExists($db, $schema, $name, $index);
 	}
 	
 	/**
