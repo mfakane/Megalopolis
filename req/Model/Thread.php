@@ -271,15 +271,14 @@ class Thread
 	
 	static function ensureTable(PDO $db)
 	{
+		if (intval(Meta::get($db, App::THREAD_STYLE_TABLE, "1")) < self::$threadStyleSchemaVersion &&
+			Util::hasTable($db, App::THREAD_STYLE_TABLE))
+			Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column border text', App::THREAD_STYLE_TABLE))));
+		
 		Util::createTableIfNotExists($db, self::$threadSchema, App::THREAD_TABLE);
 		Util::createTableIfNotExists($db, self::$threadStyleSchema, App::THREAD_STYLE_TABLE);
 		Util::createTableIfNotExists($db, self::$threadPasswordSchema, App::THREAD_PASSWORD_TABLE);
-		
-		if (intval(Meta::get($db, App::THREAD_STYLE_TABLE, "1")) < self::$threadStyleSchemaVersion)
-		{
-			Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column border text', App::THREAD_STYLE_TABLE))));
-			Meta::set($db, App::THREAD_STYLE_TABLE, strval(self::$threadStyleSchemaVersion));
-		}
+		Meta::set($db, App::THREAD_STYLE_TABLE, strval(self::$threadStyleSchemaVersion));
 	}
 	
 	/**
