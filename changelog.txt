@@ -1,4 +1,35 @@
-﻿2012-08-21 COAH96KoxU <queue glasscore.net>
+﻿2012-08-30 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 7
+	* req/Visualizer/Read/Index.php: メールとリンクの間に改行を追加
+	* style/alt/horizontalIcon.png,
+	  style/alt/minusFontIcon.png,
+	  style/alt/plusFontIcon.png,
+	  style/alt/style.css,
+	  style/alt/verticalIcon.png: 本文枠色およびアイコン色の変更
+	* req/Model/ThreadEntry.php: convertOnDemand = true の時、検索結果に Megalith ログと Megalopolis ログ両方に一致するものが含まれるとき検索結果の件数が両方カウントされるのを修正
+	* req/Model/ThreadEntry.php: 検索結果が 0 件の時エラーが発生するのを修正
+	* config.php,
+	  req/Core/DataStore.php,
+	  req/Core/Util.php,
+	  req/Model/Comment.php,
+	  req/Model/Evaluation.php,
+	  req/Model/Meta.php,
+	  req/Model/SearchIndex.php,
+	  req/Model/Thread.php,
+	  req/Model/ThreadEntry.php: MySQL への対応
+	* config.php,
+	  req/App.php,
+	  req/Core/Configuration.php,
+	  req/Core/DataStore.php,
+	  req/Core/Util.php: データストアを変更可能に
+	* req/Library/cssparser.php: コンストラクタの名称修正
+	* req/Model/Thread.php: データ新規作成時にテーブル定義に失敗するのを修正
+	* req/Handler/Util.php: 使用していないハンドラの削除
+	* req/Visualizer/Read/Index.php: メールおよびリンクの文字列をアドレスに変更
+	* req/Handler/Index.php: 検索に JSON 出力を追加
+
+2012-08-21 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 6
 	* style/horizontalIcon.png,
