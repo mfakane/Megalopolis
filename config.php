@@ -69,6 +69,15 @@ $config->denyWrite = array
 $config->registerBodyToSearchIndex = true;
 
 /*
+ * データストアに関する設定
+ */
+ 
+// データストアの種類 (特定値)
+// - new SQLiteDataStore()			SQLite を使用して、ファイルにデータを保存します。デフォルトでは store/ ディレクトリに保存されます。
+// - new SQLiteDataStore("foo/")	SQLite を使用して、ファイルにデータを保存します。この場合 foo/ ディレクトリに保存されます。
+$config->dataStore = new SQLiteDataStore();
+
+/*
  * 評価に関する設定
  */
 

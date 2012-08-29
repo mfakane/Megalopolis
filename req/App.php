@@ -35,7 +35,6 @@ class App
 			self::precondition(version_compare(PHP_VERSION, "5.2.5", ">="), "PHP 5.2.5");
 			self::precondition(extension_loaded("mbstring"), "mbstring");
 			self::precondition(extension_loaded("pdo"), "PDO");
-			self::precondition(extension_loaded("pdo_sqlite"), "PDO SQLite");
 			self::precondition(in_array(Util::HASH_ALGORITHM, hash_algos()), "hash_algos() " . Util::HASH_ALGORITHM);
 			
 			mb_internal_encoding("UTF-8");
@@ -222,20 +221,7 @@ class App
 	 */
 	static function openDB($name = "data", $beginTransaction = true)
 	{
-		$db = new PDO(sprintf("sqlite:%s%s.sqlite", DATA_DIR, $name));
-		
-		if ($beginTransaction)
-			$db->beginTransaction();
-		
-		if ($name == self::INDEX_DATABASE)
-			SearchIndex::ensureTable($db);
-		else
-		{
-			Meta::ensureTable($db);
-			Board::ensureTable($db);
-		}
-		
-		return $db;
+		return Configuration::$instance->dataStore->open($name, $beginTransaction);
 	}
 	
 	/**
@@ -244,13 +230,7 @@ class App
 	 */
 	static function closeDB(PDO &$db, $vacuum = false, $commitTransaction = true)
 	{
-		if ($commitTransaction)
-			$db->commit();
-		
-		if ($vacuum)
-			$db->exec("vacuum");
-		
-		$db = null;
+		return Configuration::$instance->dataStore->close($db, $vacuum, $commitTransaction);
 	}
 }
 
@@ -269,6 +249,7 @@ App::load(array
 	CORE_DIR . "Auth",
 	CORE_DIR . "Configuration",
 	CORE_DIR . "Cookie",
+	CORE_DIR . "DataStore",
 	CORE_DIR . "Handler",
 	CORE_DIR . "Visualizer",
 	MODEL_DIR . "Board",

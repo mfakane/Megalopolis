@@ -37,6 +37,11 @@ class Configuration
 	public $denyRead = array();
 	public $denyWrite = array();
 	public $registerBodyToSearchIndex = true;
+
+	/**
+	 * @var DataStore
+	 */
+	public $dataStore;
 	
 	public $useComments = true;
 	public $pointMap = array();
@@ -219,6 +224,11 @@ class Configuration
 	{
 		return $this->usePoints()
 			|| $this->useCommentPoints();
+	}
+	
+	function __construct()
+	{
+		$this->dataStore = new SQLiteDataStore();
 	}
 }
 ?>
