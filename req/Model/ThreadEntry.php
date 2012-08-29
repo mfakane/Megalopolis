@@ -820,7 +820,7 @@ class ThreadEntry
 		
 		$where = array
 		(
-			!is_null($ids) ? App::THREAD_ENTRY_TABLE . ".id in (" . implode(", ", $ids) . ")" : null,
+			!is_null($ids) ? App::THREAD_ENTRY_TABLE . ".id in (" . ($ids ? implode(", ", $ids) : -1) . ")" : null,
 			isset($query["eval"]) && $query["eval"] ? "evaluationCount between {$query['eval'][0]} and {$query['eval'][1]}" : null,
 			isset($query["points"]) && $query["points"] ? "points between {$query['points'][0]} and {$query['points'][1]}" : null,
 			isset($query["dateTime"]) && $query["dateTime"] ? "dateTime between {$query['dateTime'][0]} and {$query['dateTime'][1]}" : null
