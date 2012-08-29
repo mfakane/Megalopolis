@@ -176,6 +176,9 @@ Visualizer::doctype();
 							<?if (!Util::isEmpty($h->entry->mail)): ?>
 								<a href="mailto:<?+$h->entry->mail ?>"><?+$h->entry->mail ?></a>
 							<?endif ?>
+							<?if (!Util::isEmpty($h->entry->mail) && !Util::isEmpty($h->entry->link)): ?>
+								<br />
+							<?endif ?>
 							<?if (!Util::isEmpty($h->entry->link)): ?>
 								<a href="<?+$h->entry->link ?>"><?+$h->entry->link ?></a>
 							<?endif ?>
