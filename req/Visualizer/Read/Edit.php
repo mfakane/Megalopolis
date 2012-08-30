@@ -54,7 +54,7 @@ Visualizer::doctype();
 			<?endif ?>
 			<hr />
 			<?if ($c->foregroundEnabled): ?>
-				<label for="foreground">文字色</label><input type="color" name="foreground" id="foreground" onchange="updateForeground()" value="<?+$h->thread->foreground ?>" />
+				<label for="foreground">文字色</label><input type="color" name="foreground" id="foreground" onchange="megalopolis.edit.updateForeground()" value="<?+$h->thread->foreground ?>" />
 				<?if ($c->foregroundMap): ?>
 					<script>
 						megalopolis.edit.foregroundPalette([<?=implode(", ", array_map(create_function('$_', 'return "\'" . Visualizer::escapeOutput($_) . "\'";'), $c->foregroundMap)) ?>]);
@@ -64,7 +64,7 @@ Visualizer::doctype();
 				<?endif ?>
 			<?endif ?>
 			<?if ($c->backgroundEnabled): ?>
-				<label for="background">背景色</label><input type="color" name="background" id="background" onchange="updateBackground()" value="<?+$h->thread->background ?>" />
+				<label for="background">背景色</label><input type="color" name="background" id="background" onchange="megalopolis.edit.updateBackground()" value="<?+$h->thread->background ?>" />
 				<?if ($c->backgroundMap): ?>
 					<script>
 						megalopolis.edit.backgroundPalette([<?=implode(", ", array_map(create_function('$_', 'return "\'" . Visualizer::escapeOutput($_) . "\'";'), $c->backgroundMap)) ?>]);
@@ -74,7 +74,7 @@ Visualizer::doctype();
 				<?endif ?>
 			<?endif ?>
 			<?if ($c->backgroundImageEnabled): ?>
-				<label for="backgroundImage">背景画像</label><input type="url" name="backgroundImage" id="backgroundImage" onchange="updateBackgroundImage()" value="<?+$h->thread->backgroundImage ?>" />
+				<label for="backgroundImage">背景画像</label><input type="url" name="backgroundImage" id="backgroundImage" onchange="megalopolis.edit.updateBackgroundImage()" value="<?+$h->thread->backgroundImage ?>" />
 				<?if ($c->backgroundImageMap): ?>
 					<script>
 						megalopolis.edit.backgroundImagePalette([<?=implode(", ", array_map(create_function('$_', 'return "\'" . Visualizer::escapeOutput($_) . "\'";'), $c->backgroundImageMap)) ?>]);
@@ -84,7 +84,7 @@ Visualizer::doctype();
 				<?endif ?>
 			<?endif ?>
 			<?if ($c->borderEnabled): ?>
-				<label for="border">枠色</label><input type="color" name="border" id="border" onchange="updateBorder()" value="<?+$h->thread->border ?>" />
+				<label for="border">枠色</label><input type="color" name="border" id="border" onchange="megalopolis.edit.updateBorder()" value="<?+$h->thread->border ?>" />
 				<?if ($c->borderMap): ?>
 					<script>
 						megalopolis.edit.borderPalette([<?=implode(", ", array_map(create_function('$_', 'return "\'" . Visualizer::escapeOutput($_) . "\'";'), $c->borderMap)) ?>]);
