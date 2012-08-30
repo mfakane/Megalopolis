@@ -1,30 +1,32 @@
 megalopolis.edit =
 {
 	paletteID: 0,
-	setBodyBoxStyle: function(boxName, cssProperty, value)
+	setBodyBoxStyle: function(boxName, cssProperty, value, defaultValue)
 	{
 		var t = $("#" + boxName);
 		
-		$("#body").css(cssProperty,
-			typeof value == "string"
-			? t.val(value).val()
-			: t.val());
+		if (typeof value == "string")
+			t.val(value);
+		else
+			value = t.val();
+		
+		$("#body").css(cssProperty, value == "" ? defaultValue : value);
 	},
 	updateForeground: function(value)
 	{
-		megalopolis.edit.setBodyBoxStyle("foreground", "color", value);
+		megalopolis.edit.setBodyBoxStyle("foreground", "color", value, "#000000");
 	},
 	updateBackground: function(value)
 	{
-		megalopolis.edit.setBodyBoxStyle("background", "backgroundColor", value);
+		megalopolis.edit.setBodyBoxStyle("background", "backgroundColor", value, "#ffffff");
 	},
 	updateBackgroundImage: function(value)
 	{
-		megalopolis.edit.setBodyBoxStyle("backgroundImage", "backgroundImage", value);
+		megalopolis.edit.setBodyBoxStyle("backgroundImage", "backgroundImage", value, "none");
 	},
 	updateBorder: function(value)
 	{
-		megalopolis.edit.setBodyBoxStyle("border", "borderColor", value);
+		megalopolis.edit.setBodyBoxStyle("border", "borderColor", value, "#999999");
 	},
 	palette: function(values, func, cssProperty)
 	{
