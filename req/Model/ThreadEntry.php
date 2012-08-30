@@ -71,6 +71,22 @@ class ThreadEntry
 			$s = Board::getLatestSubject($db);
 			$this->subject = max($s, 1);
 			
+			while (true)
+			{
+				$st = Util::ensureStatement($db, $db->prepare(sprintf
+				('
+					select count(id) from %s
+					where id = ?',
+					App::THREAD_ENTRY_TABLE
+				)));
+				Util::executeStatement($st, array($this->id));
+				
+				if (array_pop($st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0)) > 0)
+					$this->id++;
+				else
+					break;
+			}
+			
 			if ($s > 0 &&
 				count(ThreadEntry::getEntriesBySubject($db, $s)) >= Configuration::$instance->subjectSplitting)
 				Board::$latestSubject = ++$this->subject;
