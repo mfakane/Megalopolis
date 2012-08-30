@@ -1,4 +1,17 @@
-﻿2012-08-30 COAH96KoxU <queue glasscore.net>
+﻿2012-08-31 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 8
+	* req/Visualizer/Read/Edit.js: 文字色や背景色などをパレットからではなく直接変更した際に編集画面に反映されないのを修正
+	* script/Read/Edit.js: 背景や文字色などを指定しないとしたときに背景などが黒くなるのを修正
+	* req/Core/Util.php: 改行変換フラグのない古い Megalith ログに対応
+	* req/Model/ThreadEntry.php: 作品番号の衝突防止を追加
+	* req/Handler/Read.php,
+	  req/Model/Thread.php,
+	  req/Visualizer/Read/Edit.php,
+	  req/Visualizer/Read/Index.php,
+	  script/Read/Index.js: 既定の横/縦書き表示状態を作品が指定できるように
+
+2012-08-30 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 7
 	* req/Visualizer/Read/Index.php: メールとリンクの間に改行を追加
