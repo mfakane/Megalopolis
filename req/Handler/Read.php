@@ -600,6 +600,7 @@ class ReadHandler extends Handler
 		if (!is_null(self::param("background")))		$thread->background = self::param("background") == "#000000" ? null : self::param("background");
 		if (!is_null(self::param("backgroundImage")))	$thread->backgroundImage = self::param("backgroundImage");
 		if (!is_null(self::param("border")))			$thread->border = self::param("border") == "#000000" ? null : self::param("border");
+		if (!is_null(self::param("writingMode")))		$thread->writingMode = intval(self::param("writingMode"));
 		if (!is_null(self::param("convertLineBreak")))	$thread->convertLineBreak = self::param("convertLineBreak") == "true";
 		
 		$entry->pageCount = $thread->pageCount();

@@ -156,7 +156,7 @@ Visualizer::doctype();
 			<?endif ?>
 			<div id="content">
 				<script>
-					megalopolis.read.loadOptions('<?+Visualizer::$basePath ?>style/<?+$c->skin && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null ?>');
+					megalopolis.read.loadOptions('<?+Visualizer::$basePath ?>style/<?+$c->skin && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null ?>', <?+intval($h->thread->writingMode) ?>);
 				</script>
 				<? Visualizer::convertedBody($h->thread, $h->page) ?>
 			</div>

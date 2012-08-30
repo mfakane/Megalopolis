@@ -1,6 +1,7 @@
 megalopolis.read =
 {
 	taketori: null,
+	isVertical: false,
 	evaluate: function(point)
 	{
 		var form = $("#evaluateform");
@@ -251,7 +252,7 @@ megalopolis.read =
 		else
 			callback();
 	},
-	loadOptions: function(basePath)
+	loadOptions: function(basePath, writingMode)
 	{
 		var content = $("#body");
 		var cookie = megalopolis.mainCookie("FontSize");
@@ -310,13 +311,14 @@ megalopolis.read =
 				},
 				{
 					title: "文字方向の切り替え",
-					image: megalopolis.mainCookie("Vertical") == "yes" ? "horizontalIcon.png" : "verticalIcon.png",
+					image: writingMode == 0 && megalopolis.mainCookie("Vertical") == "yes" || writingMode == 2 ? "horizontalIcon.png" : "verticalIcon.png",
 					separator: true,
 					click: function(sender)
-					{
-						var rt = megalopolis.mainCookie("Vertical", megalopolis.mainCookie("Vertical") == "yes" ? "no" : "yes");
+					{	
+						var rt = megalopolis.mainCookie("Vertical", megalopolis.read.isVertical ? "no" : "yes");
 						
 						megalopolis.read.toggleVertical();
+						
 						$("img", sender).attr("src", basePath + (rt == "yes" ? "horizontalIcon.png" : "verticalIcon.png"));
 					}
 				}
@@ -348,8 +350,8 @@ megalopolis.read =
 			}))
 			.insertBefore(content);
 		
-		if (megalopolis.mainCookie("Vertical") == "yes")
-			megalopolis.read.toggleVertical(true);
+		if (writingMode == 0 && megalopolis.mainCookie("Vertical") == "yes" || writingMode == 2)
+			megalopolis.read.toggleVertical(true, writingMode == 2 ? true : undefined);
 	},
 	loadForms: function(defaultEvaluator)
 	{
@@ -389,26 +391,32 @@ megalopolis.read =
 			? location.hash.substring(1, location.hash.length - "Headding".length)
 			: forms[defaultEvaluator]);
 	},
-	toggleVertical: function(onLoad)
+	toggleVertical: function(onLoad, setVertical)
 	{
-		if (megalopolis.mainCookie("Vertical") == "yes")
-			if (this.taketori)
+		if (setVertical == undefined)
+			setVertical = megalopolis.mainCookie("Vertical") == "yes";
+		
+		if (this.isVertical != setVertical)
+			if (setVertical)
+				if (this.taketori)
+					this.taketori.toggleAll();
+				else if (!$.browser.msie && ($.browser.mozilla || navigator.platform.indexOf("Win") == -1))
+					this.taketori = new Taketori()
+						.set
+						({
+							fontFamily: "sans-serif",
+							height: "520px"
+						})
+						.element("#contentWrapper")
+						.toVertical(onLoad ? true : false);
+				else
+					$("#body").addClass("vertical");
+			else if (this.taketori)
 				this.taketori.toggleAll();
-			else if (!$.browser.msie && ($.browser.mozilla || navigator.platform.indexOf("Win") == -1))
-				this.taketori = new Taketori()
-					.set
-					({
-						fontFamily: "sans-serif",
-						height: "520px"
-					})
-					.element("#contentWrapper")
-					.toVertical(onLoad ? true : false);
 			else
-				$("#body").addClass("vertical");
-		else if (this.taketori)
-			this.taketori.toggleAll();
-		else
-			$("#body").removeClass("vertical");
+				$("#body").removeClass("vertical");
+		
+		this.isVertical = setVertical;
 	}
 };
 

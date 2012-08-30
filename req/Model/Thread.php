@@ -2,6 +2,9 @@
 class Thread
 {
 	const REGEX_SPLIT_PAGE = "@<split\s*?/>@";
+	const WRITING_MODE_NOT_SPECIFIED = 0;
+	const WRITING_MODE_HORIZONTAL = 1;
+	const WRITING_MODE_VERTICAL = 2;
 	
 	static $threadSchema = array
 	(
@@ -11,7 +14,7 @@ class Thread
 		"body" => "mediumtext",
 		"afterword" => "mediumtext"
 	);
-	static $threadStyleSchemaVersion = 2;
+	static $threadStyleSchemaVersion = 3;
 	static $threadStyleSchema = array
 	(
 		"id" => "bigint primary key not null",
@@ -20,7 +23,8 @@ class Thread
 		"foreground" => "varchar(127)",
 		"background" => "varchar(127)",
 		"backgroundImage" => "varchar(512)",
-		"border" => "varchar(127)"
+		"border" => "varchar(127)",
+		"writingMode" => "tinyint"
 	);
 	static $threadPasswordSchema = array
 	(
@@ -45,6 +49,7 @@ class Thread
 	public $background = null;
 	public $backgroundImage = null;
 	public $border = null;
+	public $writingMode = self::WRITING_MODE_NOT_SPECIFIED;
 	
 	public $hash = null;
 	
@@ -76,6 +81,7 @@ class Thread
 			"background" => $this->background,
 			"backgroundImage" => $this->backgroundImage,
 			"border" => $this->border,
+			"writingMode" => intval($this->writingMode),
 			"nonCommentEvaluation" => array_reduce($this->nonCommentEvaluations, create_function('$x, $y', 'return $x + $y->point;'), 0),
 			"comments" => array_map(create_function('$_', 'return $_->toArray();'), $this->comments)
 		);
@@ -271,9 +277,16 @@ class Thread
 	
 	static function ensureTable(PDO $db)
 	{
-		if (intval(Meta::get($db, App::THREAD_STYLE_TABLE, "1")) < self::$threadStyleSchemaVersion &&
-			Util::hasTable($db, App::THREAD_STYLE_TABLE))
-			Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column border varchar(127)', App::THREAD_STYLE_TABLE))));
+		if (Util::hasTable($db, App::THREAD_STYLE_TABLE))
+		{
+			$currentThreadStyleSchemaVersion = intval(Meta::get($db, App::THREAD_STYLE_TABLE, "1"));
+			
+			if ($currentThreadStyleSchemaVersion < 2)
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column border varchar(127)', App::THREAD_STYLE_TABLE))));
+			
+			if ($currentThreadStyleSchemaVersion < 3)
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column writingMode tinyint', App::THREAD_STYLE_TABLE))));
+		}
 		
 		Util::createTableIfNotExists($db, self::$threadSchema, App::THREAD_TABLE);
 		Util::createTableIfNotExists($db, self::$threadStyleSchema, App::THREAD_STYLE_TABLE);
