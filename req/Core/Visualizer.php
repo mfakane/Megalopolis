@@ -457,7 +457,7 @@ class Visualizer
 	static function escapeOutput($s)
 	{
 		if (!is_null($s))
-			return htmlspecialchars($s, ENT_QUOTES);
+			return htmlspecialchars($s, ENT_QUOTES, "UTF-8");
 	}
 	
 	private static function ensureHtml($str)
