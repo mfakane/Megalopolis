@@ -355,6 +355,9 @@ megalopolis.read =
 	},
 	loadForms: function(defaultEvaluator)
 	{
+		if (defaultEvaluator == -1)
+			return;
+		
 		var forms = ["evaluateform", "commentform"];
 		
 		function switchForm(id)

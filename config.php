@@ -299,6 +299,7 @@ $config->updatePeriod = 3;
 $config->showHeaderInsideBorder = false;
 
 // コメントおよび簡易評価両方が有効な場合の既定の評価方法 (特定値)
+// - Configuration::EVAL_BOTH		タブにせず両方表示します。
 // - Configuration::EVAL_POINT		簡易評価タブを既定にします。
 // - Configuration::EVAL_COMMENT	コメントタブを既定にします。
 $config->defaultEvaluator = Configuration::EVAL_COMMENT;

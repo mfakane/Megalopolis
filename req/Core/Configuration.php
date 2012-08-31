@@ -23,6 +23,7 @@ class Configuration
 	const ON_SUBJECT = "Subject";
 	const LIST_DOUBLE = 0;
 	const LIST_SINGLE = 1;
+	const EVAL_BOTH = -1;
 	const EVAL_POINT = 0;
 	const EVAL_COMMENT = 1;
 	
