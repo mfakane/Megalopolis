@@ -137,7 +137,7 @@ Visualizer::doctype();
 			</footer>
 		</div>
 	<?elseif ($m == "p"): ?>
-		<form id="rpost" data-role="page" class="read fulllist" action="<?+Visualizer::absoluteHref($h->subject, $h->entry->id, "comment") ?>" action="post">
+		<form id="rpost" data-role="page" class="read fulllist" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::absoluteHref($h->subject, $h->entry->id, "comment")) ?>" action="post">
 			<script>
 				megalopolis.resetPage("read", "rpost");
 				$("#rpost").one("pageshow", function() { megalopolis.read.adjustTextBox('<?=Visualizer::absoluteHref($h->subject, $h->entry->id, "c") ?>'); });

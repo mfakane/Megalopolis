@@ -43,7 +43,7 @@ Visualizer::doctype();
 			<?endforeach ?>
 		</ul>
 	<?endif ?>
-	<form action="" method="post">
+	<form action="<?+Util::withMobileUniqueIDRequestSuffix() ?>" method="post">
 		<section>
 			<label for="name">名前</label><input type="text" name="name" id="name" value="<?+$h->entry->name ?>"<?=$c->requireName[Configuration::ON_ENTRY] ? 'required="required"' : null ?> /><br />
 			<label for="mail">メール</label><input type="email" name="mail" id="mail" value="<?+$h->entry->mail ?>" /><br />
@@ -147,7 +147,7 @@ Visualizer::doctype();
 		</section>
 	</form>
 	<?if (App::$actionName == "edit"): ?>
-		<form action="unpost" method="post" id="unpostForm">
+		<form action="<?+Util::withMobileUniqueIDRequestSuffix("unpost") ?>" method="post" id="unpostForm">
 			<section>
 				<h2>作品の削除</h2>
 				<label><input type="checkbox" name="token" id="unpostCheck" value="<?+$_SESSION[Auth::SESSION_TOKEN] ?>" />作品を削除する</label>

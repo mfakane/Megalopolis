@@ -205,9 +205,9 @@ Visualizer::doctype();
 		<section class="notify info">
 			<ul class="buttons">
 				<li>
-					<form action="<? Visualizer::converted(App::$actionName == "new"
+					<form action="<? Visualizer::converted(Util::withMobileUniqueIDRequestSuffix(App::$actionName == "new"
 						? Visualizer::actionHref(App::$actionName)
-						: Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName)) ?>" method="post">
+						: Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName))) ?>" method="post">
 						<div>
 							<button type="submit">
 								<img src="<?+Visualizer::actionHref("style", "backButtonIcon.png") ?>" />修正
@@ -217,9 +217,9 @@ Visualizer::doctype();
 					</form>
 				</li>
 				<li>
-					<form action="<? Visualizer::converted(App::$actionName == "new"
+					<form action="<? Visualizer::converted(Util::withMobileUniqueIDRequestSuffix(App::$actionName == "new"
 						? Visualizer::actionHref("post")
-						: Visualizer::actionHref($h->subject, $h->entry->id, "post")) ?>" method="post">
+						: Visualizer::actionHref($h->subject, $h->entry->id, "post"))) ?>" method="post">
 						<div>
 							<button type="submit">
 								送信<img src="<?+Visualizer::actionHref("style", "sendButtonIcon.png") ?>" class="last" />
@@ -235,7 +235,7 @@ Visualizer::doctype();
 		<div id="links"></div>
 		<?if ($c->usePoints()): ?>
 			<a id="evaluateformHeadding" href="#evaluateform" class="first">簡易評価</a>
-			<form id="evaluateform" action="<?+Visualizer::actionHref($h->subject, $h->entry->id, "evaluate") ?>#evaluateformHeadding" method="post">
+			<form id="evaluateform" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "evaluate")) ?>#evaluateformHeadding" method="post">
 				<?if ($d && App::$actionName == "evaluate"): ?>
 					<ul class="notify warning">
 						<?foreach (Visualizer::$data as $i): ?>
@@ -264,7 +264,7 @@ Visualizer::doctype();
 		<?endif ?>
 		<?if ($c->useComments): ?>
 			<a id="commentformHeadding" href="#commentform"<?if (!$c->usePoints()) echo 'class="first"' ?>>コメント</a>
-			<form id="commentform" action="<?+Visualizer::actionHref($h->subject, $h->entry->id, "comment") ?>#commentformHeadding" method="post">
+			<form id="commentform" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "comment")) ?>#commentformHeadding" method="post">
 				<?if ($d && App::$actionName == "comment"): ?>
 					<ul class="notify warning">
 						<?foreach (Visualizer::$data as $i): ?>

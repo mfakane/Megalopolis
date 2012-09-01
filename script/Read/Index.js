@@ -54,7 +54,7 @@ megalopolis.read =
 			$.ajax
 			({
 				type: "POST",
-				url: form.attr("action").replace(/#.*$/, "") + ".json",
+				url: form.attr("action").replace(/#.*$/, "").replace(/(\?.*)|$/, ".json$1"),
 				dataType: "json",
 				data:
 				{
@@ -143,7 +143,7 @@ megalopolis.read =
 			$.ajax
 			({
 				type: "POST",
-				url: form.attr("action").replace(/#.*$/, "") + ".json",
+				url: form.attr("action").replace(/#.*$/, "").replace(/(\?.*)|$/, ".json$1"),
 				dataType: "json",
 				data:
 				{

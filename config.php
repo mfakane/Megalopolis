@@ -48,19 +48,25 @@ $config->useBBQ = Configuration::BBQ_NONE;
 $config->denyRead = array
 (
 	// 例:
-	// "192.168.*",
-	// "*.example.com",
+	// "192.168.*",			// IP アドレス
+	// "*.example.com",		// リモートホスト
 );
 
 // 送信に対するホスト規制 (文字列一覧)
-// この一覧にあるものと IP アドレスまたはリモートホストが一致すると送信不可になります。
+// この一覧にあるものと IP アドレスまたはリモートホスト、契約者固有 ID が一致すると送信不可になります。
+// 契約者固有 ID は docomo, kddi, softbank, emobile に対応しています。
 // ワイルドカード (*, ?, [] など) も使用可能です
 $config->denyWrite = array
 (
 	// 例:
-	// "192.168.*",
-	// "*.example.com",
+	// "192.168.*",			// IP アドレス
+	// "*.example.com",		// リモートホスト
+	// "docomo:*",			// キャリア:契約者固有 ID
 );
+
+// 契約者固有 ID を通知しない携帯端末からの送信を拒否するか (true/false)
+// 契約者固有 ID は docomo, kddi, softbank, emobile に対応しています
+$config->denyWriteFromMobileWithoutID = false;
 
 // 本文も検索の対象として登録するか (true/false)
 // 投稿時に本文も検索用作品を作成するかどうかを指定します。

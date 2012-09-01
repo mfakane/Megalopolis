@@ -37,6 +37,7 @@ class Configuration
 	public $useBBQ = self::BBQ_NONE;
 	public $denyRead = array();
 	public $denyWrite = array();
+	public $denyWriteFromMobileWithoutID = false;
 	public $registerBodyToSearchIndex = true;
 
 	/**

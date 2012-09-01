@@ -78,7 +78,7 @@ $maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
 		<? Visualizer::pager($h->page, $maxCommentPage, 5, Visualizer::actionHref($h->entry->subject, $h->entry->id, "c") . "/") ?>
 	<?else: ?>
 		<?if ($c->useComments): ?>
-			<form class="content" action="<?+Visualizer::actionHref($h->subject, $h->entry->id, "comment") ?>" method="post">
+			<form class="content" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "comment")) ?>" method="post">
 				<?if ($d && App::$actionName == "comment"): ?>
 					<ul>
 						<?foreach (Visualizer::$data as $i): ?>
