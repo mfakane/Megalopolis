@@ -312,7 +312,10 @@ class ReadHandler extends Handler
 			) as $k => $v)
 				if (mb_strstr($v, $i))
 				{
-					$error[] = "{$k}に禁止ワードが含まれています";
+					if (Configuration::$instance->showDisallowedWords)
+						$error[] = "{$k}に禁止ワードが含まれています: {$i}";
+					else
+						$error[] = "{$k}に禁止ワードが含まれています";
 						
 					break;
 				}
@@ -578,7 +581,10 @@ class ReadHandler extends Handler
 			) as $k => $v)
 				if (mb_strstr($v, $i))
 				{
-					$rt[] = "{$k}に禁止ワードが含まれています";
+					if (Configuration::$instance->showDisallowedWords)
+						$rt[] = "{$k}に禁止ワードが含まれています: {$i}";
+					else
+						$rt[] = "{$k}に禁止ワードが含まれています";
 						
 					break;
 				}
