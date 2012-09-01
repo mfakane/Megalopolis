@@ -232,6 +232,9 @@ $config->disallowedWordsForName = array
 // 禁止ワードにより投稿がエラーになったとき、原因となったワードを表示するか (true/false)
 $config->showDisallowedWords = false;
 
+// 管理者ログイン時の投稿は禁止ワードが含まれていてもエラーにしない (true/false)
+$config->ignoreDisallowedWordsWhenAdmin = true;
+
 // 本文の最小サイズ (bytes)
 // 0 の場合無制限になります
 $config->minBodySize = 0;

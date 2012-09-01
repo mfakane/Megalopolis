@@ -138,6 +138,7 @@ class Configuration
 		"regex:on.*"
 	);
 	public $showDisallowedWords = false;
+	public $ignoreDisallowedWordsWhenAdmin = true;
 	public $minBodySize = 0;
 	public $maxBodySize = 0;
 	public $useSummary = true;
