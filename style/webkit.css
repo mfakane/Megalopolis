@@ -18,6 +18,11 @@ body>header form input[name="query"]::-webkit-input-placeholder
 	-webkit-transform: rotate(-90deg);
 }
 
+.edit section ul.palette
+{
+	position: relative;
+}
+
 input[type="submit"], input[type="reset"], input[type="button"], button
 {
 	-webkit-box-sizing: border-box;
@@ -46,6 +51,11 @@ textarea,
 select
 {
 	-webkit-box-sizing: content-box;
+}
+
+input[type="color"]
+{
+	margin-bottom: 4px;
 }
 
 select
