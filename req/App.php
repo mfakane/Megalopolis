@@ -130,7 +130,7 @@ class App
 			Visualizer::statusCode(is_a($ex, "ApplicationException") ? $ex->httpCode : 500);
 			Visualizer::$data = $ex;
 			
-			if (self::$handlerType == "json")
+			if (self::$handlerType == "json" || strstr(Util::getPathInfo(), ".json") == ".json")
 				Visualizer::json(array
 				(
 					"error" => $ex->getMessage()

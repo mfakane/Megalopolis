@@ -157,7 +157,7 @@ megalopolis.read =
 					
 					alert(data && data.error && $.isArray(data.error)
 						? data.error.join(" ")
-						: "不明なエラーが発生しました");
+						: data.error);
 				}
 			});
 			

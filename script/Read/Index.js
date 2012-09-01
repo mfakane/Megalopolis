@@ -109,9 +109,9 @@ megalopolis.read =
 						? $("<ul />")
 							.addClass("notify warning")
 							.append($.map(data.error, function(_) { return $("<li />").text(_)[0]; }))
-						: $("<p />")
+						: $("<ul />")
 							.addClass("notify error")
-							.text("不明なエラーが発生しました"))
+							.append($("<li />").text(data.error)))
 						.hide()
 						.prependTo(form)
 						.slideDown(250);
@@ -225,9 +225,9 @@ megalopolis.read =
 						? $("<ul />")
 							.addClass("notify warning")
 							.append($.map(data.error, function(_) { return $("<li />").text(_)[0]; }))
-						: $("<p />")
+						: $("<ul />")
 							.addClass("notify error")
-							.text("不明なエラーが発生しました"))
+							.append($("<li />").text(data.error)))
 						.hide()
 						.prependTo(form)
 						.slideDown(250);
