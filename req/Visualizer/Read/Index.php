@@ -182,6 +182,10 @@ Visualizer::doctype();
 							<?if (!Util::isEmpty($h->entry->link)): ?>
 								<a href="<?+$h->entry->link ?>"><?+$h->entry->link ?></a>
 							<?endif ?>
+							<?if ($isAdmin): ?>
+								<br />
+								<span class="host"><?+$h->entry->host ?></span>
+							<?endif ?>
 						</address>
 					<?endif ?>
 				</div>

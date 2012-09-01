@@ -66,6 +66,12 @@ function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 				<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
 					<a href="<?php Visualizer::converted(Visualizer::actionHref("author", $i->name)) ?>" class="name"><?php Visualizer::convertedName($i->name) ?></a>
 				<?php endif ?>
+				<?if ($isAdmin): ?>
+					<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
+						<br />
+					<?php endif ?>
+					<span class="host"><?php Visualizer::converted($i->host) ?></span>
+				<?endif ?>
 				<?php if ($c->showPages[Configuration::ON_SUBJECT] ||
 					  $c->showSize[Configuration::ON_SUBJECT] ||
 					  $c->showReadCount[Configuration::ON_SUBJECT] ||

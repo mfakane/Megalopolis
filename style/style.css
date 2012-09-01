@@ -418,6 +418,11 @@ ul.notify
 	text-align: right;
 }
 
+.entries article span.host
+{
+	color: #666666;
+}
+
 .entries article .update
 {
 	float: right;
@@ -1279,6 +1284,12 @@ body.read>h1
 .read #afterword address a
 {
 	font-weight: normal;
+}
+
+.read #afterword address .host
+{
+	font-weight: normal;
+	color: #666666;
 }
 
 .read #comments
