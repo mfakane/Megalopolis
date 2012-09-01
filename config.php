@@ -222,6 +222,13 @@ $config->disallowedWordsForComment = array
 	// "NG",
 );
 
+// 作品およびコメントの投稿者名における禁止ワード (文字列一覧)
+$config->disallowedWordsForName = array
+(
+	// 例:
+	// "NG",
+);
+
 // 禁止ワードにより投稿がエラーになったとき、原因となったワードを表示するか (true/false)
 $config->showDisallowedWords = false;
 

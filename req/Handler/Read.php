@@ -303,6 +303,17 @@ class ReadHandler extends Handler
 		
 		if ($point && array_filter($this->thread->evaluations, create_function('$_', 'return $_->host == $_SERVER["REMOTE_ADDR"] || $_->host == Util::getRemoteHost();')))
 			$error[] = "多重評価はできません";
+				
+		foreach (Configuration::$instance->disallowedWordsForName as $i)
+			if (mb_strstr($name, $i))
+			{
+				if (Configuration::$instance->showDisallowedWords)
+					$error[] = "名前に禁止ワードが含まれています: {$i}";
+				else
+					$error[] = "名前に禁止ワードが含まれています";
+					
+				break;
+			}
 		
 		foreach (Configuration::$instance->disallowedWordsForComment as $i)
 			foreach (array
@@ -568,6 +579,17 @@ class ReadHandler extends Handler
 		
 		if (!Util::isEmpty($thread->border) && !preg_match('/^(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}|rgba?\s*\(\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*(,\s*[0-9](\.[0-9]+)?\s*)?\))$/', $thread->border))
 			$rt[] = "枠色の指定が不正です";
+		
+		foreach (Configuration::$instance->disallowedWordsForName as $i)
+			if (mb_strstr($entry->name, $i))
+			{
+				if (Configuration::$instance->showDisallowedWords)
+					$rt[] = "名前に禁止ワードが含まれています: {$i}";
+				else
+					$rt[] = "名前に禁止ワードが含まれています";
+					
+				break;
+			}
 		
 		foreach (Configuration::$instance->disallowedWordsForEntry as $i)
 			foreach (array

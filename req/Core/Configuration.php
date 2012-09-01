@@ -95,6 +95,7 @@ class Configuration
 	public $subjectSplitting = 100;
 	public $disallowedWordsForEntry = array();
 	public $disallowedWordsForComment = array();
+	public $disallowedWordsForName = array();
 	public $disallowedTags = array
 	(
 		"style",
