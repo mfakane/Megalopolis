@@ -301,7 +301,7 @@ class ReadHandler extends Handler
 		$this->thread = self::loadThread($db, $id);
 		$this->entry = &$this->thread->entry;
 		
-		if ($point && array_filter($this->thread->evaluations, create_function('$_', 'return $_->host == $_SERVER["REMOTE_ADDR"];')))
+		if ($point && array_filter($this->thread->evaluations, create_function('$_', 'return $_->host == $_SERVER["REMOTE_ADDR"] || $_->host == Util::getRemoteHost();')))
 			$error[] = "多重評価はできません";
 		
 		foreach (Configuration::$instance->disallowedWordsForComment as $i)
@@ -411,7 +411,7 @@ class ReadHandler extends Handler
 		$this->thread = self::loadThread($db, $id);
 		$this->entry = &$this->thread->entry;
 			
-		if (array_filter($this->thread->evaluations, create_function('$_', 'return $_->host == $_SERVER["REMOTE_ADDR"];')))
+		if (array_filter($this->thread->evaluations, create_function('$_', 'return $_->host == $_SERVER["REMOTE_ADDR"] || $_->host == Util::getRemoteHost();')))
 			$error[] = "多重評価はできません";
 		
 		if ($error)
@@ -457,7 +457,7 @@ class ReadHandler extends Handler
 		
 		if (!($eval = $this->thread->getEvaluationByID($db, $evaluationID)))
 			throw new ApplicationException("指定された番号 {$evaluationID} の簡易評価は {$id} の作品に存在しません", 404);
-		else if ($eval->host != $_SERVER["REMOTE_ADDR"])
+		else if ($eval->host != $_SERVER["REMOTE_ADDR"] && $eval->host != Util::getRemoteHost())
 			throw new ApplicationException("指定された簡易評価の送信元が現在の送信元と一致しません", 403);
 		
 		$this->thread->unevaluate($db, $eval);
@@ -606,7 +606,7 @@ class ReadHandler extends Handler
 		$entry->pageCount = $thread->pageCount();
 		$entry->size = round(strlen(bin2hex(mb_convert_encoding($thread->body, "SJIS", "UTF-8"))) / 2 / 1024, 2);
 		$entry->lastUpdate = time();
-		$entry->host = $_SERVER["REMOTE_ADDR"];
+		$entry->host = Util::getRemoteHost();
 	}
 	
 	/**

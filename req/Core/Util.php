@@ -81,6 +81,14 @@ class Util
 	/**
 	 * @return string
 	 */
+	static function getRemoteHost()
+	{
+		return isset($_SERVER["REMOTE_HOST"]) && $_SERVER["REMOTE_HOST"] ? $_SERVER["REMOTE_HOST"] : gethostbyaddr($_SERVER["REMOTE_ADDR"]);
+	}
+	
+	/**
+	 * @return string
+	 */
 	static function getAbsoluteUrl($path = "")
 	{
 		$script = $_SERVER["SCRIPT_NAME"];

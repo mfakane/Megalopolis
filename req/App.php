@@ -74,7 +74,7 @@ class App
 	private static function isDenied($arr)
 	{
 		$addr = $_SERVER["REMOTE_ADDR"];
-		$host = isset($_SERVER["REMOTE_HOST"]) && $_SERVER["REMOTE_HOST"] ? $_SERVER["REMOTE_HOST"] : gethostbyaddr($addr);
+		$host = Util::getRemoteHost();
 		
 		foreach ($arr as $i)
 			if (Util::wildcard($i, $addr) ||

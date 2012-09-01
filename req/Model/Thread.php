@@ -117,7 +117,7 @@ class Thread
 		$eval = new Evaluation($db);
 		$eval->entryID = $this->id;
 		$eval->point = $point;
-		$eval->host = $_SERVER["REMOTE_ADDR"];
+		$eval->host = Util::getRemoteHost();
 		$eval->save($db);
 		$this->nonCommentEvaluations[$eval->id] = $this->evaluations[$eval->id] = $eval;
 		$this->entry->updateCount($this);
@@ -163,7 +163,7 @@ class Thread
 		$comment->mail = $mail;
 		$comment->body = $body;
 		$comment->hash = Util::hash($password);
-		$comment->host = $_SERVER["REMOTE_ADDR"];
+		$comment->host = Util::getRemoteHost();
 		
 		if ($point)
 		{
