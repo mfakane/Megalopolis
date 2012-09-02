@@ -1,5 +1,12 @@
 ﻿2012-09-03 COAH96KoxU <queue glasscore.net>
 
+	* req/App.php: release 11
+	* req/Core/Util.php: Megalith ログフォーマットに従っていないコメント行を無視するよう変更
+	* req/App.php: magic_quotes_gpc = On 時の stripslashes で配列を考慮していないのを修正
+	* req/Core/DataStore.php: データベースエラーの出力形式を変更
+
+2012-09-03 COAH96KoxU <queue glasscore.net>
+
 	* req/App.php: release 10
 	* readme.txt: Megalith 形式の URL へのアクセスに関する文を追加
 	* readme.txt: アクセス制限の推奨に関する文言の編集
