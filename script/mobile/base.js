@@ -48,6 +48,7 @@ $.extend(megalopolis,
 $(function()
 {
 	megalopolis.resizeMinHeight();
+	$.mobile.defaultPageTransition = "slide";
 	$(document).bind("orientationchange", function()
 	{
 		megalopolis.resizeMinHeight();

@@ -68,9 +68,9 @@ class Visualizer
 			<meta name="apple-mobile-web-app-capable" content="yes" />
 			<link href="<?php self::converted(self::actionHref("style", "splash.png")) ?>" rel="apple-touch-startup-image" type="image/png" />
 			<link href="<?php self::converted(self::actionHref("style", "iosIcon.png")) ?>" rel="apple-touch-icon" type="image/png" />
-			<link href="http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.min.css" rel="stylesheet" />
-			<script src="http://code.jquery.com/jquery-1.6.1.min.js"></script>
-			<script src="http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.min.js"></script>
+			<link href="http://code.jquery.com/mobile/1.1.1/jquery.mobile-1.1.1.min.css" rel="stylesheet" />
+			<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+			<script src="http://code.jquery.com/mobile/1.1.1/jquery.mobile-1.1.1.min.js"></script>
 			<link href="<?php self::converted(self::actionHref("style", "mobile", "mobile.css")) ?>" rel="stylesheet" />
 			<script src="<?php self::converted(self::actionHref("script", "base.js")) ?>"></script>
 			<script src="<?php self::converted(self::actionHref("script", "mobile", "base.js")) ?>"></script>

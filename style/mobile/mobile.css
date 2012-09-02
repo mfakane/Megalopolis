@@ -13,6 +13,12 @@ html,
 	font-family: "Segoe UI", "Meiryo", "Hiragino Kaku Gothic Pro W3", sans-serif;
 }
 
+.ui-header .ui-btn-inner, .ui-footer .ui-btn-inner, .ui-bar .ui-btn-inner, .ui-header .ui-fullsize .ui-btn-inner, .ui-footer .ui-fullsize .ui-btn-inner
+{
+	padding: .4em 8px .5em;
+	font-size: 13px;
+}
+
 .entries .ui-li .ui-btn-inner a.ui-link-inherit, .entries .ui-li-static.ui-li
 {
 	padding: 4px 32px 4px 8px;
@@ -69,6 +75,11 @@ header .ui-btn .ui-btn-inner
 	-webkit-mask-box-image: none !important;
 }
 
+.ui-btn-icon-notext .ui-btn-inner .ui-icon
+{
+	margin: 0px;
+}
+
 .ui-header .ui-icon:before, .ui-header .ui-icon:after
 {
 	display: block;
@@ -105,8 +116,8 @@ header .ui-btn[data-theme="b"] .ui-btn-inner
 
 .ui-navbar .ui-icon
 {
-	margin-top: -4px;
-	margin-left: -14px;
+	margin-top: -5px !important;
+	margin-left: -14px !important;
 	width: 29px;
 	height: 29px;
 	background-color: transparent;
@@ -209,9 +220,28 @@ header .ui-btn[data-theme="b"] .ui-btn-inner
 		to(rgba(0, 0, 0, 0.75)));
 }
 
+.ui-header .ui-btn-left
+{
+	position: absolute;
+	left: 10px;
+	top: .4em;
+}
+
+.ui-header .ui-btn-right
+{
+	position: absolute;
+	right: 10px;
+	top: .4em;
+}
+
 .ui-header .ui-btn-left, .ui-header .ui-btn-right
 {
 	margin-top: 1px;
+}
+
+.ui-navbar li .ui-btn-icon-top .ui-btn-inner
+{
+	padding-top: 27px;
 }
 
 .ui-header .ui-btn.ui-btn-up-a, .ui-header .ui-btn-hover-a, .ui-header .ui-btn-down-a,
@@ -451,6 +481,11 @@ li.ui-li.ui-btn-hover-c *
 {
 	margin-left: -80px;
 	padding-left: 80px;
+}
+
+.deflist li.ui-li .ui-btn-inner .ui-li-heading
+{
+	margin-left: -80px;
 }
 
 .deflist li.ui-li .ui-btn-inner a
@@ -694,6 +729,7 @@ form.read .ui-listview .ui-li input[type="text"]
 
 form.read .ui-listview .ui-li div.ui-select *
 {
+	font-size: 13px;
 	-webkit-box-shadow: none;
 }
 
@@ -763,6 +799,11 @@ form.read .ui-listview .ui-li:last-child
 	padding: 6px;
 }
 
+.ui-input-search
+{
+	margin: 0px;
+}
+
 .ui-body-a.ui-input-search
 {
 	border: none;
@@ -777,6 +818,7 @@ form.read .ui-listview .ui-li:last-child
 .ui-input-search input.ui-input-text
 {
 	padding: 4px 0px 4px 0px;
+	text-shadow: none;
 }
 
 .ui-input-search .ui-btn
