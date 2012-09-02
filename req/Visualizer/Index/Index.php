@@ -34,14 +34,11 @@ App::load(VISUALIZER_DIR . "Template/Index");
 	<?php
 	$arr = array
 	(
-		"new, 新規投稿, addIcon.png",
-		"random, おまかせ表示, refreshIcon.png",
-		"search, 詳細検索, detailsIcon.png",
-		Visualizer::isMobile() || Visualizer::isSimple() ? "?visualizer=auto, 携帯表示, " : null
+		"new" => !$c->adminOnly || $isAdmin ? array("新規投稿", "addIcon.png") : null,
+		"random" => array("おまかせ表示", "refreshIcon.png"),
+		"search" => array("詳細検索", "detailsIcon.png"),
+		"?visualizer=auto" => Visualizer::isMobile() || Visualizer::isSimple() ? array("携帯表示", "") : null
 	);
-	
-	if ($c->adminOnly && !$isAdmin)
-		array_shift($arr);
 	
 	Visualizer::header($title, $arr, count($h->entries) . " 件");
 	?>

@@ -129,9 +129,16 @@ class Visualizer
 		echo Configuration::$instance->head;
 	}
 	
+	/**
+	 * @param string $title
+	 * @param array $menu
+	 * @param string $subTitle [optional]
+	 */
 	static function header($title, array $menu = array(), $subTitle = null)
 	{
-		array_unshift($menu, ", ホーム, homeIcon.png");
+		$menu = array_reverse($menu, true);
+		$menu[""] = array("ホーム", "homeIcon.png");
+		$menu = array_reverse($menu, true);
 		?>
 		<header>
 			<a href="<?php self::converted(self::$basePath) ?>">
@@ -153,15 +160,17 @@ class Visualizer
 			<?php endif ?>
 			<nav>
 				<ul>
-					<?php foreach ($menu as $i): ?>
+					<?php foreach ($menu as $k => $v): ?>
 						<?php
-						if (!$i)
+						if (!is_array($v))
 							continue;
-						$values = explode(", ", $i);
+						
+						$name = $v[0];
+						$icon = isset($v[1]) && !Util::isEmpty($v[1]) ? $v[1] : null;
 						?>
 						<li>
-							<a href="<?php self::converted(self::$basePath . Util::getSuffix() . $values[0]) ?>">
-								<?php if (isset($values[2])): ?><img src='<?php self::converted(self::$basePath . "style/" . $values[2]) ?>' width='16' height='16' /><?php endif ?><?php self::converted($values[1]) ?>
+							<a href="<?php self::converted(self::$basePath . Util::getSuffix() . $k) ?>">
+								<?php if (!is_null($icon)): ?><img src='<?php self::converted(self::$basePath . "style/" . $icon) ?>' width='16' height='16' /><?php endif ?><?php self::converted($name) ?>
 							</a>
 						</li>
 					<?php endforeach ?>

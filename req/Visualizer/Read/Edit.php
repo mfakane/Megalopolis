@@ -21,9 +21,10 @@ Visualizer::doctype();
 	<? Visualizer::header($title, App::$actionName == "new"
 		? array()
 		: array
-	(
-		"{$h->subject}/{$h->entry->id}, 作品に戻る, returnIcon.png"
-	)) ?>
+		(
+			"{$h->subject}/{$h->entry->id}" => array("作品に戻る", "returnIcon.png")
+		))
+	?>
 	<?if (in_array(Util::getBrowserType(), array
 	(
 		Util::BROWSER_TYPE_MSIE6,

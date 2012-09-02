@@ -56,8 +56,8 @@ Visualizer::doctype();
 	<? Visualizer::header($h->entry->title, App::$actionName == "index"
 		? array
 		(
-			"{$h->subject}, 作品集に戻る, returnIcon.png",
-			"{$h->subject}/{$h->entry->id}/edit, 編集, editIcon.png"
+			"{$h->subject}" => array("作品集に戻る", "returnIcon.png"),
+			"{$h->subject}/{$h->entry->id}/edit" => array("編集", "editIcon.png")
 		)
 		: array()) ?>
 	<dl class="status">

@@ -15,10 +15,7 @@ App::load(VISUALIZER_DIR . "Template/Index");
 	<script src="<?+Visualizer::actionHref("script", "Index", "Index.js") ?>"></script>
 </head>
 <body class="search">
-	<? Visualizer::header("詳細検索", array
-	(
-		", ホームへ戻る, returnIcon.png",
-	), !is_null($h->entries) ? ($d['count'] <= $c->searchPaging ? "{$d['count']} 件" : "{$d['count']} 件中 " . (($h->page - 1) * $c->searchPaging + 1) . " - " . (($h->page - 1) * $c->searchPaging + count($h->entries)) .  " 件") : null) ?>
+	<? Visualizer::header("詳細検索", array(), !is_null($h->entries) ? ($d['count'] <= $c->searchPaging ? "{$d['count']} 件" : "{$d['count']} 件中 " . (($h->page - 1) * $c->searchPaging + 1) . " - " . (($h->page - 1) * $c->searchPaging + count($h->entries)) .  " 件") : null) ?>
 	<form>
 		<section>
 			<label for="query">検索文字列</label><input type="text" name="query" id="query" value="<?+IndexHandler::param("query") ?>" />

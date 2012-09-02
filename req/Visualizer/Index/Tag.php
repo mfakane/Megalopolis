@@ -13,14 +13,10 @@ Visualizer::doctype();
 </head>
 <body>
 	<? Visualizer::header(App::$actionName == "author" ? "作者の一覧" : "タグの一覧", App::$actionName == "author"
-		? array
-		(
-			", ホームに戻る, returnIcon.png"
-		)
+		? array()
 		: array
 		(
-			", ホームに戻る, returnIcon.png",
-			"tag/random, おまかせ表示, refreshIcon.png"
+			"tag/random" => array("おまかせ表示", "refreshIcon.png")
 		)
 	) ?>
 	<?if (App::$actionName == "author" && !$c->showName[Configuration::ON_SUBJECT]): ?>
