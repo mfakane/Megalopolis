@@ -119,6 +119,11 @@ Megalopolis から必要になったときに Megalith のログを読み込み�
 2. 環境設定の $config->convertOnDemand を true にします。
 
 その他
+------
+
+Megalith 形式の ?log=* や ?mode=read&key=*&log=* へアクセスすると Megalopolis 形式の URL へリダイレクトされます。
+
+その他
 ======
 
 任意の HTML 文章を Megalopolis のコンテンツとして表示する
