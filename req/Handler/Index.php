@@ -481,14 +481,14 @@ class IndexHandler extends Handler
 		if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
 			Auth::loginError("管理者パスワードが一致しません");
 		else
-			return Visualizer::redirect();
+			return Visualizer::redirect(isset($_GET["redir"]) ? $_GET["redir"] : "");
 	}
 	
 	function logout()
 	{
 		Auth::logout();
 		
-		return Visualizer::redirect();
+		return Visualizer::redirect(isset($_GET["redir"]) ? $_GET["redir"] : "");
 	}
 	
 	function manifest()

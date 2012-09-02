@@ -179,6 +179,9 @@ class Visualizer
 	
 	static function footer($backgroundColor = null)
 	{
+		$pathInfo = trim(Util::getPathInfo(), "/");
+		$redir = Util::isEmpty($pathInfo) ? null : array("redir" => $pathInfo);
+		
 		?>
 		<footer>
 			<ul>
@@ -195,13 +198,9 @@ class Visualizer
 				<?php endforeach ?>
 				<li>
 					<?php if (Auth::hasSession(true)): ?>
-						<a href="<?php self::converted(self::actionHref("logout"))?>">
-							ログアウト
-						</a>
+						<a href="<?php self::converted(self::actionHref("logout", $redir)) ?>">ログアウト</a>
 					<?php else: ?>
-						<a href="<?php self::converted(self::actionHref("login"))?>">
-							ログイン
-						</a>
+						<a href="<?php self::converted(self::actionHref("login", $redir)) ?>">ログイン</a>
 					<?php endif ?>
 				</li>
 				<li>
@@ -314,7 +313,9 @@ class Visualizer
 		$href = "";
 		
 		foreach ($arr as $i)
-			if (is_array($i))
+			if (is_null($i))
+				continue;
+			else if (is_array($i))
 			{
 				$href .= "?";
 				
@@ -331,9 +332,14 @@ class Visualizer
 	
 	static function actionHref()
 	{
+		return self::$basePath . call_user_func_array(array("self", "currentHref"), func_get_args());
+	}
+	
+	static function currentHref()
+	{
 		$href = self::href(func_get_args());
 		
-		return self::$basePath . (is_file($href) ? "" : Util::getSuffix()) . $href;
+		return (is_file($href) ? "" : Util::getSuffix()) . $href;
 	}
 	
 	static function absoluteHref()
