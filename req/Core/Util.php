@@ -198,7 +198,7 @@ class Util
 			else
 				$script .= "?" . self::PATH_INFO_QUERY_PARAM . "=";
 		
-		return "http://" . $_SERVER["SERVER_NAME"] . ($_SERVER["SERVER_PORT"] == 80 ? null : ":" . $_SERVER["SERVER_PORT"]) . $script . $path;
+		return "http://" . (isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] :  $_SERVER["SERVER_NAME"] . ($_SERVER["SERVER_PORT"] == 80 ? null : ":" . $_SERVER["SERVER_PORT"])) . $script . $path;
 	}
 	
 	static function getSuffix()
