@@ -1,4 +1,21 @@
-﻿2012-09-02 COAH96KoxU <queue glasscore.net>
+﻿2012-09-03 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 10
+	* readme.txt: Megalith 形式の URL へのアクセスに関する文を追加
+	* readme.txt: アクセス制限の推奨に関する文言の編集
+	* readme.txt: Megalith からのログ変換に関する説明を編集
+	* req/Handler/Read.php: 取得するときに使用した作品集番号に関わらず作品の所属する作品集番号を使用するように
+	* req/Core/Visualizer.php: Tweet Button のリンクに target="_blank" を追加
+	* req/Core/Util.php: 絶対 URL の合成に HTTP_HOST を使用するように
+	* req/Visualizer/Index/Index.php: Tweet Button の URL を明示的に指定
+	* req/Core/Visualizer.php,
+	  req/Visualizer/Index/Index.php,
+	  req/Visualizer/Index/Search.php,
+	  req/Visualizer/Index/Tag.php,
+	  req/Visualizer/Read/Edit.php,
+	  req/Visualizer/Read/Index.php: ページヘッダ出力の形式を変更
+
+2012-09-02 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 9
 	* style/style.css: body の幅を width から max-width に変更
