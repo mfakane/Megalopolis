@@ -59,6 +59,22 @@ App::load(VISUALIZER_DIR . "Template/Index");
 			<?=$c->listType ?>
 		);
 	</script>
+	<?if (App::$actionName == "tag" && (is_array($c->showTweetButton) ? $c->showTweetButton[Configuration::ON_TAG] : $c->showTweetButton)): ?>
+		<div class="headdingButtons">
+			<? Visualizer::tweetButton(null, $c->tagTweetButtonText, $c->tagTweetButtonHashtags, array
+			(
+				"[tag]" => $d,
+			)) ?>
+		</div>
+	<?elseif (App::$actionName == "author" && (is_array($c->showTweetButton) ? $c->showTweetButton[Configuration::ON_AUTHOR] : $c->showTweetButton)): ?>
+		<div class="headdingButtons">
+			<? Visualizer::tweetButton(null, $c->authorTweetButtonText, $c->authorTweetButtonHashtags, array
+			(
+				"[author]" => $d,
+			)) ?>
+		</div>
+	<?endif ?>
+	
 	<?if (App::$actionName == "index" && $h->subjectCount > 1): ?>
 		<? Visualizer::pager($h->subject, $h->subjectCount, 5, Visualizer::actionHref(), true) ?>
 	<?elseif (App::$actionName == "tag" && $h->pageCount > 1): ?>

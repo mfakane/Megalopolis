@@ -374,6 +374,18 @@ ul.notify
 	background: #efefef;
 }
 
+.headdingButtons
+{
+	position: absolute;
+	top: 72px;
+	right: 0px;
+}
+
+.headdingButtons iframe
+{
+	margin-right: -32px;
+}
+
 .entries
 {
 	margin: 0px -4px 0px -4px;

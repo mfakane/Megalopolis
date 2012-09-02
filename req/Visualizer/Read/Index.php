@@ -190,7 +190,7 @@ Visualizer::doctype();
 					<?endif ?>
 				</div>
 			<?endif ?>
-			<?if (App::$actionName == "index" && $c->showTweetButton): ?>
+			<?if (App::$actionName == "index" && (is_array($c->showTweetButton) ? $c->showTweetButton[Configuration::ON_ENTRY] : $c->showTweetButton)): ?>
 				<footer>
 					<? Visualizer::tweetButton(Visualizer::absoluteHref($h->subject, $h->entry->id), $c->entryTweetButtonText, $c->entryTweetButtonHashtags, array
 					(

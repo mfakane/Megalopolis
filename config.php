@@ -392,7 +392,12 @@ $config->showPages = array
 );
 
 // Tweet Button を表示するか (true/false)
-$config->showTweetButton = true;
+$config->showTweetButton = array
+(
+	Configuration::ON_AUTHOR => true,		// 作者別一覧に表示するか
+	Configuration::ON_TAG => true,			// タグ別一覧に表示するか
+	Configuration::ON_ENTRY => true,		// 作品に表示するか
+);
 
 // 作品の Tweet Button のテキスト (文字列)
 // 以下のキーワードは次の項目に変換されます:
@@ -413,6 +418,32 @@ $config->entryTweetButtonText = "";
 // - [name]			名前
 // null または空欄の場合ハッシュタグは付加されません
 $config->entryTweetButtonHashtags = "";
+
+// 分類タグの Tweet Button のテキスト (文字列)
+// 以下のキーワードは次の項目に変換されます:
+// - [tag]			分類タグ
+// null または空欄の場合ページタイトルになります
+$config->tagTweetButtonText = "";
+
+// 分類タグの Tweet Button のハッシュタグ (文字列)
+// コンマ区切りで複数の指定が可能です。# は含めないでください。
+// 以下のキーワードは次の項目に変換されます:
+// - [tag]			分類タグ
+// null または空欄の場合ハッシュタグは付加されません
+$config->tagTweetButtonHashtags = "";
+
+// タグの Tweet Button のテキスト (文字列)
+// 以下のキーワードは次の項目に変換されます:
+// - [author]		名前
+// null または空欄の場合ページタイトルになります
+$config->authorTweetButtonText = "";
+
+// タグの Tweet Button のハッシュタグ (文字列)
+// コンマ区切りで複数の指定が可能です。# は含めないでください。
+// 以下のキーワードは次の項目に変換されます:
+// - [author]		名前
+// null または空欄の場合ハッシュタグは付加されません
+$config->authorTweetButtonHashtags = "";
 
 /*
  * ログの変換に関する設定

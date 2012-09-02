@@ -21,6 +21,8 @@ class Configuration
 	const ON_ENTRY = "Entry";
 	const ON_COMMENT = "Comment";
 	const ON_SUBJECT = "Subject";
+	const ON_AUTHOR = "Author";
+	const ON_TAG = "Tag";
 	const LIST_DOUBLE = 0;
 	const LIST_SINGLE = 1;
 	const EVAL_BOTH = -1;
@@ -212,6 +214,10 @@ class Configuration
 	public $showTweetButton = false;
 	public $entryTweetButtonText = null;
 	public $entryTweetButtonHashtags = null;
+	public $tagTweetButtonText = null;
+	public $tagTweetButtonHashtags = null;
+	public $authorTweetButtonText = null;
+	public $authorTweetButtonHashtags = null;
 	
 	public $convertDivision = 50;
 	public $convertOnDemand = false;
