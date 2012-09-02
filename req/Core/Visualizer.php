@@ -317,7 +317,7 @@ class Visualizer
 				continue;
 			else if (is_array($i))
 			{
-				$href .= "?";
+				$href .= strpos(Util::getSuffix(), "?") !== false ? "&" : "?";
 				
 				foreach ($i as $k => $v)
 					$href .= (isset($encodeTable[$k]) ? $encodeTable[$k] : $encodeTable[$k] = urlencode($k)) . "=" . (isset($encodeTable[$v]) ? $encodeTable[$v] : $encodeTable[$v] = urlencode($v)) . "&";
