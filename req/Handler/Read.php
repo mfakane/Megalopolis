@@ -36,12 +36,8 @@ class ReadHandler extends Handler
 			Auth::createToken();
 		
 		$db = App::openDB("data", false);
-		
-		if ($subject == 0)
-			$subject = Board::getLatestSubject($db);
-		
-		$this->subject = $subject;
 		$this->thread = self::loadThread($db, $id);
+		$this->subject = $this->thread->subject;
 		$this->entry = &$this->thread->entry;
 		$this->page = $page;
 
