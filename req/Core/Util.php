@@ -602,6 +602,10 @@ class Util
 			foreach (array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "SJIS");'), file($com, FILE_IGNORE_NEW_LINES)) as $i)
 			{
 				$i = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", trim($i)));
+				
+				if (count($i) < 7)
+					continue;
+				
 				$comment = new Comment();
 				list
 				(
