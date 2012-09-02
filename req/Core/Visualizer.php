@@ -353,12 +353,15 @@ class Visualizer
 	
 	static function actionHref()
 	{
-		return self::$basePath . call_user_func_array(array("self", "currentHref"), func_get_args());
+		$args = func_get_args();
+		
+		return self::$basePath . call_user_func_array(array("self", "currentHref"), $args);
 	}
 	
 	static function currentHref()
 	{
-		$href = self::href(func_get_args());
+		$args = func_get_args();
+		$href = self::href($args);
 		
 		return (is_file($href) ? "" : Util::getSuffix()) . $href;
 	}
