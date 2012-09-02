@@ -192,8 +192,13 @@ Visualizer::doctype();
 			<?endif ?>
 			<?if (App::$actionName == "index" && $c->showTweetButton): ?>
 				<footer>
-					<a href="http://twitter.com/share?url=<?+Visualizer::absoluteHref($h->subject, $h->entry->id) ?>" class="twitter-share-button" data-count="horizontal" data-lang="ja">Tweet</a>
-					<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+					<? Visualizer::tweetButton(Visualizer::absoluteHref($h->subject, $h->entry->id), $c->entryTweetButtonText, $c->entryTweetButtonHashtags, array
+					(
+						"[id]" => $h->entry->id,
+						"[subject]" => $h->entry->subject,
+						"[title]" => $h->entry->title,
+						"[name]" => $h->entry->name,
+					)) ?>
 				</footer>
 			<?endif ?>
 		</div>

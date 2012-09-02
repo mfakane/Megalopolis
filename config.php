@@ -394,6 +394,26 @@ $config->showPages = array
 // Tweet Button を表示するか (true/false)
 $config->showTweetButton = true;
 
+// 作品の Tweet Button のテキスト (文字列)
+// 以下のキーワードは次の項目に変換されます:
+// - [id]			作品番号
+// - [subject]		作品集番号
+// - [title]		作品名
+// - [name]			名前
+// 例: "[title] 作者: [name]"
+// null または空欄の場合ページタイトルになります
+$config->entryTweetButtonText = "";
+
+// 作品の Tweet Button のハッシュタグ (文字列)
+// コンマ区切りで複数の指定が可能です。# は含めないでください。
+// 以下のキーワードは次の項目に変換されます:
+// - [id]			作品番号
+// - [subject]		作品集番号
+// - [title]		作品名
+// - [name]			名前
+// null または空欄の場合ハッシュタグは付加されません
+$config->entryTweetButtonHashtags = "";
+
 /*
  * ログの変換に関する設定
  */

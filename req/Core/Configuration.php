@@ -210,6 +210,8 @@ class Configuration
 		self::ON_ENTRY => true,
 	);
 	public $showTweetButton = false;
+	public $entryTweetButtonText = null;
+	public $entryTweetButtonHashtags = null;
 	
 	public $convertDivision = 50;
 	public $convertOnDemand = false;
