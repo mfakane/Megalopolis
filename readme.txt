@@ -88,19 +88,13 @@ PATH_INFO が使用可能な環境の場合、/index.php/2 などでアクセス
 
 以下のツールは、使用に管理者パスワードの入力を求められます。
 
-* Megalith 形式のログの変換 (/util/convert)
-
-Megalith 形式のログの変換ツール
--------------------------------
-
-Megalith/ のディレクトリを作成しその中に dat/ com/ aft/ sub/ の Megalith ログディレクトリをコピーすると
-スクリプトの /util/convert から Megalopolis へログをインポートできます。
+* Megalith 形式のログの変換ツール (/util/convert)
 
 Megalith からの移行
 ===================
 
 Megalith http://9.dotpp.net/software/megalith/ からのログ変換機能を有しています。
-二種類の方法があります。お好きな方をどうぞ。
+二種類の方法があります。
 
 Megalith のログを一括変換する
 -----------------------------
@@ -118,7 +112,8 @@ Megalith ログを必要に応じて読み込みその場で変換する
 ---------------------------------------------------
 
 Megalopolis から必要になったときに Megalith のログを読み込み使用します。
-更新したデータは Megalopolis ログに記録されます。
+作品へアクセスされたときにその作品を変換し、更新されたデータは Megalopolis ログに記録されます。
+一括変換である必要性がない場合、基本的にこちらの方法を推奨いたします。
 
 1. Megalith/ ディレクトリを作成し以下に dat/ com/ aft/ sub/ ログディレクトリをコピーします。
 2. 環境設定の $config->convertOnDemand を true にします。
