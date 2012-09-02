@@ -59,11 +59,7 @@ abstract class DataStore
 		if ($rt)
 			return $rt;
 		else if ($throw)
-		{
-			$error = $st->errorInfo();
-			
-			throw new ApplicationException("{$error[0]},{$error[1]}:{$error[2]}");
-		}
+			throw new ApplicationException(implode(":", $st->errorInfo()));
 		else
 			return false;
 	}
