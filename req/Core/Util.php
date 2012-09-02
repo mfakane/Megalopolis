@@ -245,7 +245,12 @@ class Util
 		if ($pathInfo)
 			return $pathInfo;
 		else if (isset($_GET[self::PATH_INFO_QUERY_PARAM]))
-			return $pathInfo = self::escapeInput($_GET[self::PATH_INFO_QUERY_PARAM]);
+		{
+			$pathInfo = self::escapeInput($_GET[self::PATH_INFO_QUERY_PARAM]);
+			unset($_GET[self::PATH_INFO_QUERY_PARAM]);
+			
+			return $pathInfo;
+		}
 		else if ($rt = self::escapeInput(getenv("PATH_INFO")))
 			return $pathInfo = $rt;
 		else

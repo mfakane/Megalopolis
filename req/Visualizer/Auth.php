@@ -15,7 +15,7 @@ $d = &Visualizer::$data;
 			<?+$d ?>
 		</div>
 	<?endif ?>
-	<form class="auth" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::currentHref(isset($_GET["redir"]) ? array("redir" => $_GET["redir"]) : null)) ?>" method="post">
+	<form class="auth" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::currentHref($_GET)) ?>" method="post">
 		<section>
 			<label for="password"><?+Auth::$label ?></label><input type="password" name="password" id="password" /><br />
 			<button type="submit">
