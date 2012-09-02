@@ -58,11 +58,19 @@ class App
 	{
 		if (get_magic_quotes_gpc())
 		{
-			$_GET = array_map('stripslashes', $_GET);
-			$_POST = array_map('stripslashes', $_POST);
-			$_REQUEST = array_map('stripslashes', $_REQUEST);
-			$_COOKIE = array_map('stripslashes', $_COOKIE);
+			$_GET = self::stripSlashesRecursive($_GET);
+			$_POST = self::stripSlashesRecursive($_POST);
+			$_REQUEST = self::stripSlashesRecursive($_REQUEST);
+			$_COOKIE = self::stripSlashesRecursive($_COOKIE);
 		}
+	}
+	
+	private static function stripSlashesRecursive($arg)
+	{
+		if (is_array($arg))
+			return array_map(array("self", "stripSlashesRecursive"), $arg);
+		else
+			return stripslashes($arg);
 	}
 	
 	private static function isBBQed()
