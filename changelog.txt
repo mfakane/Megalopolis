@@ -1,4 +1,59 @@
-﻿2012-08-31 COAH96KoxU <queue glasscore.net>
+﻿2012-09-02 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 9
+	* style/style.css: body の幅を width から max-width に変更
+	* style/style.css: 一覧の分類タグ一覧のマージンを調整
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Visualizer/Index/Index.php,
+	  req/Visualizer/Read/Index.php,
+	  style/style.css: 分類タグおよび作者別一覧に Tweet Button を表示する設定を追加
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Core/Visualizer.php,
+	  req/Visualizer/Read/Index.php: Tweet Button のテキストおよびハッシュタグの設定を追加
+	* req/Core/Visualizer.php,
+	  script/mobile/base.js,
+	  style/mobile/mobile.css: jQuery Mobile を 1.1.1 に更新
+	* req/Core/Visualizer.php,
+	  req/Handler/Index.php,
+	  req/Visualizer/Auth.php: 管理者ログイン後ホームではなく今まで見ていたページにリダイレクトするように
+	* req/Handler/Read.php: 管理者ログイン時既存の作品編集画面でエラーが出ることがあるのを修正
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Handler/Read.php: 管理者ログイン時禁止ワードを無視するオプションを追加
+	* style/webkit.css: WebKit における投稿画面のカラーピッカーの位置を調整
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Handler/Read.php: 名前における禁止ワードの設定を追加
+	* req/Handler/Read.php: showDisallowedWords が true であっても禁止ワードが表示されないのを修正
+	* req/App.php,
+	  script/mobile/Read/Index.js,
+	  script/Read/Index.js: 規制対象の時 Javascript を使用した評価において結果が表示されないのを修正
+	* config.php,
+	  req/App.php,
+	  req/Core/Configuration.php,
+	  req/Core/Util.php,
+	  req/Visualizer/Auth.php,
+	  req/Visualizer/mobile/Read/Index.php,
+	  req/Visualizer/Read/Edit.php,
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/simple/Read/Index.php,
+	  script/Read/Index.js: 携帯端末の契約者固有 ID の送信規制に対応
+	* req/Visualizer/Read/Index.php,
+	  req/Visualizer/Template/Index.php,
+	  style/style.css: 管理者モードで作品の送信元が表示されないのを修正
+	* req/App.php,
+	  req/Core/Util.php,
+	  req/Handler/Read.php,
+	  req/Model/Thread.php: 投稿者を IP アドレスではなくホスト名で記録するように
+	* config.php,
+	  req/Core/Configuration.php,
+	  script/Read/Index.js: 既定の評価でタブにせず両方を表示するオプションを追加
+	* config.php: 既定の評価方法を変更
+	* req/Core/Visualizer.php: 出力時エンコードに文字コード指定の追加
+
+2012-08-31 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 8
 	* req/Visualizer/Read/Edit.js: 文字色や背景色などをパレットからではなく直接変更した際に編集画面に反映されないのを修正
