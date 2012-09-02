@@ -12,6 +12,7 @@ define("VISUALIZER_DIR", "Visualizer/");
 
 define("DEFAULT_HANDLER", "index");
 define("DEFAULT_ACTION", "index");
+define("SQL_DEBUG", false);
 
 require APP_DIR . "App.php";
 ?>

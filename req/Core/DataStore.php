@@ -59,7 +59,14 @@ abstract class DataStore
 		if ($rt)
 			return $rt;
 		else if ($throw)
-			throw new ApplicationException(implode(":", $st->errorInfo()));
+		{
+			$message = implode(":", $st->errorInfo());
+			
+			if (defined("SQL_DEBUG") && SQL_DEBUG)
+				$message .= "\r\n" . $st->queryString;
+			
+			throw new ApplicationException($message);
+		}
 		else
 			return false;
 	}
