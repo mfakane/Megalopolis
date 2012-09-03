@@ -130,15 +130,21 @@ abstract class DataStore
 			$type = explode(" ", $v, 2);
 			$type = $type[0];
 			
-			if (strpos($type, "int") !== false)
+			if (!property_exists($obj, $k))
+				continue;
+			
+			$value = $obj->$k;
+			
+			if (is_null($value))
+				$type = PDO::PARAM_NULL;
+			else if (strpos($type, "int") !== false)
 				$type = PDO::PARAM_INT;
 			else if ($type == "bit")
 				$type = PDO::PARAM_BOOL;
 			else
 				$type = PDO::PARAM_STR;
 			
-			if (property_exists($obj, $k))
-				$st->bindValue(":" . $k, $obj->$k, $type);
+			$st->bindValue(":" . $k, $value, $type);
 		}
 	}
 }
