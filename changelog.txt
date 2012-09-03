@@ -1,5 +1,10 @@
 ﻿2012-09-04 COAH96KoxU <queue glasscore.net>
 
+	* req/App.php: release 13
+	* req/Handler/Util.php: テストデータフィルに認証がないのを修正
+
+2012-09-04 COAH96KoxU <queue glasscore.net>
+
 	* req/App.php: release 12
 	* req/Handler/Index.php,
 	  req/Visualizer/Index/Index.php: 作者またはタグによる一覧からのおまかせ表示を追加
