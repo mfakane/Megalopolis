@@ -350,6 +350,19 @@ class IndexHandler extends Handler
 				return Visualizer::redirect("author" . ($arr ? "/" . array_rand($arr) : ""));
 			}
 			
+			if ($_page == "random")
+			{
+				$this->entries = ThreadEntry::getEntriesByName($db, $name);
+				
+				if ($this->entries)
+				{
+					$entry = $this->entries[array_rand($this->entries)];
+					App::closeDB($db);
+					
+					return Visualizer::redirect("{$entry->subject}/{$entry->id}");
+				}
+			}
+			
 			$pageCount = ceil(ThreadEntry::getEntryCountByName($db, $name) / Configuration::$instance->searchPaging);
 			$this->entries = ThreadEntry::getEntriesByName($db, $name, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging);
 			$this->subject = 0;
@@ -422,7 +435,20 @@ class IndexHandler extends Handler
 				App::closeDB($db);
 				
 				return Visualizer::redirect("tag" . ($arr ? "/" . array_rand($arr) : ""));
-			}	
+			}
+			
+			if ($_page == "random")
+			{
+				$this->entries = ThreadEntry::getEntriesByTag($db, $tag);
+				
+				if ($this->entries)
+				{
+					$entry = $this->entries[array_rand($this->entries)];
+					App::closeDB($db);
+					
+					return Visualizer::redirect("{$entry->subject}/{$entry->id}");
+				}
+			}
 			
 			$pageCount = ceil(ThreadEntry::getEntryCountByTag($db, $tag) / Configuration::$instance->searchPaging);
 			$this->entries = ThreadEntry::getEntriesByTag($db, $tag, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging);

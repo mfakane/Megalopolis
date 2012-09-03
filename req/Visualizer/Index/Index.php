@@ -35,7 +35,7 @@ App::load(VISUALIZER_DIR . "Template/Index");
 	$arr = array
 	(
 		"new" => !$c->adminOnly || $isAdmin ? array("新規投稿", "addIcon.png") : null,
-		"random" => array("おまかせ表示", "refreshIcon.png"),
+		(App::$actionName == "index" ? "random" : implode("/", array(App::$actionName, rawurlencode($d), "random"))) => array("おまかせ表示", "refreshIcon.png"),
 		"search" => array("詳細検索", "detailsIcon.png"),
 		"?visualizer=auto" => Visualizer::isMobile() || Visualizer::isSimple() ? array("携帯表示", "") : null
 	);
