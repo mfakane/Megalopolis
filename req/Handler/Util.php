@@ -310,6 +310,7 @@ class UtilHandler extends Handler
 		self::ensureTestMode();
 		
 		$db = App::openDB();
+		$idb = App::openDB(App::INDEX_DATABASE);
 		
 		for ($i = 0; $i < 25; $i++)
 		{
@@ -331,8 +332,10 @@ class UtilHandler extends Handler
 				$thread->comment($db, self::createRandomString(32), self::createRandomString(32), self::createRandomString(256), self::createRandomString(32), rand(0, 100), false);
 			
 			$thread->save($db);
+			SearchIndex::register($idb, $thread);
 		}
 		
+		App::closeDB($idb, true);
 		App::closeDB($db);
 	}
 	
