@@ -12,13 +12,10 @@ Visualizer::doctype();
 	</title>
 </head>
 <body>
-	<? Visualizer::header(App::$actionName == "author" ? "作者の一覧" : "タグの一覧", App::$actionName == "author"
-		? array()
-		: array
-		(
-			"tag/random" => array("おまかせ表示", "refreshIcon.png")
-		)
-	) ?>
+	<? Visualizer::header(App::$actionName == "author" ? "作者の一覧" : "タグの一覧", array
+	(
+		App::$actionName . "/random" => array("おまかせ表示", "refreshIcon.png")
+	)) ?>
 	<?if (App::$actionName == "author" && !$c->showName[Configuration::ON_SUBJECT]): ?>
 		<p class="notify warning">
 			作者の一覧は公開されていません

@@ -342,6 +342,14 @@ class IndexHandler extends Handler
 		}
 		else
 		{
+			if ($name == "random")
+			{
+				$arr = ThreadEntry::getNames($db);
+				App::closeDB($db);
+				
+				return Visualizer::redirect("author" . ($arr ? "/" . array_rand($arr) : ""));
+			}
+			
 			$pageCount = ceil(ThreadEntry::getEntryCountByName($db, $name) / Configuration::$instance->searchPaging);
 			$this->entries = ThreadEntry::getEntriesByName($db, $name, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging);
 			$this->subject = 0;
