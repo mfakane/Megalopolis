@@ -1,4 +1,16 @@
-﻿2012-09-03 COAH96KoxU <queue glasscore.net>
+﻿2012-09-04 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 12
+	* req/Handler/Index.php,
+	  req/Visualizer/Index/Index.php: 作者またはタグによる一覧からのおまかせ表示を追加
+	* req/Handler/Index.php,
+	  req/Visualizer/Index/Tag.php: 作者のおまかせ表示を追加
+	* req/Core/DataStore.php: PDOStatement->execute() が成功時にも false を返すことがあるバグ (PHP Bug #45120) への対処
+	* req/Core/DataStore.php: null 値の取り扱いを修正
+	* index.php,
+	  req/Core/DataStore.php: データベースエラーが発生した際発行していた SQL を表示するデバッグ用オプション定数を追加
+
+2012-09-03 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 11
 	* req/Core/Util.php: Megalith ログフォーマットに従っていないコメント行を無視するよう変更
