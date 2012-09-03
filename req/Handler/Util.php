@@ -307,6 +307,8 @@ class UtilHandler extends Handler
 	
 	function fill()
 	{
+		self::ensureTestMode();
+		
 		$db = App::openDB();
 		
 		for ($i = 0; $i < 25; $i++)
