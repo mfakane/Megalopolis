@@ -56,6 +56,8 @@ abstract class DataStore
 			usleep(5000);
 		}
 		
+		$rt = $rt || $st->errorCode() == PDO::ERR_NONE;
+		
 		if ($rt)
 			return $rt;
 		else if ($throw)
