@@ -25,7 +25,7 @@ Visualizer::doctype();
 			タグの一覧は公開されていません
 		</p>
 	<?else: ?>
-		<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref(App::$actionName)) ?>
+		<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref(App::$actionName) . "/") ?>
 		<?if ($d): ?>
 			<ul class="taglist">
 				<?foreach ($d as $k => $v): ?>
@@ -39,7 +39,7 @@ Visualizer::doctype();
 				<?+App::$actionName == "author" ? "作者はいません" : "タグはありません" ?>
 			</p>
 		<?endif ?>
-		<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref(App::$actionName)) ?>
+		<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref(App::$actionName) . "/") ?>
 	<?endif ?>
 	<? Visualizer::footer() ?>
 </body>
