@@ -28,7 +28,11 @@ abstract class DataStore
 		if ($st)
 			return $st;
 		else
-			throw new ApplicationException(array_pop($db->errorInfo()));
+		{
+			$error = $db->errorInfo();
+			
+			throw new ApplicationException(array_pop($error));
+		}
 	}
 	
 	/**
@@ -89,7 +93,7 @@ abstract class DataStore
 			)",
 			$name,
 			implode(", ", array_map(create_function('$_', 'return strtr($_, array(" primary key" => ""));'), $arr)),
-			implode(", ", array_map(create_function('$_', 'return array_shift(explode(" ", $_));'), array_filter($arr, create_function('$_', 'return mb_strstr($_, "primary key");'))))
+			implode(", ", array_map(create_function('$_', '$tmp = explode(" ", $_); return array_shift($tmp);'), array_filter($arr, create_function('$_', 'return mb_strstr($_, "primary key");'))))
 		), array(",
 				primary key()" => "")))));
 		
@@ -97,6 +101,12 @@ abstract class DataStore
 			foreach ($index as $k => $v)
 				$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf('create index if not exists %s on %s(%s)', $k, $name, is_array($v) ? implode(", ", $v) : $v))));
 	}
+	
+	/**
+	 * @param string $name
+	 * @param string $indexSuffix [optional]
+	 */
+	abstract function createFullTextTableIfNotExists(PDO $db, array $schema, $name, $indexSuffix = "Index");
 	
 	/**
 	 * @param mixed $obj
@@ -155,6 +165,9 @@ class SQLiteDataStore extends DataStore
 {
 	private $directory;
 	
+	const MODULE_FTS3 = "fts3";
+	const MODULE_FTS4 = "fts4";
+	
 	/**
 	 * @param string $directory
 	 */
@@ -212,6 +225,51 @@ class SQLiteDataStore extends DataStore
 		$this->executeStatement($st, array($name));
 		
 		return count($st->fetchAll()) > 0;
+	}
+	
+	/**
+	 * @param string $name
+	 * @param string $indexSuffix [optional]
+	 */
+	function createFullTextTableIfNotExists(PDO $db, array $schema, $name, $indexSuffix = "Index")
+	{
+		if (!$this->hasTable($db, $name))
+		{
+			$module = $this->supportedFullTextSearchModule();
+			$arr = array_map(create_function('$x, $y', 'return "{$x} {$y}";'), array_keys($schema), array_values($schema));
+			
+			$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf
+			("
+				create virtual table %s using %s
+				(
+					%s
+				)",
+				$name,
+				$module,
+				implode(", ", array_filter(array_map(create_function('$_', 'return strtr($_, array(" fulltext" => ""));'), $arr), create_function('$_', 'return strpos($_, "rowid") === false && strpos($_, "docid") === false;')))
+			))));
+		}
+	}
+	
+	/**
+	 * @return string
+	 */
+	function supportedFullTextSearchModule()
+	{
+		$db = new PDO("sqlite::memory:");
+		$rt = null;
+		
+		foreach	(array(self::MODULE_FTS4, self::MODULE_FTS3) as $i)
+			if ($this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf('create virtual table temp using %s', $i))), array(), false))
+			{
+				$rt = $i;
+				
+				break;
+			}
+		
+		$db = null;
+		
+		return $rt;
 	}
 }
 
@@ -331,10 +389,63 @@ class MySQLDataStore extends DataStore
 			default character set utf8",
 			$name,
 			implode(", ", array_map(create_function('$_', 'return strtr($_, array(" primary key" => ""));'), $arr)),
-			implode(", ", array_map(create_function('$_', 'return array_shift(explode(" ", $_));'), array_filter($arr, create_function('$_', 'return mb_strstr($_, "primary key");')))),
+			implode(", ", array_map(create_function('$_', '$tmp = explode(" ", $_); return array_shift($tmp);'), array_filter($arr, create_function('$_', 'return mb_strstr($_, "primary key");')))),
 			is_array($index) ? ", key " . implode(", key ", array_map(create_function('$x, $y', 'return "{$x}(" . (is_array($y) ? implode(", ", $y) : $y) . ")";'), array_keys($index), array_values($index))) : ""
 		), array(",
 				primary key()" => "")))));
+	}
+	
+	/**
+	 * @param string $name
+	 * @param string $indexSuffix [optional]
+	 */
+	function createFullTextTableIfNotExists(PDO $db, array $schema, $name, $indexSuffix = "Index")
+	{
+		$columns = array_map(create_function('$x, $y', 'return "{$x} " . strtr($y, array(" primary key" => "", " fulltext" => ""));'), array_keys($schema), array_values($schema));
+		$primaryKeys = array_keys(array_filter($schema, create_function('$_', 'return strpos($_, "primary key") !== false;')));
+		$fullTextIndices = array_keys(array_filter($schema, create_function('$_', 'return strpos($_, "fulltext") !== false;')));
+
+		$this->executeStatement($this->ensureStatement($db, $db->prepare(strtr(sprintf
+		("
+			create table if not exists %s
+			(
+				%s,
+				primary key(%s)%s
+			)
+			default character set utf8 collate utf8_unicode_ci",
+			$name,
+			implode(", ", $columns),
+			implode(", ", $primaryKeys),
+			", fulltext index " . implode(", fulltext index ", array_map(create_function('$x, $y', 'return "{$x}{$y}({$x})";'), $fullTextIndices, array_fill(0, count($fullTextIndices), $indexSuffix)))
+		), array(",
+				primary key()" => "")))));
+	}
+	
+	function attachFullTextIndex(PDO $db, array $schema, $name, $indexSuffix = "Index")
+	{
+		$fullTextIndices = array_keys(array_filter($schema, create_function('$_', 'return strpos($_, "fulltext") !== false;')));
+		
+		foreach ($fullTextIndices as $i)
+			$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf
+			("
+				create fulltext index %s on %s(%s)",
+				$i . $indexSuffix,
+				$name,
+				$i
+			))));
+	}
+
+	function detachFullTextIndex(PDO $db, array $schema, $name, $indexSuffix = "Index")
+	{
+		$fullTextIndices = array_keys(array_filter($schema, create_function('$_', 'return strpos($_, "fulltext") !== false;')));
+		
+		foreach ($fullTextIndices as $i)
+			$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf
+			("
+				drop index %s on %s",
+				$i . $indexSuffix,
+				$name
+			))), array(), false);
 	}
 }
 ?>

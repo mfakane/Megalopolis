@@ -426,6 +426,39 @@ class ThreadEntry
 
 		return $rt;
 	}
+
+	function getMegalithEntryIDsBySubject(PDO $db, $subject)
+	{
+		$rt = array();
+		
+		if (is_file($path = "Megalith/sub/" . ($subject == Board::getLatestSubject($db) ? "subject.txt" : "subject{$subject}.txt")))
+			foreach (array_reverse(file($path, FILE_IGNORE_NEW_LINES)) as $i)
+				if (count($line = explode("<>", $i)) > 2)
+					$rt[] = intval(str_replace(".dat", "", $line[0]));
+		
+		return $rt;
+	}
+	
+	private function getMegalithEntriesBySubject(PDO $db, $subject)
+	{
+		$rt = array();
+		
+		if (is_file($path = "Megalith/sub/" . ($subject == Board::getLatestSubject($db) ? "subject.txt" : "subject{$subject}.txt")))
+			foreach (array_reverse(file($path, FILE_IGNORE_NEW_LINES)) as $i)
+			{
+				$entry = Util::convertLineToThreadEntry(mb_convert_encoding($i, "UTF-8", "SJIS"));
+				
+				if (!$entry ||
+					isset($rt[$entry->id]))
+					continue;
+				
+				$entry->subject = $subject;
+				$entry->size = is_file($file = "Megalith/dat/{$entry->id}.dat") ? round(filesize($file) / 1024, 2) : 0;
+				$rt[$entry->id] = $entry;
+			}
+		
+		return $rt;
+	}
 	
 	/**
 	 * @param int $subject
@@ -447,20 +480,8 @@ class ThreadEntry
 			implode(", ", array_map(create_function('$_', 'return $_->id;'), $rt))
 		));
 		
-		if (Configuration::$instance->convertOnDemand &&
-			is_file($path = "Megalith/sub/" . ($subject == Board::getLatestSubject($db) ? "subject.txt" : "subject{$subject}.txt")))
-			foreach (array_reverse(file($path, FILE_IGNORE_NEW_LINES)) as $i)
-			{
-				$entry = Util::convertLineToThreadEntry(mb_convert_encoding($i, "UTF-8", "SJIS"));
-				
-				if (!$entry ||
-					isset($rt[$entry->id]))
-					continue;
-				
-				$entry->subject = $subject;
-				$entry->size = is_file($file = "Megalith/dat/{$entry->id}.dat") ? round(filesize($file) / 1024, 2) : 0;
-				$rt[$entry->id] = $entry;
-			}
+		if (Configuration::$instance->convertOnDemand)
+			$rt += self::getMegalithEntriesBySubject($db, $subject);
 		
 		foreach ($rt as $i)
 		{
@@ -477,6 +498,23 @@ class ThreadEntry
 			ksort($rt);
 
 		return $rt;
+	}
+
+	/**
+	 * @param int $subject
+	 * @return array|int
+	 */
+	static function getEntryIDsBySubject(PDO $db, $subject)
+	{
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			select id from %s
+			where subject = ?',
+			App::THREAD_ENTRY_TABLE
+		)));
+		Util::executeStatement($st, array($subject));
+		
+		return array_map("intval", $st->fetchAll(PDO::FETCH_COLUMN, 0));
 	}
 	
 	/**
@@ -806,33 +844,33 @@ class ThreadEntry
 		$ids = null;
 		
 		if (isset($query["query"]) && $query["query"])
-			$ids = array_merge
+			$ids = SearchIndex::search($idb, $query["query"], array_filter(array
 			(
-				SearchIndex::search($idb, $query["query"], "title"),
-				Configuration::$instance->showName[Configuration::ON_SUBJECT] ? SearchIndex::search($idb, $query["query"], "name") : array(),
-				Configuration::$instance->useSummary && Configuration::$instance->showSummary[Configuration::ON_SUBJECT] ? SearchIndex::search($idb, $query["query"], "summary") : array(),
-				SearchIndex::search($idb, $query["query"], "body"),
-				SearchIndex::search($idb, $query["query"], "afterword"),
-				Configuration::$instance->showTags[Configuration::ON_SUBJECT] ? SearchIndex::search($idb, $query["query"], "tags") : array()
-			);
+				"title",
+				Configuration::$instance->showName[Configuration::ON_SUBJECT] ? "name" : null,
+				Configuration::$instance->useSummary && Configuration::$instance->showSummary[Configuration::ON_SUBJECT] ? "summary" : null,
+				"body",
+				"afterword",
+				Configuration::$instance->showTags[Configuration::ON_SUBJECT] ? "tag" : null
+			)));
 		
 		if (isset($query["title"]) && $query["title"])
-			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["title"], "title")) : SearchIndex::search($idb, $query["title"], "title");
+			$ids = SearchIndex::search($idb, $query["title"], array("title"), $ids);
 		
 		if (isset($query["name"]) && $query["name"] && Configuration::$instance->showName[Configuration::ON_SUBJECT])
-			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["name"], "name")) : SearchIndex::search($idb, $query["name"], "name");
+			$ids = SearchIndex::search($idb, $query["name"], array("name"), $ids);
 		
 		if (isset($query["summary"]) && $query["summary"] && Configuration::$instance->useSummary && Configuration::$instance->showSummary[Configuration::ON_SUBJECT])
-			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["summary"], "summary")) : SearchIndex::search($idb, $query["summary"], "summary");
+			$ids = SearchIndex::search($idb, $query["summary"], array("summary"), $ids);
 		
 		if (isset($query["body"]) && $query["body"])
-			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["body"], "body")) : SearchIndex::search($idb, $query["body"], "body");
+			$ids = SearchIndex::search($idb, $query["body"], array("body"), $ids);
 		
 		if (isset($query["afterword"]) && $query["afterword"])
-			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["afterword"], "afterword")) : SearchIndex::search($idb, $query["afterword"], "afterword");
+			$ids = SearchIndex::search($idb, $query["afterword"], array("afterword"), $ids);
 		
 		if (isset($query["tag"]) && $query["tag"] && Configuration::$instance->showTags[Configuration::ON_SUBJECT])
-			$ids = !is_null($ids) ? array_intersect($ids, SearchIndex::search($idb, $query["tag"], "tag")) : SearchIndex::search($idb, $query["tag"], "tags");
+			$ids = SearchIndex::search($idb, $query["tag"], array("tag"), $ids);
 		
 		$where = array
 		(

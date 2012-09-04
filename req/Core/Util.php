@@ -293,6 +293,15 @@ class Util
 	}
 	
 	/**
+	 * @param string $name
+	 * @param string $indexSuffix [optional]
+	 */
+	static function createFullTextTableIfNotExists(PDO $db, array $schema, $name, $indexSuffix = "Index")
+	{
+		return Configuration::$instance->dataStore->createFullTextTableIfNotExists($db, $schema, $name, $indexSuffix);
+	}
+	
+	/**
 	 * @param mixed $obj
 	 * @param string $name
 	 */

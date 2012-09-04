@@ -1,42 +1,45 @@
 <?php
-class SearchIndex
+abstract class SearchIndex
 {
-	static $searchIndexSchema = array
-	(
-		"id" => "bigint",
-		"type" => "varchar(127)",
-		"word" => "varchar(127)"
-	);
+	/**
+	 * @var SearchIndex
+	 */
+	static $instance;
 	static $endchars = "　｛｝「」【】（）〈〉≪≫『』〔〕［］＜＞、。・…／＆！”＃＄％’ー＝＾～｜￥＋＊‘＠：；？＿";
+	
+	/**
+	 * @var int
+	 */
+	protected $gramLength = 2;
+	/**
+	 * @var int
+	 */
+	protected $gramMax = 2048;
+	
+	abstract function registerThread(PDO $idb, Thread $thread);
+	/**
+	 * @param int $id
+	 */
+	abstract function unregisterThread(PDO $idb, $id);
+	abstract function searchThread(PDO $idb, array $query, array $type = null, array $ids = null);
+	abstract function ensureTableExists(PDO $idb);
+	/**
+	 * @param int $id
+	 * @return array|int
+	 */
+	abstract function getExistingThread(PDO $idb);
+	
+	function attachIndex(PDO $idb)
+	{
+	}
+	
+	function detachIndex(PDO $idb)
+	{
+	}
 	
 	static function register(PDO $idb, Thread $thread)
 	{
-		self::unregister($idb, $thread->id);
-		$words = array_filter(array
-		(
-			"title" => self::getWords($thread->entry->title),
-			"name" => self::getWords($thread->entry->name),
-			"summary" => self::getWords($thread->entry->summary),
-			"body" => Configuration::$instance->registerBodyToSearchIndex ? self::getWords($thread->body) : null,
-			"afterword" => self::getWords($thread->afterword),
-			"tag" => call_user_func_array(array("SearchIndex", "getWords"), $thread->entry->tags)
-		));
-		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
-		('
-			insert into %s(id, type, word)
-			values
-			(
-				%d,
-				?,
-				?
-			);',
-			App::INDEX_TABLE,
-			$thread->id
-		)));
-
-		foreach ($words as $k => $v)
-			foreach ($v as $i)
-				$st->execute(array($k, $i));
+		self::$instance->registerThread($idb, $thread);
 	}
 	
 	/**
@@ -44,115 +47,117 @@ class SearchIndex
 	 */
 	static function unregister(PDO $idb, $id)
 	{
-		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
-		('
-			delete from %s
-			where id = %d',
-			App::INDEX_TABLE,
-			$id
-		)));
-		Util::executeStatement($st);
+		self::$instance->unregisterThread($idb, $id);
 	}
 	
-	static function search(PDO $idb, array $query, $type = null)
+	/**
+	 * @return array|int
+	 */
+	static function search(PDO $idb, array $query, array $type = null, array $ids = null)
 	{
-		if (!$query)
-			return array();
-		
-		if (!($query = call_user_func_array(array("SearchIndex", "getWords"), $query)))
-			return array();
-		
-		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
-		('
-			select id, word from %s
-			where word in (%s) %s',
-			App::INDEX_TABLE,
-			implode(", ", array_fill(0, count($query), "?")),
-			$type ? "and type = '{$type}'" : null
-		)));
-		Util::executeStatement($st, $query);
-		$arr = $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
-		$rt = array();
-		
-		foreach ($arr as $k => $v)
-			if (count(array_intersect($v, $query)) == count($query))
-				$rt[] = $k;
-		
-		return $rt;
+		return self::$instance->searchThread($idb, $query, $type, $ids);
 	}
 	
-	static function getWords()
+	static function isUpgradeRequired(PDO $idb)
 	{
-		$rt = array();
-		$gram = 2;
-		
-		foreach (func_get_args() as $i)
-		{
-			$i = mb_strtolower($i);
-			$l = mb_strlen($i);
-			$arr = array();
-			$m = $i;
-			
-			if ($l < $gram)
-			{
-				$rt[] = $i;
-				
-				continue;
-			}
-			
-			foreach (range(1, $l) as $k)
-			{
-				$arr[] = mb_substr($m, 0, 1);
-				$m = mb_substr($m, 1);
-			}
-			
-			foreach (range(0, $l - 1) as $k)
-			{
-				$str = "";
-				
-				foreach (range($k, $k + $gram - 1) as $j)
-					if ($j < $l)
-					{
-						$v = $arr[$j];
-						
-						if (self::actAsEnd($v))
-						{
-							$str = "";
-							
-							break;
-						}
-						else
-							$str .= $v;
-					}
-					else
-					{
-						$str = "";
-							
-						break;
-					}
-				
-				if (!Util::isEmpty($str))
-					$rt[] = $str;
-			}
-		}
-		
-		return array_filter(array_unique($rt), "strlen");
+		return self::getAvailableType() != "Classic" && Util::hasTable($idb, ClassicSearchIndex::INDEX_TABLE);
 	}
 	
-	private static function actAsEnd($v)
+	static function clear(PDO $idb)
 	{
-		$ord = ord($v);
+		if (Util::hasTable($idb, ClassicSearchIndex::INDEX_TABLE))
+			Util::executeStatement(Util::ensureStatement($idb, $idb->prepare("drop table " . ClassicSearchIndex::INDEX_TABLE)));
 		
-		return $ord >= 0 && $ord <= 47
-			|| $ord >= 58 && $ord <= 64
-			|| $ord >= 91 && $ord <= 96
-			|| $ord >= 123 && $ord <= 127
-			|| mb_strpos(self::$endchars, $v) !== false;
+		if (Util::hasTable($idb, SQLiteSearchIndex::INDEX_TABLE))
+			Util::executeStatement(Util::ensureStatement($idb, $idb->prepare("drop table " . SQLiteSearchIndex::INDEX_TABLE)));
+	}
+	
+	static function getAvailableType()
+	{
+		if (Configuration::$instance->dataStore instanceof MySQLDataStore)
+			return "MySQL";
+		else if (Configuration::$instance->dataStore instanceof SQLiteDataStore)
+			if (Configuration::$instance->dataStore->supportedFullTextSearchModule())
+				return "SQLite";
+		
+		return "Classic";
 	}
 	
 	static function ensureTable(PDO $idb)
 	{
-		Util::createTableIfNotExists($idb, self::$searchIndexSchema, App::INDEX_TABLE);
+		if (self::$instance == null)
+			switch (Util::hasTable($idb, ClassicSearchIndex::INDEX_TABLE) ? "Classic" : self::getAvailableType())
+			{
+				case "MySQL":
+					self::$instance = new MySQLSearchIndex();
+					
+					break;
+				case "SQLite":
+					self::$instance = new SQLiteSearchIndex();
+					
+					break;
+				case "Classic":
+					self::$instance = new ClassicSearchIndex();
+					
+					break;
+			}
+		
+		self::$instance->ensureTableExists($idb);
+	}
+	
+	/**
+	 * @param int $subject
+	 * @param int $offset [optional]
+	 * @param int $limit [optional]
+	 * @return array processed, remaining, count
+	 */
+	static function registerSubject(PDO $db, PDO $idb, $subject, $offset = 0, $limit = 0)
+	{
+		$instance = self::$instance;
+		
+		$existing = $instance->getExistingThread($idb);
+		$entries = ThreadEntry::getEntryIDsBySubject($db, $subject);
+		$slicedEntries = $limit == 0 ? $entries : array_slice($entries, $offset, $limit);
+		$count = count($entries);
+		$remaining = $limit == 0 ? $count : ($offset + $limit >= $count ? count($slicedEntries) : $count - $offset);
+		$processed = 0;
+		
+		unset($entries);
+		
+		foreach ($slicedEntries as $i)
+		{
+			if (!in_array($i, $existing))
+			{
+				$thread = Thread::load($db, $i);
+				
+				if (!is_null($thread))
+					$instance->registerThread($idb, $thread);
+				
+				unset($thread);
+				
+				$processed++;
+			}
+			
+			$remaining--;
+		}
+		
+		return array($processed, $remaining, $count);
+	}
+	
+	function getWords()
+	{
+		$rt = array();
+		$gram = $this->gramLength;
+		
+		foreach (func_get_args() as $i)
+			if (!Util::isEmpty($i))
+				foreach (mb_split('[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F' . self::$endchars . ']', $this->gramMax == -1 ? mb_strtolower($i) : mb_substr(mb_strtolower($i), 0, $this->gramMax)) as $j)
+					if ($l = mb_strlen($j))
+						for ($k = 0; $k < $l; $k++)
+							if (!in_array($s = mb_substr($j, $k, $gram), $rt))
+								$rt[] = $s;
+		
+		return $rt;
 	}
 }
 ?>

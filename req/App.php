@@ -14,7 +14,6 @@ class App
 	const THREAD_PASSWORD_TABLE = "threadPassword";
 	const COMMENT_TABLE = "comment";
 	const EVALUATION_TABLE = "evaluation";
-	const INDEX_TABLE = "searchIndex";
 	const INDEX_DATABASE = "search";
 	
 	static $handler;
@@ -39,6 +38,7 @@ class App
 			
 			mb_internal_encoding("UTF-8");
 			mb_http_output("UTF-8");
+			mb_regex_encoding("UTF-8");
 			
 			if (!function_exists("lcfirst"))
 			{
@@ -270,6 +270,9 @@ App::load(array
 	MODEL_DIR . "Evaluation",
 	MODEL_DIR . "Meta",
 	MODEL_DIR . "SearchIndex",
+	MODEL_DIR . "SearchIndex/Classic",
+	MODEL_DIR . "SearchIndex/SQLite",
+	MODEL_DIR . "SearchIndex/MySQL",
 	MODEL_DIR . "Statistics",
 	MODEL_DIR . "ThreadEntry",
 	MODEL_DIR . "Thread"
