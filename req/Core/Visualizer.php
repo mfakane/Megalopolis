@@ -372,7 +372,7 @@ class Visualizer
 		$args = func_get_args();
 		$href = self::href($args);
 		
-		return (is_file($href) ? "" : Util::getSuffix()) . $href;
+		return (is_file($href) ? "" : Util::getSuffix()) . rtrim($href, "?");
 	}
 	
 	static function absoluteHref()
