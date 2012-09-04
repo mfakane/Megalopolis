@@ -26,7 +26,7 @@ class Board
 			is_dir("Megalith/sub"))
 			self::$latestSubject = max(self::$latestSubject, count(glob("Megalith/sub/subject*.txt")) - 1);
 		
-		return self::$latestSubject;
+		return intval(self::$latestSubject);
 	}
 	
 	/**
@@ -47,7 +47,7 @@ class Board
 			is_dir("Megalith/sub"))
 			$rt = self::$latestSubject ? self::$latestSubject : self::$latestSubject = max($rt, count(glob("Megalith/sub/subject*.txt")) - 1);
 		
-		return $rt;
+		return intval($rt);
 	}
 	
 	static function ensureTable(PDO $db)
