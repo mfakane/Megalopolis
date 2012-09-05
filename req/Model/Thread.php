@@ -6,10 +6,11 @@ class Thread
 	const WRITING_MODE_HORIZONTAL = 1;
 	const WRITING_MODE_VERTICAL = 2;
 	
+	static $threadSchemaVersion = 2;
 	static $threadSchema = array
 	(
 		"id" => "bigint primary key not null",
-		"subject" => "integer primary key not null",
+		"subject" => "integer not null",
 		
 		"body" => "mediumtext",
 		"afterword" => "mediumtext"
@@ -303,6 +304,17 @@ class Thread
 	
 	static function ensureTable(PDO $db)
 	{
+		if (Util::hasTable($db, App::THREAD_TABLE))
+		{
+			$currentThreadSchemaVersion = intval(Meta::get($db, App::THREAD_TABLE, "1"));
+			
+			if ($currentThreadSchemaVersion < 2)
+				if (Configuration::$instance->dataStore instanceof SQLiteDataStore)
+					Configuration::$instance->dataStore->alterTable($db, self::$threadSchema, App::THREAD_TABLE);
+				else
+					Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s drop primary key, add primary key(id)', App::THREAD_TABLE))));
+		}
+		
 		if (Util::hasTable($db, App::THREAD_STYLE_TABLE))
 		{
 			$currentThreadStyleSchemaVersion = intval(Meta::get($db, App::THREAD_STYLE_TABLE, "1"));
@@ -318,6 +330,7 @@ class Thread
 		Util::createTableIfNotExists($db, self::$threadStyleSchema, App::THREAD_STYLE_TABLE);
 		Util::createTableIfNotExists($db, self::$threadPasswordSchema, App::THREAD_PASSWORD_TABLE);
 		Meta::set($db, App::THREAD_STYLE_TABLE, strval(self::$threadStyleSchemaVersion));
+		Meta::set($db, App::THREAD_TABLE, strval(self::$threadSchemaVersion));
 	}
 	
 	/**

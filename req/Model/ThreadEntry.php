@@ -1,10 +1,11 @@
 <?php
 class ThreadEntry
 {
+	static $threadEntrySchemaVersion = 2;
 	static $threadEntrySchema = array
 	(
 		"id" => "bigint primary key not null",
-		"subject" => "integer primary key not null",
+		"subject" => "integer not null",
 		
 		"title" => "varchar(255)",
 		"name" => "varchar(255)",
@@ -248,16 +249,30 @@ class ThreadEntry
 	
 	static function ensureTable(PDO $db)
 	{
-		Util::createTableIfNotExists($db, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE, array
+		$threadEntryIndices = array
 		(
 			App::THREAD_ENTRY_TABLE . "SubjectIndex" => array("subject"),
 			App::THREAD_ENTRY_TABLE . "NameIndex" => array("name")
-		));
+		);
+		
+		if (Util::hasTable($db, App::THREAD_ENTRY_TABLE))
+		{
+			$currentThreadEntrySchemaVersion = intval(Meta::get($db, App::THREAD_ENTRY_TABLE, "1"));
+			
+			if ($currentThreadEntrySchemaVersion < 2)
+				if (Configuration::$instance->dataStore instanceof SQLiteDataStore)
+					Configuration::$instance->dataStore->alterTable($db, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE, $threadEntryIndices);
+				else
+					Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s drop primary key, add primary key(id)', App::THREAD_ENTRY_TABLE))));
+		}
+		
+		Util::createTableIfNotExists($db, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE, $threadEntryIndices);
 		Util::createTableIfNotExists($db, self::$threadEvaluationSchema, App::THREAD_EVALUATION_TABLE);
 		Util::createTableIfNotExists($db, self::$threadTagSchema, App::THREAD_TAG_TABLE, array
 		(
 			App::THREAD_TAG_TABLE . "TagIndex" => array("tag")
 		));
+		Meta::set($db, App::THREAD_ENTRY_TABLE, strval(self::$threadEntrySchemaVersion));
 	}
 	
 	/**

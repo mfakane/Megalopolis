@@ -232,6 +232,18 @@ class SQLiteDataStore extends DataStore
 	
 	/**
 	 * @param string $name
+	 */
+	function alterTable(PDO $db, array $schema, $name, array $index = null)
+	{
+		$tempName = "{$name}Temp";
+		$this->createTableIfNotExists($db, $schema, $tempName, $index);
+		$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf('insert into %s select * from %s', $tempName, $name))));
+		$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf('drop table %s', $name))));
+		$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf('alter table %s rename to %s', $tempName, $name))));
+	}
+	
+	/**
+	 * @param string $name
 	 * @param string $indexSuffix [optional]
 	 */
 	function createFullTextTableIfNotExists(PDO $db, array $schema, $name, $indexSuffix = "Index")
