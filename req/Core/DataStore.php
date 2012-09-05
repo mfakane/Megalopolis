@@ -185,7 +185,10 @@ class SQLiteDataStore extends DataStore
 	 */
 	function open($name = "data", $beginTransaction = true)
 	{
-		$db = new PDO(sprintf("sqlite:%s%s.sqlite", rtrim($this->directory, "/") . "/", $name));
+		$db = new PDO(sprintf("sqlite:%s%s.sqlite", rtrim($this->directory, "/") . "/", $name), null, null, array
+		(
+			PDO::ATTR_PERSISTENT => true,
+		));
 		
 		if ($beginTransaction)
 			$db->beginTransaction();
@@ -332,7 +335,11 @@ class MySQLDataStore extends DataStore
 			sprintf("mysql:%s;dbname=%s;charset=utf8", is_null($this->unixSocket) ? "host={$this->host};port={$this->port}" : "unixsocket={$this->unixSocket}", $this->databaseName),
 			$this->userName,
 			$this->password,
-			array(PDO::MYSQL_ATTR_INIT_COMMAND => "set names utf8")
+			array
+			(
+				PDO::MYSQL_ATTR_INIT_COMMAND => "set names utf8",
+				PDO::ATTR_PERSISTENT => true,
+			)
 		);
 		
 		if ($beginTransaction)
