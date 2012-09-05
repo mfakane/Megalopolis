@@ -69,10 +69,17 @@ $config->denyWrite = array
 $config->denyWriteFromMobileWithoutID = false;
 
 // 本文も検索の対象として登録するか (true/false)
-// 投稿時に本文も検索用作品を作成するかどうかを指定します。
+// 投稿時に本文も検索インデックスに登録するかどうかを指定します。
 // 投稿に時間がかかったり、ログ変換に失敗したりするようであれば false にすることを推奨します。
 // すでに投稿されている作品に対しては反映されません
 $config->registerBodyToSearchIndex = true;
+
+// 検索インデックスへ登録する最大文字数 (整数)
+// 検索インデックスへ登録する作品名、名前、本文などのテキストの最大文字数を指定します。
+// 例えば本文がこの文字数以上の長さである場合、それ以降のテキストは検索対象になりません。
+// 投稿に時間がかかったり、ログ変換に失敗したりするようであれば値を小さくすることを推奨します。
+// -1 の場合、制限せず全文を登録します
+$config->maximumSearchIndexLength = 1024;
 
 /*
  * データストアに関する設定
@@ -459,7 +466,7 @@ $config->convertDivision = 100;
 
 // 必要に応じて Megalith のログを読み込むかどうか (true/false)
 // Megalith/ 以下にある Megalith 形式のログを使用するかどうかを指定します
-$config->convertOnDemand = false;
+$config->convertOnDemand = true;
 
 // 設定終了
 unset($config);

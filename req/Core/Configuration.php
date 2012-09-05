@@ -41,6 +41,7 @@ class Configuration
 	public $denyWrite = array();
 	public $denyWriteFromMobileWithoutID = false;
 	public $registerBodyToSearchIndex = true;
+	public $maximumSearchIndexLength = 1024;
 
 	/**
 	 * @var DataStore

@@ -11,10 +11,6 @@ abstract class SearchIndex
 	 * @var int
 	 */
 	protected $gramLength = 2;
-	/**
-	 * @var int
-	 */
-	protected $gramMax = 2048;
 	
 	abstract function registerThread(PDO $idb, Thread $thread);
 	/**
@@ -148,10 +144,11 @@ abstract class SearchIndex
 	{
 		$rt = array();
 		$gram = $this->gramLength;
+		$gramMax = Configuration::$instance->maximumSearchIndexLength;
 		
 		foreach (func_get_args() as $i)
 			if (!Util::isEmpty($i))
-				foreach (mb_split('[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F' . self::$endchars . ']', $this->gramMax == -1 ? mb_strtolower($i) : mb_substr(mb_strtolower($i), 0, $this->gramMax)) as $j)
+				foreach (mb_split('[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F' . self::$endchars . ']', $gramMax == -1 ? mb_strtolower($i) : mb_substr(mb_strtolower($i), 0, $gramMax)) as $j)
 					if ($l = mb_strlen($j))
 						for ($k = 0; $k < $l; $k++)
 							if (!in_array($s = mb_substr($j, $k, $gram), $rt))
