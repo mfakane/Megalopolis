@@ -386,7 +386,7 @@ class MySQLDataStore extends DataStore
 				%s,
 				primary key(%s)%s
 			)
-			default character set utf8",
+			default character set utf8 engine InnoDB",
 			$name,
 			implode(", ", array_map(create_function('$_', 'return strtr($_, array(" primary key" => ""));'), $arr)),
 			implode(", ", array_map(create_function('$_', '$tmp = explode(" ", $_); return array_shift($tmp);'), array_filter($arr, create_function('$_', 'return mb_strstr($_, "primary key");')))),
@@ -412,7 +412,7 @@ class MySQLDataStore extends DataStore
 				%s,
 				primary key(%s)%s
 			)
-			default character set utf8 collate utf8_unicode_ci",
+			default character set utf8 collate utf8_unicode_ci engine MyISAM",
 			$name,
 			implode(", ", $columns),
 			implode(", ", $primaryKeys),
