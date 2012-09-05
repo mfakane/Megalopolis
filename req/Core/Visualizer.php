@@ -661,7 +661,7 @@ class Visualizer
 		eval("?" . ">" . $content);
 		$output = ob_get_contents();
 		ob_end_clean();
-		$output = mb_ereg_replace('\s+<', '<', mb_ereg_replace('>\s+', '>', $output));
+		$output = mb_ereg_replace('[\t \r\n]+<', '<', mb_ereg_replace('>[\t \r\n]+', '>', $output));
 		
         header("Content-Type: text/html; charset=utf-8");
 
