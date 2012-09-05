@@ -67,7 +67,7 @@ Visualizer::doctype();
 			<?if (!Util::isEmpty($h->thread->background)): ?>
 				background-color: <?+$h->thread->background ?>;
 			<?endif ?>
-			<?if (!Util::isEmpty($h->thread->background)): ?>
+			<?if (!Util::isEmpty($h->thread->backgroundImage)): ?>
 				background-image: url('<?+(strpos($h->thread->backgroundImage, "http://") === 0 ? null : Visualizer::$basePath) . $h->thread->backgroundImage ?>');
 			<?endif ?>
 			<?if (!Util::isEmpty($h->thread->border)): ?>
