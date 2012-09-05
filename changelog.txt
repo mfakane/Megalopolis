@@ -1,4 +1,44 @@
-﻿2012-09-04 COAH96KoxU <queue glasscore.net>
+﻿2012-09-05 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 14
+	* req/Visualizer/Read/Edit.php,
+	  req/Visualizer/Read/Index.php,
+	  script/Read/Edit.js: 背景画像に相対パスが使用できないのを修正
+	* readme.txt: 検索インデックスの再生成に関する文を追加
+	* req/Model/ThreadEntry.php: 作者数及びタグ数の取得が正しくないため作者一覧およびタグ一覧でページャが表示されないのを修正
+	* req/Handler/Index.php,
+	  req/Handler/Megalith.php,
+	  req/Model/Board.php: 作品集数の取得と最新作品集番号取得が同一の意味であるため統一
+	* req/Handler/Index.php: 管理者による一括作品削除が読み込めない作品を削除できないのを修正
+	* req/Handler/Util.php: 管理者ログイン時データストアに関する情報を設定情報に表示するように
+	* req/Handler/Util.php,
+	  req/Model/ThreadEntry.php: 変換中にエラーが発生した作品の残骸の削除を試行するように
+	* req/Handler/Util.php,
+	  script/Util/Convert.js: 変換中に実行可能時間を超過した場合処理数を半分にし一定値以下になるまでリトライするように
+	* req/App.php,
+	  req/Core/ApplicationException.php,
+	  req/Handler/Util.php: 変換中にエラーが発生した時その時処理中であった作品番号および作品集を表示するように
+	* req/Handler/Util.php: subject.txt が逆順であっても変換可能に修正
+	* req/Handler/Util.php: 既に存在する作品は変換をスキップするように
+	* req/Handler/Util.php,
+	  req/Visualizer/Util/Index.php: 検索インデックスの再生成ツールを追加
+	* req/Handler/Read.php,
+	  req/Model/Thread.php: ログ読み込み系統の整理
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Model/SearchIndex.php: インデックス登録の最大文字数の設定を追加
+	* req/App.php,
+	  req/Core/DataStore.php,
+	  req/Core/Util.php,
+	  req/Model/SearchIndex.php,
+	  req/Model/ThreadEntry.php: DBMS の全文検索機能に対するサポートを追加
+	* req/Model/Board.php: 最新作品集番号取得が数値ではなく文字列を返すのを修正
+	* req/Visualizer/Index/Tag.php: タグおよび作者一覧のページャのリンク先が正しくないのを修正
+	* req/Core/Visualizer.php: URL の末尾に余計な ? が残ることがあるのを修正
+	* req/Visualizer/Template/Index.php: ショートタグが有効でない環境で作品一覧に管理者モードでない時にホスト名が表示されることがあるのを修正
+	* req/Core/Visualizer.php: ショートタグが有効でない環境でページ先頭へのリンクが化けるのを修正
+
+2012-09-04 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 13
 	* req/Handler/Util.php: テストデータフィルに認証がないのを修正

@@ -466,7 +466,7 @@ $config->convertDivision = 100;
 
 // 必要に応じて Megalith のログを読み込むかどうか (true/false)
 // Megalith/ 以下にある Megalith 形式のログを使用するかどうかを指定します
-$config->convertOnDemand = true;
+$config->convertOnDemand = false;
 
 // 設定終了
 unset($config);
