@@ -2,6 +2,7 @@
 class ApplicationException extends Exception
 {
 	public $httpCode;
+	public $data;
 	
 	function __construct($message, $httpCode = 500)
 	{

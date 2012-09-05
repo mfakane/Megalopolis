@@ -141,7 +141,8 @@ class App
 			if (self::$handlerType == "json" || strstr(Util::getPathInfo(), ".json") == ".json")
 				Visualizer::json(array
 				(
-					"error" => $ex->getMessage()
+					"error" => $ex->getMessage(),
+					"data" => $ex->data
 				));
 			else
 				Visualizer::visualize("Exception");

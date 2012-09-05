@@ -219,7 +219,20 @@ class UtilHandler extends Handler
 						($end == 0 || $id < $end))
 						if (!in_array($id, $existing))
 						{
-							$thread = Util::convertAndSaveToThread($db, $idb, $subject, "{$dir}dat/{$id}.dat", "{$dir}com/{$id}.res.dat", "{$dir}aft/{$id}.aft.dat");
+							try
+							{
+								$thread = Util::convertAndSaveToThread($db, $idb, $subject, "{$dir}dat/{$id}.dat", "{$dir}com/{$id}.res.dat", "{$dir}aft/{$id}.aft.dat");
+							}
+							catch (ApplicationException $ex)
+							{
+								$ex->data = array
+								(
+									"id" => $id,
+									"subject" => $subject,
+								);
+								
+								throw $ex;
+							}
 							
 							if (!$thread)
 								continue;
