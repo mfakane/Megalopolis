@@ -947,5 +947,30 @@ class ThreadEntry
 			);
 		}
 	}
+	
+	
+	/**
+	 * @param int $id
+	 */
+	static function deleteDirect(PDO $db, $id)
+	{
+		foreach (array
+		(
+			App::THREAD_ENTRY_TABLE,
+			App::THREAD_EVALUATION_TABLE,
+			App::THREAD_PASSWORD_TABLE,
+			App::THREAD_STYLE_TABLE,
+			App::THREAD_TABLE,
+			App::THREAD_TAG_TABLE,
+		) as $i)
+			Util::executeStatement(Util::ensureStatement($db, $db->prepare("delete from {$i} where id = ?")), array($id));
+		
+		foreach (array
+		(
+			App::EVALUATION_TABLE,
+			App::COMMENT_TABLE,
+		) as $i)
+			Util::executeStatement(Util::ensureStatement($db, $db->prepare("delete from {$i} where entryID = ?")), array($id));
+	}
 }
 ?>

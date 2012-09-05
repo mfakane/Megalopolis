@@ -236,6 +236,9 @@ class UtilHandler extends Handler
 									"subject" => $subject,
 								);
 								
+								ThreadEntry::deleteDirect($db, $id);
+								App::closeDB($db);
+								
 								throw $ex;
 							}
 							
