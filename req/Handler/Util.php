@@ -291,6 +291,8 @@ class UtilHandler extends Handler
 	function config()
 	{
 		$c = Configuration::$instance;
+		$isAdmin = Auth::hasSession(true);
+		$idb = App::openDB(App::INDEX_DATABASE);
 		Visualizer::$data = array
 		(
 			"system" => array
@@ -298,7 +300,14 @@ class UtilHandler extends Handler
 				lcfirst(App::NAME) => App::VERSION,
 				"megalith" => App::MEGALITH_VERSION,
 				"php" => phpversion(),
-			),
+			) + ($isAdmin ? array
+			(
+				"pdoServer" => $idb->getAttribute(PDO::ATTR_SERVER_VERSION),
+				"pdoClient" => $idb->getAttribute(PDO::ATTR_CLIENT_VERSION),
+				"pdoDriver" => $idb->getAttribute(PDO::ATTR_DRIVER_NAME),
+				"currentSearch" => SearchIndex::isUpgradeRequired($idb) ? "classic" : strtolower(SearchIndex::getAvailableType()),
+				"availableSearch" => strtolower(SearchIndex::getAvailableType()),
+			) : array()),
 			"configuration" => array
 			(
 				"title" =>
@@ -402,6 +411,7 @@ class UtilHandler extends Handler
 					array("作品上ページ数表示", $c->showPages[Configuration::ON_ENTRY]),
 			),
 		);
+		App::closeDB($idb, false, false);
 		
 		if (App::$handlerType == "json")
 		{
