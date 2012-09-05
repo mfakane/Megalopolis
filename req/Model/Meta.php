@@ -21,8 +21,10 @@ class Meta
 		if (self::$meta == null)
 		{
 			self::$meta = array();
+			$st = Util::ensureStatement($db, $db->prepare("select * from " . App::META_TABLE));
+			Util::executeStatement($st);
 			
-			foreach (Util::ensureStatement($db, $db->query("select * from " . App::META_TABLE))->fetchAll() as $i)
+			foreach ($st->fetchAll() as $i)
 				self::$meta[$i["name"]] = $i["value"];
 		}
 		

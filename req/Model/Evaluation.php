@@ -55,13 +55,16 @@ class Evaluation
 	 */
 	private static function query(PDO $db, $options = "")
 	{
-		return Util::ensureStatement($db, $db->query(sprintf
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
 			select * from %s
 			%s',
 			App::EVALUATION_TABLE,
 			trim($options)
-		)))->fetchAll(PDO::FETCH_CLASS, "Evaluation");
+		)));
+		Util::executeStatement($st);
+		
+		return $st->fetchAll(PDO::FETCH_CLASS, "Evaluation");
 	}
 	
 	function save(PDO $db)

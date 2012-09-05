@@ -86,13 +86,16 @@ class Comment
 	 */
 	private static function query(PDO $db, $options = "")
 	{
-		return Util::ensureStatement($db, $db->query(sprintf
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
 			select * from %s
 			%s',
 			App::COMMENT_TABLE,
 			trim($options)
-		)))->fetchAll(PDO::FETCH_CLASS, "Comment");
+		)));
+		Util::executeStatement($st);
+		
+		return $st->fetchAll(PDO::FETCH_CLASS, "Comment");
 	}
 	
 	function save(PDO $db)

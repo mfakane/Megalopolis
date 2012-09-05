@@ -14,11 +14,13 @@ class Board
 		if (self::$latestSubject)
 			return self::$latestSubject;
 		
-		$rt = Util::ensureStatement($db, $db->query(sprintf
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
 			select max(subject) from %s',
 			App::THREAD_ENTRY_TABLE
-		)))->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
+		)));
+		Util::executeStatement($st);
+		$rt = $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
 		
 		self::$latestSubject = $rt ? intval(array_pop($rt)) : 0;
 		

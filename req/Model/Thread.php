@@ -326,7 +326,7 @@ class Thread
 	 */
 	private static function query(PDO $db, $options)
 	{
-		return Util::ensureStatement($db, $db->query(sprintf
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
 			select * from %s
 			left join %s on %1$s.id = %2$s.id
@@ -336,7 +336,10 @@ class Thread
 			App::THREAD_STYLE_TABLE,
 			App::THREAD_PASSWORD_TABLE,
 			trim($options)
-		)))->fetchAll(PDO::FETCH_CLASS, "Thread");
+		)));
+		Util::executeStatement($st);
+		
+		return $st->fetchAll(PDO::FETCH_CLASS, "Thread");
 	}
 	
 	/**

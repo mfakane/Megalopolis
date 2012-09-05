@@ -36,7 +36,7 @@ class ClassicSearchIndex extends SearchIndex
 
 		foreach ($words as $k => $v)
 			foreach ($v as $i)
-				$st->execute(array($k, $i));
+				Util::executeStatement($st, array($k, $i));
 	}
 	
 	/**
