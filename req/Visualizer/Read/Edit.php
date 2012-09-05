@@ -75,7 +75,7 @@ Visualizer::doctype();
 				<?endif ?>
 			<?endif ?>
 			<?if ($c->backgroundImageEnabled): ?>
-				<label for="backgroundImage">背景画像</label><input type="url" name="backgroundImage" id="backgroundImage" onchange="megalopolis.edit.updateBackgroundImage()" value="<?+$h->thread->backgroundImage ?>" />
+				<label for="backgroundImage">背景画像</label><input type="text" name="backgroundImage" id="backgroundImage" onchange="megalopolis.edit.updateBackgroundImage()" value="<?+$h->thread->backgroundImage ?>" />
 				<?if ($c->backgroundImageMap): ?>
 					<script>
 						megalopolis.edit.backgroundImagePalette([<?=implode(", ", array_map(create_function('$_', 'return "\'" . Visualizer::escapeOutput($_) . "\'";'), $c->backgroundImageMap)) ?>]);

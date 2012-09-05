@@ -10,7 +10,7 @@ megalopolis.edit =
 		else
 			value = t.val();
 		
-		$("#body").css(cssProperty, value == "" ? defaultValue : value);
+		$("#body").css(cssProperty, value == "" ? defaultValue : cssProperty == "backgroundImage" ? "url('" + value + "')" : value);
 	},
 	updateForeground: function(value)
 	{

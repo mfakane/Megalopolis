@@ -6,7 +6,7 @@ $isEdit = in_array(App::$actionName, array("new", "edit"));
 $isAdmin = Auth::hasSession(true);
 Visualizer::doctype();
 ?>
-<html<?if (!Util::isEmpty($h->thread->background)): ?> style="background-color: <?+$h->thread->background ?>;"<?endif ?>>
+<html>
 <head>
 	<? Visualizer::head() ?>
 	<meta name="author" content="<?+$h->entry->name ?>" />
@@ -51,6 +51,30 @@ Visualizer::doctype();
 			{{html formattedBody}}
 		</dd>
 	</script>
+	<style>
+		html
+		{
+			<?if (!Util::isEmpty($h->thread->background)): ?>
+				background-color: <?+$h->thread->background ?>;
+			<?endif ?>
+		}
+		
+		#body
+		{
+			<?if (!Util::isEmpty($h->thread->foreground)): ?>
+				color: <?+$h->thread->foreground ?>;
+			<?endif ?>
+			<?if (!Util::isEmpty($h->thread->background)): ?>
+				background-color: <?+$h->thread->background ?>;
+			<?endif ?>
+			<?if (!Util::isEmpty($h->thread->background)): ?>
+				background-image: url('<?+(strpos($h->thread->backgroundImage, "http://") === 0 ? null : Visualizer::$basePath) . $h->thread->backgroundImage ?>');
+			<?endif ?>
+			<?if (!Util::isEmpty($h->thread->border)): ?>
+				border-color: <?+$h->thread->border ?>;
+			<?endif ?>
+		}
+	</style>
 </head>
 <body class="read">
 	<? Visualizer::header($h->entry->title, App::$actionName == "index"
@@ -133,7 +157,7 @@ Visualizer::doctype();
 	<? Visualizer::pager($h->page, $h->entry->pageCount, 5, App::$actionName != "index"
 		? (App::$actionName == "new" ? Visualizer::actionHref(App::$actionName) . "/" : Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName, array("p" => "")))
 		: Visualizer::actionHref($h->subject, $h->entry->id) . "/") ?>
-	<section id="body" style="color: <?+$h->thread->foreground ?>; background-color: <?+$h->thread->background ?>; border-color: <?+$h->thread->border ?>; background-image: <?+!Util::isEmpty($h->thread->backgroundImage) ? "url('{$h->thread->backgroundImage}')" : "none" ?>;">
+	<section id="body">
 		<div id="contentWrapper">
 			<?if ($h->page == 1 && $c->showHeaderInsideBorder): ?>
 				<h1>
