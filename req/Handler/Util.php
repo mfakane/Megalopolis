@@ -124,6 +124,9 @@ class UtilHandler extends Handler
 	
 	function convert()
 	{
+		$defaultBuffer = Configuration::$instance->convertDivision;
+		$minimumBuffer = 20;
+		
 		self::ensureTestMode();
 		
 		$dir = "Megalith/";
@@ -184,7 +187,8 @@ class UtilHandler extends Handler
 					return Visualizer::json(array
 					(
 						"remaining" => $subjectRange,
-						"count" => 0
+						"count" => 0,
+						"buffer" => $defaultBuffer
 					));
 				else
 					return Visualizer::redirect("util/convert?p=" . urlencode(implode(",", $subjectRange)));
@@ -208,6 +212,7 @@ class UtilHandler extends Handler
 				$start = intval($l[1]);
 				$end = intval($l[2]);
 				$count = isset($_GET["c"]) ? intval($_GET["c"]) : 0;
+				$buffer = isset($_GET["b"]) ? intval($_GET["b"]) : $defaultBuffer;
 				$currentCount = 0;
 				$firstID = 0;
 				$existing = ThreadEntry::getEntryIDsBySubject($db, $subject);
@@ -242,7 +247,7 @@ class UtilHandler extends Handler
 							
 							$count++;
 							
-							if (++$currentCount == max(Configuration::$instance->convertDivision, 1))
+							if (++$currentCount == max($buffer, 1))
 							{
 								$lastID = $thread->id + 1;
 								array_unshift($params, "{$subject}-{$lastID}-{$end}");
@@ -259,7 +264,8 @@ class UtilHandler extends Handler
 					(
 						"first" => $firstID,
 						"remaining" => $params,
-						"count" => $count
+						"count" => $count,
+						"buffer" => max($buffer, $minimumBuffer)
 					));
 				else
 					return Visualizer::redirect("util/convert?p=" . urlencode(implode(",", $params)) . "&c={$count}");

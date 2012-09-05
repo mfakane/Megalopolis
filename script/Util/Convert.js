@@ -3,6 +3,7 @@ megalopolis.convert =
 	action: "",
 	list: [],
 	first: 0,
+	minimumBuffer: 10,
 	submit: function()
 	{
 		$("#form").remove();
@@ -61,7 +62,8 @@ megalopolis.convert =
 			data:
 			{
 				p: obj.remaining.join(","),
-				c: obj.count
+				c: obj.count,
+				b: obj.buffer
 			},
 			success: function(data)
 			{
@@ -106,6 +108,15 @@ megalopolis.convert =
 			error: function(xhr)
 			{
 				var data = xhr.responseText;
+				
+				if (data.indexOf("Maximum execution time") != -1 && data.indexOf("exceeded") != -1)
+					if (obj.buffer / 2 > megalopolis.convert.minimumBuffer)
+					{
+						obj.buffer /= 2;
+						megalopolis.convert.process(bar, obj);
+						
+						return;
+					}
 				
 				$("#convert>div>*").remove();
 				$("#convert>div")
