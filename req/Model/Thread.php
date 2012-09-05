@@ -266,6 +266,32 @@ class Thread
 			return null;
 	}
 	
+	static function loadWithMegalith(PDO $db, PDO $idb, $id)
+	{
+		if (!($rt = Thread::load($db, $id)))
+			if (Configuration::$instance->convertOnDemand &&
+				is_dir("Megalith/sub") &&
+				is_file($path = "Megalith/dat/{$id}.dat"))
+			{
+				$subject = 0;
+				
+				foreach (glob("Megalith/sub/subject*.txt") as $i)
+					if (($n = basename($i)) != "subjects.txt" &&
+						strpos(file_get_contents($i), "{$id}.dat") !== false)
+						$subject = $n == "subject.txt"
+							? Board::getLatestSubject($db)
+							: intval(strtr($n, array
+							(
+								"subject" => "",
+								".txt" => ""
+							)));
+				
+				$rt = Util::convertAndSaveToThread($db, $idb, $subject, $path, "Megalith/com/{$id}.res.dat", "Megalith/aft/{$id}.aft.dat");
+			}
+		
+		return $rt;
+	}
+	
 	function save(PDO $db)
 	{
 		$this->entry->save($db);

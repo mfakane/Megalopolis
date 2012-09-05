@@ -488,31 +488,12 @@ class ReadHandler extends Handler
 	 */
 	private static function loadThread(PDO $db, $id)
 	{
-		if (!($rt = Thread::load($db, $id)))
-			if (Configuration::$instance->convertOnDemand &&
-				is_dir("Megalith/sub") &&
-				is_file($path = "Megalith/dat/{$id}.dat"))
-			{
-				$idb = App::openDB(App::INDEX_DATABASE);
-				$subject = 0;
-				
-				foreach (glob("Megalith/sub/subject*.txt") as $i)
-					if (($n = basename($i)) != "subjects.txt" &&
-						strpos(file_get_contents($i), "{$id}.dat") !== false)
-						$subject = $n == "subject.txt"
-							? Board::getLatestSubject($db)
-							: intval(strtr($n, array
-							(
-								"subject" => "",
-								".txt" => ""
-							)));
-				
-				$rt = Util::convertAndSaveToThread($db, $idb, $subject, $path, "Megalith/com/{$id}.res.dat", "Megalith/aft/{$id}.aft.dat");
-				
-				App::closeDB($idb);
-			}
-			else
-				throw new ApplicationException("指定された番号 {$id} の作品は存在しません", 404);
+		$idb = App::openDB(App::INDEX_DATABASE);
+		
+		if (!($rt = Thread::loadWithMegalith($db, $idb, $id)))
+			throw new ApplicationException("指定された番号 {$id} の作品は存在しません", 404);
+		
+		App::closeDB($idb);
 		
 		return $rt;
 	}
