@@ -1,7 +1,7 @@
 <?php
 class ThreadEntry
 {
-	static $threadEntrySchemaVersion = 2;
+	static $threadEntrySchemaVersion = 3;
 	static $threadEntrySchema = array
 	(
 		"id" => "bigint primary key not null",
@@ -18,6 +18,7 @@ class ThreadEntry
 		"pageCount" => "integer",
 		"size" => "real"
 	);
+	static $threadEvaluationSchemaVersion = 2;
 	static $threadEvaluationSchema = array
 	(
 		"id" => "bigint primary key not null",
@@ -264,6 +265,20 @@ class ThreadEntry
 					Configuration::$instance->dataStore->alterTable($db, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE, $threadEntryIndices);
 				else
 					Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s drop primary key, add primary key(id)', App::THREAD_ENTRY_TABLE))));
+			
+			if ($currentThreadEntrySchemaVersion < 3)
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(dateTime)', App::THREAD_ENTRY_TABLE . "DateTimeIndex", App::THREAD_ENTRY_TABLE))));
+		}
+		
+		if (Util::hasTable($db, App::THREAD_EVALUATION_TABLE))
+		{
+			$currentThreadEvaluationSchemaVersion = intval(Meta::get($db, App::THREAD_EVALUATION_TABLE, "1"));
+			
+			if ($currentThreadEvaluationSchemaVersion < 2)
+			{
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(evaluationCount)', App::THREAD_EVALUATION_TABLE . "EvaluationCountIndex", App::THREAD_EVALUATION_TABLE))));
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(points)', App::THREAD_EVALUATION_TABLE . "PointsIndex", App::THREAD_EVALUATION_TABLE))));
+			}
 		}
 		
 		Util::createTableIfNotExists($db, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE, $threadEntryIndices);
@@ -273,6 +288,7 @@ class ThreadEntry
 			App::THREAD_TAG_TABLE . "TagIndex" => array("tag")
 		));
 		Meta::set($db, App::THREAD_ENTRY_TABLE, strval(self::$threadEntrySchemaVersion));
+		Meta::set($db, App::THREAD_EVALUATION_TABLE, strval(self::$threadEvaluationSchemaVersion));
 	}
 	
 	/**
@@ -815,14 +831,13 @@ class ThreadEntry
 		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
 			select
-				max(dateTime) as maxDateTime,
-				min(dateTime) as minDateTime,
-				max(evaluationCount) as maxEval,
-				min(evaluationCount) as minEval,
-				max(points) as maxPoints,
-				min(points) as minPoints
-				from %s
-			left join %s on %1$s.id = %2$s.id',
+				max(a.evaluationCount) as maxEval,
+				min(a.evaluationCount) as minEval,
+				max(b.points) as maxPoints,
+				min(b.points) as minPoints,
+				max(c.dateTime) as maxDateTime,
+				min(c.dateTime) as minDateTime
+				from %2$s as a, %2$s as b, %1$s as c',
 			App::THREAD_ENTRY_TABLE,
 			App::THREAD_EVALUATION_TABLE
 		)));
