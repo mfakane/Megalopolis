@@ -156,16 +156,16 @@ class UtilHandler extends Handler
 					
 					$previousSubjectFile = "{$dir}sub/subject{$subjectNum}.txt";
 					$nextSubjectFile = "{$dir}sub/subject" . ($subjectNum == count($subjects) - 2 ? "" : $subjectNum + 2) . ".txt";
-					$stats = explode("\n", trim(file_get_contents($subjectFile)));
+					$stats = file($subjectFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 					$count = count($stats);
 					
 					$set = array
 					(
 						"start" => $subjectNum > 0
-							? (is_file($previousSubjectFile) ? self::getDataLineID(array_pop(explode("\n", trim(file_get_contents($previousSubjectFile))))) + 1 : self::getDataLineID($stats[0]))
+							? (is_file($previousSubjectFile) ? max(self::getFirstAndLastDataLineIDFromLines(file($previousSubjectFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES))) + 1 : min(self::getFirstAndLastDataLineIDFromLines($stats)))
 							: 0,
 						"end" => $subjectNum < count($subjects)
-							? (is_file($nextSubjectFile) ? self::getDataLineID(array_shift(file($nextSubjectFile))) : self::getDataLineID($stats[$count - 1]) + 1)
+							? (is_file($nextSubjectFile) ? min(self::getFirstAndLastDataLineIDFromLines(file($nextSubjectFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES))) : max(self::getFirstAndLastDataLineIDFromLines($stats)) + 1)
 							: 0
 					);
 					$subjectRange[] = $set;
@@ -254,6 +254,11 @@ class UtilHandler extends Handler
 		}
 		else
 			return Visualizer::visualize();
+	}
+	
+	private static function getFirstAndLastDataLineIDFromLines(array $lines)
+	{
+		return array(self::getDataLineID(array_shift($lines)), self::getDataLineID(array_pop($lines)));
 	}
 	
 	private static function getDataLineID($s)
