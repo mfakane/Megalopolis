@@ -621,8 +621,7 @@ class ThreadEntry
 	{
 		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
-			select count(1) from %s
-			group by name',
+			select count(distinct name) from %s',
 			App::THREAD_ENTRY_TABLE
 		)));
 		Util::executeStatement($st);
@@ -638,8 +637,7 @@ class ThreadEntry
 	{
 		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
-			select count(1) from %s
-			group by tag',
+			select count(distinct tag) from %s',
 			App::THREAD_TAG_TABLE
 		)));
 		Util::executeStatement($st);
