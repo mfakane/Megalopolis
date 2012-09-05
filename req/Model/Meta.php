@@ -36,6 +36,9 @@ class Meta
 	 */
 	static function set(PDO $db, $name, $value)
 	{
+		if (isset(self::$meta[$name]) && self::$meta[$name] === $value)
+			return;
+		
 		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf
 		('
 			replace into %s
