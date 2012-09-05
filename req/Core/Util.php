@@ -184,6 +184,11 @@ class Util
 	 */
 	static function getAbsoluteUrl($path = "")
 	{
+		static $absoluteUrls = array();
+		
+		if (isset($absoluteUrls[$path]))
+			return $absoluteUrls[$path];
+		
 		$script = $_SERVER["SCRIPT_NAME"];
 		$linkType = Configuration::$instance->linkType;
 
@@ -198,7 +203,7 @@ class Util
 			else
 				$script .= "?" . self::PATH_INFO_QUERY_PARAM . "=";
 		
-		return "http://" . (isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] :  $_SERVER["SERVER_NAME"] . ($_SERVER["SERVER_PORT"] == 80 ? null : ":" . $_SERVER["SERVER_PORT"])) . $script . $path;
+		return $absoluteUrls[$path] = "http://" . (isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] :  $_SERVER["SERVER_NAME"] . ($_SERVER["SERVER_PORT"] == 80 ? null : ":" . $_SERVER["SERVER_PORT"])) . $script . $path;
 	}
 	
 	static function getSuffix()
