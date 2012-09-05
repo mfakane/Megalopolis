@@ -63,7 +63,7 @@ class IndexHandler extends Handler
 		
 		$this->entries = ThreadEntry::getEntriesBySubject($db, $subject);
 		$this->subject = $subject;
-		$this->subjectCount = Board::getSubjectCount($db);
+		$this->subjectCount = Board::getLatestSubject($db);
 		
 		App::closeDB($db);
 		
@@ -359,7 +359,7 @@ class IndexHandler extends Handler
 			$pageCount = ceil(ThreadEntry::getEntryCountByName($db, $name) / Configuration::$instance->searchPaging);
 			$this->entries = ThreadEntry::getEntriesByName($db, $name, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging);
 			$this->subject = 0;
-			$this->subjectCount = Board::getSubjectCount($db);
+			$this->subjectCount = Board::getLatestSubject($db);
 			Visualizer::$data = $name;
 		}
 		
@@ -446,7 +446,7 @@ class IndexHandler extends Handler
 			$pageCount = ceil(ThreadEntry::getEntryCountByTag($db, $tag) / Configuration::$instance->searchPaging);
 			$this->entries = ThreadEntry::getEntriesByTag($db, $tag, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging);
 			$this->subject = 0;
-			$this->subjectCount = Board::getSubjectCount($db);
+			$this->subjectCount = Board::getLatestSubject($db);
 			Visualizer::$data = $tag;
 		}
 		
