@@ -33,6 +33,95 @@ class UtilHandler extends Handler
 		return Visualizer::visualize();
 	}
 	
+	function reindex()
+	{
+		$defaultBuffer = 40;
+		$minimumBuffer = 5;
+		
+		self::ensureTestMode();
+		
+		if (isset($_GET["p"]))
+		{
+			$param = Util::escapeInput($_GET["p"]);
+			
+			if ($param == "list")
+			{
+				$db = App::openDB();
+				$idb = App::openDB(App::INDEX_DATABASE);
+				$maxSubject = Board::getLatestSubject($db);
+				
+				if (isset($_GET["force"]) && $_GET["force"] == "yes")
+					SearchIndex::clear($idb);
+				
+				App::closeDB($idb);
+				App::closeDB($db);
+				
+				if (App::$handlerType == "json")
+					return Visualizer::json(array
+					(
+						"remainingChildren" => 1,
+						"allChildren" => 1,
+						"nextOffset" => 0,
+						"current" => 0,
+						"next" => 1,
+						"max" => $maxSubject,
+						"count" => 0,
+						"buffer" => $defaultBuffer
+					));
+				else
+					return Visualizer::redirect("util/reindex?p=1");
+			}
+			else if ($param == "end")
+			{
+				Visualizer::$data = isset($_GET["c"]) ? intval($_GET["c"]) : 0;
+				
+				if (App::$handlerType == "json")
+					return Visualizer::json(array
+					(
+						"count" => Visualizer::$data
+					));
+				else
+					return Visualizer::visualize();
+			}
+			else
+			{
+				$current = intval($param);
+				$count = isset($_GET["c"]) ? intval($_GET["c"]) : 0;
+				$offset = isset($_GET["o"]) ? intval($_GET["o"]) : 0;
+				$buffer = isset($_GET["b"]) ? intval($_GET["b"]) : $defaultBuffer;
+				
+				$db = App::openDB();
+				$idb = App::openDB(App::INDEX_DATABASE);
+				$maxSubject = Board::getLatestSubject($db);
+				
+				$rt = SearchIndex::$instance->registerSubject($db, $idb, $current, $offset, $buffer);
+				$count += $rt[0];
+				$nextOffset = $rt[1] <= 0 ? 0 : $offset += $buffer;
+				$next = $nextOffset == 0 ? $current + 1 : $current;
+				
+				App::closeDB($idb);
+				App::closeDB($db);
+				
+				if (App::$handlerType == "json")
+					return Visualizer::json(array
+					(
+						"remainingChildren" => $rt[1],
+						"allChildren" => $rt[2],
+						"nextOffset" => $nextOffset,
+						"current" => $current,
+						"next" => $next > $maxSubject ? null : $next,
+						"max" => $maxSubject,
+						"count" => $count,
+						"buffer" => max($buffer, $minimumBuffer)
+					));
+				else
+					return Visualizer::redirect($next > $maxSubject ? "util/reindex?p=end" : "util/reindex?p={$next}&c={$count}&o={$nextOffset}");
+			}
+		}
+		else
+			return Visualizer::visualize();
+	}
+	
 	function convert()
 	{
 		self::ensureTestMode();
