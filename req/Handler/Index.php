@@ -45,13 +45,12 @@ class IndexHandler extends Handler
 				Auth::loginError("管理者パスワードが一致しません");
 			
 			$ids = array_map("intval", array_map(array("Util", "escapeInput"), isset($_POST["id"]) ? (is_array($_POST["id"]) ? $_POST["id"] : array($_POST["id"])) : array()));
-			$threads = $ids ? array_filter(array_map(array("Thread", "load"), array_fill(0, count($ids), $db), $ids)) : array();
 			
 			switch ($mode = Util::escapeInput($_POST["admin"]))
 			{
 				case "unpost":
-					foreach ($threads as $i)
-						$i->delete($db);
+					foreach ($ids as $i)
+						ThreadEntry::deleteDirect($db, $i);
 					
 					break;
 			}
@@ -189,21 +188,15 @@ class IndexHandler extends Handler
 			if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
 				Auth::loginError("管理者パスワードが一致しません");
 			
-			$this->entries = array_combine(array_map(create_function('$_', 'return $_->id;'), $this->entries), $this->entries);
 			$ids = array_map("intval", array_map(array("Util", "escapeInput"), isset($_POST["id"]) ? (is_array($_POST["id"]) ? $_POST["id"] : array($_POST["id"])) : array()));
-			$threads = array();
-			
-			foreach ($ids as $i)
-				if (isset($this->entries[$i]))
-					$threads[] = $this->entries[$i];
 			
 			switch ($mode = Util::escapeInput($_POST["admin"]))
 			{
 				case "unpost":
-					foreach ($threads as $i)
+					foreach ($ids as $i)
 					{
-						$i->delete($db);
-						unset($this->entries[$i->id]);
+						ThreadEntry::deleteDirect($db, $i);
+						unset($this->entries[$i]);
 						$rt["count"]--;
 					}
 					
