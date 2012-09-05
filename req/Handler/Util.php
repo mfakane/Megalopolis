@@ -210,31 +210,33 @@ class UtilHandler extends Handler
 				$count = isset($_GET["c"]) ? intval($_GET["c"]) : 0;
 				$currentCount = 0;
 				$firstID = 0;
+				$existing = ThreadEntry::getEntryIDsBySubject($db, $subject);
 				
 				foreach (new DirectoryIterator("{$dir}dat") as $i)
 					if ($i->isFile() &&
 						mb_strstr($i->getFilename(), ".") == ".dat" &&
 						($id = intval(mb_substr($i->getFilename(), 0, -4))) >= $start &&
 						($end == 0 || $id < $end))
-					{
-						$thread = Util::convertAndSaveToThread($db, $idb, $subject, "{$dir}dat/{$id}.dat", "{$dir}com/{$id}.res.dat", "{$dir}aft/{$id}.aft.dat");
-						
-						if (!$thread)
-							continue;
-						
-						if ($firstID == 0)
-							$firstID = $thread->id;
-						
-						$count++;
-						
-						if (++$currentCount == max(Configuration::$instance->convertDivision, 1))
+						if (!in_array($id, $existing))
 						{
-							$lastID = $thread->id + 1;
-							array_unshift($params, "{$subject}-{$lastID}-{$end}");
+							$thread = Util::convertAndSaveToThread($db, $idb, $subject, "{$dir}dat/{$id}.dat", "{$dir}com/{$id}.res.dat", "{$dir}aft/{$id}.aft.dat");
 							
-							break;
+							if (!$thread)
+								continue;
+							
+							if ($firstID == 0)
+								$firstID = $thread->id;
+							
+							$count++;
+							
+							if (++$currentCount == max(Configuration::$instance->convertDivision, 1))
+							{
+								$lastID = $thread->id + 1;
+								array_unshift($params, "{$subject}-{$lastID}-{$end}");
+								
+								break;
+							}
 						}
-					}
 				
 				App::closeDB($idb);
 				App::closeDB($db);
