@@ -62,10 +62,10 @@ abstract class SearchIndex
 	static function clear(PDO $idb)
 	{
 		if (Util::hasTable($idb, ClassicSearchIndex::INDEX_TABLE))
-			Util::executeStatement(Util::ensureStatement($idb, $idb->prepare("drop table " . ClassicSearchIndex::INDEX_TABLE)));
+			Configuration::$instance->dataStore->dropTable($idb, ClassicSearchIndex::INDEX_TABLE);
 		
 		if (Util::hasTable($idb, SQLiteSearchIndex::INDEX_TABLE))
-			Util::executeStatement(Util::ensureStatement($idb, $idb->prepare("drop table " . SQLiteSearchIndex::INDEX_TABLE)));
+			Configuration::$instance->dataStore->dropTable($idb, SQLiteSearchIndex::INDEX_TABLE);
 	}
 	
 	static function getAvailableType()

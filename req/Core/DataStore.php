@@ -1,6 +1,36 @@
 <?php
 abstract class DataStore
 {
+	private $handles = array();
+	private $tableNames = array();
+	
+	protected function registerHandle(PDO &$db, $name)
+	{
+		$this->handles[$name] = &$db;
+	}
+	
+	protected function unregisterHandle(PDO &$db)
+	{
+		unset($this->handles[$this->getDatabaseNameByHandle($db)]);
+	}
+	
+	private function getDatabaseNameByHandle(PDO &$db)
+	{
+		return array_search($db, $this->handles, true);
+	}
+	
+	protected function registerTableByHandle(PDO &$db, $name)
+	{
+		$this->handles[$this->getDatabaseNameByHandle($db)][] = $name;
+	}
+	
+	protected function unregisterTableByHandle(PDO &$db, $name)
+	{
+		$arr = &$this->handles[$this->getDatabaseNameByHandle($db)];
+		
+		unset($arr[array_search($name, $arr)]);
+	}
+	
 	/**
 	 * @param string $database
 	 * @param bool $beginTransaction [optional]
@@ -15,9 +45,22 @@ abstract class DataStore
 	abstract function close(PDO &$db, $vacuum = false, $commitTransaction = true);
 	
 	/**
+	 * @return array|string
+	 */
+	abstract function getTables(PDO $db);
+	
+	/**
 	 * @param string $name
 	 */
-	abstract function hasTable(PDO $db, $name);
+	function hasTable(PDO $db, $name)
+	{
+		$dbname = $this->getDatabaseNameByHandle($db);
+		
+		if (!isset($this->tableNames[$dbname]))
+			$this->tableNames[$dbname] = array_map("strtolower", $this->getTables($db));
+		
+		return in_array(strtolower($name), $this->tableNames[$dbname]);
+	}
 	
 	/**
 	 * @param PDOStatement $st
@@ -29,9 +72,12 @@ abstract class DataStore
 			return $st;
 		else
 		{
-			$error = $db->errorInfo();
+			$message = implode(":", $st->errorInfo());
 			
-			throw new ApplicationException(array_pop($error));
+			if (defined("SQL_DEBUG") && SQL_DEBUG)
+				$message .= "\r\n" . $st->queryString;
+			
+			throw new ApplicationException($message);
 		}
 	}
 	
@@ -82,24 +128,29 @@ abstract class DataStore
 	 */
 	function createTableIfNotExists(PDO $db, array $schema, $name, array $index = null)
 	{
-		$arr = array_map(create_function('$x, $y', 'return "{$x} {$y}";'), array_keys($schema), array_values($schema));
+		if (!$this->hasTable($db, $name))
+		{
+			$arr = array_map(create_function('$x, $y', 'return "{$x} {$y}";'), array_keys($schema), array_values($schema));
 
-		$this->executeStatement($this->ensureStatement($db, $db->prepare(strtr(sprintf
-		("
-			create table if not exists %s
-			(
-				%s,
-				primary key(%s)
-			)",
-			$name,
-			implode(", ", array_map(create_function('$_', 'return strtr($_, array(" primary key" => ""));'), $arr)),
-			implode(", ", array_map(create_function('$_', '$tmp = explode(" ", $_); return array_shift($tmp);'), array_filter($arr, create_function('$_', 'return mb_strstr($_, "primary key");'))))
-		), array(",
-				primary key()" => "")))));
-		
-		if (is_array($index))
-			foreach ($index as $k => $v)
-				$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf('create index if not exists %s on %s(%s)', $k, $name, is_array($v) ? implode(", ", $v) : $v))));
+			$this->executeStatement($this->ensureStatement($db, $db->prepare(strtr(sprintf
+			("
+				create table if not exists %s
+				(
+					%s,
+					primary key(%s)
+				)",
+				$name,
+				implode(", ", array_map(create_function('$_', 'return strtr($_, array(" primary key" => ""));'), $arr)),
+				implode(", ", array_map(create_function('$_', '$tmp = explode(" ", $_); return array_shift($tmp);'), array_filter($arr, create_function('$_', 'return mb_strstr($_, "primary key");'))))
+			), array(",
+					primary key()" => "")))));
+			
+			if (is_array($index))
+				foreach ($index as $k => $v)
+					$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf('create index if not exists %s on %s(%s)', $k, $name, is_array($v) ? implode(", ", $v) : $v))));
+			
+			$this->registerTableByHandle($db, $name);
+		}
 	}
 	
 	/**
@@ -107,6 +158,15 @@ abstract class DataStore
 	 * @param string $indexSuffix [optional]
 	 */
 	abstract function createFullTextTableIfNotExists(PDO $db, array $schema, $name, $indexSuffix = "Index");
+	
+	/**
+	 * @param string $name
+	 */
+	function dropTable(PDO $db, $name)
+	{
+		$this->executeStatement($this->ensureStatement($db, $db->prepare('drop table ' . $name)));
+		$this->unregisterTableByHandle($db, $name);
+	}
 	
 	/**
 	 * @param mixed $obj
@@ -189,6 +249,7 @@ class SQLiteDataStore extends DataStore
 		(
 			PDO::ATTR_PERSISTENT => true,
 		));
+		$this->registerHandle($db, $name);
 		
 		if ($beginTransaction)
 			$db->beginTransaction();
@@ -210,6 +271,8 @@ class SQLiteDataStore extends DataStore
 	 */
 	function close(PDO &$db, $vacuum = false, $commitTransaction = true)
 	{
+		$this->unregisterHandle($db);
+		
 		if ($commitTransaction)
 			$db->commit();
 		
@@ -220,14 +283,14 @@ class SQLiteDataStore extends DataStore
 	}
 	
 	/**
-	 * @param string $name
+	 * @return array|string
 	 */
-	function hasTable(PDO $db, $name)
+	function getTables(PDO $db)
 	{
-		$st = $this->ensureStatement($db, $db->prepare("select * from sqlite_master where type = 'table' and name = ?"));
-		$this->executeStatement($st, array($name));
+		$st = $this->ensureStatement($db, $db->prepare("select name from sqlite_master where type = 'table'"));
+		$this->executeStatement($st, array());
 		
-		return count($st->fetchAll()) > 0;
+		return $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
 	}
 	
 	/**
@@ -263,6 +326,8 @@ class SQLiteDataStore extends DataStore
 				$module,
 				implode(", ", array_filter(array_map(create_function('$_', 'return strtr($_, array(" fulltext" => ""));'), $arr), create_function('$_', 'return strpos($_, "rowid") === false && strpos($_, "docid") === false;')))
 			))));
+			
+			$this->registerTableByHandle($db, $name);
 		}
 	}
 	
@@ -353,6 +418,7 @@ class MySQLDataStore extends DataStore
 				PDO::ATTR_PERSISTENT => true,
 			)
 		);
+		$this->registerHandle($db, $name);
 		
 		if ($beginTransaction)
 			$db->beginTransaction();
@@ -374,6 +440,8 @@ class MySQLDataStore extends DataStore
 	 */
 	function close(PDO &$db, $vacuum = false, $commitTransaction = true)
 	{
+		$this->unregisterHandle($db);
+		
 		if ($commitTransaction)
 			$db->commit();
 		
@@ -381,14 +449,14 @@ class MySQLDataStore extends DataStore
 	}
 	
 	/**
-	 * @param string $name
+	 * @return array|string
 	 */
-	function hasTable(PDO $db, $name)
+	function getTables(PDO $db)
 	{
-		$st = $this->ensureStatement($db, $db->prepare("show tables like ?"));
-		$this->executeStatement($st, array($name));
+		$st = $this->ensureStatement($db, $db->prepare("show tables"));
+		$this->executeStatement($st, array());
 		
-		return count($st->fetchAll()) > 0;
+		return $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
 	}
 	
 	/**
@@ -396,22 +464,27 @@ class MySQLDataStore extends DataStore
 	 */
 	function createTableIfNotExists(PDO $db, array $schema, $name, array $index = null)
 	{
-		$arr = array_map(create_function('$x, $y', 'return "{$x} {$y}";'), array_keys($schema), array_values($schema));
+		if (!$this->hasTable($db, $name))
+		{
+			$arr = array_map(create_function('$x, $y', 'return "{$x} {$y}";'), array_keys($schema), array_values($schema));
 
-		$this->executeStatement($this->ensureStatement($db, $db->prepare(strtr(sprintf
-		("
-			create table if not exists %s
-			(
-				%s,
-				primary key(%s)%s
-			)
-			default character set utf8 engine InnoDB",
-			$name,
-			implode(", ", array_map(create_function('$_', 'return strtr($_, array(" primary key" => ""));'), $arr)),
-			implode(", ", array_map(create_function('$_', '$tmp = explode(" ", $_); return array_shift($tmp);'), array_filter($arr, create_function('$_', 'return mb_strstr($_, "primary key");')))),
-			is_array($index) ? ", key " . implode(", key ", array_map(create_function('$x, $y', 'return "{$x}(" . (is_array($y) ? implode(", ", $y) : $y) . ")";'), array_keys($index), array_values($index))) : ""
-		), array(",
-				primary key()" => "")))));
+			$this->executeStatement($this->ensureStatement($db, $db->prepare(strtr(sprintf
+			("
+				create table if not exists %s
+				(
+					%s,
+					primary key(%s)%s
+				)
+				default character set utf8 engine InnoDB",
+				$name,
+				implode(", ", array_map(create_function('$_', 'return strtr($_, array(" primary key" => ""));'), $arr)),
+				implode(", ", array_map(create_function('$_', '$tmp = explode(" ", $_); return array_shift($tmp);'), array_filter($arr, create_function('$_', 'return mb_strstr($_, "primary key");')))),
+				is_array($index) ? ", key " . implode(", key ", array_map(create_function('$x, $y', 'return "{$x}(" . (is_array($y) ? implode(", ", $y) : $y) . ")";'), array_keys($index), array_values($index))) : ""
+			), array(",
+					primary key()" => "")))));
+			
+			$this->registerTableByHandle($db, $name);
+		}
 	}
 	
 	/**
@@ -420,24 +493,29 @@ class MySQLDataStore extends DataStore
 	 */
 	function createFullTextTableIfNotExists(PDO $db, array $schema, $name, $indexSuffix = "Index")
 	{
-		$columns = array_map(create_function('$x, $y', 'return "{$x} " . strtr($y, array(" primary key" => "", " fulltext" => ""));'), array_keys($schema), array_values($schema));
-		$primaryKeys = array_keys(array_filter($schema, create_function('$_', 'return strpos($_, "primary key") !== false;')));
-		$fullTextIndices = array_keys(array_filter($schema, create_function('$_', 'return strpos($_, "fulltext") !== false;')));
-
-		$this->executeStatement($this->ensureStatement($db, $db->prepare(strtr(sprintf
-		("
-			create table if not exists %s
-			(
-				%s,
-				primary key(%s)%s
-			)
-			default character set utf8 collate utf8_unicode_ci engine MyISAM",
-			$name,
-			implode(", ", $columns),
-			implode(", ", $primaryKeys),
-			", fulltext index " . implode(", fulltext index ", array_map(create_function('$x, $y', 'return "{$x}{$y}({$x})";'), $fullTextIndices, array_fill(0, count($fullTextIndices), $indexSuffix)))
-		), array(",
-				primary key()" => "")))));
+		if (!$this->hasTable($db, $name))
+		{
+			$columns = array_map(create_function('$x, $y', 'return "{$x} " . strtr($y, array(" primary key" => "", " fulltext" => ""));'), array_keys($schema), array_values($schema));
+			$primaryKeys = array_keys(array_filter($schema, create_function('$_', 'return strpos($_, "primary key") !== false;')));
+			$fullTextIndices = array_keys(array_filter($schema, create_function('$_', 'return strpos($_, "fulltext") !== false;')));
+	
+			$this->executeStatement($this->ensureStatement($db, $db->prepare(strtr(sprintf
+			("
+				create table if not exists %s
+				(
+					%s,
+					primary key(%s)%s
+				)
+				default character set utf8 collate utf8_unicode_ci engine MyISAM",
+				$name,
+				implode(", ", $columns),
+				implode(", ", $primaryKeys),
+				", fulltext index " . implode(", fulltext index ", array_map(create_function('$x, $y', 'return "{$x}{$y}({$x})";'), $fullTextIndices, array_fill(0, count($fullTextIndices), $indexSuffix)))
+			), array(",
+					primary key()" => "")))));
+			
+			$this->registerTableByHandle($db, $name);
+		}
 	}
 	
 	function attachFullTextIndex(PDO $db, array $schema, $name, $indexSuffix = "Index")
