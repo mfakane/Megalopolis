@@ -1,4 +1,89 @@
-﻿2012-09-05 COAH96KoxU <queue glasscore.net>
+﻿2012-09-06 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 15
+	* req/Library/simple_html_dom.php: ruby 系タグへの対応 
+	* req/Visualizer/Read/Index.php: 送信ボタンの二重押し防止追加 
+	* req/Visualizer/Template/Index.php,
+	  script/Index/Index.js,
+	  style/style.css: 一覧の情報文字列の最初の要素を非表示にした場合でも区切り線が先頭に残らないように変更 
+	* req/Visualizer/Template/Index.php,
+	  script/Index/Index.js,
+	  style/style.css: 一覧の情報文字列およびタグの面積を削減 
+	* req/Visualizer/mobile/Index/Index.php: iPhone 用表示にコメント数を追加 
+	* req/Core/Visualizer.php: jQuery を 1.8.1 に変更 
+	* req/Visualizer/simple/Index/Index.php,
+	  style/simple/simple.css: 携帯表示にコメント数を追加 
+	* req/Visualizer/Index/Index.php,
+	  req/Visualizer/Template/Index.php,
+	  script/Index/Index.js: 設定で作品集にコメントを表示するにしているにもかかわらずコメント数が表示されないのを修正 
+	* req/Visualizer/Read/Index.php,
+	  style/style.css: 作品ページを可変幅に変更 
+	* req/Handler/Read.php: 古い形式のパスワードで保存されている作品を編集できないのを修正 
+	* req/Handler/Read.php: post に認証がないのを修正 
+	* req/Handler/Util.php,
+	  req/Visualizer/Util/Convert.php,
+	  script/Util/Convert.js: 改行変換フラグが存在しない古いログのみ処理するオプションを追加 
+	* req/Handler/Util.php,
+	  req/Visualizer/Util/Convert.php,
+	  script/Util/Convert.js: 更新日時が変換前と同一の作品の再変換を許可するオプションを追加 
+	* req/Visualizer/Util/Reindex.php: value を修正 
+	* style/style.css: 本文枠内で長い英数が連続するとき折り返さないのを修正 
+	* req/Core/Configuration.php: center タグを許可 
+	* req/Model/Comment.php,
+	  req/Model/Thread.php: 作品表示時評価を二回データベースに要求していたのを削減 
+	* req/Core/Util.php: 改行変換フラグがない Megalith ログを yes と解釈せず no 扱いになっているのを修正 
+	* req/Core/Visualizer.php: jQuery Mobile を 1.2 Beta に更新 
+	* req/Handler/Read.php,
+	  req/Visualizer/Read/Index.php,
+	  script/Read/Index.js: 本文にフォント指定が含まれていた場合 IE 以外で taketori を使用するように 
+	* req/Handler/Index.php: 作者一覧のページングが動かないのを修正 
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Model/SearchIndex/MySQL.php: MySQL 全文検索にて前方一致を使用するかどうかの設定を追加 
+	* req/Model/SearchIndex.php,
+	  req/Model/SearchIndex/MySQL.php: 検索ワードが N-gram の長さを満たさない時の前方一致回数を削減 
+	* req/App.php,
+	  req/Core/DataStore.php,
+	  req/Handler/Index.php,
+	  req/Handler/Read.php,
+	  req/Handler/Util.php,
+	  req/Model/Comment.php,
+	  req/Model/Evaluation.php,
+	  req/Model/Meta.php,
+	  req/Model/SearchIndex/Classic.php,
+	  req/Model/SearchIndex/SQLite.php,
+	  req/Model/Thread.php,
+	  req/Model/ThreadEntry.php: トランザクションを書き込み時のみ取り扱うよう変更 
+	* req/Model/SearchIndex.php,
+	  req/Model/SearchIndex/Classic.php,
+	  req/Model/SearchIndex/MySQL.php,
+	  req/Model/SearchIndex/SQLite.php: インデックス再生成時に不要な delete を発行しないように 
+	* req/Core/Configuration.php,
+	  req/Model/SearchIndex/MySQL.php: MySQL 全文検索の検索ワード最小文字数制限への対策を追加 
+	* req/Core/DataStore.php: テーブルの存在確認が正しくないのを修正 
+	* req/Core/DataStore.php: 持続的接続において検索が開けない問題が発生するのを修正 
+	* req/Core/Visualizer.php: 表示時のタグ間スペース削除において全角スペースを削除しないように 
+	* req/Core/DataStore.php: ensureStatement 時のエラー情報出力を変更 
+	* req/Model/ThreadEntry.php: 検索画面の表示のための点数、投稿日時、評価数にインデックスを作成 
+	* req/Core/DataStore.php,
+	  req/Model/SearchIndex.php: テーブル存在確認をキャッシュするように 
+	* req/Core/DataStore.php,
+	  req/Model/Thread.php,
+	  req/Model/ThreadEntry.php: キーを id のみに変更 
+	* req/Core/DataStore.php: 持続的接続を使用するように 
+	* req/Model/Meta.php: メタテーブルで値を更新する必要がない時は更新しないように 
+	* req/Model/Board.php,
+	  req/Model/Comment.php,
+	  req/Model/Evaluation.php,
+	  req/Model/Meta.php,
+	  req/Model/SearchIndex/Classic.php,
+	  req/Model/Thread.php,
+	  req/Model/ThreadEntry.php: クエリ実行をすべて Util::executeStatement に置き換え 
+	* req/Core/Util.php: 絶対 URL 合成にキャッシュ追加 
+	* req/Core/DataStore.php: MySQL 時のテーブルの種類を InnoDB に変更 
+	* req/Visualizer/Read/Index.php: 背景画像が反映されないのを修正 
+
+2012-09-05 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 14
 	* req/Visualizer/Read/Edit.php,
