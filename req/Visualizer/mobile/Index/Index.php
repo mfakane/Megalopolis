@@ -44,6 +44,9 @@ function entries($h, $c)
 						<?if ($c->showSize[Configuration::ON_SUBJECT]): ?>
 							<span class="size"><?+$i->size ?>KB</span>
 						<?endif ?>
+						<?if ($c->showComment[Configuration::ON_SUBJECT]): ?>
+							<span class="commentCount"><?+$i->commentCount ?></span>
+						<?endif ?>
 						<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
 							<span class="evaluationCount"><?+$i->evaluationCount ?></span>
 							<span class="points"><?+$i->points ?></span>
@@ -263,6 +266,13 @@ Visualizer::doctype();
 								</a>
 							</li>
 						<?endif ?>
+						<?if ($c->showComment[Configuration::ON_SUBJECT]): ?>
+								<li>
+									<a href="#sort-commentCount">
+										<h2>コメント数</h2>
+									</a>
+								</li>
+							<?endif ?>
 						<?if ($c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
 							<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
 								<li>
