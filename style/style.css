@@ -461,7 +461,7 @@ ul.notify
 	margin: 4px 0px 0px 0px;
 	padding: 4px;
 	background: #efefef;
-	font-size: 9pt;
+	font-size: 90%;
 }
 
 .entries article time+dl
@@ -500,8 +500,9 @@ ul.notify
 
 .entries ul.tags
 {
-	margin: 6px 0px 0px -8px;
+	margin: 2px 0px 0px -8px;
 	padding: 0px;
+	font-size: 90%;
 }
 
 .entries ul.tags li

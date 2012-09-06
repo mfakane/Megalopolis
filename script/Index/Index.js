@@ -45,12 +45,12 @@ megalopolis.index =
 				},
 				!usePageCount ? null :
 				{
-					label: "ページ数",
+					label: "ページ",
 					value: "pageCount"
 				},
 				!useReadCount ? null :
 				{
-					label: "閲覧数",
+					label: "閲覧",
 					value: "readCount"
 				},
 				!useSize ? null :
@@ -64,12 +64,12 @@ megalopolis.index =
 				},
 				!useEvaluationCount ? null :
 				{
-					label: "評価数",
+					label: "評価",
 					value: "evaluationCount"
 				},
 				!useCommentCount ? null :
 				{
-					label: "コメント数",
+					label: "コメント",
 					value: "commentCount"
 				},
 				!usePoints ? null :
@@ -181,12 +181,12 @@ megalopolis.index =
 					[
 						!usePageCount ? null :
 						{
-							label: "ページ数",
+							label: "ページ",
 							value: "pageCount"
 						},
 						!useReadCount ? null :
 						{
-							label: "閲覧数",
+							label: "閲覧",
 							value: "readCount"
 						},
 						!useSize ? null :
@@ -196,12 +196,12 @@ megalopolis.index =
 						},
 						!useEvaluationCount ? null :
 						{
-							label: "評価数",
+							label: "評価",
 							value: "evaluationCount"
 						},
 						!useCommentCount ? null :
 						{
-							label: "コメント数",
+							label: "コメント",
 							value: "commentCount"
 						},
 						!usePoints ? null :

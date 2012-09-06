@@ -81,15 +81,15 @@ function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 					  $c->showComment[Configuration::ON_SUBJECT] ||
 					  $c->showRate[Configuration::ON_SUBJECT]): ?>
 				<dl>
-					<?php if ($c->showPages[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "ページ数", "pageCount") ?>
+					<?php if ($c->showPages[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "ページ", "pageCount") ?>
 					<?php if ($c->showSize[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "サイズ", "size", "{$i->size}KB") ?>
-					<?php if ($c->showReadCount[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "閲覧数", "readCount") ?>
+					<?php if ($c->showReadCount[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "閲覧", "readCount") ?>
 					<?php if ($c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
 						<?php if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-							<?php entryInfo($i, $visibility, "評価数", "evaluationCount") ?>
+							<?php entryInfo($i, $visibility, "評価", "evaluationCount") ?>
 						<?php endif ?>
 						<?php if ($c->showComment[Configuration::ON_SUBJECT]): ?>
-							<?php entryInfo($i, $visibility, "コメント数", "commentCount") ?>
+							<?php entryInfo($i, $visibility, "コメント", "commentCount") ?>
 						<?php endif ?>
 						<?php if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
 							<?php entryInfo($i, $visibility, "POINT", "points") ?>
