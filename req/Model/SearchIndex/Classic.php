@@ -9,9 +9,11 @@ class ClassicSearchIndex extends SearchIndex
 		"word" => "varchar(127)"
 	);
 	
-	function registerThread(PDO $idb, Thread $thread)
+	function registerThread(PDO $idb, Thread $thread, $removeExisting)
 	{
-		self::unregister($idb, $thread->id);
+		if ($removeExisting)
+			self::unregister($idb, $thread->id);
+		
 		$words = array_filter(array
 		(
 			"title" => $this->getWords($thread->entry->title),

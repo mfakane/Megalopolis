@@ -6,9 +6,11 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		$this->gramLength = max(Configuration::$instance->mysqlSearchNgramLength, 2);
 	}
 	
-	function registerThread(PDO $idb, Thread $thread)
+	function registerThread(PDO $idb, Thread $thread, $removeExisting)
 	{
-		self::unregister($idb, $thread->id);
+		if ($removeExisting)
+			self::unregister($idb, $thread->id);
+		
 		$words = array_filter(array
 		(
 			"title" => $this->getWords($thread->entry->title),

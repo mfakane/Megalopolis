@@ -12,7 +12,7 @@ abstract class SearchIndex
 	 */
 	protected $gramLength = 2;
 	
-	abstract function registerThread(PDO $idb, Thread $thread);
+	abstract function registerThread(PDO $idb, Thread $thread, $removeExisting);
 	/**
 	 * @param int $id
 	 */
@@ -33,9 +33,9 @@ abstract class SearchIndex
 	{
 	}
 	
-	static function register(PDO $idb, Thread $thread)
+	static function register(PDO $idb, Thread $thread, $removeExisting = true)
 	{
-		self::$instance->registerThread($idb, $thread);
+		self::$instance->registerThread($idb, $thread, $removeExisting);
 	}
 	
 	/**
@@ -127,7 +127,7 @@ abstract class SearchIndex
 				$thread = Thread::load($db, $i);
 				
 				if (!is_null($thread))
-					$instance->registerThread($idb, $thread);
+					$instance->registerThread($idb, $thread, false);
 				
 				unset($thread);
 				

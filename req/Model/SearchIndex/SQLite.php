@@ -13,9 +13,11 @@ class SQLiteSearchIndex extends SearchIndex
 		"tag" => "varchar(2048) fulltext"
 	);
 	
-	function registerThread(PDO $idb, Thread $thread)
+	function registerThread(PDO $idb, Thread $thread, $removeExisting)
 	{
-		self::unregister($idb, $thread->id);
+		if ($removeExisting)
+			self::unregister($idb, $thread->id);
+		
 		$words = array_filter(array
 		(
 			"title" => $this->getWords($thread->entry->title),
