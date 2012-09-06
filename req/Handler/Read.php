@@ -16,6 +16,7 @@ class ReadHandler extends Handler
 	 */
 	public $thread;
 	public $page;
+	public $forceTaketori;
 	
 	function index($_subject = "0", $_id = "0", $_page = "1")
 	{
@@ -40,6 +41,7 @@ class ReadHandler extends Handler
 		$this->subject = $this->thread->subject;
 		$this->entry = &$this->thread->entry;
 		$this->page = $page;
+		$this->forceTaketori = preg_match('/<\s*font|font:\s*|font-family:\s*/i', $this->thread->body);
 
 		if (Cookie::getCookie(Cookie::LAST_ID_KEY) != $id)
 		{

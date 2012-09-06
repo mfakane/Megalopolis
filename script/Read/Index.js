@@ -2,6 +2,7 @@ megalopolis.read =
 {
 	taketori: null,
 	isVertical: false,
+	forceTaketori: false,
 	evaluate: function(point)
 	{
 		var form = $("#evaluateform");
@@ -252,7 +253,7 @@ megalopolis.read =
 		else
 			callback();
 	},
-	loadOptions: function(basePath, writingMode)
+	loadOptions: function(basePath, writingMode, forceTaketori)
 	{
 		var content = $("#body");
 		var cookie = megalopolis.mainCookie("FontSize");
@@ -350,6 +351,8 @@ megalopolis.read =
 			}))
 			.insertBefore(content);
 		
+		megalopolis.read.forceTaketori = forceTaketori;
+		
 		if (writingMode == 0 && megalopolis.mainCookie("Vertical") == "yes" || writingMode == 2)
 			megalopolis.read.toggleVertical(true, writingMode == 2 ? true : undefined);
 	},
@@ -403,7 +406,7 @@ megalopolis.read =
 			if (setVertical)
 				if (this.taketori)
 					this.taketori.toggleAll();
-				else if (!$.browser.msie && ($.browser.mozilla || navigator.platform.indexOf("Win") == -1))
+				else if (!$.browser.msie && (this.forceTaketori || $.browser.mozilla || navigator.platform.indexOf("Win") == -1))
 					this.taketori = new Taketori()
 						.set
 						({
