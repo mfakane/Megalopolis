@@ -234,11 +234,11 @@ Visualizer::doctype();
 		<section class="notify info">
 			<ul class="buttons">
 				<li>
-					<form action="<? Visualizer::converted(Util::withMobileUniqueIDRequestSuffix(App::$actionName == "new"
+					<form id="resumeForm" action="<? Visualizer::converted(Util::withMobileUniqueIDRequestSuffix(App::$actionName == "new"
 						? Visualizer::actionHref(App::$actionName)
 						: Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName))) ?>" method="post">
 						<div>
-							<button type="submit">
+							<button type="submit" onclick="$(this).prop('disabled', true); $('#resumeForm').submit(); return false;">
 								<img src="<?+Visualizer::actionHref("style", "backButtonIcon.png") ?>" />修正
 							</button>
 							<? ReadHandler::printHiddenParams() ?>
@@ -246,11 +246,11 @@ Visualizer::doctype();
 					</form>
 				</li>
 				<li>
-					<form action="<? Visualizer::converted(Util::withMobileUniqueIDRequestSuffix(App::$actionName == "new"
+					<form id="sendForm" action="<? Visualizer::converted(Util::withMobileUniqueIDRequestSuffix(App::$actionName == "new"
 						? Visualizer::actionHref("post")
 						: Visualizer::actionHref($h->subject, $h->entry->id, "post"))) ?>" method="post">
 						<div>
-							<button type="submit">
+							<button type="submit" onclick="$(this).prop('disabled', true); $('#sendForm').submit(); return false;">
 								送信<img src="<?+Visualizer::actionHref("style", "sendButtonIcon.png") ?>" class="last" />
 							</button>
 							<? ReadHandler::printHiddenParams() ?>
