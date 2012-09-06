@@ -19,6 +19,11 @@ abstract class DataStore
 		return array_search($db, $this->handles, true);
 	}
 	
+	protected function getHandleByName($name)
+	{
+		return $this->handles[$name];
+	}
+	
 	protected function registerTableByHandle(PDO &$db, $name)
 	{
 		$this->handles[$this->getDatabaseNameByHandle($db)][] = $name;
@@ -242,10 +247,7 @@ class SQLiteDataStore extends DataStore
 	 */
 	function open($name = "data", $beginTransaction = true)
 	{
-		$db = new PDO(sprintf("sqlite:%s%s.sqlite", rtrim($this->directory, "/") . "/", $name), null, null, array
-		(
-			PDO::ATTR_PERSISTENT => true,
-		));
+		$db = new PDO(sprintf("sqlite:%s%s.sqlite", rtrim($this->directory, "/") . "/", $name), null, null);
 		$this->registerHandle($db, $name);
 		
 		if ($beginTransaction)
@@ -352,6 +354,8 @@ class SQLiteDataStore extends DataStore
 
 class MySQLDataStore extends DataStore
 {
+	private $openCount = 0;	
+	
 	/**
 	 * @var string
 	 */
@@ -404,6 +408,11 @@ class MySQLDataStore extends DataStore
 	 */
 	function open($name = "data", $beginTransaction = true)
 	{
+		$this->openCount++;
+		
+		if ($name == App::INDEX_DATABASE)
+			return $this->getHandleByName("data");
+		
 		$db = new PDO
 		(
 			sprintf("mysql:%s;dbname=%s;charset=utf8", is_null($this->unixSocket) ? "host={$this->host};port={$this->port}" : "unixsocket={$this->unixSocket}", $this->databaseName),
@@ -420,13 +429,9 @@ class MySQLDataStore extends DataStore
 		if ($beginTransaction)
 			$db->beginTransaction();
 		
-		if ($name == App::INDEX_DATABASE)
-			SearchIndex::ensureTable($db);
-		else
-		{
-			Meta::ensureTable($db);
-			Board::ensureTable($db);
-		}
+		Meta::ensureTable($db);
+		Board::ensureTable($db);
+		SearchIndex::ensureTable($db);
 		
 		return $db;
 	}
@@ -437,6 +442,9 @@ class MySQLDataStore extends DataStore
 	 */
 	function close(PDO &$db, $vacuum = false, $commitTransaction = true)
 	{
+		if (--$this->openCount > 0)
+			return;
+		
 		$this->unregisterHandle($db);
 		
 		if ($commitTransaction)
