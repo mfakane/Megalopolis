@@ -61,10 +61,12 @@ class Comment
 	 * @param int $entryID
 	 * @return array of Comment
 	 */
-	static function getCommentsFromEntryID(PDO $db, $entryID)
+	static function getCommentsFromEntryID(PDO $db, $entryID, $evals = null)
 	{
 		$rt = array();
-		$evals = Evaluation::getEvaluationsFromEntryID($db, $entryID);
+		
+		if (is_null($evals))
+			$evals = Evaluation::getEvaluationsFromEntryID($db, $entryID);
 		
 		foreach (self::query($db, sprintf
 		('

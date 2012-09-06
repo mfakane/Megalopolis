@@ -252,9 +252,9 @@ class Thread
 			$rt->entry = ThreadEntry::load($db, $id);
 			$rt->loaded = true;
 			$rt->updatePropertyLink();
-			$rt->comments = Comment::getCommentsFromEntryID($db, $rt->id);
-			$resEval = array_map(create_function('$_', 'return $_->evaluation ? $_->evaluation->id : 0;'), $rt->comments);
 			$rt->evaluations = Evaluation::getEvaluationsFromEntryID($db, $rt->id);
+			$rt->comments = Comment::getCommentsFromEntryID($db, $rt->id, $rt->evaluations);
+			$resEval = array_map(create_function('$_', 'return $_->evaluation ? $_->evaluation->id : 0;'), $rt->comments);
 			$rt->nonCommentEvaluations = array();
 			
 			foreach ($rt->evaluations as $i)
