@@ -19,6 +19,9 @@ Visualizer::doctype();
 					ログが多い場合は、変換に時間がかかります。ご了承ください。
 				</p>
 				<p>
+					<label><input type="checkbox" id="allowOverwrite" name="allowOverwrite" value="yes" />更新日時が変換前と同一の作品の再変換を許可する</label>
+				</p>
+				<p>
 					<input type="submit" value="変換開始" />
 					<input type="hidden" name="p" value="list" />
 				</p>

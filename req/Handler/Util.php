@@ -146,7 +146,8 @@ class UtilHandler extends Handler
 			$params = explode(",", Util::escapeInput($_GET["p"]));
 			$db = App::openDB();
 			$idb = App::openDB(App::INDEX_DATABASE);
-		
+			$allowOverwrite = isset($_GET["allowOverwrite"]) && $_GET["allowOverwrite"] == "yes";
+			
 			if ($params[0] == "list")
 			{
 				$subjects = array_merge(array_slice(file("{$dir}sub/subjects.txt"), 1), array("subject.txt"));
@@ -192,7 +193,8 @@ class UtilHandler extends Handler
 					(
 						"remaining" => $subjectRange,
 						"count" => 0,
-						"buffer" => $defaultBuffer
+						"buffer" => $defaultBuffer,
+						"allowOverwrite" => $allowOverwrite ? "yes" : "no"
 					));
 				else
 					return Visualizer::redirect("util/convert?p=" . urlencode(implode(",", $subjectRange)));
@@ -231,58 +233,71 @@ class UtilHandler extends Handler
 						mb_strstr($i->getFilename(), ".") == ".dat" &&
 						($id = intval(mb_substr($i->getFilename(), 0, -4))) >= $start &&
 						($end == 0 || $id < $end))
-						if (!in_array($id, $existing))
-						{
-							try
+					{
+						$datLines = is_file($dat = "{$dir}dat/{$id}.dat") ? array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "SJIS");'), file($dat, FILE_IGNORE_NEW_LINES)) : null;
+						
+						if (in_array($id, $existing))
+							if ($allowOverwrite && $datLines)
 							{
-								$thread = Util::convertAndSaveToThread($db, $idb, $subject, "{$dir}dat/{$id}.dat", "{$dir}com/{$id}.res.dat", "{$dir}aft/{$id}.aft.dat");
+								$converting = Util::convertLineToThreadEntry("{$id}.dat<>" . $datLines[0]);
+								$entry = ThreadEntry::load($db, $id);
+								
+								if ($entry->lastUpdate > $converting->lastUpdate)
+									continue;
 							}
-							catch (ApplicationException $ex)
-							{
-								$ex->data = array
-								(
-									"id" => $id,
-									"subject" => $subject,
-								);
-								
-								App::closeDB($db);
-								App::closeDB($idb);
-								
-								$db = App::openDB();
-								$idb = App::openDB(App::INDEX_DATABASE);
-								$db->beginTransaction();
-								
-								if ($db !== $idb)
-									$idb->beginTransaction();
-								
-								ThreadEntry::deleteDirect($db, $idb, $id);
-								
-								if ($db !== $idb)
-									$idb->commit();
-								
-								$db->commit();
-								App::closeDB($idb);
-								App::closeDB($db);
-								
-								throw $ex;
-							}
-							
-							if (!$thread)
+							else
 								continue;
-							
-							if ($firstID == 0)
-								$firstID = $thread->id;
-							
-							$count++;
-							
-							if (++$currentCount == max($buffer, 1))
-							{
-								$lastID = $thread->id + 1;
-								array_unshift($params, "{$subject}-{$lastID}-{$end}");
-								
-								break;
-							}
+						
+						try
+						{
+							$thread = Util::convertAndSaveToThread($db, $idb, $subject, "{$dir}dat/{$id}.dat", "{$dir}com/{$id}.res.dat", "{$dir}aft/{$id}.aft.dat");
 						}
+						catch (ApplicationException $ex)
+						{
+							$ex->data = array
+							(
+								"id" => $id,
+								"subject" => $subject,
+							);
+							
+							App::closeDB($db);
+							App::closeDB($idb);
+							
+							$db = App::openDB();
+							$idb = App::openDB(App::INDEX_DATABASE);
+							$db->beginTransaction();
+							
+							if ($db !== $idb)
+								$idb->beginTransaction();
+							
+							ThreadEntry::deleteDirect($db, $idb, $id);
+							
+							if ($db !== $idb)
+								$idb->commit();
+							
+							$db->commit();
+							App::closeDB($idb);
+							App::closeDB($db);
+							
+							throw $ex;
+						}
+						
+						if (!$thread)
+							continue;
+						
+						if ($firstID == 0)
+							$firstID = $thread->id;
+						
+						$count++;
+						
+						if (++$currentCount == max($buffer, 1))
+						{
+							$lastID = $thread->id + 1;
+							array_unshift($params, "{$subject}-{$lastID}-{$end}");
+							
+							break;
+						}
+					}
 					
 				if ($db !== $idb)
 					$idb->commit();
@@ -298,7 +313,8 @@ class UtilHandler extends Handler
 						"first" => $firstID,
 						"remaining" => $params,
 						"count" => $count,
-						"buffer" => max($buffer, $minimumBuffer)
+						"buffer" => max($buffer, $minimumBuffer),
+						"allowOverwrite" => $allowOverwrite ? "yes" : "no"
 					));
 				else
 					return Visualizer::redirect("util/convert?p=" . urlencode(implode(",", $params)) . "&c={$count}");

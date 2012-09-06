@@ -6,6 +6,8 @@ megalopolis.convert =
 	minimumBuffer: 10,
 	submit: function()
 	{
+		var allowOverwrite = $("#allowOverwrite").is(":checked");
+		
 		$("#form").remove();
 		
 		var div = $("<div />")
@@ -25,7 +27,8 @@ megalopolis.convert =
 			dataType: "json",
 			data:
 			{
-				p: "list"
+				p: "list",
+				allowOverwrite: allowOverwrite ? "yes" : "no"
 			},
 			success: function(data)
 			{
@@ -63,7 +66,8 @@ megalopolis.convert =
 			{
 				p: obj.remaining.join(","),
 				c: obj.count,
-				b: obj.buffer
+				b: obj.buffer,
+				allowOverwrite: obj.allowOverwrite
 			},
 			success: function(data)
 			{
