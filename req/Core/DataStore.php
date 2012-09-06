@@ -21,17 +21,17 @@ abstract class DataStore
 	
 	protected function getHandleByName($name)
 	{
-		return $this->handles[$name];
+		return isset($this->handles[$name]) ? $this->handles[$name] : null;
 	}
 	
 	protected function registerTableByHandle(PDO &$db, $name)
 	{
-		$this->handles[$this->getDatabaseNameByHandle($db)][] = $name;
+		$this->tableNames[$this->getDatabaseNameByHandle($db)][] = $name;
 	}
 	
 	protected function unregisterTableByHandle(PDO &$db, $name)
 	{
-		$arr = &$this->handles[$this->getDatabaseNameByHandle($db)];
+		$arr = &$this->tableNames[$this->getDatabaseNameByHandle($db)];
 		
 		unset($arr[array_search($name, $arr)]);
 	}
@@ -411,7 +411,14 @@ class MySQLDataStore extends DataStore
 		$this->openCount++;
 		
 		if ($name == App::INDEX_DATABASE)
-			return $this->getHandleByName("data");
+			if ($rt = $this->getHandleByName("data"))
+				return $rt;
+			else
+			{
+				$this->openCount--;
+				
+				return $this->open("data", $beginTransaction);
+			}
 		
 		$db = new PDO
 		(
