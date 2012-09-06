@@ -172,12 +172,12 @@ class ReadHandler extends Handler
 		self::setValues($this->entry, $this->thread);
 		Visualizer::$data = self::checkValues($this->entry, $this->thread, true);
 		
-		if (isset($type) && $type != Util::HASH_TYPE_LATEST)
-			Visualizer::$data[] = "サーバに保存されている編集キーの形式が古いため、編集キーを再度入力するか変更することを推奨します。";
-		
 		if (!is_null($_page) ||
 			$_POST && self::param("preview", null, true) == "true" && !Visualizer::$data)
 			return Visualizer::visualize("Read/Index");
+		
+		if (isset($type) && $type != Util::HASH_TYPE_LATEST)
+			Visualizer::$data[] = "サーバに保存されている編集キーの形式が古いため、編集キーを再度入力するか変更することを推奨します。";
 		
 		Auth::createToken();
 		
