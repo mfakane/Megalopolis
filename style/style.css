@@ -1137,6 +1137,9 @@ body.read>h1
 	padding-bottom: 8px;
 	line-height: 130%;
 	overflow: hidden;
+	line-break: strict;
+	word-break: break-all;
+	word-wrap: break-word;
 }
 
 .read #body>div
