@@ -94,10 +94,14 @@ class UtilHandler extends Handler
 				$idb = App::openDB(App::INDEX_DATABASE);
 				$maxSubject = Board::getLatestSubject($db);
 				
+				$idb->beginTransaction();
+				
 				$rt = SearchIndex::$instance->registerSubject($db, $idb, $current, $offset, $buffer);
 				$count += $rt[0];
 				$nextOffset = $rt[1] <= 0 ? 0 : $offset += $buffer;
 				$next = $nextOffset == 0 ? $current + 1 : $current;
+				
+				$idb->commit();
 				
 				App::closeDB($idb);
 				App::closeDB($db);
@@ -217,6 +221,11 @@ class UtilHandler extends Handler
 				$firstID = 0;
 				$existing = ThreadEntry::getEntryIDsBySubject($db, $subject);
 				
+				$db->beginTransaction();
+							
+				if ($db !== $idb)
+					$idb->beginTransaction();
+				
 				foreach (new DirectoryIterator("{$dir}dat") as $i)
 					if ($i->isFile() &&
 						mb_strstr($i->getFilename(), ".") == ".dat" &&
@@ -236,7 +245,23 @@ class UtilHandler extends Handler
 									"subject" => $subject,
 								);
 								
-								ThreadEntry::deleteDirect($db, $id);
+								App::closeDB($db);
+								App::closeDB($idb);
+								
+								$db = App::openDB();
+								$idb = App::openDB(App::INDEX_DATABASE);
+								$db->beginTransaction();
+								
+								if ($db !== $idb)
+									$idb->beginTransaction();
+								
+								ThreadEntry::deleteDirect($db, $idb, $id);
+								
+								if ($db !== $idb)
+									$idb->commit();
+								
+								$db->commit();
+								App::closeDB($idb);
 								App::closeDB($db);
 								
 								throw $ex;
@@ -258,6 +283,11 @@ class UtilHandler extends Handler
 								break;
 							}
 						}
+					
+				if ($db !== $idb)
+					$idb->commit();
+				
+				$db->commit();
 				
 				App::closeDB($idb);
 				App::closeDB($db);
@@ -440,6 +470,11 @@ class UtilHandler extends Handler
 		$db = App::openDB();
 		$idb = App::openDB(App::INDEX_DATABASE);
 		
+		$db->beginTransaction();
+		
+		if ($db !== $idb)
+			$idb->beginTransaction();
+		
 		for ($i = 0; $i < 25; $i++)
 		{
 			$thread = new Thread($db);
@@ -462,6 +497,11 @@ class UtilHandler extends Handler
 			$thread->save($db);
 			SearchIndex::register($idb, $thread);
 		}
+		
+		if ($db !== $idb)
+			$idb->commit();
+		
+		$db->commit();
 		
 		App::closeDB($idb, true);
 		App::closeDB($db);

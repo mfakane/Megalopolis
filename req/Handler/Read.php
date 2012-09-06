@@ -43,7 +43,9 @@ class ReadHandler extends Handler
 
 		if (Cookie::getCookie(Cookie::LAST_ID_KEY) != $id)
 		{
+			$db->beginTransaction();
 			$this->entry->incrementReadCount($db);
+			$db->commit();
 			Cookie::setCookie(Cookie::LAST_ID_KEY, $id);
 			Cookie::sendCookie();
 		}
@@ -57,6 +59,7 @@ class ReadHandler extends Handler
 				Auth::loginError("管理者パスワードが一致しません");
 			
 			$ids = array_map("intval", array_map(array("Util", "escapeInput"), isset($_POST["id"]) ? (is_array($_POST["id"]) ? $_POST["id"] : array($_POST["id"])) : array()));
+			$db->beginTransaction();
 			
 			switch ($mode = Util::escapeInput($_POST["admin"]))
 			{
@@ -73,9 +76,11 @@ class ReadHandler extends Handler
 					
 					break;
 			}
+			
+			$db->commit();
 		}
 		
-		App::closeDB($db, false, false);
+		App::closeDB($db);
 		
 		if (App::$handlerType == "json")
 			return Visualizer::json($this->thread->toArray());
@@ -183,6 +188,12 @@ class ReadHandler extends Handler
 		$id = intval($_id);
 		
 		$db = App::openDB();
+		$idb = App::openDB(App::INDEX_DATABASE);
+		
+		$db->beginTransaction();
+		
+		if ($db !== $idb)
+			$idb->beginTransaction();
 		
 		if ($vacuum = $id == 0)
 			$this->thread = new Thread($db);
@@ -201,11 +212,16 @@ class ReadHandler extends Handler
 			throw new ApplicationException(implode("\r\n", $errors), 400);
 		
 		$this->thread->save($db);
-		App::closeDB($db, $vacuum && !ThreadEntry::getEntriesBySubject($db, $this->entry->subject));
 		
-		$idb = App::openDB(App::INDEX_DATABASE);
 		SearchIndex::register($idb, $this->thread);
+		
+		if ($db !== $idb)
+			$idb->commit();
+		
+		$db->commit();
+		
 		App::closeDB($idb, true);
+		App::closeDB($db, $vacuum && !ThreadEntry::getEntriesBySubject($db, $this->entry->subject));
 		
 		if (!Auth::hasSession(true))
 			Auth::logout();
@@ -226,6 +242,7 @@ class ReadHandler extends Handler
 		$isAdmin = Auth::hasSession(true);
 		
 		$db = App::openDB();
+		$idb = App::openDB(App::INDEX_DATABASE);
 		
 		if (!$_POST)
 			if (!$isAdmin)
@@ -246,7 +263,18 @@ class ReadHandler extends Handler
 		if (!Auth::ensureToken("token", false))
 			return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}/edit");
 		
-		$this->thread->delete($db);
+		$db->beginTransaction();
+		
+		if ($db !== $idb)
+			$idb->beginTransaction();
+		
+		$this->thread->delete($db, $idb);
+		
+		if ($db !== $idb)
+			$idb->commit();
+		
+		$db->commit();
+		App::closeDB($idb);
 		App::closeDB($db);
 		
 		if (!$isAdmin)
@@ -346,7 +374,9 @@ class ReadHandler extends Handler
 		}
 		else
 		{
+			$db->beginTransaction();
 			$comment = $this->thread->comment($db, $name, $mail, $body, $password, $point);
+			$db->commit();
 			App::closeDB($db);
 			
 			if (App::$handlerType == "json")
@@ -394,7 +424,9 @@ class ReadHandler extends Handler
 		else
 			Auth::cleanSession();
 		
+		$db->beginTransaction();
 		$this->thread->uncomment($db, $comment);
+		$db->commit();
 		App::closeDB($db);
 		
 		if (App::$handlerType == "json")
@@ -443,7 +475,9 @@ class ReadHandler extends Handler
 		}
 		else
 		{
+			$db->beginTransaction();
 			$eval = $this->thread->evaluate($db, $point);
+			$db->commit();
 			App::closeDB($db);
 			
 			if (App::$handlerType == "json")
@@ -473,7 +507,9 @@ class ReadHandler extends Handler
 		else if ($eval->host != $_SERVER["REMOTE_ADDR"] && $eval->host != Util::getRemoteHost())
 			throw new ApplicationException("指定された簡易評価の送信元が現在の送信元と一致しません", 403);
 		
+		$db->beginTransaction();
 		$this->thread->unevaluate($db, $eval);
+		$db->commit();
 		App::closeDB($db);
 		
 		if (App::$handlerType == "json")

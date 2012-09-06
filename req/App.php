@@ -230,21 +230,20 @@ class App
 	
 	/**
 	 * @param string $name
-	 * @param bool $beginTransaction [optional]
 	 * @return PDO
 	 */
-	static function openDB($name = "data", $beginTransaction = true)
+	static function openDB($name = "data")
 	{
-		return Configuration::$instance->dataStore->open($name, $beginTransaction);
+		return Configuration::$instance->dataStore->open($name);
 	}
 	
 	/**
 	 * @param bool $vacuum [optional]
 	 * @param bool $commitTransaction [optional]
 	 */
-	static function closeDB(PDO &$db, $vacuum = false, $commitTransaction = true)
+	static function closeDB(PDO &$db, $vacuum = false)
 	{
-		return Configuration::$instance->dataStore->close($db, $vacuum, $commitTransaction);
+		return Configuration::$instance->dataStore->close($db, $vacuum);
 	}
 }
 

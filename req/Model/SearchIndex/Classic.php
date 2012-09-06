@@ -85,7 +85,9 @@ class ClassicSearchIndex extends SearchIndex
 	
 	function ensureTableExists(PDO $idb)
 	{
+		$idb->beginTransaction();
 		Util::createTableIfNotExists($idb, self::$searchIndexSchema, self::INDEX_TABLE);
+		$idb->commit();
 	}
 	
 	/**

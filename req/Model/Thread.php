@@ -199,9 +199,9 @@ class Thread
 		$this->save($db);
 	}
 	
-	function delete(PDO $db)
+	function delete(PDO $db, PDO $idb)
 	{
-		$this->entry->delete($db);
+		$this->entry->delete($db, $idb);
 		$this->loaded = false;
 	}
 	
@@ -287,7 +287,17 @@ class Thread
 								".txt" => ""
 							)));
 				
+				$db->beginTransaction();
+				
+				if ($db !== $idb)
+					$idb->beginTransaction();
+				
 				$rt = Util::convertAndSaveToThread($db, $idb, $subject, $path, "Megalith/com/{$id}.res.dat", "Megalith/aft/{$id}.aft.dat");
+				
+				if ($db !== $idb)
+					$idb->commit();
+				
+				$db->commit();
 			}
 		
 		return $rt;
@@ -304,6 +314,8 @@ class Thread
 	
 	static function ensureTable(PDO $db)
 	{
+		$db->beginTransaction();
+		
 		if (Util::hasTable($db, App::THREAD_TABLE))
 		{
 			$currentThreadSchemaVersion = intval(Meta::get($db, App::THREAD_TABLE, "1"));
@@ -331,6 +343,8 @@ class Thread
 		Util::createTableIfNotExists($db, self::$threadPasswordSchema, App::THREAD_PASSWORD_TABLE);
 		Meta::set($db, App::THREAD_STYLE_TABLE, strval(self::$threadStyleSchemaVersion));
 		Meta::set($db, App::THREAD_TABLE, strval(self::$threadSchemaVersion));
+		
+		$db->commit();
 	}
 	
 	/**

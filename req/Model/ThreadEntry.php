@@ -187,26 +187,9 @@ class ThreadEntry
 		}
 	}
 	
-	function delete(PDO $db)
+	function delete(PDO $db, PDO $idb)
 	{
-		foreach (array
-		(
-			App::THREAD_ENTRY_TABLE => "id",
-			App::THREAD_EVALUATION_TABLE => "id",
-			App::THREAD_TAG_TABLE => "id",
-			App::THREAD_TABLE => "id",
-			App::THREAD_STYLE_TABLE => "id",
-			App::THREAD_PASSWORD_TABLE => "id",
-			App::COMMENT_TABLE => "entryID",
-			App::EVALUATION_TABLE => "entryID"
-		) as $k => $v)
-			Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf
-			('
-				delete from %s
-				where %s = ?',
-				$k,
-				$v
-			))), array($this->id));
+		self::deleteDirect($db, $idb, $this->id);
 		
 		$this->loaded = false;
 	}
@@ -250,6 +233,8 @@ class ThreadEntry
 	
 	static function ensureTable(PDO $db)
 	{
+		$db->beginTransaction();
+		
 		$threadEntryIndices = array
 		(
 			App::THREAD_ENTRY_TABLE . "SubjectIndex" => array("subject"),
@@ -289,6 +274,8 @@ class ThreadEntry
 		));
 		Meta::set($db, App::THREAD_ENTRY_TABLE, strval(self::$threadEntrySchemaVersion));
 		Meta::set($db, App::THREAD_EVALUATION_TABLE, strval(self::$threadEvaluationSchemaVersion));
+		
+		$db->commit();
 	}
 	
 	/**
@@ -981,7 +968,7 @@ class ThreadEntry
 	/**
 	 * @param int $id
 	 */
-	static function deleteDirect(PDO $db, $id)
+	static function deleteDirect(PDO $db, PDO $idb, $id)
 	{
 		foreach (array
 		(
@@ -1000,6 +987,9 @@ class ThreadEntry
 			App::COMMENT_TABLE,
 		) as $i)
 			Util::executeStatement(Util::ensureStatement($db, $db->prepare("delete from {$i} where entryID = ?")), array($id));
+		
+		if ($idb != null)
+			SearchIndex::$instance->unregister($idb, $id);
 	}
 }
 ?>

@@ -87,7 +87,9 @@ class Evaluation
 	
 	static function ensureTable(PDO $db)
 	{
+		$db->beginTransaction();
 		Util::createTableIfNotExists($db, self::$evaluationSchema, App::EVALUATION_TABLE);
+		$db->commit();
 	}
 }
 ?>

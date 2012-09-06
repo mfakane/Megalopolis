@@ -66,8 +66,10 @@ class Meta
 	{
 		if (!Util::hasTable($db, App::META_TABLE))
 		{
+			$db->beginTransaction();
 			Util::createTableIfNotExists($db, self::$metaTableSchema, App::META_TABLE);
 			self::set($db, self::DATA_VERSION, self::DATA_VERSION_VALUE_LATEST);
+			$db->commit();
 		}
 	}
 }

@@ -45,15 +45,28 @@ class IndexHandler extends Handler
 				Auth::loginError("管理者パスワードが一致しません");
 			
 			$ids = array_map("intval", array_map(array("Util", "escapeInput"), isset($_POST["id"]) ? (is_array($_POST["id"]) ? $_POST["id"] : array($_POST["id"])) : array()));
+			$db->beginTransaction();
 			
 			switch ($mode = Util::escapeInput($_POST["admin"]))
 			{
 				case "unpost":
+					$idb = App::openDB(App::INDEX_DATABASE);
+					
+					if ($db !== $idb)
+						$idb->beginTransaction();
+					
 					foreach ($ids as $i)
-						ThreadEntry::deleteDirect($db, $i);
+						ThreadEntry::deleteDirect($db, $idb, $i);
+					
+					if ($db !== $idb)
+						$idb->commit();
+					
+					App::closeDB($idb);
 					
 					break;
 			}
+			
+			$db->commit();
 		}
 		
 		if ($subject == 0)
@@ -189,19 +202,28 @@ class IndexHandler extends Handler
 				Auth::loginError("管理者パスワードが一致しません");
 			
 			$ids = array_map("intval", array_map(array("Util", "escapeInput"), isset($_POST["id"]) ? (is_array($_POST["id"]) ? $_POST["id"] : array($_POST["id"])) : array()));
+			$db->beginTransaction();
+					
+			if ($db !== $idb)
+				$idb->beginTransaction();
 			
 			switch ($mode = Util::escapeInput($_POST["admin"]))
 			{
 				case "unpost":
 					foreach ($ids as $i)
 					{
-						ThreadEntry::deleteDirect($db, $i);
+						ThreadEntry::deleteDirect($db, $idb, $i);
 						unset($this->entries[$i]);
 						$rt["count"]--;
 					}
 					
 					break;
 			}
+			
+			if ($db !== $idb)
+				$idb->commit();
+			
+			$db->commit();
 		}
 		
 		App::closeDB($idb);

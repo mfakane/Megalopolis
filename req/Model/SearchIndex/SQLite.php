@@ -88,7 +88,9 @@ class SQLiteSearchIndex extends SearchIndex
 	
 	function ensureTableExists(PDO $idb)
 	{
+		$idb->beginTransaction();
 		Util::createFullTextTableIfNotExists($idb, self::$searchIndexSchema, self::INDEX_TABLE);
+		$idb->commit();
 	}
 	
 	/**

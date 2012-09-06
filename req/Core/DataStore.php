@@ -38,16 +38,14 @@ abstract class DataStore
 	
 	/**
 	 * @param string $database
-	 * @param bool $beginTransaction [optional]
 	 * @return PDO
 	 */
-	abstract function open($database = "data", $beginTransaction = true);
+	abstract function open($database = "data");
 	
 	/**
 	 * @param bool $vacuum [optional]
-	 * @param bool $commitTransaction [optional]
 	 */
-	abstract function close(PDO &$db, $vacuum = false, $commitTransaction = true);
+	abstract function close(PDO &$db, $vacuum = false);
 	
 	/**
 	 * @return array|string
@@ -242,16 +240,12 @@ class SQLiteDataStore extends DataStore
 	
 	/**
 	 * @param string $name
-	 * @param bool $beginTransaction [optional]
 	 * @return PDO
 	 */
-	function open($name = "data", $beginTransaction = true)
+	function open($name = "data")
 	{
 		$db = new PDO(sprintf("sqlite:%s%s.sqlite", rtrim($this->directory, "/") . "/", $name), null, null);
 		$this->registerHandle($db, $name);
-		
-		if ($beginTransaction)
-			$db->beginTransaction();
 		
 		if ($name == App::INDEX_DATABASE)
 			SearchIndex::ensureTable($db);
@@ -266,14 +260,10 @@ class SQLiteDataStore extends DataStore
 	
 	/**
 	 * @param bool $vacuum [optional]
-	 * @param bool $commitTransaction [optional]
 	 */
-	function close(PDO &$db, $vacuum = false, $commitTransaction = true)
+	function close(PDO &$db, $vacuum = false)
 	{
 		$this->unregisterHandle($db);
-		
-		if ($commitTransaction)
-			$db->commit();
 		
 		if ($vacuum)
 			$db->exec("vacuum");
@@ -403,10 +393,9 @@ class MySQLDataStore extends DataStore
 	
 	/**
 	 * @param string $name
-	 * @param bool $beginTransaction [optional]
 	 * @return PDO
 	 */
-	function open($name = "data", $beginTransaction = true)
+	function open($name = "data")
 	{
 		$this->openCount++;
 		
@@ -417,7 +406,7 @@ class MySQLDataStore extends DataStore
 			{
 				$this->openCount--;
 				
-				return $this->open("data", $beginTransaction);
+				return $this->open("data");
 			}
 		
 		$db = new PDO
@@ -433,9 +422,6 @@ class MySQLDataStore extends DataStore
 		);
 		$this->registerHandle($db, $name);
 		
-		if ($beginTransaction)
-			$db->beginTransaction();
-		
 		Meta::ensureTable($db);
 		Board::ensureTable($db);
 		SearchIndex::ensureTable($db);
@@ -445,18 +431,13 @@ class MySQLDataStore extends DataStore
 	
 	/**
 	 * @param bool $vacuum [optional]
-	 * @param bool $commitTransaction [optional]
 	 */
-	function close(PDO &$db, $vacuum = false, $commitTransaction = true)
+	function close(PDO &$db, $vacuum = false)
 	{
 		if (--$this->openCount > 0)
 			return;
 		
 		$this->unregisterHandle($db);
-		
-		if ($commitTransaction)
-			$db->commit();
-		
 		$db = null;
 	}
 	
