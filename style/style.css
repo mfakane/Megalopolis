@@ -842,18 +842,22 @@ form[action="unpost"] button:active img, button.unpost:active img
 	margin-bottom: 5px;
 }
 
-#commentform
+#commentformContent
 {
 	padding-left: 318px;
+	padding-right: 8px;
+	width: 631px;
+	margin-right: auto;
+	margin-left: auto;
 }
 
-#commentform div
+#commentformContent div
 {
 	position: relative;
 	margin: 0px;
 }
 
-#commentform div div
+#commentformContent div div
 {
 	position: absolute;
 	left: -238px;
@@ -894,7 +898,7 @@ form[action="unpost"] button:active img, button.unpost:active img
 	min-height: 108px;
 }
 
-#commentform>.buttons
+#commentformContent>.buttons
 {
 	float: none;
 	margin: 0px;
@@ -1038,6 +1042,13 @@ ul.buttons li,
 .read h1
 {
 	margin-top: 32px;
+}
+
+body.read
+{
+	max-width: none;
+	margin-right: 8px;
+	margin-left: 8px;
 }
 
 body.read>h1

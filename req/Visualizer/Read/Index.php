@@ -294,49 +294,51 @@ Visualizer::doctype();
 		<?if ($c->useComments): ?>
 			<a id="commentformHeadding" href="#commentform"<?if (!$c->usePoints()) echo 'class="first"' ?>>コメント</a>
 			<form id="commentform" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "comment")) ?>#commentformHeadding" method="post">
-				<?if ($d && App::$actionName == "comment"): ?>
-					<ul class="notify warning">
-						<?foreach (Visualizer::$data as $i): ?>
-							<li>
-								<?+$i ?>
-							</li>
-						<?endforeach ?>
-					</ul>
-				<?endif ?>
-				<div>
+				<div id="commentformContent">
+					<?if ($d && App::$actionName == "comment"): ?>
+						<ul class="notify warning">
+							<?foreach (Visualizer::$data as $i): ?>
+								<li>
+									<?+$i ?>
+								</li>
+							<?endforeach ?>
+						</ul>
+					<?endif ?>
 					<div>
-						<label for="name">名前</label><input type="text" name="name" id="name" value="<?+ReadHandler::param("name", Cookie::getCookie(Cookie::NAME_KEY)) ?>"<?=$c->requireName[Configuration::ON_COMMENT] ? 'required="required"' : null ?> /><br />
-						<label for="mail">メール</label><input type="email" name="mail" id="mail" value="<?+ReadHandler::param("mail", Cookie::getCookie(Cookie::MAIL_KEY)) ?>" /><br />
-						<label for="password">削除キー</label><input type="password" name="password" id="password" value="<?+ReadHandler::param("password", Cookie::getCookie(Cookie::PASSWORD_KEY)) ?>"<?=$c->requirePassword[Configuration::ON_ENTRY] ? ' required="required"' : null ?> /><br />
-						<?if (!Util::isEmpty($c->postPassword)): ?>
-							<label for="postPassword2">投稿キー</label><input type="password" name="postPassword" id="postPassword2" /><br />
-						<?endif ?>
-						<?if ($c->useCommentPoints()): ?>
-							<label for="point">評価</label>
-							<select name="point" id="point">
-								<?foreach ($c->commentPointMap as $i): ?>
-									<?if ($i > 0): ?>
-										<option value="<?+$i ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?+$i ?> 点</option>
-									<?endif ?>
-								<?endforeach ?>
-								<option value="0"<?=!isset($_POST["point"]) ? ' selected="selected"' : null ?>>無評価</option>
-								<?foreach ($c->commentPointMap as $i): ?>
-									<?if ($i < 0): ?>
-										<option value="<?+$i ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?+$i ?> 点</option>
-									<?endif ?>
-								<?endforeach ?>
-							</select>
-						<?endif ?>
+						<div>
+							<label for="name">名前</label><input type="text" name="name" id="name" value="<?+ReadHandler::param("name", Cookie::getCookie(Cookie::NAME_KEY)) ?>"<?=$c->requireName[Configuration::ON_COMMENT] ? 'required="required"' : null ?> /><br />
+							<label for="mail">メール</label><input type="email" name="mail" id="mail" value="<?+ReadHandler::param("mail", Cookie::getCookie(Cookie::MAIL_KEY)) ?>" /><br />
+							<label for="password">削除キー</label><input type="password" name="password" id="password" value="<?+ReadHandler::param("password", Cookie::getCookie(Cookie::PASSWORD_KEY)) ?>"<?=$c->requirePassword[Configuration::ON_ENTRY] ? ' required="required"' : null ?> /><br />
+							<?if (!Util::isEmpty($c->postPassword)): ?>
+								<label for="postPassword2">投稿キー</label><input type="password" name="postPassword" id="postPassword2" /><br />
+							<?endif ?>
+							<?if ($c->useCommentPoints()): ?>
+								<label for="point">評価</label>
+								<select name="point" id="point">
+									<?foreach ($c->commentPointMap as $i): ?>
+										<?if ($i > 0): ?>
+											<option value="<?+$i ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?+$i ?> 点</option>
+										<?endif ?>
+									<?endforeach ?>
+									<option value="0"<?=!isset($_POST["point"]) ? ' selected="selected"' : null ?>>無評価</option>
+									<?foreach ($c->commentPointMap as $i): ?>
+										<?if ($i < 0): ?>
+											<option value="<?+$i ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?+$i ?> 点</option>
+										<?endif ?>
+									<?endforeach ?>
+								</select>
+							<?endif ?>
+						</div>
+						<textarea name="body" class="<?+implode(" ", array($c->useCommentPoints() ? "usePoint" : "", !Util::isEmpty($c->postPassword) ? "usePostPassword" : ""))?>" rows="2" cols="80"><?+ReadHandler::param("body")?></textarea>
 					</div>
-					<textarea name="body" class="<?+implode(" ", array($c->useCommentPoints() ? "usePoint" : "", !Util::isEmpty($c->postPassword) ? "usePostPassword" : ""))?>" rows="2" cols="80"><?+ReadHandler::param("body")?></textarea>
+					<ul class="buttons">
+						<li>
+							<button type="submit">
+								<img src="<?+Visualizer::actionHref("style", "writeButtonIcon.png") ?>" />送信
+							</button>
+						</li>
+					</ul>
 				</div>
-				<ul class="buttons">
-					<li>
-						<button type="submit">
-							<img src="<?+Visualizer::actionHref("style", "writeButtonIcon.png") ?>" />送信
-						</button>
-					</li>
-				</ul>
 			</form>
 		<?endif ?>
 		<?if ($c->usePoints() && $c->useComments): ?>
