@@ -1,8 +1,8 @@
 <?php
-function entryInfo($i, $visibility, $label, $member, $value = null)
+function entryInfo(&$idx, $i, $visibility, $label, $member, $value = null)
 {
 	?>
-	<dt<?php echo in_array($member, $visibility) ? null : ' class="hidden"' ?>><?php Visualizer::converted($label) ?></dt>
+	<dt<?php echo in_array($member, $visibility) ? ($idx++ == 0 ? ' class="firstChild"' : null) : ' class="hidden"' ?>><?php Visualizer::converted($label) ?></dt>
 	<dd class="<?php echo $member . (in_array($member, $visibility) ? null : " hidden") ?>">
 		<?php Visualizer::converted($value ? $value : $i->{$member}) ?>
 	</dd>
@@ -81,20 +81,21 @@ function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 					  $c->showComment[Configuration::ON_SUBJECT] ||
 					  $c->showRate[Configuration::ON_SUBJECT]): ?>
 				<dl>
-					<?php if ($c->showPages[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "ページ", "pageCount") ?>
-					<?php if ($c->showSize[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "サイズ", "size", "{$i->size}KB") ?>
-					<?php if ($c->showReadCount[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "閲覧", "readCount") ?>
+					<?php $idx = 0; ?>
+					<?php if ($c->showPages[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "ページ", "pageCount") ?>
+					<?php if ($c->showSize[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "サイズ", "size", "{$i->size}KB") ?>
+					<?php if ($c->showReadCount[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "閲覧", "readCount") ?>
 					<?php if ($c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
 						<?php if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-							<?php entryInfo($i, $visibility, "評価", "evaluationCount") ?>
+							<?php entryInfo($idx, $i, $visibility, "評価", "evaluationCount") ?>
 						<?php endif ?>
 						<?php if ($c->showComment[Configuration::ON_SUBJECT]): ?>
-							<?php entryInfo($i, $visibility, "コメント", "commentCount") ?>
+							<?php entryInfo($idx, $i, $visibility, "コメント", "commentCount") ?>
 						<?php endif ?>
 						<?php if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-							<?php entryInfo($i, $visibility, "POINT", "points") ?>
+							<?php entryInfo($idx, $i, $visibility, "POINT", "points") ?>
 						<?php endif ?>
-						<?php if ($c->showRate[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "Rate", "rate", sprintf("%.2f", $i->rate)) ?>
+						<?php if ($c->showRate[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "Rate", "rate", sprintf("%.2f", $i->rate)) ?>
 					<?php endif ?>
 				</dl>
 				<?php endif ?>

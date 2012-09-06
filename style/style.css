@@ -477,7 +477,7 @@ ul.notify
 	border-left: #000000 1px solid;
 }
 
-.entries dl dt:first-child
+.entries dl dt:first-child, .entries dl dt.firstChild
 {
 	margin-left: 0px;
 	padding-left: 0px;

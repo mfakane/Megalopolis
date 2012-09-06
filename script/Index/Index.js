@@ -234,6 +234,14 @@ megalopolis.index =
 									{
 										$([$(v), $(v).prev("dt")]).toggleClass("hidden");
 									});
+									$(".entries>article dl").each(function(k, v)
+									{
+										var elems = $("dt", v);
+										var firstVisible = elems.not(".hidden").first();
+										
+										elems.removeClass("firstChild");
+										firstVisible.addClass("firstChild");
+									});
 									
 									if (idx != -1)
 										delete visibilityCookie[idx];
