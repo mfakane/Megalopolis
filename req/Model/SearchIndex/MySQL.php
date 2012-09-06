@@ -3,7 +3,39 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 {
 	function __construct()
 	{
-		$this->gramLength = 4;
+		$this->gramLength = max(Configuration::$instance->mysqlSearchNgramLength, 2);
+	}
+	
+	function registerThread(PDO $idb, Thread $thread)
+	{
+		self::unregister($idb, $thread->id);
+		$words = array_filter(array
+		(
+			"title" => $this->getWords($thread->entry->title),
+			"name" => $this->getWords($thread->entry->name),
+			"summary" => $this->getWords($thread->entry->summary),
+			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords($thread->body) : null,
+			"afterword" => $this->getWords($thread->afterword),
+			"tag" => call_user_func_array(array("SearchIndex", "getWords"), $thread->entry->tags)
+		));
+		
+		foreach ($words as $k => $v)
+			$words[$k] = array_map(create_function('$_', 'return ($len = mb_strlen($_)) >= ' . $this->gramLength . ' ? $_ : $_ . str_repeat("_", ' . $this->gramLength . ' - $len);'), $v);
+		
+		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
+		('
+			insert into %s(docid, %s)
+			values
+			(
+				%d,
+				%s
+			);',
+			self::INDEX_TABLE,
+			implode(", ", array_keys($words)),
+			$thread->id,
+			implode(", ", array_map(create_function('$_', 'return ":{$_}";'), array_keys($words)))
+		)));
+		Util::executeStatement($st, array_map(create_function('$_', 'return implode(" ", $_);'), $words));
 	}
 	
 	function attachIndex(PDO $idb)
@@ -25,7 +57,11 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		
 		foreach ($query as $i)
 			if ($words = $this->getWords(str_replace('"', "", $i)))
-				$queryArguments[] = '+"' . implode(" ", $words) . '"';
+				$queryArguments[] = implode
+				(
+					" ",
+					array_map(create_function('$_', 'return mb_strlen($_) >= ' . $this->gramLength . ' ? "+{$_}" : "+{$_}*";'), $words)
+				);
 		
 		if (!($queryArguments = array_filter($queryArguments)))
 			return array();

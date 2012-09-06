@@ -42,6 +42,7 @@ class Configuration
 	public $denyWriteFromMobileWithoutID = false;
 	public $registerBodyToSearchIndex = true;
 	public $maximumSearchIndexLength = 1024;
+	public $mysqlSearchNgramLength = 4;
 
 	/**
 	 * @var DataStore
