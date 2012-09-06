@@ -1,6 +1,6 @@
 megalopolis.index =
 {
-	loadDropDown: function(useTitle, useName, usePageCount, useReadCount, useSize, useEvaluationCount, usePoints, useRate, defaultStyle)
+	loadDropDown: function(useTitle, useName, usePageCount, useReadCount, useSize, useEvaluationCount, useCommentCount, usePoints, useRate, defaultStyle)
 	{
 		if ($.browser.msie &&
 			$.browser.version < 8)
@@ -66,6 +66,11 @@ megalopolis.index =
 				{
 					label: "評価数",
 					value: "evaluationCount"
+				},
+				!useCommentCount ? null :
+				{
+					label: "コメント数",
+					value: "commentCount"
 				},
 				!usePoints ? null :
 				{
@@ -194,7 +199,7 @@ megalopolis.index =
 							label: "評価数",
 							value: "evaluationCount"
 						},
-						!useEvaluationCount ? null :
+						!useCommentCount ? null :
 						{
 							label: "コメント数",
 							value: "commentCount"

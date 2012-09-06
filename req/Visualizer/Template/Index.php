@@ -32,7 +32,9 @@ function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 		$listType == "single")
 		$listType = "double";
 	
-	$visibility = explode(",", Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "pageCount,readCount,size,evaluationCount,points,rate,dateTime"));
+	$visibility = explode(",", Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, $c->showPoint[Configuration::ON_SUBJECT]
+		? "pageCount,readCount,size,evaluationCount,points,rate,dateTime"
+		: "pageCount,readCount,size,evaluationCount,commentCount,dateTime"));
 	?>
 	<div class="entries<?php echo $listType == "single" ? " single" : null ?>">
 		<?php foreach ($entries as $idx => $i): ?><article>
@@ -76,6 +78,7 @@ function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 					  $c->showSize[Configuration::ON_SUBJECT] ||
 					  $c->showReadCount[Configuration::ON_SUBJECT] ||
 					  $c->showPoint[Configuration::ON_SUBJECT] ||
+					  $c->showComment[Configuration::ON_SUBJECT] ||
 					  $c->showRate[Configuration::ON_SUBJECT]): ?>
 				<dl>
 					<?php if ($c->showPages[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "ページ数", "pageCount") ?>
@@ -84,7 +87,11 @@ function entries($entries, $isAdmin, $listType = null, $noSingle = false)
 					<?php if ($c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
 						<?php if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
 							<?php entryInfo($i, $visibility, "評価数", "evaluationCount") ?>
+						<?php endif ?>
+						<?php if ($c->showComment[Configuration::ON_SUBJECT]): ?>
 							<?php entryInfo($i, $visibility, "コメント数", "commentCount") ?>
+						<?php endif ?>
+						<?php if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
 							<?php entryInfo($i, $visibility, "POINT", "points") ?>
 						<?php endif ?>
 						<?php if ($c->showRate[Configuration::ON_SUBJECT]) entryInfo($i, $visibility, "Rate", "rate", sprintf("%.2f", $i->rate)) ?>

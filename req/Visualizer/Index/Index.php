@@ -51,6 +51,7 @@ App::load(VISUALIZER_DIR . "Template/Index");
 			<?=$c->showReadCount[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
 			<?=$c->showSize[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
 			<?=$c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+			<?=$c->showComment[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
 			<?=$c->showPoint[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
 			<?=$c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
 			<?=$c->listType ?>
