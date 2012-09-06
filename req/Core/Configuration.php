@@ -128,7 +128,6 @@ class Configuration
 		"basefont",
 		"bgsound",
 		"blink",
-		"center",
 		"dir",
 		"frame",
 		"frameset",
