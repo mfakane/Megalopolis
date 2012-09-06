@@ -27,15 +27,31 @@ if (isset($_GET["s"]))
 	switch ($column = Util::escapeInput($_GET["s"]))
 	{
 		case "title":
+			usort($h->entries, create_function('$x, $y', 'return strnatcmp($x->title, $y->title);'));
+			
+			break;
 		case "name":
-			usort($h->entries, create_function('$x, $y', 'return strnatcmp($x->' . $column . ', $y-> ' . $column . ');'));
+			usort($h->entries, create_function('$x, $y', 'return strnatcmp($x->name, $y->name);'));
+			
+			break;
+		case "commentCount":
+			usort($h->entries, create_function('$x, $y', 'return $y->commentCount - $x->commentCount;'));
 			
 			break;
 		case "points":
+			usort($h->entries, create_function('$x, $y', 'return $y->points - $x->points;'));
+			
+			break;
 		case "rate":
+			usort($h->entries, create_function('$x, $y', 'return $y->rate - $x->rate;'));
+			
+			break;
 		case "size":
+			usort($h->entries, create_function('$x, $y', 'return $y->size - $x->size;'));
+			
+			break;
 		case "dateTime":
-			usort($h->entries, create_function('$x, $y', 'return $y->' . $column . ' - $x-> ' . $column . ';'));
+			usort($h->entries, create_function('$x, $y', 'return $y->dateTime - $x->dateTime;'));
 			
 			break;
 	}
@@ -69,8 +85,11 @@ Visualizer::doctype();
 				<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
 					<span class="name"><? Visualizer::convertedName($i->name) ?></span>
 				<?endif ?>
-				<?if ($c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
+				<?if ($c->showComment[Configuration::ON_SUBJECT] || $c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
 					<br />
+					<?if ($c->showComment[Configuration::ON_SUBJECT]): ?>
+						<span class="commentCount">Cm:<?+$i->commentCount ?></span>
+					<?endif ?>
 					<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
 						<span class="points">Pt:<?+$i->points ?></span>
 					<?endif ?>
@@ -97,6 +116,7 @@ Visualizer::doctype();
 			"random" => "おまかせ表示",
 			"s=title" => ($c->showTitle[Configuration::ON_SUBJECT] ? "作品名順" : null),
 			"s=name" => ($c->showName[Configuration::ON_SUBJECT] ? "作者順" : null),
+			"s=commentCount" => ($c->showComment[Configuration::ON_SUBJECT] ? "コメント数順" : null),
 			"s=points" => ($c->showPoint[Configuration::ON_SUBJECT] ? "POINT順" : null),
 			"s=rate" => ($c->showPoint[Configuration::ON_SUBJECT] ? "Rate順" : null),
 			"s=size" => ($c->showSize[Configuration::ON_SUBJECT] ? "サイズ順" : null),

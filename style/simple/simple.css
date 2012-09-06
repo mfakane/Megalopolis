@@ -21,7 +21,7 @@ h2
 	border-top: #999999 1px solid;
 }
 
-.dateTime, .name, .points, .rate, .size, .tags
+.dateTime, .name, .commentCount, .points, .rate, .size, .tags
 {
 	margin: 0px 8px 0px 0px;
 	font-size: 75%;
@@ -34,7 +34,7 @@ h2
 	color: #999999;
 }
 
-.points, .rate, .size
+.commentCount, .points, .rate, .size
 {
 	color: #666666;
 }
