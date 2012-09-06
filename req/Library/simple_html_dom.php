@@ -507,6 +507,9 @@ class simple_html_dom {
         'dl'=>array('dd'=>1, 'dt'=>1),
         'p'=>array('p'=>1),
         'nobr'=>array('nobr'=>1),
+        'rb'=>array('rb'=>1, 'rp'=>1, 'rt'=>1),
+        'rp'=>array('rb'=>1, 'rp'=>1, 'rt'=>1),
+        'rt'=>array('rb'=>1, 'rp'=>1, 'rt'=>1),
     );
 
     function __construct($str=null) {
