@@ -588,7 +588,7 @@ class Util
 		$line = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", array_shift($data))) + array_fill(0, 14, null);
 		$thread->subject = $subject;
 		$thread->foreground = $line[10];
-		$thread->convertLineBreak = $line[11] == "yes";
+		$thread->convertLineBreak = is_null($line[11]) || $line[11] == "yes";
 		$thread->hash = array_shift($data);
 		
 		if (preg_match('/^\#|^rgb/', $line[9]))
