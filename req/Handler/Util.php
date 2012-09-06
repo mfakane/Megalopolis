@@ -147,6 +147,7 @@ class UtilHandler extends Handler
 			$db = App::openDB();
 			$idb = App::openDB(App::INDEX_DATABASE);
 			$allowOverwrite = isset($_GET["allowOverwrite"]) && $_GET["allowOverwrite"] == "yes";
+			$whenNoConvertLineBreakFieldOnly = isset($_GET["whenNoConvertLineBreakFieldOnly"]) && $_GET["whenNoConvertLineBreakFieldOnly"] == "yes";
 			
 			if ($params[0] == "list")
 			{
@@ -194,7 +195,8 @@ class UtilHandler extends Handler
 						"remaining" => $subjectRange,
 						"count" => 0,
 						"buffer" => $defaultBuffer,
-						"allowOverwrite" => $allowOverwrite ? "yes" : "no"
+						"allowOverwrite" => $allowOverwrite ? "yes" : "no",
+						"whenNoConvertLineBreakFieldOnly" => $whenNoConvertLineBreakFieldOnly ? "yes" : "no"
 					));
 				else
 					return Visualizer::redirect("util/convert?p=" . urlencode(implode(",", $subjectRange)));
@@ -247,6 +249,9 @@ class UtilHandler extends Handler
 							}
 							else
 								continue;
+						
+						if ($whenNoConvertLineBreakFieldOnly && $datLines && count(explode("<>", $datLines[0])) > 12)
+							continue;
 						
 						try
 						{
@@ -314,7 +319,8 @@ class UtilHandler extends Handler
 						"remaining" => $params,
 						"count" => $count,
 						"buffer" => max($buffer, $minimumBuffer),
-						"allowOverwrite" => $allowOverwrite ? "yes" : "no"
+						"allowOverwrite" => $allowOverwrite ? "yes" : "no",
+						"whenNoConvertLineBreakFieldOnly" => $whenNoConvertLineBreakFieldOnly ? "yes" : "no"
 					));
 				else
 					return Visualizer::redirect("util/convert?p=" . urlencode(implode(",", $params)) . "&c={$count}");

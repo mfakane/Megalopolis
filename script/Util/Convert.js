@@ -7,6 +7,7 @@ megalopolis.convert =
 	submit: function()
 	{
 		var allowOverwrite = $("#allowOverwrite").is(":checked");
+		var whenNoConvertLineBreakFieldOnly = $("#whenNoConvertLineBreakFieldOnly").is(":checked");
 		
 		$("#form").remove();
 		
@@ -28,7 +29,8 @@ megalopolis.convert =
 			data:
 			{
 				p: "list",
-				allowOverwrite: allowOverwrite ? "yes" : "no"
+				allowOverwrite: allowOverwrite ? "yes" : "no",
+				whenNoConvertLineBreakFieldOnly: whenNoConvertLineBreakFieldOnly ? "yes" : "no"
 			},
 			success: function(data)
 			{
@@ -67,7 +69,8 @@ megalopolis.convert =
 				p: obj.remaining.join(","),
 				c: obj.count,
 				b: obj.buffer,
-				allowOverwrite: obj.allowOverwrite
+				allowOverwrite: obj.allowOverwrite,
+				whenNoConvertLineBreakFieldOnly: obj.whenNoConvertLineBreakFieldOnly
 			},
 			success: function(data)
 			{
