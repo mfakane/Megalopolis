@@ -200,7 +200,14 @@ class ReadHandler extends Handler
 		if ($vacuum = $id == 0)
 			$this->thread = new Thread($db);
 		else
+		{
 			$this->thread = self::loadThread($db, $id);
+			
+			if (!Auth::hasSession(true) &&
+				!($type = Util::hashEquals(Configuration::$instance->adminHash, $login = Auth::login())) &&
+				!($type = Util::hashEquals($this->thread->hash, $login)))
+				Auth::loginError("編集キーが一致しません");
+		}
 		
 		$this->entry = &$this->thread->entry;
 		self::setValues($this->entry, $this->thread);
