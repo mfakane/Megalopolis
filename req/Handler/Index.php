@@ -344,7 +344,7 @@ class IndexHandler extends Handler
 	
 	function author($_name = null, $_page = 1)
 	{
-		$isNameList = is_null($_name);
+		$isNameList = is_null($_name) || intval($_name) > 0;
 		$name = Util::escapeInput($_name);
 		$page = max(intval($isNameList ? $_name : $_page) - 1, 0);
 		
