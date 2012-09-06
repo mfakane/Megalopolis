@@ -58,7 +58,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		$queryArguments = array();
 		
 		foreach ($query as $i)
-			if ($words = $this->getWords(str_replace('"', "", $i)))
+			if ($words = $this->getWords(array("endOnIncompletedGram" => true), str_replace('"', "", $i)))
 				$queryArguments[] = implode
 				(
 					" ",
