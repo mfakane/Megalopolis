@@ -81,6 +81,22 @@ $config->registerBodyToSearchIndex = true;
 // -1 の場合、制限せず全文を登録します
 $config->maximumSearchIndexLength = 1024;
 
+// MySQL 時の検索インデックスの N-gram 長 (整数)
+// MySQL 使用時の検索で使用可能な検索ワードの最小の長さを指定します。既定値は 4 です。最小値は 2 です。
+// 数値が大きくなると検索インデックスの要求サイズが増えます。
+// MySQL の既定の設定では 4 です。これを変更するには MySQL の設定ファイルを ft_min_word_len=1 などに変更する必要があります。
+// 詳細については、以下の URL をご参照ください。
+// http://dev.mysql.com/doc/refman/4.1/ja/fulltext-fine-tuning.html
+// ft_min_word_len の値を下回る値を指定した場合、検索に何もヒットしません。
+// この値を変更した場合、検索インデックスの再生成が必要です。
+$config->mysqlSearchNgramLength = 4;
+
+// MySQL 時の検索において N-gram 長を満たさない検索ワードに対して前方一致を使用するか (true/false)
+// true にすることで ft_min_word_len を変更不可能な環境においても 3 文字以下の文字にマッチしますが、
+// 作品や一致件数が増えると重くなることがあります。
+// この値を変更した場合でも検索インデックスの再生成は必要ありません
+$config->mysqlSearchUseHeadMatching = false;
+
 /*
  * データストアに関する設定
  */

@@ -43,6 +43,7 @@ class Configuration
 	public $registerBodyToSearchIndex = true;
 	public $maximumSearchIndexLength = 1024;
 	public $mysqlSearchNgramLength = 4;
+	public $mysqlSearchUseHeadMatching = false;
 
 	/**
 	 * @var DataStore
