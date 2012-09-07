@@ -345,7 +345,7 @@ Visualizer::doctype();
 		<?endif ?>
 		<?if ($c->usePoints() && $c->useComments): ?>
 			<script>
-				megalopolis.read.loadForms(<?+$c->defaultEvaluator ?>);
+				megalopolis.read.loadForms(<?+$c->defaultEvaluator ?>, '<?+$c->defaultName ?>');
 			</script>
 		<?endif ?>
 		<?if ($c->showComment[Configuration::ON_ENTRY]): ?>
@@ -420,10 +420,10 @@ Visualizer::doctype();
 								<span class="name">
 									<?if (!Util::isEmpty($i->mail)): ?>
 										<a href="mailto:<?+$i->mail ?>">
-											<?+$i->name ?>
+											<? Visualizer::convertedName($i->name) ?>
 										</a>
 									<?else: ?>
-										<?+$i->name ?>
+										<? Visualizer::convertedName($i->name) ?>
 									<?endif ?>
 								</span>
 							<?endif ?>

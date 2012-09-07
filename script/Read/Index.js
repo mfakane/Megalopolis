@@ -4,6 +4,7 @@ megalopolis.read =
 	isVertical: false,
 	forceTaketori: false,
 	resizeAction: null,
+	defaultName: null,
 	isWebKit: function()
 	{
 		try
@@ -169,6 +170,9 @@ megalopolis.read =
 				},
 				success: function(data)
 				{	
+					if (!data.name || data.name.length == 0)
+						data.name = megalopolis.read.defaultName;
+					
 					$("<div />")
 						.addClass("notify info")
 						.text("コメントを受け付けました！" + ($("#point").val() == 0 ? "無評価" : $("#point").val() + "点"))
@@ -387,8 +391,10 @@ megalopolis.read =
 		if (writingMode == 0 && megalopolis.mainCookie("Vertical") == "yes" || writingMode == 2)
 			megalopolis.read.toggleVertical(true, writingMode == 2 ? true : undefined);
 	},
-	loadForms: function(defaultEvaluator)
+	loadForms: function(defaultEvaluator, defaultName)
 	{
+		megalopolis.read.defaultName = defaultName;
+		
 		if (defaultEvaluator == -1)
 			return;
 		
