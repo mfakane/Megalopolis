@@ -626,6 +626,7 @@ class ThreadEntry
 			if (isset($tags[$i->id]))
 				$i->tags = $tags[$i->id];
 			
+			$i->calculateRate();
 			$i->loaded = true;
 		}
 		
