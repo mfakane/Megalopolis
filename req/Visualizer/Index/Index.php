@@ -42,6 +42,14 @@ App::load(VISUALIZER_DIR . "Template/Index");
 	
 	Visualizer::header($title, $arr, count($h->entries) . " 件");
 	?>
+	<dl class="status">
+		<dt>最終更新</dt>
+		<dd>
+			<time pubdate="pubdate" datetime="<?+date("c", $h->lastUpdate) ?>">
+				<?+Visualizer::formatDateTime($h->lastUpdate) ?>
+			</time>
+		</dd>
+	</dl>
 	<script>
 		megalopolis.index.loadDropDown
 		(

@@ -11,6 +11,7 @@ class IndexHandler extends Handler
 	public $page;
 	public $pageCount;
 	public $entries;
+	public $lastUpdate;
 	
 	function index($_subject = "0", $_id = 0)
 	{
@@ -79,6 +80,8 @@ class IndexHandler extends Handler
 		$this->subjectCount = Board::getLatestSubject($db);
 		
 		App::closeDB($db);
+		
+		$this->lastUpdate = max(array_map(create_function('$_', 'return $_->lastUpdate;'), $this->entries));
 		
 		switch (App::$handlerType)
 		{

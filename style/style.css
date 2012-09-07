@@ -1198,18 +1198,18 @@ ul.buttons li,
 	background-image: url("defaultColorIcon.png");
 }
 
-.read h1
+.index h1, .read h1
 {
 	margin-top: 32px;
 }
 
-body.read>h1
+body.index>h1, body.read>h1
 {
 	height: auto;
 	min-height: 20px;
 }
 
-.read .status
+.index .status, .read .status
 {
 	position: absolute;
 	left: 0px;
@@ -1220,7 +1220,7 @@ body.read>h1
 	font-size: 9pt;
 }
 
-.read .status+.status
+.index .status+.status, .read .status+.status
 {
 	left: auto;
 	right: 0px;
@@ -1235,7 +1235,7 @@ body.read>h1
 	line-height: 14px;
 }
 
-.read .status dt
+.index .status dt, .read .status dt
 {
 	float: left;
 	display: block;
@@ -1244,7 +1244,14 @@ body.read>h1
 	border-left: #666666 1px solid;
 }
 
-.read .status dd
+.index .status dt:first-child
+{
+	margin-left: 0px;
+	padding-left: 0px;
+	border-left: none;
+}
+
+.index .status dd, .read .status dd
 {
 	float: left;
 	display: block;
@@ -1252,13 +1259,13 @@ body.read>h1
 	padding: 0px;
 }
 
-.read .status dt:after
+.index .status dt:after, .read .status dt:after
 {
 	display: inline;
 	content: ": "
 }
 
-.read .status+.status dt
+.index .status+.status dt, .read .status+.status dt
 {
 	margin-left: 8px;
 	padding-left: 0px;
