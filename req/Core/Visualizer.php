@@ -87,8 +87,6 @@ class Visualizer
 			<?php endif ?>
 			<script src="<?php self::converted(self::actionHref("script", "base.js")) ?>"></script>
 		<?php endif ?>
-		<link href="<?php self::converted(self::actionHref("style", "favicon.ico")) ?>" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-		<link href="<?php self::converted(self::actionHref("style", "favicon.ico")) ?>" rel="icon" type="image/vnd.microsoft.icon" />
 		<?php
 		
 		if (!$isMobile && !$isSimple)
