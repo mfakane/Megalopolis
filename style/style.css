@@ -10,9 +10,8 @@ html
 body
 {
 	position: relative;
-	margin: 0px auto 0px auto;
+	margin: 0px 5% 0px 5%;
 	padding: 0px;
-	max-width: 960px;
 	color: #000000;
 }
 
@@ -396,13 +395,19 @@ div.entries article
 {
 	position: relative;
 	display: inline-block;
+	margin: 0px;
+	padding: 0px;
+	width: 50%;
+	vertical-align: top;
+}
+
+div.entries article .articleBody
+{
 	margin: 0px 4px 8px 4px;
 	padding: 8px;
-	width: 458px;
 	border: #005019 1px solid;
 	border-radius: 4px;
 	background: #ffffff;
-	vertical-align: top;
 	overflow: hidden;
 }
 
@@ -1003,7 +1008,7 @@ form[action="unpost"] button:active img, button.unpost:active img
 {
 	padding-left: 318px;
 	padding-right: 8px;
-	width: 631px;
+	width: 494px;
 	margin-right: auto;
 	margin-left: auto;
 }
@@ -1034,9 +1039,8 @@ form[action="unpost"] button:active img, button.unpost:active img
 #commentform textarea
 {
 	margin-left: 8px;
-	width: 618px;
-	min-width: 618px;
-	max-width: 618px;
+	width: 480px;
+	min-width: 480px;
 	height: 48px;
 	min-height: 48px;
 }
@@ -1070,7 +1074,6 @@ form[action="unpost"] button:active img, button.unpost:active img
 {
 	width: 460px;
 	min-width: 460px;
-	max-width: 460px;
 }
 
 .edit section p
@@ -1200,13 +1203,6 @@ ul.buttons li,
 	margin-top: 32px;
 }
 
-body.read
-{
-	max-width: none;
-	margin-right: 8px;
-	margin-left: 8px;
-}
-
 body.read>h1
 {
 	height: auto;
@@ -1309,7 +1305,7 @@ body.read>h1
 	word-wrap: break-word;
 }
 
-.read #body>div
+.read #body #contentWrapper
 {
 	line-height: 180%;
 }
@@ -1402,22 +1398,28 @@ body.read>h1
 	height: 528px;
 }
 
-.read #body.vertical>div
+.read #body.vertical #verticalWrapper
 {
 	position: absolute;
 	right: 0px;
 	top: 0px;
 	margin: 0px;
-	padding: 16px;
-	width: 926px;
+	padding: 0px;
+	width: 100%;
 	height: 520px;
 	font-family: "@MeiryoKe_Gothic", "@メイリオ", "@ＭＳ ゴシック", monospace;
 	overflow: auto;
 }
 
+.read #body.vertical #contentWrapper
+{
+	margin: 0px;
+	padding: 16px;
+}
+
 .read #body .taketori-ttb
 {
-	margin: 0px -16px -31px -16px;
+	margin: 0px 0px -32px -16px;
 	line-height: 130%;
 }
 
@@ -1427,7 +1429,6 @@ body.read>h1
 	top: -24px;
 	padding-top: 16px;
 	padding-bottom: 8px;
-	height: 934px !important;
 }
 
 .read #body #content

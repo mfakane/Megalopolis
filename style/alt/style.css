@@ -84,7 +84,7 @@ body>footer>ul:first-child+a
 	background-color: #ffffff;
 }
 
-div.entries article
+div.entries article .articleBody
 {
 	border-color: #480000;
 }

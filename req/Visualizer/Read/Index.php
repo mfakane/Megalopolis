@@ -158,35 +158,12 @@ Visualizer::doctype();
 		? (App::$actionName == "new" ? Visualizer::actionHref(App::$actionName) . "/" : Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName, array("p" => "")))
 		: Visualizer::actionHref($h->subject, $h->entry->id) . "/") ?>
 	<section id="body">
-		<div id="contentWrapper">
-			<?if ($h->page == 1 && $c->showHeaderInsideBorder): ?>
-				<h1>
-					<?+$h->entry->title ?>
-				</h1>
-				<?if ($c->showName[Configuration::ON_ENTRY]): ?>
-					<address>
-						<?if (App::$actionName == "index"): ?>
-							<a href="<?+Visualizer::actionHref("author", $h->entry->name) ?>"><? Visualizer::convertedName($h->entry->name) ?></a>
-						<?else: ?>
-							<? Visualizer::convertedName($h->entry->name) ?>
-						<?endif ?>
-					</address>
-				<?endif ?>
-				<?if (!Util::isEmpty($h->entry->summary) && $c->useSummary && $c->showSummary[Configuration::ON_ENTRY]): ?>
-					<p id="summary">
-						<? Visualizer::convertedSummary($h->entry->summary) ?>
-					</p>
-				<?endif ?>
-			<?endif ?>
-			<div id="content">
-				<script>
-					megalopolis.read.loadOptions('<?+Visualizer::$basePath ?>style/<?+$c->skin && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null ?>', <?+intval($h->thread->writingMode) ?>, <?+$h->forceTaketori ? "true" : "false" ?>);
-				</script>
-				<? Visualizer::convertedBody($h->thread, $h->page) ?>
-			</div>
-			<?if ($h->page == $h->entry->pageCount): ?>
-				<div id="afterword">
-					<? Visualizer::convertedAfterword($h->thread) ?>
+		<div id="verticalWrapper">
+			<div id="contentWrapper">
+				<?if ($h->page == 1 && $c->showHeaderInsideBorder): ?>
+					<h1>
+						<?+$h->entry->title ?>
+					</h1>
 					<?if ($c->showName[Configuration::ON_ENTRY]): ?>
 						<address>
 							<?if (App::$actionName == "index"): ?>
@@ -194,37 +171,62 @@ Visualizer::doctype();
 							<?else: ?>
 								<? Visualizer::convertedName($h->entry->name) ?>
 							<?endif ?>
-							<?if (!Util::isEmpty($h->entry->mail) || !Util::isEmpty($h->entry->link)): ?>
-								<br />
-							<?endif ?>
-							<?if (!Util::isEmpty($h->entry->mail)): ?>
-								<a href="mailto:<?+$h->entry->mail ?>"><?+$h->entry->mail ?></a>
-							<?endif ?>
-							<?if (!Util::isEmpty($h->entry->mail) && !Util::isEmpty($h->entry->link)): ?>
-								<br />
-							<?endif ?>
-							<?if (!Util::isEmpty($h->entry->link)): ?>
-								<a href="<?+$h->entry->link ?>"><?+$h->entry->link ?></a>
-							<?endif ?>
-							<?if ($isAdmin): ?>
-								<br />
-								<span class="host"><?+$h->entry->host ?></span>
-							<?endif ?>
 						</address>
 					<?endif ?>
+					<?if (!Util::isEmpty($h->entry->summary) && $c->useSummary && $c->showSummary[Configuration::ON_ENTRY]): ?>
+						<p id="summary">
+							<? Visualizer::convertedSummary($h->entry->summary) ?>
+						</p>
+					<?endif ?>
+				<?endif ?>
+				<div id="content">
+					<script>
+						megalopolis.read.loadOptions('<?+Visualizer::$basePath ?>style/<?+$c->skin && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null ?>', <?+intval($h->thread->writingMode) ?>, <?+$h->forceTaketori ? "true" : "false" ?>);
+					</script>
+					<? Visualizer::convertedBody($h->thread, $h->page) ?>
 				</div>
-			<?endif ?>
-			<?if (App::$actionName == "index" && (is_array($c->showTweetButton) ? $c->showTweetButton[Configuration::ON_ENTRY] : $c->showTweetButton)): ?>
-				<footer>
-					<? Visualizer::tweetButton(Visualizer::absoluteHref($h->subject, $h->entry->id), $c->entryTweetButtonText, $c->entryTweetButtonHashtags, array
-					(
-						"[id]" => $h->entry->id,
-						"[subject]" => $h->entry->subject,
-						"[title]" => $h->entry->title,
-						"[name]" => $h->entry->name,
-					)) ?>
-				</footer>
-			<?endif ?>
+				<?if ($h->page == $h->entry->pageCount): ?>
+					<div id="afterword">
+						<? Visualizer::convertedAfterword($h->thread) ?>
+						<?if ($c->showName[Configuration::ON_ENTRY]): ?>
+							<address>
+								<?if (App::$actionName == "index"): ?>
+									<a href="<?+Visualizer::actionHref("author", $h->entry->name) ?>"><? Visualizer::convertedName($h->entry->name) ?></a>
+								<?else: ?>
+									<? Visualizer::convertedName($h->entry->name) ?>
+								<?endif ?>
+								<?if (!Util::isEmpty($h->entry->mail) || !Util::isEmpty($h->entry->link)): ?>
+									<br />
+								<?endif ?>
+								<?if (!Util::isEmpty($h->entry->mail)): ?>
+									<a href="mailto:<?+$h->entry->mail ?>"><?+$h->entry->mail ?></a>
+								<?endif ?>
+								<?if (!Util::isEmpty($h->entry->mail) && !Util::isEmpty($h->entry->link)): ?>
+									<br />
+								<?endif ?>
+								<?if (!Util::isEmpty($h->entry->link)): ?>
+									<a href="<?+$h->entry->link ?>"><?+$h->entry->link ?></a>
+								<?endif ?>
+								<?if ($isAdmin): ?>
+									<br />
+									<span class="host"><?+$h->entry->host ?></span>
+								<?endif ?>
+							</address>
+						<?endif ?>
+					</div>
+				<?endif ?>
+				<?if (App::$actionName == "index" && (is_array($c->showTweetButton) ? $c->showTweetButton[Configuration::ON_ENTRY] : $c->showTweetButton)): ?>
+					<footer>
+						<? Visualizer::tweetButton(Visualizer::absoluteHref($h->subject, $h->entry->id), $c->entryTweetButtonText, $c->entryTweetButtonHashtags, array
+						(
+							"[id]" => $h->entry->id,
+							"[subject]" => $h->entry->subject,
+							"[title]" => $h->entry->title,
+							"[name]" => $h->entry->name,
+						)) ?>
+					</footer>
+				<?endif ?>
+			</div>
 		</div>
 	</section>
 	<? Visualizer::pager($h->page, $h->entry->pageCount, 5, App::$actionName != "index"

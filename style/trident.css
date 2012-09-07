@@ -8,7 +8,7 @@
 	margin: -8px 0px -8px 24px !important;
 }
 
-.read #body.vertical>div
+.read #body.vertical #verticalWrapper
 {
 	writing-mode: tb-rl;
 	-ms-writing-mode: tb-rl;
@@ -22,7 +22,7 @@
 	margin-left: 8px;
 }
 
-.read #body.vertical>div>address
+.read #body.vertical #contentWrapper>address
 {
 	margin-left: 8px;
 	margin-bottom: 0px;

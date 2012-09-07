@@ -1,8 +1,7 @@
-.read #body.vertical>div
+.read #body.vertical #verticalWrapper
 {
 	right: -552px;
-	height: 926px;
-	width: 520px;
+	width: 552px;
 	-o-transform: rotate(90deg);
 	-o-transform-origin: 0% 0%;
 	letter-spacing: 1px;

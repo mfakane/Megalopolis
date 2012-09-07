@@ -3,6 +3,18 @@ megalopolis.read =
 	taketori: null,
 	isVertical: false,
 	forceTaketori: false,
+	resizeAction: null,
+	isWebKit: function()
+	{
+		try
+		{
+			return window.navigator.taintEnabled == undefined;
+		}
+		catch (ex)
+		{
+			return false;
+		}
+	},
 	evaluate: function(point)
 	{
 		var form = $("#evaluateform");
@@ -351,6 +363,28 @@ megalopolis.read =
 			}))
 			.insertBefore(content);
 		
+		if (window.opera || megalopolis.read.isWebKit())
+		{
+			var firstLoad = true;
+			
+			megalopolis.read.resizeAction = function()
+			{
+				if (!megalopolis.read.taketori && megalopolis.read.isVertical)
+					$("#verticalWrapper", content).height(content.width() + (window.opera
+						? firstLoad
+							? 18
+							: 32
+						: 64));
+				else
+					$("#verticalWrapper", content).css("height", "auto");
+				
+				firstLoad = false;
+			};
+		}
+		
+		if (megalopolis.read.resizeAction)
+			$(window).resize(megalopolis.read.resizeAction);
+		
 		megalopolis.read.forceTaketori = forceTaketori;
 		
 		if (writingMode == 0 && megalopolis.mainCookie("Vertical") == "yes" || writingMode == 2)
@@ -423,6 +457,9 @@ megalopolis.read =
 				$("#body").removeClass("vertical");
 		
 		this.isVertical = setVertical;
+		
+		if (megalopolis.read.resizeAction)
+			megalopolis.read.resizeAction();
 	}
 };
 

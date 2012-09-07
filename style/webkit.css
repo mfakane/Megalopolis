@@ -3,10 +3,9 @@ body>header form input[name="query"]::-webkit-input-placeholder
 	color: #666666;
 }
 
-.read #body.vertical>div
+.read #body.vertical #verticalWrapper
 {
-	right: -552px;
-	height: 926px;
+	right: -520px;
 	width: 520px;
 	-webkit-transform: rotate(90deg);
 	-webkit-transform-origin: 0% 0%;
