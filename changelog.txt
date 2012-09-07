@@ -1,4 +1,48 @@
-﻿2012-09-06 COAH96KoxU <queue glasscore.net>
+﻿2012-09-07 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 16
+	* req/Handler/Index.php,
+	  req/Visualizer/Index/Index.php,
+	  style/style.css: 作品集の最終更新時間を表示 
+	* script/Index/Index.js: 表示設定 Cookie の空の要素が設定を変更するたびにどんどん増えるのを修正 
+	* req/Core/Visualizer.php,
+	  req/Visualizer/Index/Index.php,
+	  req/Visualizer/Template/Index.php: 一覧の表示を微妙に高速化 
+	* req/Visualizer/Read/Index.php,
+	  style/style.css: あとがきのデザイン変更 
+	* script/Read/Index.js,
+	  style/alt/style.css,
+	  style/style.css: 本文枠マージンの変更 
+	* req/Visualizer/Read/Index.php,
+	  req/Visualizer/Template/Index.php,
+	  script/Read/Index.js,
+	  style/alt/style.css,
+	  style/presto.css,
+	  style/style.css,
+	  style/trident.css,
+	  style/webkit.css: 作品ページ以外も可変幅に変更 
+	* req/Visualizer/simple/Index/Index.php: 携帯表示の作品集の分割を 50 作品毎に 
+	* req/Core/Visualizer.php,
+	  req/Visualizer/Index/Index.php,
+	  script/Index/Index.js,
+	  style/style.css: 作品集ページャをドロップダウン化 
+	* req/Core/Visualizer.php: favicon 削除 
+	* req/Core/Util.php,
+	  req/Handler/Read.php: 入力から複数行が必要な部分以外の改行文字を削除するよう変更 
+	* style/style.css: コメント欄にて通知がはみ出るのを修正 
+	* req/Model/ThreadEntry.php: タグからの一覧において Rate が 0 になるのを修正 
+	* req/Visualizer/Index/Search.php,
+	  req/Visualizer/Template/Index.php,
+	  script/Index/Index.js,
+	  style/alt/style.css,
+	  style/style.css: 一列表示をテーブル表示に変更 
+	* style/simple/simple.css: 携帯表示の区切り線を太く変更 
+	* req/Visualizer/simple/Read/Index.php: 携帯表示の作品本文のページ分割単位を 8000 文字へ増加 
+	* req/Handler/Megalith.php: Megalith 互換ログ出力にてコメントログでエラーが出るのを修正 
+	* style/mobile/mobile.css: iPhone 表示のフッタでボタンがはみ出ているのを修正 
+	* req/Visualizer/simple/Index/Index.php: 携帯表示での作品一覧のページャが検索や過去作品集で動作しないのを修正 
+
+2012-09-06 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 15
 	* req/Library/simple_html_dom.php: ruby 系タグへの対応 
