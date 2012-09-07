@@ -73,7 +73,7 @@ Visualizer::doctype();
 	<form class="search" action="<?+Visualizer::actionHref("search") ?>">
 		<input type="text" name="query" value="<?+IndexHandler::param("query") ?>" size="18" /><input type="submit" value="検索" />
 	</form>
-	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref(array("p" => ""))) ?>
+	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => IndexHandler::param("query")) : array()) + array("p" => ""))) ?>
 	<?+count($h->entries) ?>件中<?+$offset + 1 ?>～<?+min($offset + $paging, count($h->entries)) ?>件
 	<ul class="entries">
 		<?foreach (App::$actionName == "index" ? array_slice($h->entries, $offset, $paging) : $h->entries as $i): ?>
@@ -107,7 +107,7 @@ Visualizer::doctype();
 			</li>
 		<?endforeach ?>
 	</ul>
-	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref(array("p" => ""))) ?>
+	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => IndexHandler::param("query")) : array()) + array("p" => ""))) ?>
 	<ul id="menu" class="menu">
 		<? $i = 0 ?>
 		<?foreach (array
