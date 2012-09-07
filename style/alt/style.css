@@ -84,14 +84,35 @@ body>footer>ul:first-child+a
 	background-color: #ffffff;
 }
 
-.entries article
+div.entries article
 {
 	border-color: #480000;
 }
 
-.entries article .update
+.entries .update
 {
 	color: #480000;
+}
+
+.entries table thead tr
+{
+	border-bottom-color: #480000;
+}
+
+.entries table th
+{
+	color: #480000;
+}
+
+.entries table tr.tags+tr,
+.entries table tr.notags+tr
+{
+	border-top: #480000 1px solid;
+}
+
+.entries table tr.hover+tr
+{
+	border-top: #999999 1px solid;
 }
 
 section, .taglist, body>ul

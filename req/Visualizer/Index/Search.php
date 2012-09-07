@@ -52,7 +52,7 @@ App::load(VISUALIZER_DIR . "Template/Index");
 			<?if ($isAdmin): ?>
 				<form action="" method="post" id="entriesForm">
 			<?endif ?>
-			<? entries($h->entries, $isAdmin, true) ?>
+			<? entries($h->entries, $isAdmin) ?>
 			<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref("search", array
 			(
 				"query" => IndexHandler::param("query"),

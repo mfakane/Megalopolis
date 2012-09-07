@@ -12,7 +12,7 @@ megalopolis.index =
 			value: "dateTime",
 			selector: function(x, y)
 			{
-				var arr = $.map([x, y], function(_) { return $("time", _).text(); });
+				var arr = $.map([x, y], function(_) { return $(".value", _).text(); });
 				
 				return arr[0] == arr.sort()[0] ? -1 : 1;
 			}
@@ -145,7 +145,7 @@ megalopolis.index =
 				value: "double"
 			},
 			{
-				name: "一列表示",
+				name: "テーブル",
 				value: "single"
 			}
 		];
@@ -227,6 +227,8 @@ megalopolis.index =
 								{
 									var elem = $(this);
 									var idx = $.inArray(_.value, visibilityCookie);
+									var tagRows = $(".entries>table tr.tags>td");
+									var fromColSpan = tagRows.prop("colspan");
 									
 									elem.toggleClass("selected");
 									
@@ -241,6 +243,18 @@ megalopolis.index =
 										
 										elems.removeClass("firstChild");
 										firstVisible.addClass("firstChild");
+									});
+									
+									$(".entries>table th." + _.value + ", .entries>table td." + _.value).each(function(k, v)
+									{
+										var elem = $(this);
+										
+										if (elem.hasClass("hidden"))
+											tagRows.prop("colspan", fromColSpan + 1);
+										else
+											tagRows.prop("colspan", fromColSpan - 1);
+										
+										elem.toggleClass("hidden");
 									});
 									
 									if (idx != -1)
@@ -297,6 +311,15 @@ megalopolis.index =
 									else
 										e.addClass("hidden");
 								});
+								$(".entries>table .dateTime, .entries>table .lastUpdate").each(function(k, v)
+								{
+									var e = $(v);
+									
+									if (e.hasClass(_.value))
+										e.removeClass("hidden");
+									else
+										e.addClass("hidden");
+								});
 								
 								if (dateTimeIndex != -1)
 									delete visibilityCookie[dateTimeIndex];
@@ -342,6 +365,49 @@ megalopolis.index =
 		{
 			return ascending ? selector($(x), $(y)) : selector($(y), $(x));
 		}));
+		
+		var list = $.map($("table>tbody>tr.article", div).map(function()
+		{
+			return $([$(this), $(this).next("tr.tags")]);
+		}).sort(function(x, y)
+		{
+			return ascending ? selector($(x[0]), $(y[0])) : selector($(y[0]), $(x[0]));
+		}), function(_)
+		{
+			return [_[0], _[1]];
+		});
+		
+		$("table>tbody", div).append(list);
+	},
+	showSummary: function()
+	{
+		var tagRow = $("tr.tags").last();
+		var button = $('<a href="javascript:void(0);" />').addClass("summaryButton").text("[概要]").prependTo($("td", tagRow));
+		var rows = $([tagRow.prev("tr")[0], tagRow[0]]);
+		
+		$("a, input", rows).click(function(e)
+		{
+			if (this != button[0])
+				e.stopPropagation();
+		});
+		
+		rows.mouseenter(function()
+		{
+			rows.addClass("hover");
+		})
+		.mouseleave(function()
+		{
+			rows.removeClass("hover");
+		})
+		.click(function()
+		{
+			var summary = $("p", tagRow);
+			
+			if (summary.hasClass("hidden"))
+				summary.removeClass("hidden");
+			else
+				summary.addClass("hidden");
+		});
 	}
 };
 

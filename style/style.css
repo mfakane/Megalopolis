@@ -386,13 +386,13 @@ ul.notify
 	margin-right: -32px;
 }
 
-.entries
+div.entries
 {
 	margin: 0px -4px 0px -4px;
 	padding: 0px;
 }
 
-.entries article
+div.entries article
 {
 	position: relative;
 	display: inline-block;
@@ -406,23 +406,17 @@ ul.notify
 	overflow: hidden;
 }
 
-.entries.single article
-{
-	display: block;
-	width: auto;
-}
-
-.entries input[type="checkbox"]
+div.entries input[type="checkbox"]
 {
 	margin-right: 4px;
 }
 
-.search .entries article
+.search div.entries article
 {
 	width: 568px;
 }
 
-.entries article time
+div.entries article time
 {
 	float: right;
 	display: block;
@@ -430,12 +424,12 @@ ul.notify
 	text-align: right;
 }
 
-.entries article span.host
+.entries .host
 {
 	color: #666666;
 }
 
-.entries article .update
+.entries .update
 {
 	float: right;
 	display: block;
@@ -445,18 +439,18 @@ ul.notify
 	text-align: right;
 }
 
-.entries article .hidden
+.entries .hidden
 {
 	display: none;
 }
 
-.entries article h2
+div.entries article h2
 {
 	margin: 0px 0px 4px 0px;
 	font-size: 120%;
 }
 
-.entries dl
+div.entries dl
 {
 	margin: 4px 0px 0px 0px;
 	padding: 4px;
@@ -464,12 +458,12 @@ ul.notify
 	font-size: 90%;
 }
 
-.entries article time+dl
+div.entries article time+dl
 {
 	margin-top: 24px;
 }
 
-.entries dl dt
+div.entries dl dt
 {
 	display: inline;
 	margin: 0px 0px 0px 4px;
@@ -477,14 +471,14 @@ ul.notify
 	border-left: #000000 1px solid;
 }
 
-.entries dl dt:first-child, .entries dl dt.firstChild
+div.entries dl dt:first-child, div.entries dl dt.firstChild
 {
 	margin-left: 0px;
 	padding-left: 0px;
 	border-left: none;
 }
 
-.entries dl dd
+div.entries dl dd
 {
 	display: inline;
 	margin: 0px;
@@ -492,20 +486,20 @@ ul.notify
 	font-weight: bold;
 }
 
-.entries dl dt:after
+div.entries dl dt:after
 {
 	display: inline;
 	content: ": "
 }
 
-.entries ul.tags
+div.entries ul.tags
 {
 	margin: 2px 0px 0px -8px;
 	padding: 0px;
 	font-size: 90%;
 }
 
-.entries ul.tags li
+div.entries ul.tags li
 {
 	display: inline;
 	margin: 0px 0px 0px 8px;
@@ -513,11 +507,173 @@ ul.notify
 	border: none;
 }
 
-.entries p
+div.entries p
 {
 	margin: 4px 0px 0px 0px;
 	padding: 8px 0px 0px 0px;
 	border-top: #999999 1px solid;
+}
+
+section.entries
+{
+	font-size: 10pt;
+	padding: 2px 4px 4px 4px;
+}
+
+.search section.entries
+{
+	padding: 2px 4px 4px 4px;
+	width: auto;
+}
+
+.entries table
+{
+	margin: 0px;
+	padding: 0px;
+	width: 100%;
+	border: none;
+	border-collapse: collapse;
+	line-break: strict;
+	word-break: break-all;
+	word-wrap: break-word;
+}
+
+.entries table h2
+{
+	margin: 0px;
+	font-size: 10pt;
+}
+
+.entries table .update
+{
+	float: left;
+	text-align: left;
+}
+
+.entries table tr
+{
+	background: #ffffff;
+}
+
+.entries table tr.tags
+{
+	background: #efefef;
+}
+
+.entries table tr.tags+tr,
+.entries table tr.notags+tr
+{
+	border-top: #999999 1px solid;
+}
+
+.entries table tr.hover
+{
+	background: #f6f6f6;
+}
+
+.entries table tr.hover+tr
+{
+	border-top: #efefef 1px solid;
+}
+
+.entries table tr.hover+tr.tags
+{
+	border-top: none;
+}
+
+.entries table tr.tags ul
+{
+	display: block;
+	margin: 0px;
+	padding: 0px;
+	min-height: 1em;
+}
+
+.entries table tr.tags ul li
+{
+	display: inline;
+	margin: 0px;
+	margin-right: 8px;
+	padding: 0px;
+	list-style: none;
+}
+
+.entries table tr.tags .summaryButton
+{
+	display: block;
+	float: right;
+	margin: 0px 0px 0px 8px;
+	color: #999999;
+}
+
+.entries table th, .entries table td
+{
+	border: none;
+	padding: 8px;
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+
+.entries table thead tr
+{
+	font-weight: bold;
+	color: #ffffff;
+	border-bottom: #005019 1px solid;
+}
+
+.entries table th
+{
+	text-align: left;
+	color: #005019;
+}
+
+.entries table .title
+{
+	min-width: 12em;
+}
+
+.entries table .name
+{
+	width: 8em;
+}
+
+.entries table .dateTime, .entries table .lastUpdate
+{
+	width: 8em;
+}
+
+.entries table .info
+{
+	text-align: right;
+	width: 3.5em;
+}
+
+.entries table .info.commentCount
+{
+	width: 4em;
+}
+
+.entries table .info.size
+{
+	width: 4.75em;
+}
+
+.entries table .summaryButton
+{
+	display: block;
+	float: left;
+	margin: 0px 4px 0px 0px;
+	padding: 0px;
+}
+
+.entries table .summaryButton.opened
+{
+}
+
+.entries table p
+{
+	margin: 0px;
+	margin-top: 8px;
 }
 
 section, .taglist, body>ul
