@@ -365,7 +365,7 @@ header .ui-btn[data-theme="b"] .ui-btn-inner
 
 .ui-footer .ui-navbar
 {
-	padding: 0px 2px 0px 0px;
+	padding: 0px 6px 0px 0px;
 	border: none;
 	height: 49px;
 	background-image: -webkit-gradient(linear, left top, left bottom,     
@@ -380,6 +380,10 @@ header .ui-btn[data-theme="b"] .ui-btn-inner
 .ui-footer .ui-navbar .ui-btn
 {
 	margin: 3px;
+	margin-right: 2px;
+	margin-left: 2px;
+	padding: 0px;
+	padding-right: 4px;
 	border: none;
 	border-radius: 3px;
 	height: 43px;
