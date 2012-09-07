@@ -66,7 +66,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 					(
 						Configuration::$instance->mysqlSearchUseHeadMatching
 							? create_function('$_', 'return mb_strlen($_) >= ' . $this->gramLength . ' ? "+{$_}" : "+{$_}*";')
-							: create_function('$_', 'return ($len = mb_strlen($_)) >= ' . $this->gramLength . ' ? "+{$_}" : "{$_}" . str_repeat("_", ' . $this->gramLength . ' - $len);'),
+							: create_function('$_', 'return ($len = mb_strlen($_)) >= ' . $this->gramLength . ' ? "+{$_}" : "+{$_}" . str_repeat("_", ' . $this->gramLength . ' - $len);'),
 						$words
 					)
 				);
