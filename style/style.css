@@ -1692,6 +1692,70 @@ body.read>h1
 	font-weight: normal;
 }
 
+.index .pagerContainer.subjectPager span
+{
+	float: left;
+	display: block;
+	height: 26px;
+	margin: 0px 4px 0px 4px;
+	padding: 1px 0px 1px 0px;
+	line-height: 26px;
+	font-weight: bold;
+}
+
+.index .pagerContainer.subjectPager form
+{
+	display: inline;
+	margin: 0px;
+	padding: 0px;
+}
+
+.index .pagerContainer.subjectPager select
+{
+	margin: 0px 2px 0px 2px;
+	padding: 1px;
+	border: #999999 1px solid;
+	border-radius: 0px 4px 4px 0px;
+	min-width: 14px;
+	height: 26px;
+	background: #efefef;
+	line-height: 26px;
+	font-size: inherit;
+	vertical-align: top;
+}
+
+.index .pagerContainer.subjectPager button
+{
+	margin: 0px 2px 0px 2px;
+	padding: 1px 4px 1px 4px;
+	border: #999999 1px solid;
+	border-radius: 4px;
+	min-width: 14px;
+	height: 26px;
+	background: #efefef;
+	line-height: 26px;
+	font-size: inherit;
+	text-shadow: none;
+	box-shadow: none;
+	-webkit-box-shadow: none;
+}
+
+.index .pagerContainer.subjectPager button:hover
+{
+	color: #000000;
+	background: #ffffff;
+}
+
+.index .pagerContainer.subjectPager .pager
+{
+	left: 0px;
+}
+
+.index .pagerContainer.subjectPager .pager li
+{
+	left: 0px;
+}
+
 .read .pager
 {
 	text-align: center;

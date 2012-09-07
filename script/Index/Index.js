@@ -1,5 +1,15 @@
 megalopolis.index =
 {
+	loadSubjectPager: function()
+	{
+		var form = $("form").last();
+		
+		$("button", form).remove();
+		$("select", form).change(function()
+		{
+			location.href = form.prop("action") + $(this).val();
+		});
+	},
 	loadDropDown: function(useTitle, useName, usePageCount, useReadCount, useSize, useEvaluationCount, useCommentCount, usePoints, useRate, defaultStyle)
 	{
 		if ($.browser.msie &&

@@ -224,7 +224,7 @@ class Visualizer
 		<?php	
 	}
 	
-	static function pager($current, $max, $range, $link, $reverse = false)
+	static function pager($current, $max, $range, $link, $reverse = false, $buttons = true, $container = true)
 	{
 		if ($max < 2)
 			return;
@@ -241,36 +241,40 @@ class Visualizer
 		$isSimple = self::isSimple();
 		
 		?>
-		<div class="pagerContainer">
+		<?php if ($container): ?>
+			<div class="pagerContainer">
+		<?php endif ?>
 			<ul class="pager">
-				<?php if ($reverse): ?>
-					<?php if ($current < $max || !$isSimple): ?>
+				<?php if ($buttons): ?>
+					<?php if ($reverse): ?>
+						<?php if ($current < $max || !$isSimple): ?>
+							<?php if ($max > $range): ?>
+								<li class="nav">
+									<a href="<?php self::converted($current < $max ? $link . $max : $loopback) ?>">
+										&lt;&lt; 最後
+									</a>
+								</li>
+							<?php endif ?>
+							<li class="nav">
+								<a href="<?php self::converted($current < $max ? $link . ($current + 1) : $loopback) ?>">
+									&lt; 次
+								</a>
+							</li>
+						<?php endif ?>
+					<?php elseif ($current > 1 || !$isSimple): ?>
 						<?php if ($max > $range): ?>
 							<li class="nav">
-								<a href="<?php self::converted($current < $max ? $link . $max : $loopback) ?>">
-									&lt;&lt; 最後
+								<a href="<?php self::converted($current > 1 ? $link . "1" : $loopback) ?>">
+									&lt;&lt; 最初
 								</a>
 							</li>
 						<?php endif ?>
 						<li class="nav">
-							<a href="<?php self::converted($current < $max ? $link . ($current + 1) : $loopback) ?>">
-								&lt; 次
+							<a href="<?php self::converted($current > 1 ? $link . ($current - 1) : $loopback) ?>">
+								&lt; 前
 							</a>
 						</li>
 					<?php endif ?>
-				<?php elseif ($current > 1 || !$isSimple): ?>
-					<?php if ($max > $range): ?>
-						<li class="nav">
-							<a href="<?php self::converted($current > 1 ? $link . "1" : $loopback) ?>">
-								&lt;&lt; 最初
-							</a>
-						</li>
-					<?php endif ?>
-					<li class="nav">
-						<a href="<?php self::converted($current > 1 ? $link . ($current - 1) : $loopback) ?>">
-							&lt; 前
-						</a>
-					</li>
 				<?php endif ?>
 				<?php foreach (range($reverse ? $end : max(min($current - floor($range / 2), $max - $range + 1), 1), $reverse ? $start : $end, $reverse ? -1 : 1) as $i): ?>
 					<li>
@@ -279,37 +283,41 @@ class Visualizer
 						</a>
 					</li>
 				<?php endforeach ?>
-				<?php if ($reverse): ?>
-					<?php if ($current > 1 || !$isSimple): ?>
+				<?php if ($buttons): ?>
+					<?php if ($reverse): ?>
+						<?php if ($current > 1 || !$isSimple): ?>
+							<li class="nav<?php if ($max <= $range) echo ' last' ?>">
+								<a href="<?php self::converted($current > 1 ? $link . ($current - 1) : $loopback) ?>">
+									前 &gt;
+								</a>
+							</li>
+							<?php if ($max > $range): ?>
+								<li class="nav last">
+									<a href="<?php self::converted($current > 1 ? $link . "1" : $loopback) ?>">
+										&gt;&gt; 最初
+									</a>
+								</li>
+							<?php endif ?>
+						<?php endif ?>
+					<?php elseif ($current < $max || !$isSimple): ?>
 						<li class="nav<?php if ($max <= $range) echo ' last' ?>">
-							<a href="<?php self::converted($current > 1 ? $link . ($current - 1) : $loopback) ?>">
-								前 &gt;
+							<a href="<?php self::converted($current < $max ? $link . ($current + 1) : $loopback) ?>">
+								次 &gt;
 							</a>
 						</li>
 						<?php if ($max > $range): ?>
 							<li class="nav last">
-								<a href="<?php self::converted($current > 1 ? $link . "1" : $loopback) ?>">
-									&gt;&gt; 最初
+								<a href="<?php self::converted($current < $max ? $link . $max : $loopback) ?>">
+									最後 &gt;&gt;
 								</a>
 							</li>
 						<?php endif ?>
 					<?php endif ?>
-				<?php elseif ($current < $max || !$isSimple): ?>
-					<li class="nav<?php if ($max <= $range) echo ' last' ?>">
-						<a href="<?php self::converted($current < $max ? $link . ($current + 1) : $loopback) ?>">
-							次 &gt;
-						</a>
-					</li>
-					<?php if ($max > $range): ?>
-						<li class="nav last">
-							<a href="<?php self::converted($current < $max ? $link . $max : $loopback) ?>">
-								最後 &gt;&gt;
-							</a>
-						</li>
-					<?php endif ?>
 				<?php endif ?>
 			</ul>
-		</div>
+		<?php if ($container): ?>
+			</div>
+		<?php endif ?>
 		<?php
 	}
 	

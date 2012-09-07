@@ -74,7 +74,23 @@ App::load(VISUALIZER_DIR . "Template/Index");
 	<?endif ?>
 	
 	<?if (App::$actionName == "index" && $h->subjectCount > 1): ?>
-		<? Visualizer::pager($h->subject, $h->subjectCount, 5, Visualizer::actionHref(), true) ?>
+		<div class="pagerContainer subjectPager">
+			<span>作品集: </span>
+			<? Visualizer::pager($h->subject, $h->subjectCount, 5, Visualizer::actionHref(), true, false, false) ?>
+			<form action="<?+Visualizer::actionHref() ?>" method="get">
+				<select name="log">
+					<?for ($i = $h->subjectCount; $i > 0; $i--): ?>
+						<option<?if ($h->subject == $i) echo ' selected="selected"' ?>><?+$i ?></option>
+					<?endfor ?>
+				</select>
+				<button type="submit">
+					GO
+				</button>
+				<script>
+					megalopolis.index.loadSubjectPager();
+				</script>
+			</form>
+		</div>
 	<?elseif (App::$actionName == "tag" && $h->pageCount > 1): ?>
 		<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref("tag", $d) . "/") ?>
 	<?elseif (App::$actionName == "author" && $h->pageCount > 1): ?>
