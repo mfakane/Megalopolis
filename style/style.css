@@ -418,7 +418,7 @@ div.entries input[type="checkbox"]
 
 .search div.entries article
 {
-	width: auto;
+	width: 100%;
 }
 
 div.entries article time
