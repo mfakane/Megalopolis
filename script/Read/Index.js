@@ -301,9 +301,6 @@ megalopolis.read =
 		
 		$("<ul />")
 			.addClass("options")
-			.css("backgroundColor", content.css("backgroundColor"))
-			.css("backgroundImage", content.css("backgroundImage"))
-			.css("borderColor", content.css("borderColor"))
 			.append($.map
 			([
 				{

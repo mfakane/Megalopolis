@@ -418,7 +418,7 @@ div.entries input[type="checkbox"]
 
 .search div.entries article
 {
-	width: 568px;
+	width: auto;
 }
 
 div.entries article time
@@ -1296,6 +1296,7 @@ body.read>h1
 .read #body
 {
 	position: relative;
+	margin: 32px;
 	padding: 16px;
 	padding-bottom: 8px;
 	line-height: 130%;
@@ -1308,12 +1309,6 @@ body.read>h1
 .read #body #contentWrapper
 {
 	line-height: 180%;
-}
-
-.read .options+#body
-{
-	margin-top: 0px;
-	border-radius: 4px 0px 4px 4px;
 }
 
 .read #body h1
@@ -1340,22 +1335,15 @@ body.read>h1
 	float: right;
 	margin: -23px 0px -1px 0px;
 	padding: 4px 4px 0px 0px;
-	border: #005019 1px solid;
-	border-bottom: none;
-	border-radius: 4px 4px 0px 0px;
+	border: none;
+	background: none;
 	height: 19px;
-	background: #ffffff;
 	z-index: 1;
 }
 
 .read .notify+ul.options
 {
 	margin-top: 0px;
-}
-
-.read .notify+ul.options+#body
-{
-	margin-top: 31px;
 }
 
 .read ul.options li
