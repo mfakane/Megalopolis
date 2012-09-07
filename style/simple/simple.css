@@ -18,7 +18,7 @@ h2
 {
 	margin: 0px 0px 4px 0px;
 	padding: 0px;
-	border-top: #999999 1px solid;
+	border-top: #999999 3px solid;
 }
 
 .dateTime, .name, .commentCount, .points, .rate, .size, .tags
@@ -31,7 +31,7 @@ h2
 {
 	float: right;
 	margin: 0px;
-	color: #999999;
+	color: #666666;
 }
 
 .commentCount, .points, .rate, .size
@@ -43,7 +43,7 @@ h2
 {
 	margin: 0px;
 	padding: 4px 0px 0px 0px;
-	border-top: #999999 1px solid;
+	border-top: #999999 3px solid;
 }
 
 .pager li
@@ -61,7 +61,7 @@ h2
 {
 	margin: 4px 0px 4px 0px;
 	padding: 4px 0px 0px 0px;
-	border-top: #999999 1px solid;
+	border-top: #999999 3px solid;
 }
 
 .menu li
