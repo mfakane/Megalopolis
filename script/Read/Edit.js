@@ -81,12 +81,18 @@ megalopolis.edit =
 
 $(function()
 {
+	var section = $(".edit section+section");
+	var textAreas = $("textarea, input[type='text']", section).width(section.width() - 8);
+	
+	$(window).resize(function()
+	{
+		textAreas.width(section.width() - 8);
+	});
 	$("#unpostCheck").change(function()
 	{
 		$("#unpostSubmit").attr("disabled", !$(this).is(":checked"));
 	});
 	$("#unpostSubmit").attr("disabled", true);
-	
 	$("#unpostForm").submit(function()
 	{
 		return window.confirm("本当に作品を削除してよろしいですか？");

@@ -1067,13 +1067,12 @@ form[action="unpost"] button:active img, button.unpost:active img
 
 .edit section+section input[type="text"]
 {
-	width: 460px;
+	width: 360px;
 }
 
 .edit textarea
 {
-	width: 460px;
-	min-width: 460px;
+	width: 360px;
 }
 
 .edit section p
