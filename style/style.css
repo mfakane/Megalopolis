@@ -1335,6 +1335,17 @@ body.index>h1, body.read>h1
 	text-align: right;
 }
 
+.read #body table
+{
+	border-collapse: collapse;
+}
+
+.read #body table th, .read #body table td
+{
+	border: #999999 1px solid;
+	padding: 4px;
+}
+
 .read ul.options
 {
 	position: relative;
