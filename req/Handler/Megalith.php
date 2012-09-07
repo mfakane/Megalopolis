@@ -141,7 +141,7 @@ class MegalithHandler extends Handler
 						"",
 						"no"
 					));'), $thread->nonCommentEvaluations),
-					array_map(create_function('$_', 'return Util::convertLineBreak(implode("<>", array_map("htmlspecialchars", array
+					array_map(create_function('$_', 'return str_replace("\r\n", "<br />", implode("<>", array_map("htmlspecialchars", array
 					(
 						$_->body,
 						$_->name,
