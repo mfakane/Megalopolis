@@ -18,7 +18,7 @@ if (isset(App::$pathInfo[3]) &&
 	$v = intval(App::$pathInfo[3]))
 	$h->page = max($v, 1);
 
-$paging = 1000;
+$paging = 8000;
 $maxPage = ceil(mb_strlen($h->thread->body) / $paging);
 $commentPaging = 25;
 $maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
