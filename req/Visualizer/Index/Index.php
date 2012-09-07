@@ -18,17 +18,17 @@ App::load(VISUALIZER_DIR . "Template/Index");
 <head>
 	<? Visualizer::head() ?>
 	<?if (App::$actionName == "index"): ?>
-		<link href="<?+Visualizer::actionHref(0) ?>.rss" rel="alternate" type="application/rss+xml" title="<?+$c->title ?> 最新作品集 RSS 2.0" />
-		<link href="<?+Visualizer::actionHref(0) ?>.atom" rel="alternate" type="application/atom+xml" title="<?+$c->title ?> 最新作品集 Atom" />
-		<link href="<?+Visualizer::actionHref($h->subject) ?>.json" rel="alternate" type="application/json" />
+		<link href="<?+Visualizer::actionHrefArray(array(0)) ?>.rss" rel="alternate" type="application/rss+xml" title="<?+$c->title ?> 最新作品集 RSS 2.0" />
+		<link href="<?+Visualizer::actionHrefArray(array(0)) ?>.atom" rel="alternate" type="application/atom+xml" title="<?+$c->title ?> 最新作品集 Atom" />
+		<link href="<?+Visualizer::actionHrefArray(array($h->subject)) ?>.json" rel="alternate" type="application/json" />
 	<?else: ?>
-		<link href="<?+Visualizer::actionHref(App::$actionName, $d) ?>.rss" rel="alternate" type="application/rss+xml" title="RSS 2.0" />
-		<link href="<?+Visualizer::actionHref(App::$actionName, $d) ?>.atom" rel="alternate" type="application/atom+xml" title="Atom" />
+		<link href="<?+Visualizer::actionHrefArray(array(App::$actionName, $d)) ?>.rss" rel="alternate" type="application/rss+xml" title="RSS 2.0" />
+		<link href="<?+Visualizer::actionHrefArray(array(App::$actionName, $d)) ?>.atom" rel="alternate" type="application/atom+xml" title="Atom" />
 	<?endif ?>
 	<title>
 		<?+$title ?> - <?+$c->title ?>
 	</title>
-	<script src="<?+Visualizer::actionHref("script", "Index", "Index.js") ?>"></script>
+	<script src="<?+Visualizer::actionHrefArray(array("script", "Index", "Index.js")) ?>"></script>
 </head>
 <body class="index">
 	<?php
@@ -76,8 +76,8 @@ App::load(VISUALIZER_DIR . "Template/Index");
 	<?if (App::$actionName == "index" && $h->subjectCount > 1): ?>
 		<div class="pagerContainer subjectPager">
 			<span>作品集: </span>
-			<? Visualizer::pager($h->subject, $h->subjectCount, 5, Visualizer::actionHref(), true, false, false) ?>
-			<form action="<?+Visualizer::actionHref() ?>" method="get">
+			<? Visualizer::pager($h->subject, $h->subjectCount, 5, Visualizer::actionHrefArray(), true, false, false) ?>
+			<form action="<?+Visualizer::actionHrefArray() ?>" method="get">
 				<select name="log">
 					<?for ($i = $h->subjectCount; $i > 0; $i--): ?>
 						<option<?if ($h->subject == $i) echo ' selected="selected"' ?>><?+$i ?></option>
@@ -92,9 +92,9 @@ App::load(VISUALIZER_DIR . "Template/Index");
 			</form>
 		</div>
 	<?elseif (App::$actionName == "tag" && $h->pageCount > 1): ?>
-		<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref("tag", $d) . "/") ?>
+		<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHrefArray(array("tag", $d)) . "/") ?>
 	<?elseif (App::$actionName == "author" && $h->pageCount > 1): ?>
-		<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref("author", $d) . "/") ?>
+		<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHrefArray(array("author", $d)) . "/") ?>
 	<?endif ?>
 	<?if (in_array(Util::getBrowserType(), array
 	(
@@ -123,7 +123,7 @@ App::load(VISUALIZER_DIR . "Template/Index");
 						<ul class="buttons">
 							<li>
 								<button type="submit" class="unpost" name="admin" value="unpost" id="unpostButton">
-									<img src="<?+Visualizer::actionHref("style", "deleteButtonIcon.png") ?>" />選択した作品を削除
+									<img src="<?+Visualizer::actionHrefArray(array("style", "deleteButtonIcon.png")) ?>" />選択した作品を削除
 								</button>
 							</li>
 						</ul>

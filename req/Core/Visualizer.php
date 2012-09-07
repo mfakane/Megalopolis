@@ -373,9 +373,23 @@ class Visualizer
 		return self::$basePath . call_user_func_array(array("self", "currentHref"), $args);
 	}
 	
+	static function actionHrefArray($args = null)
+	{
+		if (is_null($args))
+			return self::$basePath;
+		else
+			return self::$basePath . self::currentHrefArray($args);
+	}
+	
 	static function currentHref()
 	{
 		$args = func_get_args();
+		
+		return self::currentHrefArray($args);
+	}
+	
+	static function currentHrefArray($args)
+	{
 		$href = self::href($args);
 		
 		return (is_file($href) ? "" : Util::getSuffix()) . rtrim($href, "?");
@@ -667,7 +681,7 @@ class Visualizer
 		eval("?" . ">" . $content);
 		$output = ob_get_contents();
 		ob_end_clean();
-		$output = mb_ereg_replace('[\t \r\n]+<', '<', mb_ereg_replace('>[\t \r\n]+', '>', $output));
+		$output = mb_ereg_replace('[\t \r\n]+?<', '<', mb_ereg_replace('>[\t \r\n]+?', '>', $output));
 		
         header("Content-Type: text/html; charset=utf-8");
 

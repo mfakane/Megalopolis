@@ -1,10 +1,12 @@
 <?php
-function entryInfo(&$idx, $i, $visibility, $label, $member, $value = null)
+function entryInfo(&$idx, $i, $visibility, $label, $member, $value)
 {
+	$visible = isset($visibility[$member]);
+	
 	?>
-	<dt<?php echo in_array($member, $visibility) ? ($idx++ == 0 ? ' class="firstChild"' : null) : ' class="hidden"' ?>><?php Visualizer::converted($label) ?></dt>
-	<dd class="<?php echo $member . (in_array($member, $visibility) ? null : " hidden") ?>">
-		<?php Visualizer::converted($value ? $value : $i->{$member}) ?>
+	<dt<?php echo $visible ? ($idx++ == 0 ? ' class="firstChild"' : null) : ' class="hidden"' ?>><?php Visualizer::converted($label) ?></dt>
+	<dd class="<?php echo $member . ($visible ? null : " hidden") ?>">
+		<?php Visualizer::converted($value) ?>
 	</dd>
 	<?php
 }
@@ -12,17 +14,17 @@ function entryInfo(&$idx, $i, $visibility, $label, $member, $value = null)
 function entryInfoHeaderSingle($visibility, $member, $header)
 {
 	?>
-	<th class="info <?php echo $member ?><?php echo in_array($member, $visibility) ? null : " hidden" ?>">
+	<th class="info <?php echo $member ?><?php echo isset($visibility[$member]) ? null : " hidden" ?>">
 		<?php Visualizer::converted($header) ?>
 	</th>
 	<?php
 }
 
-function entryInfoSingle($i, $visibility, $member, $value = null)
+function entryInfoSingle($i, $visibility, $member, $value)
 {
 	?>
-	<td class="info <?php echo $member ?><?php echo in_array($member, $visibility) ? null : " hidden" ?>">
-		<?php Visualizer::converted($value ? $value : $i->{$member}) ?>
+	<td class="info <?php echo $member ?><?php echo isset($visibility[$member]) ? null : " hidden" ?>">
+		<?php Visualizer::converted($value) ?>
 	</td>
 	<?php
 }
@@ -31,9 +33,9 @@ function filterVisibleOnly($visibility, $arr)
 {
 	$rt = array();
 	
-	foreach ($visibility as $i)
-		if (isset($arr[$i]))
-			$rt[$i] = $arr[$i];
+	foreach ($visibility as $k => $v)
+		if (isset($arr[$k]))
+			$rt[$k] = $arr[$k];
 	
 	return $rt;
 }
@@ -56,10 +58,10 @@ function entries($entries, $isAdmin, $listType = null)
 		}
 	
 	$listType = Cookie::getCookie(Cookie::LIST_TYPE_KEY, $listType);
-	
-	$visibility = explode(",", Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, $c->showPoint[Configuration::ON_SUBJECT]
+	$visibility = array_filter(explode(",", Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, $c->showPoint[Configuration::ON_SUBJECT]
 		? "pageCount,readCount,size,evaluationCount,points,rate,dateTime"
-		: "pageCount,readCount,size,evaluationCount,commentCount,dateTime"));
+		: "pageCount,readCount,size,evaluationCount,commentCount,dateTime")));
+	$visibility = array_flip($visibility);
 	
 	if ($listType == "double")
 	{
@@ -74,17 +76,17 @@ function entries($entries, $isAdmin, $listType = null)
 									<label>
 										<input type="checkbox" name="id[]" value="<?php Visualizer::converted($i->id) ?>" />
 								<?php endif ?>
-								<a href="<?php Visualizer::converted(Visualizer::actionHref($i->subject, $i->id)) ?>"><?php Visualizer::converted($i->title) ?></a>
+								<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array($i->subject, $i->id))) ?>"><?php Visualizer::converted($i->title) ?></a>
 								<?php if ($isAdmin): ?>
 									</label>
 								<?php endif ?>
 							</h2>
 						<?php endif ?>
-						<time class="dateTime<?php echo in_array("dateTime", $visibility) ? null : " hidden" ?>" pubdate="pubdate" datetime="<?php Visualizer::converted(date("c", $i->dateTime)) ?>">
+						<time class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>" pubdate="pubdate" datetime="<?php Visualizer::converted(date("c", $i->dateTime)) ?>">
 							<?php Visualizer::converted(Visualizer::formatDateTime($i->dateTime)) ?>
 							<span class="value hidden"><?php Visualizer::converted($i->dateTime) ?></span>
 						</time>
-						<time class="lastUpdate<?php echo in_array("lastUpdate", $visibility) ? null : " hidden" ?>" datetime="<?php Visualizer::converted(date("c", $i->lastUpdate)) ?>">
+						<time class="lastUpdate<?php echo isset($visibility["lastUpdate"]) ? null : " hidden" ?>" datetime="<?php Visualizer::converted(date("c", $i->lastUpdate)) ?>">
 							<?php Visualizer::converted(Visualizer::formatDateTime($i->lastUpdate)) ?>
 							<span class="value hidden"><?php Visualizer::converted($i->lastUpdate) ?></span>
 						</time>
@@ -98,7 +100,7 @@ function entries($entries, $isAdmin, $listType = null)
 							</span>
 						<?php endif ?>
 						<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
-							<a href="<?php Visualizer::converted(Visualizer::actionHref("author", $i->name)) ?>" class="name"><?php Visualizer::convertedName($i->name) ?></a>
+							<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("author", $i->name))) ?>" class="name"><?php Visualizer::convertedName($i->name) ?></a>
 						<?php endif ?>
 						<?php if ($isAdmin): ?>
 							<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
@@ -114,18 +116,18 @@ function entries($entries, $isAdmin, $listType = null)
 							  $c->showRate[Configuration::ON_SUBJECT]): ?>
 						<dl>
 							<?php $idx = 0; ?>
-							<?php if ($c->showPages[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "ページ", "pageCount") ?>
+							<?php if ($c->showPages[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "ページ", "pageCount", $i->pageCount) ?>
 							<?php if ($c->showSize[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "サイズ", "size", "{$i->size}KB") ?>
-							<?php if ($c->showReadCount[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "閲覧", "readCount") ?>
+							<?php if ($c->showReadCount[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "閲覧", "readCount", $i->readCount) ?>
 							<?php if ($c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
 								<?php if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-									<?php entryInfo($idx, $i, $visibility, "評価", "evaluationCount") ?>
+									<?php entryInfo($idx, $i, $visibility, "評価", "evaluationCount", $i->evaluationCount) ?>
 								<?php endif ?>
 								<?php if ($c->showComment[Configuration::ON_SUBJECT]): ?>
-									<?php entryInfo($idx, $i, $visibility, "コメント", "commentCount") ?>
+									<?php entryInfo($idx, $i, $visibility, "コメント", "commentCount", $i->commentCount) ?>
 								<?php endif ?>
 								<?php if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-									<?php entryInfo($idx, $i, $visibility, "POINT", "points") ?>
+									<?php entryInfo($idx, $i, $visibility, "POINT", "points", $i->points) ?>
 								<?php endif ?>
 								<?php if ($c->showRate[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "Rate", "rate", sprintf("%.2f", $i->rate)) ?>
 							<?php endif ?>
@@ -135,7 +137,7 @@ function entries($entries, $isAdmin, $listType = null)
 							<ul class="tags">
 								<?php foreach ($i->tags as $j): ?>
 									<li>
-										<a href="<?php Visualizer::converted(Visualizer::actionHref("tag", $j)) ?>"><?php Visualizer::converted($j) ?></a>
+										<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("tag", $j))) ?>"><?php Visualizer::converted($j) ?></a>
 									</li>
 								<?php endforeach ?>
 							</ul>
@@ -186,10 +188,10 @@ function entries($entries, $isAdmin, $listType = null)
 								名前
 							</th>
 						<?php endif ?>
-						<th class="dateTime<?php echo in_array("dateTime", $visibility) ? null : " hidden" ?>">
+						<th class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>">
 							投稿日時
 						</th>
-						<th class="lastUpdate<?php echo in_array("lastUpdate", $visibility) ? null : " hidden" ?>">
+						<th class="lastUpdate<?php echo isset($visibility["lastUpdate"]) ? null : " hidden" ?>">
 							更新日時
 						</th>
 						<?php if ($c->showPages[Configuration::ON_SUBJECT]) entryInfoHeaderSingle($visibility, "pageCount", "ページ") ?>
@@ -220,7 +222,7 @@ function entries($entries, $isAdmin, $listType = null)
 											<label>
 												<input type="checkbox" name="id[]" value="<?php Visualizer::converted($i->id) ?>" />
 										<?php endif ?>
-										<a href="<?php Visualizer::converted(Visualizer::actionHref($i->subject, $i->id)) ?>"><?php Visualizer::converted($i->title) ?></a>
+										<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array($i->subject, $i->id))) ?>"><?php Visualizer::converted($i->title) ?></a>
 										<?php if ($isAdmin): ?>
 											</label>
 										<?php endif ?>
@@ -235,23 +237,23 @@ function entries($entries, $isAdmin, $listType = null)
 							<?php endif ?>
 							<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
 								<td class="name">
-									<a href="<?php Visualizer::converted(Visualizer::actionHref("author", $i->name)) ?>"><?php Visualizer::convertedName($i->name) ?></a>
+									<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("author", $i->name))) ?>"><?php Visualizer::convertedName($i->name) ?></a>
 								</td>
 							<?php endif ?>
-							<td class="dateTime<?php echo in_array("dateTime", $visibility) ? null : " hidden" ?>">
+							<td class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>">
 								<?php Visualizer::converted(substr(Visualizer::formatDateTime($i->dateTime), 2, -3)) ?>
 								<span class="value hidden"><?php Visualizer::converted($i->dateTime) ?></span>
 							</td>
-							<td class="lastUpdate<?php echo in_array("lastUpdate", $visibility) ? null : " hidden" ?>">
+							<td class="lastUpdate<?php echo isset($visibility["lastUpdate"]) ? null : " hidden" ?>">
 								<?php Visualizer::converted(substr(Visualizer::formatDateTime($i->lastUpdate), 2, -3)) ?>
 								<span class="value hidden"><?php Visualizer::converted($i->lastUpdate) ?></span>
 							</td>
-							<?php if ($c->showPages[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "pageCount") ?>
+							<?php if ($c->showPages[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "pageCount", $i->pageCount) ?>
 							<?php if ($c->showSize[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "size", "{$i->size}KB") ?>
-							<?php if ($c->showReadCount[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "readCount") ?>
-							<?php if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "evaluationCount") ?>
-							<?php if ($c->showComment[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "commentCount") ?>
-							<?php if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "points") ?>
+							<?php if ($c->showReadCount[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "readCount", $i->readCount) ?>
+							<?php if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "evaluationCount", $i->evaluationCount) ?>
+							<?php if ($c->showComment[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "commentCount", $i->commentCount) ?>
+							<?php if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "points", $i->points) ?>
 							<?php if ($c->showRate[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "rate", sprintf("%.2f", $i->rate)) ?>
 						</tr>
 						<?php if ($c->showTags[Configuration::ON_SUBJECT] || !Util::isEmpty($i->summary)): ?>
@@ -266,7 +268,7 @@ function entries($entries, $isAdmin, $listType = null)
 										<?php if ($i->tags): ?>
 											<?php foreach ($i->tags as $j): ?>
 												<li>
-													<a href="<?php Visualizer::converted(Visualizer::actionHref("tag", $j)) ?>"><?php Visualizer::converted($j) ?></a>
+													<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("tag", $j))) ?>"><?php Visualizer::converted($j) ?></a>
 												</li>
 											<?php endforeach ?>
 										<?php endif ?>
