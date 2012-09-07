@@ -15,7 +15,7 @@ else
 if (App::$actionName == "index")
 {
 	$h->page = isset($_GET["p"]) ? max(intval(Util::escapeInput($_GET["p"])), 1) : 1;
-	$paging = 30;
+	$paging = 50;
 	$h->pageCount = ceil(count($h->entries) / $paging);
 }
 else
