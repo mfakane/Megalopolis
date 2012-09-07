@@ -272,7 +272,7 @@ megalopolis.index =
 									else
 										visibilityCookie.push(_.value);
 									
-									megalopolis.mainCookie("ListVisibility", visibilityCookie.join(","));
+									megalopolis.mainCookie("ListVisibility", visibilityCookie.join(",").replace(/,{2,}/g, ","));
 									
 									return false;
 								})[0];
@@ -337,9 +337,8 @@ megalopolis.index =
 								if (lastUpdateIndex != -1)
 									delete visibilityCookie[lastUpdateIndex];
 								
-								
 								visibilityCookie.push(_.value);
-								megalopolis.mainCookie("ListVisibility", visibilityCookie.join(","));
+								megalopolis.mainCookie("ListVisibility", visibilityCookie.join(",").replace(/,{2,}/g, ","));
 								
 								return false;
 							})[0];
