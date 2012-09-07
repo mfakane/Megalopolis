@@ -213,18 +213,18 @@ Visualizer::doctype();
 								<?endif ?>
 							</address>
 						<?endif ?>
+						<?if (App::$actionName == "index" && (is_array($c->showTweetButton) ? $c->showTweetButton[Configuration::ON_ENTRY] : $c->showTweetButton)): ?>
+							<footer>
+								<? Visualizer::tweetButton(Visualizer::absoluteHref($h->subject, $h->entry->id), $c->entryTweetButtonText, $c->entryTweetButtonHashtags, array
+								(
+									"[id]" => $h->entry->id,
+									"[subject]" => $h->entry->subject,
+									"[title]" => $h->entry->title,
+									"[name]" => $h->entry->name,
+								)) ?>
+							</footer>
+						<?endif ?>
 					</div>
-				<?endif ?>
-				<?if (App::$actionName == "index" && (is_array($c->showTweetButton) ? $c->showTweetButton[Configuration::ON_ENTRY] : $c->showTweetButton)): ?>
-					<footer>
-						<? Visualizer::tweetButton(Visualizer::absoluteHref($h->subject, $h->entry->id), $c->entryTweetButtonText, $c->entryTweetButtonHashtags, array
-						(
-							"[id]" => $h->entry->id,
-							"[subject]" => $h->entry->subject,
-							"[title]" => $h->entry->title,
-							"[name]" => $h->entry->name,
-						)) ?>
-					</footer>
 				<?endif ?>
 			</div>
 		</div>

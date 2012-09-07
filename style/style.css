@@ -1427,19 +1427,19 @@ body.read>h1
 
 .read #body footer
 {
-	margin: 0px -8px 0px -8px;
+	margin: 8px -8px 0px -8px;
 	padding: 0px;
 	text-align: right;
 }
 
 .read #afterword
 {
-	margin: 0px -8px 6px -8px;
+	margin: 64px -8px 0px -8px;
 	padding: 8px 0px 0px 8px;
 	border: none;
-	border-top: #999999 1px solid;
-	border-radius: 0px;
-	color: #666666;
+	border-radius: 4px;
+	color: #000000;
+	background-color: #efefef;
 }
 
 .read #afterword address
