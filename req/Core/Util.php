@@ -393,12 +393,16 @@ class Util
 	 * @param string $input
 	 * @return string
 	 */
-	static function escapeInput($input)
+	static function escapeInput($input, $stripLinebreaks = false)
 	{
 		$input = mb_convert_encoding($input, "UTF-8");
 		$input = self::escapeAmpersand($input);
 		$input = self::decodeNumericEntity($input);
 		$input = self::escapeControlChars($input);
+		
+		if ($stripLinebreaks)
+			$input = strtr($input, array("\r" => "", "\n" => ""));
+		
 		$input = mb_convert_encoding($input, "UTF-8");
 		
 		return $input;

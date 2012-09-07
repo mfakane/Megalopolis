@@ -303,7 +303,7 @@ class ReadHandler extends Handler
 		$error = array();
 		$name = self::param("name");
 		$mail = self::param("mail");
-		$body = self::param("body");
+		$body = self::param("body", null, false, false);
 		$password = self::param("password", self::param("pass"));
 		$postPassword = self::param("postPassword", self::param("compass"));
 		$point = intval(self::param("point"));
@@ -649,9 +649,9 @@ class ReadHandler extends Handler
 		if (!is_null(self::param("mail")))				$entry->mail = self::param("mail");
 		if (!is_null(self::param("link")))				$entry->link = self::param("link");
 		if (!is_null(self::param("tags")))				$entry->tags = Util::splitTags(self::param("tags"));
-		if (!is_null(self::param("summary")))			$entry->summary = self::param("summary");
-		if (!is_null(self::param("body")))				$thread->body = self::param("body");
-		if (!is_null(self::param("afterword")))			$thread->afterword = self::param("afterword");
+		if (!is_null(self::param("summary")))			$entry->summary = self::param("summary", null, false, false);
+		if (!is_null(self::param("body")))				$thread->body = self::param("body", null, false, false);
+		if (!is_null(self::param("afterword")))			$thread->afterword = self::param("afterword", null, false, false);
 		if (!is_null(self::param("foreground")))		$thread->foreground = self::param("foreground") == "#000000" ? null : self::param("foreground");
 		if (!is_null(self::param("background")))		$thread->background = self::param("background") == "#000000" ? null : self::param("background");
 		if (!is_null(self::param("backgroundImage")))	$thread->backgroundImage = self::param("backgroundImage");
@@ -671,18 +671,18 @@ class ReadHandler extends Handler
 	 * @param bool $tryGet
 	 * @return string
 	 */
-	static function param($name, $default = null, $tryGet = false)
+	static function param($name, $default = null, $tryGet = false, $stripLinebreaks = true)
 	{
 		if (isset($_POST[$name]))
 		{
-			$rt = Util::escapeInput(is_array($_POST[$name]) ? $_POST[$name][count($_POST[$name]) - 1] : $_POST[$name]);
+			$rt = Util::escapeInput(is_array($_POST[$name]) ? $_POST[$name][count($_POST[$name]) - 1] : $_POST[$name], $stripLinebreaks);
 
 			if (isset($_POST["encoded"]) &&
 				$_POST["encoded"] == "true")
 				if (($rt = base64_decode($rt, true)) === false)
 					throw new ApplicationException("パラメータ {$name} のデコードに失敗しました", 404);
 				else
-					$rt = Util::escapeInput($rt);
+					$rt = Util::escapeInput($rt, $stripLinebreaks);
 			
 			if ($name != "preview" &&
 				$name != "encoded")
@@ -691,9 +691,9 @@ class ReadHandler extends Handler
 			return $rt;
 		}
 		else if (isset($_SESSION[$name]))
-			return Util::escapeInput($_SESSION[$name]);
+			return Util::escapeInput($_SESSION[$name], $stripLinebreaks);
 		else if ($tryGet && isset($_GET[$name]))
-			return Util::escapeInput($_GET[$name]);
+			return Util::escapeInput($_GET[$name], $stripLinebreaks);
 		else
 			return $default;
 	}
