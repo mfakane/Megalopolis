@@ -16,6 +16,23 @@ App::load(VISUALIZER_DIR . "Template/Index");
 </head>
 <body class="search">
 	<? Visualizer::header("詳細検索", array(), !is_null($h->entries) ? ($d['count'] <= $c->searchPaging ? "{$d['count']} 件" : "{$d['count']} 件中 " . (($h->page - 1) * $c->searchPaging + 1) . " - " . (($h->page - 1) * $c->searchPaging + count($h->entries)) .  " 件") : null) ?>
+	<?if ($h->entries): ?>
+		<script>
+			megalopolis.index.loadDropDown
+			(
+				<?=$c->showTitle[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$c->showName[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$c->showPages[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$c->showReadCount[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$c->showSize[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$c->showComment[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$c->showPoint[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$c->listType ?>
+			);
+		</script>
+	<?endif ?>
 	<form>
 		<section>
 			<label for="query">検索文字列</label><input type="text" name="query" id="query" value="<?+IndexHandler::param("query") ?>" />
