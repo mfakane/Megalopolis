@@ -71,12 +71,19 @@ class Thread
 	 */
 	function toArray()
 	{
+		$formattedBody = array();
+		
+		for ($i = 0; $i < $this->pageCount(); $i++)
+			$formattedBody[] = Visualizer::escapeBody($this, $i);
+		
 		return array
 		(
 			"entry" => $this->entry->toArray(),
 			"tags" => Configuration::$instance->showTags[Configuration::ON_ENTRY] ? $this->entry->tags : null,
 			"body" => $this->body,
+			"formattedBody" => $formattedBody,
 			"afterword" => $this->afterword,
+			"formattedAfterword" => Visualizer::escapeAfterword($this),
 			"convertLineBreak" => $this->convertLineBreak,
 			"foreground" => $this->foreground,
 			"background" => $this->background,
