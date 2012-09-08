@@ -38,6 +38,25 @@ $maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
 		<?if ($c->showName[Configuration::ON_ENTRY]): ?>
 			<? Visualizer::convertedName($h->entry->name) ?>
 		<?endif ?>
+		<?if ($h->page == 1): ?>
+			<div class="info">
+				<?if ($c->showReadCount[Configuration::ON_ENTRY]): ?>
+					閲覧: <?+$h->entry->readCount ?>
+				<?endif ?>
+				<?if ($c->showReadCount[Configuration::ON_ENTRY]): ?>
+					評価: <?+$h->entry->evaluationCount ?>
+				<?endif ?>
+				<?if ($c->showComment[Configuration::ON_ENTRY]): ?>
+					コメント: <?+$h->entry->commentCount ?>
+				<?endif ?>
+				<?if ($c->showPoint[Configuration::ON_ENTRY]): ?>
+					POINT: <?+$h->entry->points ?>
+				<?endif ?>
+				<?if ($c->showRate[Configuration::ON_ENTRY]): ?>
+					Rate: <?+$h->entry->rate ?>
+				<?endif ?>
+			</div>
+		<?endif ?>
 		<? Visualizer::pager($h->page, $maxPage, 5, Visualizer::actionHref($h->entry->subject, $h->entry->id) . "/") ?>
 		<div class="content">
 			<?if ($h->page == 1 && $c->useSummary && $c->showSummary[Configuration::ON_ENTRY]): ?>
