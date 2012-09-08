@@ -573,19 +573,22 @@ class Util
 		return $entry;
 	}
 	
-	/**
-	 * @param int $subject
-	 * @param string $dat
-	 * @param string $com
-	 * @param string $aft
-	 * @return Thread
-	 */
-	static function convertAndSaveToThread(PDO $db, PDO $idb, $subject, $dat, $com, $aft)
+	private static function convertAndSaveToThreadInternal(PDO $db, PDO $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly = false, $allowSaveCommentsOnly = false, &$save)
 	{
 		if (!is_file($dat))
 			return null;
 		
-		$data = array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "SJIS");'), file($dat, FILE_IGNORE_NEW_LINES));
+		$containsWin31JOnly = false;
+		$data = array();
+		
+		foreach (file($dat, FILE_IGNORE_NEW_LINES) as $i)
+		{
+			$data[] = $j = mb_convert_encoding($i, "UTF-8", array("Windows-31J", "SJIS-win"));
+			
+			if ($whenContainsWin31JOnly && !$containsWin31JOnly && $j != mb_convert_encoding($i, "UTF-8", "SJIS"))
+				$containsWin31JOnly = true;
+		}
+		
 		$thread = new Thread();
 		
 		self::convertLineToThreadEntry(basename($dat) . "<>" . $data[0], $thread->entry);
@@ -604,7 +607,21 @@ class Util
 		unset($data);
 		
 		if (is_file($aft))
-			$thread->afterword = mb_convert_encoding(implode("\r\n", file($aft, FILE_IGNORE_NEW_LINES)), "UTF-8", "SJIS");
+		{
+			$afterData = array();
+			
+			foreach (file($aft, FILE_IGNORE_NEW_LINES) as $i)
+			{
+				$afterData[] = $j = mb_convert_encoding($i, "UTF-8", array("Windows-31J", "SJIS-win"));
+			
+				if ($whenContainsWin31JOnly && !$containsWin31JOnly && $j != mb_convert_encoding($i, "UTF-8", "SJIS"))
+					$containsWin31JOnly = true;
+			}
+			
+			$thread->afterword = implode("\r\n", $afterData);
+			
+			unset($afterData);
+		}
 		
 		if ($thread->convertLineBreak)
 		{
@@ -613,12 +630,13 @@ class Util
 			$thread->afterword = strtr($thread->afterword, $br);
 		}
 		
-		$thread->entry->size = round(strlen(bin2hex(mb_convert_encoding($thread->body, "SJIS", "UTF-8"))) / 2 / 1024, 2);
+		$thread->entry->size = round(strlen(bin2hex(mb_convert_encoding($thread->body, "SJIS-Win", "UTF-8"))) / 2 / 1024, 2);
 		
 		if (is_file($com))
 		{
-			foreach (array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "SJIS");'), file($com, FILE_IGNORE_NEW_LINES)) as $i)
+			foreach (file($com, FILE_IGNORE_NEW_LINES) as $rawline)
 			{
+				$i = mb_convert_encoding($rawline, "UTF-8", array("Windows-31J", "SJIS-Win"));
 				$i = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", trim($i)));
 				
 				if (count($i) < 7)
@@ -677,10 +695,32 @@ class Util
 				);
 			}
 		}
-
-		$thread->entry->updateCount($thread);
-		$thread->save($db);
-		SearchIndex::register($idb, $thread);
+		
+		$save = !$whenContainsWin31JOnly || !$allowSaveCommentsOnly || $containsWin31JOnly;
+		
+		return $thread;
+	}
+	
+	/**
+	 * @param int $subject
+	 * @param string $dat
+	 * @param string $com
+	 * @param string $aft
+	 * @param bool $whenContainsSJISWinOnly [optional]
+	 * @param bool $allowSaveCommentsOnly [optional]
+	 * @return Thread
+	 */
+	static function convertAndSaveToThread(PDO $db, PDO $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly = false, $allowSaveCommentsOnly = false)
+	{
+		$save = false;
+		$thread = self::convertAndSaveToThreadInternal($db, $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly, $allowSaveCommentsOnly, $save);
+		
+		if ($thread && $save)
+		{
+			$thread->entry->updateCount($thread);
+			$thread->save($db);
+			SearchIndex::register($idb, $thread);
+		}
 		
 		return $thread;
 	}

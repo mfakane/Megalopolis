@@ -577,7 +577,7 @@ class ReadHandler extends Handler
 			$rt[] = "リンクに不明なプロトコルが指定されています";
 		
 		$summaryLines = mb_substr_count(strtr($entry->summary, array("\r\n" => "\n", "\r" => "\n")), "\n") + 1;
-		$summaryBytes = strlen(bin2hex(mb_convert_encoding($entry->summary, "SJIS", "UTF-8"))) / 2;
+		$summaryBytes = strlen(bin2hex(mb_convert_encoding($entry->summary, "Windows-31J", "UTF-8"))) / 2;
 		
 		if (Configuration::$instance->maxSummaryLines > 0 && $summaryLines > Configuration::$instance->maxSummaryLines)
 			$rt[] = "概要が {$summaryLines} 行です。" . Configuration::$instance->maxSummaryLines . " 行以下である必要があります。";
@@ -588,7 +588,7 @@ class ReadHandler extends Handler
 			$rt[] = "本文が入力されていません";
 		else
 		{
-			$bytes = strlen(bin2hex(mb_convert_encoding($thread->body, "SJIS", "UTF-8"))) / 2;
+			$bytes = strlen(bin2hex(mb_convert_encoding($thread->body, "Windows-31J", "UTF-8"))) / 2;
 			
 			if (Configuration::$instance->minBodySize > 0 && Configuration::$instance->minBodySize > $bytes)
 				$rt[] = "本文が {$bytes} バイトです。" . Configuration::$instance->minBodySize . " バイト以上である必要があります。";
@@ -660,7 +660,7 @@ class ReadHandler extends Handler
 		if (!is_null(self::param("convertLineBreak")))	$thread->convertLineBreak = self::param("convertLineBreak") == "true";
 		
 		$entry->pageCount = $thread->pageCount();
-		$entry->size = round(strlen(bin2hex(mb_convert_encoding($thread->body, "SJIS", "UTF-8"))) / 2 / 1024, 2);
+		$entry->size = round(strlen(bin2hex(mb_convert_encoding($thread->body, "Windows-31J", "UTF-8"))) / 2 / 1024, 2);
 		$entry->lastUpdate = time();
 		$entry->host = Util::getRemoteHost();
 	}

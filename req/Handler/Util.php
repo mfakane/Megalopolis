@@ -148,6 +148,7 @@ class UtilHandler extends Handler
 			$idb = App::openDB(App::INDEX_DATABASE);
 			$allowOverwrite = isset($_GET["allowOverwrite"]) && $_GET["allowOverwrite"] == "yes";
 			$whenNoConvertLineBreakFieldOnly = isset($_GET["whenNoConvertLineBreakFieldOnly"]) && $_GET["whenNoConvertLineBreakFieldOnly"] == "yes";
+			$whenContainsWin31JOnly = isset($_GET["whenContainsWin31JOnly"]) && $_GET["whenContainsWin31JOnly"] == "yes";
 			
 			if ($params[0] == "list")
 			{
@@ -196,7 +197,8 @@ class UtilHandler extends Handler
 						"count" => 0,
 						"buffer" => $defaultBuffer,
 						"allowOverwrite" => $allowOverwrite ? "yes" : "no",
-						"whenNoConvertLineBreakFieldOnly" => $whenNoConvertLineBreakFieldOnly ? "yes" : "no"
+						"whenNoConvertLineBreakFieldOnly" => $whenNoConvertLineBreakFieldOnly ? "yes" : "no",
+						"whenContainsWin31JOnly" => $whenContainsWin31JOnly ? "yes" : "no",
 					));
 				else
 					return Visualizer::redirect("util/convert?p=" . urlencode(implode(",", $subjectRange)));
@@ -236,7 +238,7 @@ class UtilHandler extends Handler
 						($id = intval(mb_substr($i->getFilename(), 0, -4))) >= $start &&
 						($end == 0 || $id < $end))
 					{
-						$datLines = is_file($dat = "{$dir}dat/{$id}.dat") ? array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "SJIS");'), file($dat, FILE_IGNORE_NEW_LINES)) : null;
+						$datLines = is_file($dat = "{$dir}dat/{$id}.dat") ? array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", array("Windows-31J", "SJIS-win"));'), file($dat, FILE_IGNORE_NEW_LINES)) : null;
 						
 						if (in_array($id, $existing))
 							if ($allowOverwrite && $datLines)
@@ -253,9 +255,11 @@ class UtilHandler extends Handler
 						if ($whenNoConvertLineBreakFieldOnly && $datLines && count(explode("<>", $datLines[0])) > 12)
 							continue;
 						
+						unset($datLines);
+						
 						try
 						{
-							$thread = Util::convertAndSaveToThread($db, $idb, $subject, "{$dir}dat/{$id}.dat", "{$dir}com/{$id}.res.dat", "{$dir}aft/{$id}.aft.dat");
+							$thread = Util::convertAndSaveToThread($db, $idb, $subject, "{$dir}dat/{$id}.dat", "{$dir}com/{$id}.res.dat", "{$dir}aft/{$id}.aft.dat", $whenContainsWin31JOnly, $whenContainsWin31JOnly && $allowOverwrite);
 						}
 						catch (ApplicationException $ex)
 						{
@@ -320,7 +324,8 @@ class UtilHandler extends Handler
 						"count" => $count,
 						"buffer" => max($buffer, $minimumBuffer),
 						"allowOverwrite" => $allowOverwrite ? "yes" : "no",
-						"whenNoConvertLineBreakFieldOnly" => $whenNoConvertLineBreakFieldOnly ? "yes" : "no"
+						"whenNoConvertLineBreakFieldOnly" => $whenNoConvertLineBreakFieldOnly ? "yes" : "no",
+						"whenContainsWin31JOnly" => $whenContainsWin31JOnly ? "yes" : "no"
 					));
 				else
 					return Visualizer::redirect("util/convert?p=" . urlencode(implode(",", $params)) . "&c={$count}");

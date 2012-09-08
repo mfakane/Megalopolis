@@ -8,6 +8,7 @@ megalopolis.convert =
 	{
 		var allowOverwrite = $("#allowOverwrite").is(":checked");
 		var whenNoConvertLineBreakFieldOnly = $("#whenNoConvertLineBreakFieldOnly").is(":checked");
+		var whenContainsWin31JOnly = $("#whenContainsWin31JOnly").is(":checked");
 		
 		$("#form").remove();
 		
@@ -30,7 +31,8 @@ megalopolis.convert =
 			{
 				p: "list",
 				allowOverwrite: allowOverwrite ? "yes" : "no",
-				whenNoConvertLineBreakFieldOnly: whenNoConvertLineBreakFieldOnly ? "yes" : "no"
+				whenNoConvertLineBreakFieldOnly: whenNoConvertLineBreakFieldOnly ? "yes" : "no",
+				whenContainsWin31JOnly: whenContainsWin31JOnly ? "yes" : "no"
 			},
 			success: function(data)
 			{
@@ -70,7 +72,8 @@ megalopolis.convert =
 				c: obj.count,
 				b: obj.buffer,
 				allowOverwrite: obj.allowOverwrite,
-				whenNoConvertLineBreakFieldOnly: obj.whenNoConvertLineBreakFieldOnly
+				whenNoConvertLineBreakFieldOnly: obj.whenNoConvertLineBreakFieldOnly,
+				whenContainsWin31JOnly: obj.whenContainsWin31JOnly
 			},
 			success: function(data)
 			{
