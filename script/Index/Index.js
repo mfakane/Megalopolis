@@ -174,7 +174,7 @@ megalopolis.index =
 		
 		currentStyle = currentStyle.length ? currentStyle[0] : styleMap[defaultStyle];
 		
-		var visibilityCookie = $.grep([megalopolis.mainCookie("ListVisibility"), !usePoints ? "pageCount,readCount,size,commentCount,dateTime" : "pageCount,readCount,size,evaluationCount,points,rate,dateTime"], function(_) { return _; })[0].split(",");
+		var visibilityCookie = $.grep([megalopolis.mainCookie("ListVisibility"), "readCount,size,commentCount,evaluationCount,points,rate,dateTime"], function(_) { return _; })[0].split(",");
 		var styleControl = $("<div />")
 			.addClass("dropDown")
 			.append($("<span />").text(currentStyle.name))

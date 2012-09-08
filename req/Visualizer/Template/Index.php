@@ -58,9 +58,7 @@ function entries($entries, $isAdmin, $listType = null)
 		}
 	
 	$listType = Cookie::getCookie(Cookie::LIST_TYPE_KEY, $listType);
-	$visibility = array_filter(explode(",", Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, $c->showPoint[Configuration::ON_SUBJECT]
-		? "pageCount,readCount,size,evaluationCount,points,rate,dateTime"
-		: "pageCount,readCount,size,commentCount,dateTime")));
+	$visibility = array_filter(explode(",", Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "readCount,size,commentCount,evaluationCount,points,rate,dateTime")));
 	$visibility = array_flip($visibility);
 	
 	if ($listType == "double")
