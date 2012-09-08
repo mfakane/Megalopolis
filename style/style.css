@@ -1623,7 +1623,6 @@ body.index>h1, body.read>h1
 .pagerContainer
 {
 	position: relative;
-	overflow: hidden;
 	height: 34px;
 }
 
