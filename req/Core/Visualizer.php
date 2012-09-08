@@ -79,8 +79,6 @@ class Visualizer
 		<?php else: ?>
 			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 			<script src="http://code.jquery.com/jquery-1.8.1.min.js"></script>
-			<script src="<?php self::converted(self::actionHref("script", "jquery.easing.js")) ?>"></script>
-			<script src="<?php self::converted(self::actionHref("script", "jquery.tmpl.js")) ?>"></script>
 			<link href="<?php self::converted(self::actionHref("style", "style.css")) ?>" rel="stylesheet" />
 			<?php if (Configuration::$instance->skin): ?>
 				<link href="<?php self::converted(self::actionHref("style", Configuration::$instance->skin, "style.css")) ?>" rel="stylesheet" />

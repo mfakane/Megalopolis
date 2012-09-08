@@ -19,38 +19,6 @@ Visualizer::doctype();
 	</title>
 	<script src="<?+Visualizer::actionHref("script", "taketori", "taketori.js") ?>"></script>
 	<script src="<?+Visualizer::actionHref("script", "Read", "Index.js") ?>"></script>
-	<script id="commentTemplate" type="text/x-jquery-tmpl">
-		<dt id="comment${num}">
-			${num}.
-			<?if ($isAdmin || $c->showPoint[Configuration::ON_COMMENT]): ?>
-				{{if !evaluation}}
-					<span class="point none">無評価</span>
-				{{else evaluation > 0}}
-					<span class="point plus">${evaluation}</span>点
-				{{else evaluation < 0}}
-					<span class="point minus">${evaluation}</span>点
-				{{/if}}
-			<?endif ?>
-			<?if ($isAdmin || $c->showName[Configuration::ON_COMMENT]): ?>
-				<span class="name">
-					{{if mail}}
-						<a href="mailto:${mail}">
-							${name}
-						</a>
-					{{else}}
-						${name}
-					{{/if}}
-				</span>
-			<?endif ?>
-			<time datetime="${megalopolis.unixTimeAsString(dateTime, 0)}">
-				${megalopolis.unixTimeAsString(dateTime, 1)}
-			</time>
-			<a href="${deleteAction}">削除</a>
-		</dt>
-		<dd>
-			{{html formattedBody}}
-		</dd>
-	</script>
 	<style>
 		html
 		{
@@ -345,7 +313,7 @@ Visualizer::doctype();
 		<?endif ?>
 		<?if ($c->usePoints() && $c->useComments): ?>
 			<script>
-				megalopolis.read.loadForms(<?+$c->defaultEvaluator ?>, '<?+$c->defaultName ?>');
+				megalopolis.read.loadForms(<?+$c->defaultEvaluator ?>, '<?+$c->defaultName ?>', <?=$isAdmin || $c->showName[Configuration::ON_COMMENT] ? "true" : "false" ?>, <?=$isAdmin || $c->showPoint[Configuration::ON_COMMENT] ? "true" : "false" ?>);
 			</script>
 		<?endif ?>
 		<?if ($c->showComment[Configuration::ON_ENTRY]): ?>

@@ -16,6 +16,7 @@ megalopolis.read =
 			return false;
 		}
 	},
+	createCommentFromTemplate: null,
 	evaluate: function(point)
 	{
 		var form = $("#evaluateform");
@@ -226,9 +227,7 @@ megalopolis.read =
 						.hide()
 						.prependTo(form)
 						.slideDown(250);
-					megalopolis.scrollTo($("#commentTemplate")
-						.tmpl(data)
-						.appendTo("#comments"));
+					megalopolis.scrollTo(megalopolis.read.createCommentFromTemplate(data).appendTo("#comments")[0]);
 					
 					$("#comments>dt.none").remove();
 					$("textarea", form).val("");
@@ -391,9 +390,46 @@ megalopolis.read =
 		if (writingMode == 0 && megalopolis.mainCookie("Vertical") == "yes" || writingMode == 2)
 			megalopolis.read.toggleVertical(true, writingMode == 2 ? true : undefined);
 	},
-	loadForms: function(defaultEvaluator, defaultName)
+	loadForms: function(defaultEvaluator, defaultName, showName, showPoint)
 	{
 		megalopolis.read.defaultName = defaultName;
+		megalopolis.read.createCommentFromTemplate = function(data)
+		{
+			var dt = $("<dt />")
+				.prop("id", "comment" + data.num)
+				.text(data.num + ".");
+			
+			if (showPoint)
+			{
+				dt.append($("<span />")
+					.addClass("point")
+					.addClass(!data.evaluation ? "none" : data.evaluation > 0 ? "plus" : "minus")
+					.text(data.evaluation ? data.evaluation : "無評価"));
+				
+				if (data.evaluation)
+					dt.append("点");
+			}
+			
+			if (showName)
+			{
+				var nameValue = data.name && data.name.length > 0 ? data.name : defaultName;
+				
+				dt.append($("<span />")
+					.addClass("name")
+					.append(data.mail
+						? $("<a />").prop("href", "mailto:" + data.mail).text(nameValue)
+						: nameValue));
+			}
+			
+			dt.append($("<time />")
+				.prop("datetime", megalopolis.unixTimeAsString(data.dateTime, 0))
+				.text(megalopolis.unixTimeAsString(data.dateTime, 1)));
+			dt.append($("<a />")
+				.prop("href", data.deleteAction)
+				.text("削除"));
+			
+			return $([dt, $("<dd />").html(data.formattedBody)]);
+		};
 		
 		if (defaultEvaluator == -1)
 			return;

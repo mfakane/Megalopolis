@@ -115,7 +115,7 @@ var megalopolis =
 				: destination.nodeType ? $(destination).offset().top
 				: destination.jquery ? destination.offset().top
 				: destination
-			}, 500, "easeInOutExpo");
+			}, 500);
 	}
 };
 
