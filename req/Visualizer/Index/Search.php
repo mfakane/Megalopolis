@@ -5,6 +5,21 @@ $d = &Visualizer::$data;
 $isAdmin = Auth::hasSession(true);
 Visualizer::doctype();
 App::load(VISUALIZER_DIR . "Template/Index");
+
+$pagerHref = Visualizer::actionHref("search", array
+(
+	"query" => IndexHandler::param("query"),
+	"title" => IndexHandler::param("title"),
+	"name" => IndexHandler::param("name"),
+	"tags" => IndexHandler::param("tags"),
+	"evalBegin" => IndexHandler::param("evalBegin"),
+	"evalEnd" => IndexHandler::param("evalEnd"),
+	"pointsBegin" => IndexHandler::param("pointsBegin"),
+	"pointsEnd" => IndexHandler::param("pointsEnd"),
+	"dateTimeBegin" => IndexHandler::param("dateTimeBegin"),
+	"dateTimeEnd" => IndexHandler::param("dateTimeEnd"),
+	"p" => ""
+));
 ?>
 <html>
 <head>
@@ -69,21 +84,9 @@ App::load(VISUALIZER_DIR . "Template/Index");
 			<?if ($isAdmin): ?>
 				<form action="" method="post" id="entriesForm">
 			<?endif ?>
+			<? Visualizer::pager($h->page, $h->pageCount, 5, $pagerHref) ?>
 			<? entries($h->entries, $isAdmin) ?>
-			<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref("search", array
-			(
-				"query" => IndexHandler::param("query"),
-				"title" => IndexHandler::param("title"),
-				"name" => IndexHandler::param("name"),
-				"tags" => IndexHandler::param("tags"),
-				"evalBegin" => IndexHandler::param("evalBegin"),
-				"evalEnd" => IndexHandler::param("evalEnd"),
-				"pointsBegin" => IndexHandler::param("pointsBegin"),
-				"pointsEnd" => IndexHandler::param("pointsEnd"),
-				"dateTimeBegin" => IndexHandler::param("dateTimeBegin"),
-				"dateTimeEnd" => IndexHandler::param("dateTimeEnd"),
-				"p" => ""
-			))) ?>
+			<? Visualizer::pager($h->page, $h->pageCount, 5, $pagerHref) ?>
 			<?if ($isAdmin): ?>
 					<input type="hidden" name="token" value="<?+$_SESSION[Auth::SESSION_TOKEN] ?>" />
 					<section class="admin">
