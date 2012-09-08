@@ -19,7 +19,7 @@ Visualizer::doctype();
 					作品が多い場合は、再生成に時間がかかります。ご了承ください。
 				</p>
 				<p>
-					<label><input type="checkbox" id="force" name="force" value="yes" />既存の検索インデックスをクリアしてから再生成する</label>
+					<label><input type="checkbox" id="force" name="force" value="yes" checked="checked" />既存の検索インデックスをクリアしてから再生成する</label>
 				</p>
 				<p>
 					<input type="submit" value="再生成開始" />
