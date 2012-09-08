@@ -30,7 +30,7 @@ class ReadHandler extends Handler
 		else
 			Auth::cleanSession(!Auth::hasSession(true));
 		
-		if (!$c->showTitle[Configuration::ON_SUBJECT])
+		if (!Auth::hasSession(true) && !$c->showTitle[Configuration::ON_SUBJECT])
 			throw new ApplicationException("作品の閲覧は許可されていません", 403);
 		
 		if (!Auth::hasToken())

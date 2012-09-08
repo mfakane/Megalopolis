@@ -156,7 +156,7 @@ Visualizer::doctype();
 				<?if ($h->page == $h->entry->pageCount): ?>
 					<div id="afterword">
 						<? Visualizer::convertedAfterword($h->thread) ?>
-						<?if ($c->showName[Configuration::ON_ENTRY]): ?>
+						<?if ($isAdmin || $c->showName[Configuration::ON_ENTRY]): ?>
 							<address>
 								<?if (App::$actionName == "index"): ?>
 									<a href="<?+Visualizer::actionHref("author", $h->entry->name) ?>"><? Visualizer::convertedName($h->entry->name) ?></a>

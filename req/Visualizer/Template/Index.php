@@ -70,7 +70,7 @@ function entries($entries, $isAdmin, $listType = null)
 			<?php foreach ($entries as $idx => $i): ?>
 				<article>
 					<div class="articleBody">
-						<?php if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
+						<?php if ($isAdmin || $c->showTitle[Configuration::ON_SUBJECT]): ?>
 							<h2>
 								<?php if ($isAdmin): ?>
 									<label>
@@ -99,13 +99,11 @@ function entries($entries, $isAdmin, $listType = null)
 								UP
 							</span>
 						<?php endif ?>
-						<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
+						<?php if ($isAdmin || $c->showName[Configuration::ON_SUBJECT]): ?>
 							<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("author", $i->name))) ?>" class="name"><?php Visualizer::convertedName($i->name) ?></a>
 						<?php endif ?>
 						<?php if ($isAdmin): ?>
-							<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
-								<br />
-							<?php endif ?>
+							<br />
 							<span class="host"><?php Visualizer::converted($i->host) ?></span>
 						<?php endif ?>
 						<?php if ($c->showPages[Configuration::ON_SUBJECT] ||
@@ -170,12 +168,12 @@ function entries($entries, $isAdmin, $listType = null)
 			<table>
 				<thead>
 					<tr>
-						<?php if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
+						<?php if ($isAdmin || $c->showTitle[Configuration::ON_SUBJECT]): ?>
 							<th class="title">
 								作品名
 							</th>
 						<?php endif ?>
-						<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
+						<?php if ($isAdmin || $c->showName[Configuration::ON_SUBJECT]): ?>
 							<th class="name">
 								名前
 							</th>
@@ -198,7 +196,7 @@ function entries($entries, $isAdmin, $listType = null)
 				<tbody>
 					<?php foreach ($entries as $idx => $i): ?>
 						<tr class="article<?php if (!$c->showTags[Configuration::ON_SUBJECT] && Util::isEmpty($i->summary)) echo ' notags' ?>">
-							<?php if ($c->showTitle[Configuration::ON_SUBJECT] || $isAdmin): ?>
+							<?php if ($isAdmin || $c->showTitle[Configuration::ON_SUBJECT]): ?>
 								<td class="title">
 									<?php if (time() - $i->dateTime < $c->updatePeriod * 24 * 60 * 60): ?>
 										<span class="update">
@@ -227,7 +225,7 @@ function entries($entries, $isAdmin, $listType = null)
 									<?php endif ?>
 								</td>
 							<?php endif ?>
-							<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
+							<?php if ($isAdmin || $c->showName[Configuration::ON_SUBJECT]): ?>
 								<td class="name">
 									<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("author", $i->name))) ?>"><?php Visualizer::convertedName($i->name) ?></a>
 								</td>
