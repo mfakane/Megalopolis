@@ -351,6 +351,12 @@ class IndexHandler extends Handler
 		$name = Util::escapeInput($_name);
 		$page = max(intval($isNameList ? $_name : $_page) - 1, 0);
 		
+		if (!Auth::hasSession(true))
+			if (!Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
+				throw new ApplicationException("作品の閲覧は許可されていません", 403);
+			else if (!Configuration::$instance->showName[Configuration::ON_SUBJECT])
+				throw new ApplicationException("作者の閲覧は許可されていません", 403);
+		
 		$db = App::openDB();
 		
 		if ($isNameList)
@@ -437,6 +443,9 @@ class IndexHandler extends Handler
 		$isTagList = is_null($_tag) || intval($_tag) > 0;
 		$tag = $isTagList ? null : Util::escapeInput($_tag);
 		$page = max(intval($isTagList ? $_tag : $_page) - 1, 0);
+		
+		if (!Auth::hasSession(true) && !Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
+			throw new ApplicationException("作品の閲覧は許可されていません", 403);
 		
 		$db = App::openDB();
 		
