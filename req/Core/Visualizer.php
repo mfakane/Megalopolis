@@ -503,9 +503,9 @@ class Visualizer
 	{
 		return strtr($s, array
 		(
-			"\r\n" => "<br />",
-			"\n" => "<br />",
-			"\r" => "<br />"
+			"\r\n" => "<br />\r\n",
+			"\n" => "<br />\r\n",
+			"\r" => "<br />\r\n"
 		));
 	}
 	
