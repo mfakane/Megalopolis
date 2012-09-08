@@ -15,7 +15,7 @@ class MegalithHandler extends Handler
 		$name = Util::escapeInput($_name);
 		
 		if (App::$handlerType == "txt" &&
-			preg_match('/^subject(s|[0-9]*[1-9]|)$/', $name, $matches))
+			preg_match('/^subject(s|[1-9]*[0-9]|)$/', $name, $matches))
 		{
 			$db = App::openDB();
 			$content = null;
