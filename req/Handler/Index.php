@@ -88,7 +88,7 @@ class IndexHandler extends Handler
 			case "json":
 				return Visualizer::json(array
 				(
-					"entries" => array_map(create_function('$_', 'return $_->toArray();'), $this->entries),
+					"entries" => array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->entries)),
 					"subject" => $this->subject,
 					"subjectCount" => $this->subjectCount
 				));
@@ -253,7 +253,7 @@ class IndexHandler extends Handler
 			case "json":
 				return Visualizer::json(array
 				(
-					"entries" => array_map(create_function('$_', 'return $_->toArray();'), $this->entries),
+					"entries" => array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->entries)),
 					"page" => $this->page,
 					"pageCount" => $this->pageCount
 				));
@@ -413,7 +413,7 @@ class IndexHandler extends Handler
 					return Visualizer::json(array
 					(
 						"name" => $name,
-						"entries" => array_map(create_function('$_', 'return $_->toArray();'), $this->entries),
+						"entries" => array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->entries)),
 						"page" => $this->page,
 						"pageCount" => $this->pageCount
 					));
@@ -500,7 +500,7 @@ class IndexHandler extends Handler
 					return Visualizer::json(array
 					(
 						"tag" => $tag,
-						"entries" => array_map(create_function('$_', 'return $_->toArray();'), $this->entries),
+						"entries" => array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->entries)),
 						"page" => $this->page,
 						"pageCount" => $this->pageCount
 					));
