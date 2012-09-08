@@ -82,13 +82,13 @@ function entries($entries, $isAdmin, $listType = null)
 								<?php endif ?>
 							</h2>
 						<?php endif ?>
-						<time class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>" pubdate="pubdate" datetime="<?php Visualizer::converted(date("c", $i->dateTime)) ?>">
-							<?php Visualizer::converted(Visualizer::formatDateTime($i->dateTime)) ?>
-							<span class="value hidden"><?php Visualizer::converted($i->dateTime) ?></span>
-						</time>
 						<time class="lastUpdate<?php echo isset($visibility["lastUpdate"]) ? null : " hidden" ?>" datetime="<?php Visualizer::converted(date("c", $i->lastUpdate)) ?>">
 							<?php Visualizer::converted(Visualizer::formatDateTime($i->lastUpdate)) ?>
 							<span class="value hidden"><?php Visualizer::converted($i->lastUpdate) ?></span>
+						</time>
+						<time class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>" pubdate="pubdate" datetime="<?php Visualizer::converted(date("c", $i->dateTime)) ?>">
+							<?php Visualizer::converted(Visualizer::formatDateTime($i->dateTime)) ?>
+							<span class="value hidden"><?php Visualizer::converted($i->dateTime) ?></span>
 						</time>
 						<?php if (time() - $i->dateTime < $c->updatePeriod * 24 * 60 * 60): ?>
 							<span class="update">

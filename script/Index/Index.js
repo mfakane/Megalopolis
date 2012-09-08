@@ -223,6 +223,14 @@ megalopolis.index =
 						{
 							label: "Rate",
 							value: "rate"
+						},
+						{
+							label: "投稿日時",
+							value: "dateTime"
+						},
+						{
+							label: "更新日時",
+							value: "lastUpdate"
 						}
 					],
 					function(_)
@@ -254,6 +262,13 @@ megalopolis.index =
 										elems.removeClass("firstChild");
 										firstVisible.addClass("firstChild");
 									});
+									$(".entries>article time").each(function(k, v)
+									{
+										var e = $(v);
+										
+										if (e.hasClass(_.value))
+											e.toggleClass("hidden");
+									});
 									
 									$(".entries>table th." + _.value + ", .entries>table td." + _.value).each(function(k, v)
 									{
@@ -276,72 +291,6 @@ megalopolis.index =
 									
 									return false;
 								})[0];
-					}
-				))
-				.append($.map
-				(
-					[
-						{
-							label: "投稿日時",
-							value: "dateTime"
-						},
-						{
-							label: "更新日時",
-							value: "lastUpdate"
-						}
-					],
-					function(_)
-					{
-						return $("<li />")
-							.addClass("dateType")
-							.addClass($.inArray(_.value, visibilityCookie) != -1 ? "selected" : null)
-							.text(_.label)
-							.append($("<div />").addClass("button"))
-							.click(function()
-							{
-								var elem = $(this);
-								var dateTimeIndex = $.inArray("dateTime", visibilityCookie);
-								var lastUpdateIndex = $.inArray("lastUpdate", visibilityCookie);
-								
-								$(".dropDown ul li.dateType").each(function(k, v)
-								{
-									var e = $(v);
-									
-									if (e.text().indexOf(_.label) != -1)
-										e.addClass("selected");
-									else
-										e.removeClass("selected");
-								});
-								$(".entries>article time").each(function(k, v)
-								{
-									var e = $(v);
-									
-									if (e.hasClass(_.value))
-										e.removeClass("hidden");
-									else
-										e.addClass("hidden");
-								});
-								$(".entries>table .dateTime, .entries>table .lastUpdate").each(function(k, v)
-								{
-									var e = $(v);
-									
-									if (e.hasClass(_.value))
-										e.removeClass("hidden");
-									else
-										e.addClass("hidden");
-								});
-								
-								if (dateTimeIndex != -1)
-									delete visibilityCookie[dateTimeIndex];
-								
-								if (lastUpdateIndex != -1)
-									delete visibilityCookie[lastUpdateIndex];
-								
-								visibilityCookie.push(_.value);
-								megalopolis.mainCookie("ListVisibility", visibilityCookie.join(",").replace(/,{2,}/g, ","));
-								
-								return false;
-							})[0];
 					}
 				))
 				.hide())

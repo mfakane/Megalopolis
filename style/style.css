@@ -429,6 +429,21 @@ div.entries article time
 	text-align: right;
 }
 
+div.entries article time+time
+{
+	margin-right: 4px;
+}
+
+div.entries article time.hidden+time
+{
+	margin-right: 0px;
+}
+
+div.entries article time.lastUpdate
+{
+	color: #666666;
+}
+
 .entries .host
 {
 	color: #666666;
@@ -1890,8 +1905,7 @@ body.index>h1, body.read>h1
 	background-color: #005019;
 }
 
-.dropDown ul li.listType+.listVisibility,
-.dropDown ul li.listVisibility+.dateType
+.dropDown ul li.listType+.listVisibility
 {
 	border-top: #005019 1px solid;
 }
