@@ -364,13 +364,18 @@ ul.notify
 	padding: 0px;
 }
 
-.notes
+.notes, .search section.filter
 {
 	margin: 0px 0px 8px 0px;
 	padding: 8px;
 	border: #999999 1px solid;
 	border-radius: 4px;
 	background: #efefef;
+}
+
+.search section.filter
+{
+	padding-bottom: 0px;
 }
 
 .headdingButtons
@@ -414,11 +419,6 @@ div.entries article .articleBody
 div.entries input[type="checkbox"]
 {
 	margin-right: 4px;
-}
-
-.search div.entries article
-{
-	width: 100%;
 }
 
 div.entries article time
@@ -523,12 +523,6 @@ section.entries
 {
 	font-size: 10pt;
 	padding: 2px 4px 4px 4px;
-}
-
-.search section.entries
-{
-	padding: 2px 4px 4px 4px;
-	width: auto;
 }
 
 .entries table
@@ -793,6 +787,8 @@ h2
 
 .search section label[for]
 {
+	margin-left: 0px;
+	margin-right: -80px;
 	padding: 3px 2px 3px 0px;
 }
 
@@ -820,6 +816,11 @@ h2
 	margin-left: -102px;
 }
 
+.search section.filter input
+{
+	margin-left: 80px;
+}
+
 .edit section input[type="text"],
 .edit section input[type="email"],
 .edit section input[type="url"],
@@ -842,6 +843,11 @@ h2
 	margin: 0px 4px 0px 4px;
 	width: 16px;
 	text-align: center;
+}
+
+.search section.filter span+input
+{
+	margin-left: 0px;
 }
 
 .edit section input[type="password"]
@@ -1081,39 +1087,16 @@ form[action="unpost"] button:active img, button.unpost:active img
 	margin-bottom: 8px;
 }
 
-.edit section ul,
-.search section ul
+.edit section ul
 {
 	margin: 0px 0px 8px 0px;
 	padding: 0px;
 }
 
-.edit section ul li
+.edit section li
 {
 	display: block;
-	margin: 0px;
-	padding: 0px;
-}
-
-.search section ul li
-{
-	display: inline;
-	margin: 0px 8px 0px 0px;
-	padding: 0px;
-}
-
-.search section ul.filter
-{
-	margin: 0px;
-	padding: 0px;
-}
-
-.search section ul.filter li
-{
-	display: block;
-	margin: 0px 0px 8px 0px;
-	padding: 0px;
-	border-bottom: #005019 1px solid;
+	list-style-type: none;
 }
 
 .buttons,
@@ -1124,6 +1107,11 @@ form[action="unpost"] button:active img, button.unpost:active img
 	margin: 0px 0px 0px auto;
 	padding: 0px;
 	text-align: right;
+}
+
+.search section ul.buttons
+{
+	clear: both;
 }
 
 ul.buttons li,
@@ -1786,16 +1774,19 @@ body.index>h1, body.read>h1
 	margin-bottom: 0px;
 }
 
-.search section
+.search ul.params
 {
-	float: right;
-	padding-left: 80px;
-	width: 276px;
+	margin: 0px -8px 8px 0px;
+	padding: 0px;
 }
 
-.search #content
+.search .params li
 {
-	margin-right: 374px;
+	display: block;
+	float: left;
+	margin: 0px;
+	padding: 0px;
+	width: 50%;
 }
 
 .dropDown
