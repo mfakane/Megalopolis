@@ -537,6 +537,13 @@ class Visualizer
 	
 	private static function ensureHtmlTagEnd($rt)
 	{
+		static $selfClosingTags = array
+		(
+			"img" => true,
+			"br" => true,
+			"hr" => true,
+		);
+		
 		foreach ($rt->find("*") as $i)
 		{
 			if (Util::isEmpty($i->outertext))
@@ -578,12 +585,80 @@ class Visualizer
 			
 			self::ensureHtmlTagEnd($i);
 			
-			if ($s = mb_strpos($i->plaintext, "<") !== false &&
-				mb_strpos($i->plaintext, ">") !== false)
-				$i->innertext = strip_tags($i->plaintext);	// tag in a plain text? huh?
-			else if (!preg_match('@/>$@', $i->outertext) &&
-				!preg_match('@</\s*' . $i->tag . '\s*>$@i', $i->outertext))
-				$i->outertext .= "</{$i->tag}>";
+			$outertext = $i->outertext;
+			$matches = array();
+			
+			// close if unclosed tag
+			if (strstr($outertext, "/>") != "/>" && strstr($outertext, "</{$i->tag}>") != "</{$i->tag}>")
+				$outertext .= "</{$i->tag}>";
+			
+			// strip any double-closed tags
+			if (strpos($i->plaintext, "</") !== false)
+			{
+				$stack = array();
+				$html = "";
+				$idx = 0;
+				preg_match_all('@<(/?)([^\s>]*).*?(/?)>@i', $outertext, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+				
+				if ($matches)
+				{
+					foreach ($matches as $m)
+					{
+						$tag = $m[0][0];
+						$start = $m[0][1];
+						$name = $m[2][0];
+						$isClosing = !Util::isEmpty($m[1][0]);
+						$isSelfClosed = !Util::isEmpty($m[3][0]);
+						$length = strlen($tag);
+						
+						$html .= substr($outertext, $idx, $start - $idx);
+						
+						if (!$isSelfClosed)
+							if ($isClosing)
+								if ($stack && $stack[count($stack) - 1] == $name)
+								{
+									// closed tag
+									$html .= $tag;
+									array_pop($stack);
+								}
+								else
+								{
+									// double closed tag
+									$length = 0;
+								}
+							else
+							{
+								// open tag
+								
+								if (isset($selfClosingTags[$name]))
+								{
+									$html .= substr($tag, 0, -1) . " />";
+									$length += 2;
+								}
+								else
+								{
+									$html .= $tag;
+								
+									array_push($stack, $name);
+								}
+							}
+						
+						$idx = $start + $length;
+					}
+					
+					$html .= substr($outertext, $idx);
+					
+					foreach	($stack as $j)
+					{
+						// unclosed tag
+						$html .= "</{$j}>";
+					}
+					
+					$outertext = $html;
+				}
+			}
+			
+			$i->outertext = $outertext;
 		}
 	}
 	
