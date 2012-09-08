@@ -395,7 +395,7 @@ class Util
 	 */
 	static function escapeInput($input, $stripLinebreaks = false)
 	{
-		$input = mb_convert_encoding($input, "UTF-8");
+		$input = mb_convert_encoding($input, "UTF-8", "UTF-8,Windows-31J,eucJP-win");
 		$input = self::escapeAmpersand($input);
 		$input = self::decodeNumericEntity($input);
 		$input = self::escapeControlChars($input);
