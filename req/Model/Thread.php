@@ -106,7 +106,7 @@ class Thread
 	{
 		$rt = preg_split(self::REGEX_SPLIT_PAGE, $this->body);
 		
-		return $rt[$page - 1];
+		return isset($rt[$page - 1]) ? $rt[$page - 1] : null;
 	}
 	
 	private function updatePropertyLink()
