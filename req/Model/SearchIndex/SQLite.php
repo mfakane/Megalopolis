@@ -77,7 +77,7 @@ class SQLiteSearchIndex extends SearchIndex
 		('
 			select docid from
 			(' . implode(" union ", array_map(create_function('$_', 'return "select docid from %2\$s where {$_} match ?";'), $targetColumns)) . ') %s',
-			is_array($ids) ? "where docid in (" . implode(", ", $ids) . ")" : null,
+			is_array($ids) ? "where docid in (" . ($ids ? implode(", ", $ids) : -1) . ")" : null,
 			self::INDEX_TABLE
 		)));
 		

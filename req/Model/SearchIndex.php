@@ -51,6 +51,9 @@ abstract class SearchIndex
 	 */
 	static function search(PDO $idb, array $query, array $type = null, array $ids = null)
 	{
+		if (is_array($ids) && !$ids)
+			return array();
+		
 		return self::$instance->searchThread($idb, $query, $type, $ids);
 	}
 	
