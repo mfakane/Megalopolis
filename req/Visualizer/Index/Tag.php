@@ -27,13 +27,35 @@ Visualizer::doctype();
 	<?else: ?>
 		<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref(App::$actionName) . "/") ?>
 		<?if ($d): ?>
-			<ul class="taglist">
-				<?foreach ($d as $k => $v): ?>
-					<li>
-						<a href="<?+Visualizer::actionHref(App::$actionName, $k) ?>"><?+$k ?><span class="count"><?+$v ?></span></a>
-					</li>
+			<?php
+			$byCount = array();
+			
+			foreach ($d as $k => $v)
+			{
+				$baseCount = strval(pow(10, max(strlen($v) - 1, 1)));
+				
+				if (!isset($byCount[$baseCount]))
+					$byCount[$baseCount] = array();
+				
+				$byCount[$baseCount][$k] = $v;
+			}
+			?>
+			<dl class="taglist">
+				<?foreach ($byCount as $by => $vals): ?>
+					<dt>
+						<?=$by ?>
+					</dt>
+					<dd>
+						<ul>
+							<?foreach ($vals as $k => $v): ?>
+								<li>
+									<a href="<?+Visualizer::actionHref(App::$actionName, $k) ?>"><?+$k ?><span class="count"><?+$v ?></span></a>
+								</li>
+							<?endforeach ?>
+						</ul>
+					</dd>
 				<?endforeach ?>
-			</ul>
+			</dl>
 		<?else: ?>
 			<p class="notify info">
 				<?+App::$actionName == "author" ? "作者はいません" : "タグはありません" ?>

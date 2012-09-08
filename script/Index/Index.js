@@ -22,7 +22,7 @@ megalopolis.index =
 			value: "dateTime",
 			selector: function(x, y)
 			{
-				var arr = $.map([x, y], function(_) { return $(".value", _).text(); });
+				var arr = $.map([x, y], function(_) { return $(".dateTime .value", _).text() - 0; });
 				
 				return arr[0] == arr.sort()[0] ? -1 : 1;
 			}
@@ -92,7 +92,17 @@ megalopolis.index =
 					label: "Rate",
 					value: "rate"
 				},
-				lastSort
+				lastSort,
+				{
+					label: "更新日時",
+					value: "lastUpdate",
+					selector: function(x, y)
+					{
+						var arr = $.map([x, y], function(_) { return $(".lastUpdate .value", _).text() - 0; });
+						
+						return arr[0] == arr.sort()[0] ? -1 : 1;
+					}
+				}
 			],
 			function(_)
 			{
