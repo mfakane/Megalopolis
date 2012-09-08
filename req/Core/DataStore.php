@@ -216,7 +216,13 @@ abstract class DataStore
 			else
 				$type = PDO::PARAM_STR;
 			
-			$st->bindValue(":" . $k, $value, $type);
+			if ($type == PDO::PARAM_BOOL)
+				if ($value)
+					$st->bindValue(":" . $k, 1, PDO::PARAM_INT);
+				else
+					$st->bindValue(":" . $k, null, PDO::PARAM_NULL);
+			else
+				$st->bindValue(":" . $k, $value, $type);
 		}
 	}
 }
