@@ -311,7 +311,9 @@ megalopolis.read =
 					image: "plusFontIcon.png",
 					click: function()
 					{
-						updateFontSize(20);
+						updateFontSize(10);
+						
+						return false;
 					}
 				},
 				{
@@ -319,7 +321,9 @@ megalopolis.read =
 					image: "minusFontIcon.png",
 					click: function()
 					{
-						updateFontSize(-20);
+						updateFontSize(-10);
+						
+						return false;
 					}
 				},
 				{
