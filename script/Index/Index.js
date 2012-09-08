@@ -387,11 +387,20 @@ megalopolis.index =
 		});
 		
 		$("table>tbody", div).append(list);
+		$("table>tbody tr.tags .summaryButton", div).remove();
+		$("table>tbody tr.tags", div).each(function()
+		{
+			megalopolis.index.makeSummaryButton($(this));
+		});
+	},
+	makeSummaryButton: function(tagRow)
+	{
+		var button = $('<a href="javascript:void(0);" />').addClass("summaryButton").text("[概要]").prependTo($("td", tagRow));
 	},
 	showSummary: function()
 	{
 		var tagRow = $("tr.tags").last();
-		var button = $('<a href="javascript:void(0);" />').addClass("summaryButton").text("[概要]").prependTo($("td", tagRow));
+		var button = megalopolis.index.makeSummaryButton(tagRow);
 		var rows = $([tagRow.prev("tr")[0], tagRow[0]]);
 		
 		$("a, input", rows).click(function(e)
@@ -410,12 +419,9 @@ megalopolis.index =
 		})
 		.click(function()
 		{
-			var summary = $("p", tagRow);
+			var summary = $("p", $(this).hasClass("tags") ? $(this) : $(this).next("tr.tags"));
 			
-			if (summary.hasClass("hidden"))
-				summary.removeClass("hidden");
-			else
-				summary.addClass("hidden");
+			summary.toggleClass("hidden");
 		});
 	}
 };
