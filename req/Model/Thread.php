@@ -366,7 +366,14 @@ class Thread
 		)));
 		Util::executeStatement($st);
 		
-		return $st->fetchAll(PDO::FETCH_CLASS, "Thread");
+		return array_map(array("self", "initializeFromQuery"), $st->fetchAll(PDO::FETCH_CLASS, "Thread"));
+	}
+	
+	private static function initializeFromQuery($instance)
+	{
+		$instance->convertLineBreak = (bool)$instance->convertLineBreak;
+		
+		return $instance;
 	}
 	
 	/**
