@@ -22,6 +22,12 @@
 	margin-left: 8px;
 }
 
+.read #body.vertical #content
+{
+	margin-right: 24px;
+	margin-bottom: 0px;
+}
+
 .read #body.vertical #contentWrapper>address
 {
 	margin-left: 8px;
