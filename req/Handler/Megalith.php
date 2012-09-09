@@ -34,7 +34,7 @@ class MegalithHandler extends Handler
 					(
 						"{$_->id}.dat",
 						$_->title,
-						Configuration::$instance->showName[Configuration::ON_SUBJECT] ? $_->name : "",
+						Configuration::$instance->showName[Configuration::ON_SUBJECT] ? (Util::isEmpty($_->name) ? Configuration::$instance->defaultName : $_->name) : "",
 						Configuration::$instance->showName[Configuration::ON_SUBJECT] ? $_->mail : "",
 						Configuration::$instance->showName[Configuration::ON_SUBJECT] ? $_->link : "",
 						"{$_->commentCount}/{$_->responseCount}",
@@ -84,7 +84,7 @@ class MegalithHandler extends Handler
 					implode("<>", array_map("htmlspecialchars", array
 					(
 						$_->title,
-						$c->showName[Configuration::ON_ENTRY] ? $_->name : "",
+						$c->showName[Configuration::ON_ENTRY] ? (Util::isEmpty($_->name) ? $c->defaultName : $_->name) : "",
 						$c->showName[Configuration::ON_ENTRY] ? $_->mail : "",
 						$c->showName[Configuration::ON_ENTRY] ? $_->link : "",
 						"{$_->commentCount}/{$_->responseCount}",
@@ -144,10 +144,10 @@ class MegalithHandler extends Handler
 					array_map(create_function('$_', 'return str_replace("\r\n", "<br />", implode("<>", array_map("htmlspecialchars", array
 					(
 						$_->body,
-						$_->name,
+						(Util::isEmpty($_->name) ? Configuration::$instance->defaultName : $_->name),
 						$_->mail,
 						date("Y/m/d H:i:s", $_->dateTime),
-						$_->evaluation ? $_->evaluation->point : 0,
+						$_->evaluation ? (Configuration::$instance->showPoint[Configuration::ON_COMMENT] ? $_->evaluation->point : 0) : 0,
 						"",
 						"",
 						"no"
