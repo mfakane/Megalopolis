@@ -190,7 +190,7 @@ h2
 	background: #480000;
 }
 
-.index .pagerContainer
+.index .pagerContainer.subjectPager
 {
 	border-color: #480000;
 	color: #ffffff;

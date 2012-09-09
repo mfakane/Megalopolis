@@ -105,10 +105,6 @@ App::load(VISUALIZER_DIR . "Template/Index");
 				</script>
 			</form>
 		</div>
-	<?elseif (App::$actionName == "tag" && $h->pageCount > 1): ?>
-		<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHrefArray(array("tag", $d)) . "/") ?>
-	<?elseif (App::$actionName == "author" && $h->pageCount > 1): ?>
-		<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHrefArray(array("author", $d)) . "/") ?>
 	<?endif ?>
 	<?if (in_array(Util::getBrowserType(), array
 	(
@@ -130,7 +126,21 @@ App::load(VISUALIZER_DIR . "Template/Index");
 			<?if ($isAdmin): ?>
 				<form action="" method="post" id="entriesForm">
 			<?endif ?>
+			<?if ($h->pageCount > 1): ?>
+				<?if (App::$actionName == "tag"): ?>
+					<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHrefArray(array("tag", $d)) . "/") ?>
+				<?elseif (App::$actionName == "author"): ?>
+					<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHrefArray(array("author", $d)) . "/") ?>
+				<?endif ?>
+			<?endif ?>
 			<? entries($h->entries, $isAdmin) ?>
+			<?if ($h->pageCount > 1): ?>
+				<?if (App::$actionName == "tag"): ?>
+					<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHrefArray(array("tag", $d)) . "/") ?>
+				<?elseif (App::$actionName == "author"): ?>
+					<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHrefArray(array("author", $d)) . "/") ?>
+				<?endif ?>
+			<?endif ?>
 			<?if ($isAdmin): ?>
 					<input type="hidden" name="token" value="<?+$_SESSION[Auth::SESSION_TOKEN] ?>" />
 					<section class="admin">

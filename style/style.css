@@ -1769,7 +1769,7 @@ body.index>h1, body.read>h1
 	text-align: center;
 }
 
-.index .pagerContainer
+.index .pagerContainer.subjectPager
 {
 	position: absolute;
 	left: auto;
@@ -1784,7 +1784,7 @@ body.index>h1, body.read>h1
 	background: transparent url("infoBackground.png") repeat-x scroll right bottom;
 }
 
-.index .pager
+.index .subjectPager .pager
 {
 	margin-bottom: 0px;
 }
