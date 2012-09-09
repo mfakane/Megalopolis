@@ -599,33 +599,43 @@ class ThreadEntry
 	 * @param int $offset
 	 * @param int $limit
 	 * @param int $order [optional]
+	 * @param int $foundItems [optinal]
 	 * @return array of ThreadEntry
 	 */
-	static function getEntriesByTag(PDO $db, $tag, $offset = 0, $limit = null, $order = Board::ORDER_DESCEND)
+	static function getEntriesByTag(PDO $db, $tag, $offset = 0, $limit = null, $order = Board::ORDER_DESCEND, &$foundItems = null)
 	{
-		$st = Util::ensureStatement($db, $db->prepare(sprintf
+		$isMysql = Configuration::$instance->dataStore instanceof MySQLDataStore;
+		$rt = array();
+		$sql = sprintf
 		('
-			select id from %s
-			where tag = ?',
-			App::THREAD_TAG_TABLE
-		)));
-		Util::executeStatement($st, array($tag));
-		$ids = implode(", ", $st->fetchAll(PDO::FETCH_COLUMN));
-		
-		$rt = self::query($db, sprintf
-		('
-			where %s.id in (%s)
-			order by %1$s.id %s
+			select %s * from %s as tt
+			join %s as t on t.id = tt.id and tag = ?
+			left join %s as e on e.id = tt.id
+			order by tt.id %s
 			%s',
+			$isMysql ? "sql_calc_found_rows" : "",
+			App::THREAD_TAG_TABLE,
 			App::THREAD_ENTRY_TABLE,
-			$ids,
+			App::THREAD_EVALUATION_TABLE,
 			$order == Board::ORDER_ASCEND ? "asc" : "desc",
 			is_null($limit) ? "" : "limit {$limit} offset {$offset}"
-		));
+		);
+		Util::executeStatement($st = Util::ensureStatement($db, $db->prepare($sql)), array($tag));
+		
+		foreach ($st->fetchAll(PDO::FETCH_CLASS, "ThreadEntry") as $i)
+			$rt[$i->id] = $i;
+		
+		if ($isMysql)
+		{
+			Util::executeStatement($st2 = Util::ensureStatement($db, $db->prepare("select found_rows()")));
+			$foundItems = $st2->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
+			$foundItems = intval(array_pop($foundItems));
+		}
+		
 		$tags = self::queryTags($db, sprintf
 		('
 			where id in (%s)',
-			$ids
+			implode(", ", array_keys($rt))
 		));
 		
 		if (Configuration::$instance->convertOnDemand &&
