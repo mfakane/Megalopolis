@@ -119,7 +119,7 @@ class UtilHandler extends Handler
 						"buffer" => max($buffer, $minimumBuffer)
 					));
 				else
-					return Visualizer::redirect($next > $maxSubject ? "util/reindex?p=end" : "util/reindex?p={$next}&c={$count}&o={$nextOffset}");
+					return Visualizer::redirect($next > $maxSubject ? "util/reindex?p=end&c={$count}" : "util/reindex?p={$next}&c={$count}&o={$nextOffset}");
 			}
 		}
 		else
@@ -128,6 +128,11 @@ class UtilHandler extends Handler
 	
 	function convert()
 	{
+		$args = func_get_args();
+		
+		if ($args && $args[0] == "tags")
+			return $this->convertTags(App::$actionName = array_shift($args), $args);
+		
 		$defaultBuffer = Configuration::$instance->convertDivision;
 		$minimumBuffer = 20;
 		
@@ -333,6 +338,138 @@ class UtilHandler extends Handler
 		}
 		else
 			return Visualizer::visualize();
+	}
+	
+	static function convertTags()
+	{
+		$defaultBuffer = 1000;
+		$minimumBuffer = 100;
+		
+		self::ensureTestMode();
+		
+		$dir = "Megalith/";
+		
+		if (!is_dir("{$dir}")) throw new ApplicationException("ディレクトリ {$dir} が見つかりません");
+		if (is_dir("{$dir}sub") && (!is_dir("{$dir}dat") || !is_dir("{$dir}com") || !is_dir("{$dir}aft"))) throw new ApplicationException("ディレクトリ {$dir}sub/ が見つかりましたが、他のログディレクトリが見つかりません");
+		if (is_dir("{$dir}dat") && (!is_dir("{$dir}sub") || !is_dir("{$dir}com") || !is_dir("{$dir}aft"))) throw new ApplicationException("ディレクトリ {$dir}dat/ が見つかりましたが、他のログディレクトリが見つかりません");
+		if (is_dir("{$dir}com") && (!is_dir("{$dir}sub") || !is_dir("{$dir}dat") || !is_dir("{$dir}aft"))) throw new ApplicationException("ディレクトリ {$dir}com/ が見つかりましたが、他のログディレクトリが見つかりません");
+		if (is_dir("{$dir}aft") && (!is_dir("{$dir}sub") || !is_dir("{$dir}dat") || !is_dir("{$dir}com"))) throw new ApplicationException("ディレクトリ {$dir}aft/ が見つかりましたが、他のログディレクトリが見つかりません");
+		
+		if (isset($_GET["p"]) && $_GET["p"] == "list")
+		{
+			$db = App::openDB();
+			$subjectCount = Board::getLatestSubject($db);
+			App::closeDB($db);
+			
+			if (App::$handlerType == "json")
+				return Visualizer::json(array
+				(
+					"remainingChildren" => 1,
+					"allChildren" => 1,
+					"nextOffset" => 0,
+					"current" => 0,
+					"next" => 1,
+					"max" => $subjectCount,
+					"count" => 0,
+					"buffer" => $defaultBuffer
+				));
+			else
+				return Visualizer::redirect("util/convert/tags?s=1&o=0&m={$subjectCount}&c=0");
+		}
+		else if (isset($_GET["p"]) && $_GET["p"] == "end")
+		{
+			Visualizer::$data = isset($_GET["c"]) ? intval($_GET["c"]) : 0;
+			
+			if (App::$handlerType == "json")
+				return Visualizer::json(array
+				(
+					"count" => Visualizer::$data
+				));
+			else
+				return Visualizer::visualize("Util/Convert/Tags");
+		}
+		else if (isset($_GET["s"]) && isset($_GET["o"]) && isset($_GET["m"]))
+		{
+			$offset = intval(Util::escapeInput($_GET["o"]));
+			$subjectCount = intval(Util::escapeInput($_GET["m"]));
+			$count = intval(Util::escapeInput($_GET["c"]));
+			$buffer = isset($_GET["b"]) ? intval($_GET["b"]) : $defaultBuffer;
+			$db = App::openDB();
+			$datCount = 0;
+			$processed = 0;
+			$next = 0;
+			
+			for ($subject = intval(Util::escapeInput($_GET["s"])); $subject < $subjectCount; $subject++)
+			{
+				$subjectFile = $dir . "sub/subject" . ($subject == $subjectCount ? "" : $subject) . ".txt";
+				$datCount = 0;
+				
+				if (is_file($subjectFile))
+				{
+					$sub = array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", array("Windows-31J", "SJIS-win"));'), file($subjectFile, FILE_IGNORE_NEW_LINES));
+					$datCount = count($sub);
+					
+					foreach (array_slice($sub, $offset, $buffer) as $i)
+					{
+						$newEntry = Util::convertLineToThreadEntry($i);
+						
+						if ($newEntry && $newEntry->tags)
+						{
+							foreach ($newEntry->tags as $k => $v)
+							{
+								$st = Util::ensureStatement($db, $db->prepare(sprintf
+								('
+									update %s set position = :position where id = :id and tag = :tag',
+									App::THREAD_TAG_TABLE
+								)));
+								$st->bindParam("id", $newEntry->id, PDO::PARAM_INT);
+								$st->bindParam("tag", $v);
+								$st->bindParam("position", $k, PDO::PARAM_INT);
+								Util::executeStatement($st);
+							}
+							
+							$count++;
+						}
+						
+						$processed++;
+						$offset++;
+						
+						if ($processed >= $buffer)
+							break;
+					}
+				}
+				
+				$next = $subject;
+				
+				if ($offset >= $datCount)
+				{
+					$offset = 0;
+					$next++;
+				}
+				
+				if ($processed >= $buffer)
+					break;
+			}
+				
+			App::closeDB($db);
+			
+			if (App::$handlerType == "json")
+				return Visualizer::json(array
+				(
+					"remainingChildren" => $datCount - $offset,
+					"allChildren" => $datCount,
+					"nextOffset" => $offset,
+					"current" => $subject,
+					"next" => $next > $subjectCount ? null : $next,
+					"max" => $subjectCount,
+					"count" => $count,
+					"buffer" => max($buffer, $minimumBuffer)
+				));
+			else
+				return Visualizer::redirect($next > $subjectCount ? "util/convert/tags?p=end&c={$count}" : "util/convert/tags?s={$next}&o={$offset}&m={$subjectCount}&c={$count}");
+		}
+		else
+			return Visualizer::visualize("Util/Convert/Tags");
 	}
 	
 	private static function getFirstAndLastDataLineIDFromLines(array $lines)

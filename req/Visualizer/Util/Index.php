@@ -25,6 +25,9 @@ Visualizer::doctype();
 					<a href="<?+Visualizer::actionHref("util", "convert") ?>">Megalith 形式のログの変換</a>
 				</li>
 				<li>
+					<a href="<?+Visualizer::actionHref("util", "convert/tags") ?>">Megalith 形式のタグ順のインポート</a>
+				</li>
+				<li>
 					<a href="<?+Visualizer::actionHref("util", "reindex") ?>">検索インデックスの再生成</a>
 				</li>
 			<?endif ?>
