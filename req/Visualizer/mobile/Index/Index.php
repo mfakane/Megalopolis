@@ -48,7 +48,7 @@ function entries($h, $c)
 							<span class="commentCount"><?+$i->commentCount ?></span>
 						<?endif ?>
 						<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-							<span class="evaluationCount"><?+$i->evaluationCount ?></span>
+							<span class="evaluationCount"><?+$c->pointMap && $c->commentPointMap ? "{$i->commentedEvaluationCount}/{$i->evaluationCount}" : $i->evaluationCount ?></span>
 							<span class="points"><?+$i->points ?></span>
 						<?endif ?>
 						<?if ($c->showRate[Configuration::ON_SUBJECT]): ?>

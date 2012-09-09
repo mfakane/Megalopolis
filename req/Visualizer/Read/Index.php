@@ -89,7 +89,7 @@ Visualizer::doctype();
 				<?if ($c->showPoint[Configuration::ON_ENTRY]): ?>
 					<dt>評価数</dt>
 					<dd id="evaluationCount">
-						<?+$h->entry->evaluationCount ?>
+						<?+$c->pointMap && $c->commentPointMap ? "{$h->entry->commentedEvaluationCount}/{$h->entry->evaluationCount}" : $h->entry->evaluationCount ?>
 					</dd>
 					<dt>POINT</dt>
 					<dd id="points">

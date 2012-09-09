@@ -75,7 +75,15 @@ megalopolis.index =
 				!useEvaluationCount ? null :
 				{
 					label: "評価",
-					value: "evaluationCount"
+					value: "evaluationCount",
+					selector: function(x, y)
+					{
+						var a = $(".evaluationCount", x).text();
+						var b = $(".evaluationCount", y).text();
+						var allEval = a.replace(/^[0-9]+\//, "") - b.replace(/^[0-9]+\//, "");
+						
+						return allEval != 0 ? allEval : a.indexOf("/") == -1 ? 0 : a.replace(/\/[0-9]+$/, "") - b.replace(/\/[0-9]+$/, "");
+					}
 				},
 				!useCommentCount ? null :
 				{

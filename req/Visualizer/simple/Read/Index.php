@@ -44,7 +44,7 @@ $maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
 					閲覧: <?+$h->entry->readCount ?>
 				<?endif ?>
 				<?if ($c->showReadCount[Configuration::ON_ENTRY]): ?>
-					評価: <?+$h->entry->evaluationCount ?>
+					評価: <?+$c->pointMap && $c->commentPointMap ? "{$h->entry->commentedEvaluationCount}/{$h->entry->evaluationCount}" : $h->entry->evaluationCount ?>
 				<?endif ?>
 				<?if ($c->showComment[Configuration::ON_ENTRY]): ?>
 					コメント: <?+$h->entry->commentCount ?>

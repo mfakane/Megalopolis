@@ -115,7 +115,7 @@ function entries($entries, $isAdmin, $listType = null)
 							<?php if ($c->showPages[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "ページ", "pageCount", $i->pageCount) ?>
 							<?php if ($c->showSize[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "サイズ", "size", "{$i->size}KB") ?>
 							<?php if ($c->showReadCount[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "閲覧", "readCount", $i->readCount) ?>
-							<?php if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "評価", "evaluationCount", $i->evaluationCount) ?>
+							<?php if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "評価", "evaluationCount", $c->pointMap && $c->commentPointMap ? "{$i->commentedEvaluationCount}/{$i->evaluationCount}" : $i->evaluationCount) ?>
 							<?php if ($c->showComment[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "コメント", "commentCount", $i->commentCount) ?>
 							<?php if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "POINT", "points", $i->points) ?>
 							<?php if ($c->showRate[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $visibility, "Rate", "rate", sprintf("%.2f", $i->rate)) ?>
@@ -239,7 +239,7 @@ function entries($entries, $isAdmin, $listType = null)
 							<?php if ($c->showPages[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "pageCount", $i->pageCount) ?>
 							<?php if ($c->showSize[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "size", "{$i->size}KB") ?>
 							<?php if ($c->showReadCount[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "readCount", $i->readCount) ?>
-							<?php if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "evaluationCount", $i->evaluationCount) ?>
+							<?php if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "evaluationCount", $c->pointMap && $c->commentPointMap ? "{$i->commentedEvaluationCount}/{$i->evaluationCount}" : $i->evaluationCount) ?>
 							<?php if ($c->showComment[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "commentCount", $i->commentCount) ?>
 							<?php if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "points", $i->points) ?>
 							<?php if ($c->showRate[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "rate", sprintf("%.2f", $i->rate)) ?>

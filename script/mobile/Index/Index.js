@@ -12,6 +12,12 @@ megalopolis.index =
 			title: textSort,
 			name: textSort,
 			size: function(x, y) { y.replace("KB", "") - x.replace("KB", "") },
+			evaluationCount: function(x, y)
+			{
+				var allEval = y.replace(/^[0-9]+\//, "") - x.replace(/^[0-9]+\//, "");
+				
+				return allEval != 0 ? allEval : x.indexOf("/") == -1 ? 0 : y.replace(/\/[0-9]+$/, "") - x.replace(/\/[0-9]+$/, "");
+			},
 			dateTime: function(x, y) { return textSort(y, x); }
 		};
 		
