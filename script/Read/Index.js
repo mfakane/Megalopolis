@@ -367,18 +367,30 @@ megalopolis.read =
 			}))
 			.insertBefore(content);
 		
-		if (window.opera || megalopolis.read.isWebKit())
+		if (megalopolis.read.isWebKit() && !forceTaketori)
+		{
+			var wrapper = $("#verticalWrapper", content).on("mousewheel", function(e)
+			{
+				if (megalopolis.read.isVertical)
+				{
+					wrapper.stop(true, true).animate
+					({
+						scrollLeft: wrapper.scrollLeft() + e.originalEvent.wheelDelta,
+					}, 20, "linear");
+					
+					return false;
+				}
+			});
+		}
+		
+		if (window.opera)
 		{
 			var firstLoad = true;
-			
+				
 			megalopolis.read.resizeAction = function()
 			{
 				if (!megalopolis.read.taketori && megalopolis.read.isVertical)
-					$("#verticalWrapper", content).height(content.width() + (window.opera
-						? firstLoad
-							? 18
-							: 32
-						: 64));
+					$("#verticalWrapper", content).height(content.width() + (firstLoad ? 18 : 32));
 				else
 					$("#verticalWrapper", content).css("height", "auto");
 				

@@ -5,16 +5,28 @@ body>header form input[name="query"]::-webkit-input-placeholder
 
 .read #body.vertical #verticalWrapper
 {
-	right: -520px;
-	width: 520px;
-	-webkit-transform: rotate(90deg);
-	-webkit-transform-origin: 0% 0%;
-	line-height: 140%;
+	-webkit-writing-mode: vertical-rl;
+	letter-spacing: 1px;
+	line-height: 130%;
+	height: auto;
 }
 
-.read #body.vertical img
+.read #body.vertical h1
 {
-	-webkit-transform: rotate(-90deg);
+	height: auto;
+	margin-left: 8px;
+}
+
+.read #body.vertical #contentWrapper>address
+{
+	margin-left: 8px;
+	margin-bottom: 0px;
+}
+
+.read #body.vertical #afterword
+{
+	margin: -8px 64px -8px 0px;
+	padding: 8px 8px 8px 0px;
 }
 
 .edit section ul.palette
