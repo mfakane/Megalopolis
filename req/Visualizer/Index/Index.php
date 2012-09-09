@@ -40,7 +40,12 @@ App::load(VISUALIZER_DIR . "Template/Index");
 		"?visualizer=auto" => Visualizer::isMobile() || Visualizer::isSimple() ? array("携帯表示", "") : null
 	);
 	
-	Visualizer::header($title, $arr, count($h->entries) . " 件");
+	Visualizer::header
+	(
+		$title,
+		$arr,
+		$h->pageCount > 1 ? "{$h->entryCount} 件中 " . (($h->page - 1) * $c->searchPaging + 1) . " - " . (($h->page - 1) * $c->searchPaging + count($h->entries)) .  " 件" : count($h->entries) . " 件"
+	);
 	?>
 	<dl class="status">
 		<?if ($h->entryCount > 0): ?>

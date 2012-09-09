@@ -477,9 +477,9 @@ class IndexHandler extends Handler
 				}
 			}
 			
-			$entryCount = null;
-			$this->entries = ThreadEntry::getEntriesByTag($db, $tag, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $entryCount);
-			$pageCount = ceil((is_null($entryCount) ? ThreadEntry::getEntryCountByTag($db, $tag) : $entryCount) / Configuration::$instance->searchPaging);
+			$this->entryCount = null;
+			$this->entries = ThreadEntry::getEntriesByTag($db, $tag, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $this->entryCount);
+			$pageCount = ceil((is_null($this->entryCount) ? ThreadEntry::getEntryCountByTag($db, $tag) : $this->entryCount) / Configuration::$instance->searchPaging);
 			$this->subject = 0;
 			$this->subjectCount = Board::getLatestSubject($db);
 			Visualizer::$data = $tag;
