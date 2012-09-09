@@ -14,6 +14,7 @@
 	-ms-writing-mode: tb-rl;
 	letter-spacing: 1px;
 	line-height: 130%;
+	height: 100%;
 }
 
 .read #body.vertical h1
