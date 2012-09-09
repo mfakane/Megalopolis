@@ -24,7 +24,7 @@ megalopolis.index =
 			{
 				var arr = $.map([x, y], function(_) { return $(".dateTime .value", _).text() - 0; });
 				
-				return arr[0] == arr.sort()[0] ? -1 : 1;
+				return arr[0] - arr[1];
 			}
 		};
 		var ascending = false;
@@ -108,7 +108,7 @@ megalopolis.index =
 					{
 						var arr = $.map([x, y], function(_) { return $(".lastUpdate .value", _).text() - 0; });
 						
-						return arr[0] == arr.sort()[0] ? -1 : 1;
+						return arr[0] - arr[1];
 					}
 				}
 			],
