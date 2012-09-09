@@ -29,11 +29,13 @@ class ThreadEntry
 		"evaluationCount" => "integer",
 		"readCount" => "integer"
 	);
+	static $threadTagSchemaVersion = 2;
 	static $threadTagSchema = array
 	(
 		"id" => "bigint primary key not null",
 
-		"tag" => "varchar(255) primary key not null"
+		"tag" => "varchar(255) primary key not null",
+		"position" => "tinyint not null default 0"
 	);
 	
 	const SEARCH_RANDOM = 0;
@@ -207,7 +209,7 @@ class ThreadEntry
 			$this->id
 		))));
 		
-		foreach ($this->tags as $i)
+		foreach ($this->tags as $k => $v)
 		{
 			$st = Util::ensureStatement($db, $db->prepare(sprintf
 			('
@@ -224,7 +226,8 @@ class ThreadEntry
 				implode(", :", array_keys(self::$threadTagSchema))
 			)));
 			Util::bindValues($st, $this, self::$threadTagSchema);
-			$st->bindParam("tag", $i);
+			$st->bindParam("tag", $v);
+			$st->bindParam("position", $k);
 			Util::executeStatement($st);
 		}
 		
@@ -233,8 +236,6 @@ class ThreadEntry
 	
 	static function ensureTable(PDO $db)
 	{
-		$db->beginTransaction();
-		
 		$threadEntryIndices = array
 		(
 			App::THREAD_ENTRY_TABLE . "SubjectIndex" => array("subject"),
@@ -266,6 +267,14 @@ class ThreadEntry
 			}
 		}
 		
+		if (Util::hasTable($db, App::THREAD_TAG_TABLE))
+		{
+			$currentThreadTagSchemaVersion = intval(Meta::get($db, App::THREAD_TAG_TABLE, "1"));
+			
+			if ($currentThreadTagSchemaVersion < 2)
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column position tinyint not null default 0', App::THREAD_TAG_TABLE))), array(), false);
+		}
+		
 		Util::createTableIfNotExists($db, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE, $threadEntryIndices);
 		Util::createTableIfNotExists($db, self::$threadEvaluationSchema, App::THREAD_EVALUATION_TABLE);
 		Util::createTableIfNotExists($db, self::$threadTagSchema, App::THREAD_TAG_TABLE, array
@@ -274,8 +283,7 @@ class ThreadEntry
 		));
 		Meta::set($db, App::THREAD_ENTRY_TABLE, strval(self::$threadEntrySchemaVersion));
 		Meta::set($db, App::THREAD_EVALUATION_TABLE, strval(self::$threadEvaluationSchemaVersion));
-		
-		$db->commit();
+		Meta::set($db, App::THREAD_TAG_TABLE, strval(self::$threadTagSchemaVersion));
 	}
 	
 	/**
@@ -319,14 +327,23 @@ class ThreadEntry
 	{
 		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
-			select id, tag from %s
+			select id, tag, position from %s
 			%s',
 			App::THREAD_TAG_TABLE,
 			trim($options)
 		)));
 		$st->execute($params);
+		$rt = array();
 		
-		return $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
+		foreach ($st->fetchAll() as $i)
+		{
+			if (!isset($rt[$i["id"]]))
+				$rt[$i["id"]] = array();
+			
+			$rt[$i["id"]][$i["tag"]] = intval($i["position"]);
+		}
+		
+		return array_map(create_function('$_', 'asort($_); return array_keys($_);'), $rt);
 	}
 	
 	private static function getAllMegalithEntryIDs($latest)
