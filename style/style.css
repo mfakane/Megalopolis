@@ -548,7 +548,7 @@ section.entries
 	border: none;
 	border-collapse: collapse;
 	line-break: strict;
-	word-break: break-all;
+	word-break: normal;
 	word-wrap: break-word;
 }
 
@@ -1311,7 +1311,7 @@ body.index>h1, body.read>h1
 	line-height: 130%;
 	overflow: hidden;
 	line-break: strict;
-	word-break: break-all;
+	word-break: normal;
 	word-wrap: break-word;
 }
 
