@@ -25,6 +25,14 @@ abstract class SearchIndex
 	 */
 	abstract function getExistingThread(PDO $idb);
 	
+	/**
+	 * @return int
+	 */
+	function getEntryCount(PDO $idb)
+	{
+		return -1;
+	}
+	
 	function attachIndex(PDO $idb)
 	{
 	}

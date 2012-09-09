@@ -31,6 +31,25 @@ class Board
 		return self::$latestSubject;
 	}
 	
+	/**
+	 * @return int
+	 */
+	static function getEntryCount(PDO $db, PDO $idb)
+	{
+		if (($rt = SearchIndex::$instance->getEntryCount($idb)) != -1)
+			return $rt;
+		
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			select count(subject) from %s',
+			App::THREAD_ENTRY_TABLE
+		)));
+		Util::executeStatement($st);
+		$rt = $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
+		
+		return intval(array_shift($rt));
+	}
+	
 	static function ensureTable(PDO $db)
 	{
 		ThreadEntry::ensureTable($db);

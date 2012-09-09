@@ -11,6 +11,7 @@ class IndexHandler extends Handler
 	public $page;
 	public $pageCount;
 	public $entries;
+	public $entryCount;
 	public $lastUpdate;
 	
 	function index($_subject = "0", $_id = 0)
@@ -36,6 +37,7 @@ class IndexHandler extends Handler
 			Auth::createToken();
 		
 		$db = App::openDB();
+		$idb = App::openDB(App::INDEX_DATABASE);
 		
 		if (isset($_POST["admin"]))
 		{
@@ -51,8 +53,6 @@ class IndexHandler extends Handler
 			switch ($mode = Util::escapeInput($_POST["admin"]))
 			{
 				case "unpost":
-					$idb = App::openDB(App::INDEX_DATABASE);
-					
 					if ($db !== $idb)
 						$idb->beginTransaction();
 					
@@ -61,8 +61,6 @@ class IndexHandler extends Handler
 					
 					if ($db !== $idb)
 						$idb->commit();
-					
-					App::closeDB($idb);
 					
 					break;
 			}
@@ -78,7 +76,9 @@ class IndexHandler extends Handler
 		$this->entries = ThreadEntry::getEntriesBySubject($db, $subject);
 		$this->subject = $subject;
 		$this->subjectCount = Board::getLatestSubject($db);
+		$this->entryCount = Board::getEntryCount($db, $idb);
 		
+		App::closeDB($idb);
 		App::closeDB($db);
 		
 		$this->lastUpdate = max(array_map(create_function('$_', 'return $_->lastUpdate;'), $this->entries));
@@ -361,7 +361,7 @@ class IndexHandler extends Handler
 		
 		if ($isNameList)
 		{
-			$pageCount = ceil(ThreadEntry::getNameCount($db) / Configuration::$instance->tagListing);
+			$pageCount = ceil(($this->entryCount = ThreadEntry::getNameCount($db)) / Configuration::$instance->tagListing);
 			Visualizer::$data = ThreadEntry::getNames($db, $page * Configuration::$instance->tagListing, Configuration::$instance->tagListing);
 		}
 		else
@@ -451,7 +451,7 @@ class IndexHandler extends Handler
 		
 		if ($isTagList)
 		{
-			$pageCount = ceil(ThreadEntry::getTagCount($db) / Configuration::$instance->tagListing);
+			$pageCount = ceil(($this->entryCount = ThreadEntry::getTagCount($db)) / Configuration::$instance->tagListing);
 			Visualizer::$data = ThreadEntry::getTags($db, $page * Configuration::$instance->tagListing, Configuration::$instance->tagListing);
 		}
 		else

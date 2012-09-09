@@ -43,6 +43,12 @@ App::load(VISUALIZER_DIR . "Template/Index");
 	Visualizer::header($title, $arr, count($h->entries) . " 件");
 	?>
 	<dl class="status">
+		<?if ($h->entryCount > 0): ?>
+			<dt>全作品数</dt>
+			<dd>
+				<?=$h->entryCount ?>
+			</dd>
+		<?endif ?>
 		<dt>最終更新</dt>
 		<dd>
 			<time pubdate="pubdate" datetime="<?+date("c", $h->lastUpdate) ?>">
