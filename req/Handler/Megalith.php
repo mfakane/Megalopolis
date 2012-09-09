@@ -21,7 +21,7 @@ class MegalithHandler extends Handler
 			$content = null;
 			
 			if ($matches[1] == "s")
-				$content = implode("\r\n", array_map(create_function('$_', 'return "subject{$_}.txt";'), array_merge(array(""), Board::getLatestSubject($db) > 1 ? range(1, Board::getLatestSubject($db) - 1) : array())));
+				$content = implode("\n", array_map(create_function('$_', 'return "subject{$_}.txt";'), array_merge(array(""), Board::getLatestSubject($db) > 1 ? range(1, Board::getLatestSubject($db) - 1) : array())));
 			else
 			{
 				$latest = Board::getLatestSubject($db);
@@ -30,7 +30,7 @@ class MegalithHandler extends Handler
 					throw new ApplicationException("ファイルが見つかりません", 404);
 				
 				if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
-					$content = implode("\r\n", array_reverse(array_map(create_function('$_', 'return implode("<>", array_map("htmlspecialchars", array
+					$content = implode("\n", array_reverse(array_map(create_function('$_', 'return implode("<>", array_map("htmlspecialchars", array
 					(
 						"{$_->id}.dat",
 						$_->title,
@@ -99,14 +99,14 @@ class MegalithHandler extends Handler
 						$c->showSize[Configuration::ON_ENTRY] ? $_->size : ""
 					))),
 					"",
-					Visualizer::escapeBody($thread)
+					str_replace("\r\n", "\n", Visualizer::escapeBody($thread))
 				);
 			else
 				$content = array();
 			
 			App::closeDB($db);
 			
-			return Visualizer::text(implode("\r\n", $content), "Shift_JIS");
+			return Visualizer::text(implode("\n", $content), "Shift_JIS");
 		}
 		else
 			throw new ApplicationException("ファイルが見つかりません", 404);
@@ -158,7 +158,7 @@ class MegalithHandler extends Handler
 			
 			App::closeDB($db);
 			
-			return Visualizer::text(implode("\r\n", $content), "Shift_JIS");
+			return Visualizer::text(implode("\n", $content), "Shift_JIS");
 		}
 		else
 			throw new ApplicationException("ファイルが見つかりません", 404);
@@ -182,7 +182,7 @@ class MegalithHandler extends Handler
 			App::closeDB($db);
 			
 			if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
-				return Visualizer::text(Visualizer::escapeAfterword($thread), "Shift_JIS");
+				return Visualizer::text(str_replace("\r\n", "\n", Visualizer::escapeAfterword($thread)), "Shift_JIS");
 			else
 				return Visualizer::text("", "Shift_JIS");
 		}
