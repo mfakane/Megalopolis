@@ -58,8 +58,8 @@ Visualizer::doctype();
 		</dd>
 		<dt>最終更新</dt>
 		<dd>
-			<time pubdate="pubdate" datetime="<?+date("c", $h->entry->lastUpdate) ?>">
-				<?+Visualizer::formatDateTime($h->entry->lastUpdate) ?>
+			<time pubdate="pubdate" datetime="<?+date("c", $h->entry->getLastUpdate()) ?>">
+				<?+Visualizer::formatDateTime($h->entry->getLastUpdate()) ?>
 			</time>
 		</dd>
 		<?if ($c->showSize[Configuration::ON_ENTRY]): ?>

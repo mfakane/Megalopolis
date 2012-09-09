@@ -18,7 +18,7 @@ class ThreadEntry
 		"pageCount" => "integer",
 		"size" => "real"
 	);
-	static $threadEvaluationSchemaVersion = 2;
+	static $threadEvaluationSchemaVersion = 3;
 	static $threadEvaluationSchema = array
 	(
 		"id" => "bigint primary key not null",
@@ -27,7 +27,8 @@ class ThreadEntry
 		"responseCount" => "integer",
 		"commentCount" => "integer",
 		"evaluationCount" => "integer",
-		"readCount" => "integer"
+		"readCount" => "integer",
+		"responseLastUpdate" => "integer"
 	);
 	static $threadTagSchemaVersion = 2;
 	static $threadTagSchema = array
@@ -35,7 +36,7 @@ class ThreadEntry
 		"id" => "bigint primary key not null",
 
 		"tag" => "varchar(255) primary key not null",
-		"position" => "tinyint not null default 0"
+		"position" => "tinyint"
 	);
 	
 	const SEARCH_RANDOM = 0;
@@ -61,6 +62,8 @@ class ThreadEntry
 	public $commentCount = 0;
 	public $evaluationCount = 0;
 	public $readCount = 0;
+	public $commentedEvaluationCount = null;
+	public $responseLastUpdate = null;
 	
 	public $tags = array();
 	
@@ -112,13 +115,7 @@ class ThreadEntry
 		if ($rt)
 		{
 			$rt = array_pop($rt);
-			$tags = self::queryTags($db, 'where id = ?', array($id));
-			
-			if (isset($tags[$rt->id]))
-				$rt->tags = $tags[$rt->id];
-			
-			$rt->calculateRate();
-			$rt->loaded = true;
+			self::processResultEntries($db, array($rt));
 		
 			return $rt;
 		}
@@ -143,7 +140,7 @@ class ThreadEntry
 			"link" => $c->showName[Configuration::ON_ENTRY] ? $this->link : null,
 			"mail" => $c->showName[Configuration::ON_ENTRY] ? $this->mail : null,
 			"dateTime" => intval($this->dateTime),
-			"lastUpdate" => intval($this->lastUpdate),
+			"lastUpdate" => $this->getLastUpdate(),
 			"pageCount" => $c->showPages[Configuration::ON_ENTRY] ? intval($this->pageCount) : null,
 			"size" => $c->showSize[Configuration::ON_ENTRY] ? intval($this->size) : null,
 			"points" => $c->showPoint[Configuration::ON_ENTRY] ? intval($this->points) : null,
@@ -152,6 +149,11 @@ class ThreadEntry
 			"evaluationCount" => $c->showComment[Configuration::ON_ENTRY] ? intval($this->evaluationCount) : null,
 			"readCount" => $c->showReadCount[Configuration::ON_ENTRY] ? intval($this->readCount) : null
 		);
+	}
+
+	function getLastUpdate()
+	{
+		return max($this->lastUpdate, $this->responseLastUpdate);
 	}
 	
 	function incrementReadCount(PDO $db)
@@ -167,9 +169,12 @@ class ThreadEntry
 	
 	function updateCount(Thread $thread)
 	{
-		$this->responseCount = count($thread->nonCommentEvaluations) + count($thread->comments);
+		$nonCommentEvaluationCount = count($thread->nonCommentEvaluations);
+		
+		$this->responseCount = $nonCommentEvaluationCount + count($thread->comments);
 		$this->evaluationCount = count($thread->evaluations);
 		$this->commentCount = count($thread->comments);
+		$this->commentedEvaluationCount = $this->evaluationCount - $nonCommentEvaluationCount;
 		$this->points = array_reduce($thread->evaluations, create_function('$x, $y', 'return $x + $y->point;'), 0);
 		$this->calculateRate();
 	}
@@ -265,6 +270,9 @@ class ThreadEntry
 				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(evaluationCount)', App::THREAD_EVALUATION_TABLE . "EvaluationCountIndex", App::THREAD_EVALUATION_TABLE))));
 				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(points)', App::THREAD_EVALUATION_TABLE . "PointsIndex", App::THREAD_EVALUATION_TABLE))));
 			}
+			
+			if ($currentThreadEvaluationSchemaVersion < 3)
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column responseLastUpdate integer', App::THREAD_EVALUATION_TABLE))), array(), false);
 		}
 		
 		if (Util::hasTable($db, App::THREAD_TAG_TABLE))
@@ -272,7 +280,7 @@ class ThreadEntry
 			$currentThreadTagSchemaVersion = intval(Meta::get($db, App::THREAD_TAG_TABLE, "1"));
 			
 			if ($currentThreadTagSchemaVersion < 2)
-				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column position tinyint not null default 0', App::THREAD_TAG_TABLE))), array(), false);
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column position tinyint', App::THREAD_TAG_TABLE))), array(), false);
 		}
 		
 		Util::createTableIfNotExists($db, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE, $threadEntryIndices);
@@ -518,14 +526,7 @@ class ThreadEntry
 		if (Configuration::$instance->convertOnDemand)
 			$rt += self::getMegalithEntriesBySubject($db, $subject);
 		
-		foreach ($rt as $i)
-		{
-			if (!$i->tags && isset($tags[$i->id]))
-				$i->tags = $tags[$i->id];
-			
-			$i->calculateRate();
-			$i->loaded = true;
-		}
+		$rt = self::processResultEntries($db, $rt);
 		
 		if ($order == Board::ORDER_DESCEND)
 			krsort($rt);
@@ -603,14 +604,7 @@ class ThreadEntry
 			krsort($rt);
 		}
 		
-		foreach ($rt as $i)
-		{
-			if (!$i->tags && isset($tags[$i->id]))
-				$i->tags = $tags[$i->id];
-			
-			$i->calculateRate();
-			$i->loaded = true;
-		}
+		$rt = self::processResultEntries($db, $rt);
 		
 		return $rt;
 	}
@@ -669,14 +663,7 @@ class ThreadEntry
 			krsort($rt);
 		}
 		
-		foreach ($rt as $i)
-		{
-			if (isset($tags[$i->id]))
-				$i->tags = $tags[$i->id];
-			
-			$i->calculateRate();
-			$i->loaded = true;
-		}
+		$rt = self::processResultEntries($db, $rt);
 		
 		return $rt;
 	}
@@ -972,24 +959,6 @@ class ThreadEntry
 		{
 			$rt = self::query($db, "{$whereString} order by {$sort} " . ($option == self::SEARCH_DESCENDING ? "desc" : "asc") . ($limit ? " limit {$limit} offset {$offset}" : null));
 			
-			if ($rt)
-			{
-				$tags = self::queryTags($db, sprintf
-				('
-					where id in (%s)',
-					implode(", ", array_map(create_function('$_', 'return $_->id;'), $rt))
-				));
-				
-				foreach ($rt as $i)
-				{
-					if (!$i->tags && isset($tags[$i->id]))
-						$i->tags = $tags[$i->id];
-					
-					$i->calculateRate();
-					$i->loaded = true;
-				}
-			}
-			
 			if (Configuration::$instance->convertOnDemand &&
 				is_dir("Megalith/sub"))
 			{
@@ -1005,6 +974,8 @@ class ThreadEntry
 				$count[0] += $c;
 			}
 			
+			$rt = self::processResultEntries($db, $rt);
+			
 			return array
 			(
 				"result" => $rt,
@@ -1013,6 +984,36 @@ class ThreadEntry
 		}
 	}
 	
+	private static function processResultEntries(PDO $db, array $rt)
+	{
+		if (!$rt)
+			return $rt;
+		
+		$tags = self::queryTags($db, sprintf
+		('
+			where id in (%s)',
+			implode(", ", array_map(create_function('$_', 'return $_->id;'), $rt))
+		));
+		
+		foreach ($rt as $i)
+		{
+			if (!$i->tags && isset($tags[$i->id]))
+				$i->tags = $tags[$i->id];
+			
+			$i->commentedEvaluationCount = $i->commentCount - ($i->responseCount - $i->evaluationCount);
+			$i->lastUpdate = intval($i->lastUpdate);
+			
+			if (is_null($i->responseLastUpdate))
+				$i->responseLastUpdate = $i->lastUpdate;
+			else
+				$i->responseLastUpdate = intval($i->responseLastUpdate);
+			
+			$i->calculateRate();
+			$i->loaded = true;
+		}
+		
+		return $rt;
+	}
 	
 	/**
 	 * @param int $id

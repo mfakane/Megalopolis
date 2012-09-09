@@ -128,6 +128,7 @@ class Thread
 		$eval->host = Util::getRemoteHost();
 		$eval->save($db);
 		$this->nonCommentEvaluations[$eval->id] = $this->evaluations[$eval->id] = $eval;
+		$this->entry->responseLastUpdate = time();
 		$this->entry->updateCount($this);
 		
 		if ($saveThread)
@@ -150,6 +151,7 @@ class Thread
 				$i->save($db);
 			}
 		
+		$this->entry->responseLastUpdate = time();
 		$this->entry->updateCount($this);
 		$this->save($db);
 	}
@@ -186,6 +188,7 @@ class Thread
 		
 		$comment->save($db);
 		$this->comments[$comment->id] = $comment;
+		$this->entry->responseLastUpdate = time();
 		$this->entry->updateCount($this);
 		
 		if ($saveThread)
@@ -202,6 +205,7 @@ class Thread
 			unset($this->evaluations[$comment->evaluation->id]);
 		
 		$comment->delete($db);
+		$this->entry->responseLastUpdate = time();
 		$this->entry->updateCount($this);
 		$this->save($db);
 	}

@@ -81,7 +81,7 @@ class IndexHandler extends Handler
 		App::closeDB($idb);
 		App::closeDB($db);
 		
-		$this->lastUpdate = max(array_map(create_function('$_', 'return $_->lastUpdate;'), $this->entries));
+		$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLastUpdate();'), $this->entries));
 		
 		switch (App::$handlerType)
 		{
