@@ -91,7 +91,7 @@ class Thread
 			"border" => $this->border,
 			"writingMode" => intval($this->writingMode),
 			"nonCommentEvaluation" => array_reduce($this->nonCommentEvaluations, create_function('$x, $y', 'return $x + $y->point;'), 0),
-			"comments" => array_map(create_function('$_', 'return $_->toArray();'), $this->comments)
+			"comments" => array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->comments))
 		);
 	}
 	
