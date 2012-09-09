@@ -555,17 +555,38 @@ class ThreadEntry
 	/**
 	 * @param string $name
 	 * @param int $order [optional]
+	 * @param int $foundItems [optional]
 	 * @return array of ThreadEntry
 	 */
-	static function getEntriesByName(PDO $db, $name, $order = Board::ORDER_DESCEND)
+	static function getEntriesByName(PDO $db, $name, $offset = 0, $limit = null, $order = Board::ORDER_DESCEND, &$foundItems = null)
 	{
-		$rt = self::query($db, sprintf
+		$isMysql = Configuration::$instance->dataStore instanceof MySQLDataStore;
+		$rt = array();
+		$sql = sprintf
 		('
-			where %s.name = ?
-			order by %1$s.id %s',
+			select %s * from %s as t
+			left join %s as e on e.id = t.id
+			where name = ?
+			order by t.id %s
+			%s',
+			$isMysql ? "sql_calc_found_rows" : "",
 			App::THREAD_ENTRY_TABLE,
-			$order == Board::ORDER_ASCEND ? "asc" : "desc"
-		), array($name));
+			App::THREAD_EVALUATION_TABLE,
+			$order == Board::ORDER_ASCEND ? "asc" : "desc",
+			is_null($limit) ? "" : "limit {$limit} offset {$offset}"
+		);
+		Util::executeStatement($st = Util::ensureStatement($db, $db->prepare($sql)), array($name));
+		
+		foreach ($st->fetchAll(PDO::FETCH_CLASS, "ThreadEntry") as $i)
+			$rt[$i->id] = $i;
+		
+		if ($isMysql)
+		{
+			Util::executeStatement($st2 = Util::ensureStatement($db, $db->prepare("select found_rows()")));
+			$foundItems = $st2->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
+			$foundItems = intval(array_pop($foundItems));
+		}
+		
 		$tags = self::queryTags($db, sprintf
 		('
 			where id in (%s)',
