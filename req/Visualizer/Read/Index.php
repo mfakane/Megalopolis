@@ -6,7 +6,7 @@ $isEdit = in_array(App::$actionName, array("new", "edit"));
 $isAdmin = Auth::hasSession(true);
 Visualizer::doctype();
 ?>
-<html>
+<html lang="ja">
 <head>
 	<? Visualizer::head() ?>
 	<meta name="author" content="<?+$h->entry->name ?>" />

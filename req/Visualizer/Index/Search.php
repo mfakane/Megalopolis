@@ -21,7 +21,7 @@ $pagerHref = Visualizer::actionHref("search", array
 	"p" => ""
 ));
 ?>
-<html>
+<html lang="ja">
 <head>
 	<? Visualizer::head() ?>
 	<title>

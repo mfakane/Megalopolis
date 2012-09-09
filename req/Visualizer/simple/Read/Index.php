@@ -23,7 +23,7 @@ $maxPage = ceil(mb_strlen($h->thread->body) / $paging);
 $commentPaging = 25;
 $maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
 ?>
-<html>
+<html lang="ja">
 <head>
 	<? Visualizer::head() ?>
 	<title>

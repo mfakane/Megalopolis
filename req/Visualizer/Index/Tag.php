@@ -4,7 +4,7 @@ $h = &IndexHandler::$instance;
 $d = &Visualizer::$data;
 Visualizer::doctype();
 ?>
-<html>
+<html lang="ja">
 <head>
 	<? Visualizer::head() ?>
 	<title>

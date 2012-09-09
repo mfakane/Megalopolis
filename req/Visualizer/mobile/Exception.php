@@ -2,7 +2,7 @@
 $c = &Configuration::$instance;
 ?>
 <? Visualizer::doctype() ?>
-<html>
+<html lang="ja">
 <head>
 	<? Visualizer::head() ?>
 	<title>エラー</title>

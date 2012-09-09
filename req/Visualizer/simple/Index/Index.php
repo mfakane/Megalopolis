@@ -58,7 +58,7 @@ if (isset($_GET["s"]))
 
 Visualizer::doctype();
 ?>
-<html>
+<html lang="ja">
 <head>
 	<? Visualizer::head() ?>
 	<title>

@@ -14,7 +14,7 @@ $isAdmin = Auth::hasSession(true);
 Visualizer::doctype();
 App::load(VISUALIZER_DIR . "Template/Index");
 ?>
-<html>
+<html lang="ja">
 <head>
 	<? Visualizer::head() ?>
 	<?if (App::$actionName == "index"): ?>

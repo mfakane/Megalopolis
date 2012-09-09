@@ -5,7 +5,7 @@ $h = &ReadHandler::$instance;
 $title = App::$actionName == "new" ? "新規投稿" : "{$h->entry->title} の編集";
 Visualizer::doctype();
 ?>
-<html>
+<html lang="ja">
 <head>
 	<? Visualizer::head() ?>
 	<title>

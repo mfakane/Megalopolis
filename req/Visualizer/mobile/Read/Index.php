@@ -29,7 +29,7 @@ function makeMenu($basePath, $current)
 
 Visualizer::doctype();
 ?>
-<html manifest="<?+Visualizer::actionHref("manifest") ?>">
+<html lang="ja" manifest="<?+Visualizer::actionHref("manifest") ?>">
 <head>
 	<? Visualizer::head() ?>
 	<title>

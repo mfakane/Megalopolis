@@ -6,7 +6,7 @@ $d = &Visualizer::$data;
 $isAdmin = Auth::hasSession(true);
 Visualizer::doctype();
 ?>
-<html>
+<html lang="ja">
 <head>
 	<? Visualizer::head() ?>
 	<title>

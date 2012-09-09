@@ -3,7 +3,7 @@ $c = &Configuration::$instance;
 $d = &Visualizer::$data;
 ?>
 <? Visualizer::doctype() ?>
-<html>
+<html lang="ja">
 <head>
 	<? Visualizer::head() ?>
 	<title><?+$c->title ?></title>

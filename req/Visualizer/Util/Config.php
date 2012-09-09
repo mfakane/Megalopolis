@@ -4,7 +4,7 @@ $c = &Configuration::$instance;
 $d = &Visualizer::$data;
 Visualizer::doctype();
 ?>
-<html>
+<html lang="ja">
 <head>
 	<? Visualizer::head() ?>
 	<title>設定情報 - <?+$c->title ?></title>

@@ -20,7 +20,7 @@ switch (App::$actionName)
 		break;
 }
 ?>
-<html>
+<html lang="ja">
 <head>
 	<? Visualizer::head() ?>
 	<title><?+$c->title ?></title>
