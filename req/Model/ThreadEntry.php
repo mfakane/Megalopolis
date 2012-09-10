@@ -87,8 +87,9 @@ class ThreadEntry
 					App::THREAD_ENTRY_TABLE
 				)));
 				Util::executeStatement($st, array($this->id));
+				$rt = $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
 				
-				if (array_pop($st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0)) > 0)
+				if (array_pop($rt) > 0)
 					$this->id++;
 				else
 					break;

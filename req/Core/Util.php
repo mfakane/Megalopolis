@@ -554,7 +554,8 @@ class Util
 		$entry->tags = Util::splitTags($tags);
 		$entry->dateTime = $entry->id;
 		$entry->pageCount = 1;
-		$entry->evaluationCount = intval(array_pop(explode("/", $eval)));
+		$evals = explode("/", $eval);
+		$entry->evaluationCount = intval(array_pop($evals));
 		$entry->points = intval($points);
 		$entry->rate = floatval($rate);
 		unset
