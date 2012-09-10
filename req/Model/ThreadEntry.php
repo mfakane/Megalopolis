@@ -146,7 +146,7 @@ class ThreadEntry
 			"points" => $c->showPoint[Configuration::ON_ENTRY] ? intval($this->points) : null,
 			"responseCount" => $c->showComment[Configuration::ON_ENTRY] ? intval($this->responseCount) : null,
 			"commentCount" => $c->showComment[Configuration::ON_ENTRY] ? intval($this->commentCount) : null,
-			"evaluationCount" => $c->showComment[Configuration::ON_ENTRY] ? intval($this->evaluationCount) : null,
+			"evaluationCount" => $c->showPoint[Configuration::ON_ENTRY] ? intval($this->evaluationCount) : null,
 			"readCount" => $c->showReadCount[Configuration::ON_ENTRY] ? intval($this->readCount) : null
 		);
 	}
