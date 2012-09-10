@@ -284,7 +284,7 @@ class UtilHandler extends Handler
 							if ($db !== $idb)
 								$idb->beginTransaction();
 							
-							ThreadEntry::deleteDirect($db, $idb, $id);
+							ThreadEntry::deleteDirect($db, $idb, array($id));
 							
 							if ($db !== $idb)
 								$idb->commit();

@@ -196,7 +196,8 @@ class ThreadEntry
 	
 	function delete(PDO $db, PDO $idb)
 	{
-		self::deleteDirect($db, $idb, $this->id);
+		self::deleteDirect($db, $idb, array($this->id));
+		Board::setLastUpdate($db, $this->subject);
 		
 		$this->loaded = false;
 	}
@@ -236,6 +237,7 @@ class ThreadEntry
 			Util::executeStatement($st);
 		}
 		
+		Board::setLastUpdate($db, $this->subject);
 		$this->loaded = true;
 	}
 	
@@ -1015,11 +1017,10 @@ class ThreadEntry
 		return $rt;
 	}
 	
-	/**
-	 * @param int $id
-	 */
-	static function deleteDirect(PDO $db, PDO $idb, $id)
+	static function deleteDirect(PDO $db, PDO $idb, array $ids)
 	{
+		$idString = implode(", ", array_map('intval', $ids));
+		
 		foreach (array
 		(
 			App::THREAD_ENTRY_TABLE,
@@ -1029,17 +1030,17 @@ class ThreadEntry
 			App::THREAD_TABLE,
 			App::THREAD_TAG_TABLE,
 		) as $i)
-			Util::executeStatement(Util::ensureStatement($db, $db->prepare("delete from {$i} where id = ?")), array($id));
+			Util::executeStatement(Util::ensureStatement($db, $db->prepare("delete from {$i} where id in ({$idString})")));
 		
 		foreach (array
 		(
 			App::EVALUATION_TABLE,
 			App::COMMENT_TABLE,
 		) as $i)
-			Util::executeStatement(Util::ensureStatement($db, $db->prepare("delete from {$i} where entryID = ?")), array($id));
+			Util::executeStatement(Util::ensureStatement($db, $db->prepare("delete from {$i} where entryID in ({$idString})")));
 		
 		if ($idb != null)
-			SearchIndex::$instance->unregister($idb, $id);
+			SearchIndex::unregister($idb, $ids);
 	}
 }
 ?>

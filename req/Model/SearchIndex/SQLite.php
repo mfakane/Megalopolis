@@ -43,17 +43,14 @@ class SQLiteSearchIndex extends SearchIndex
 		Util::executeStatement($st, array_map(create_function('$_', 'return implode(" ", $_);'), $words));
 	}
 	
-	/**
-	 * @param int $id
-	 */
-	function unregisterThread(PDO $idb, $id)
+	function unregisterThread(PDO $idb, array $ids)
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
 			delete from %s
-			where docid = %d',
+			where docid in (%s)',
 			self::INDEX_TABLE,
-			$id
+			implode(", ", array_map('intval', $ids))
 		)));
 		Util::executeStatement($st);
 	}

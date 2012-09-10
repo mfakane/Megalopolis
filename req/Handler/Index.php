@@ -56,8 +56,8 @@ class IndexHandler extends Handler
 					if ($db !== $idb)
 						$idb->beginTransaction();
 					
-					foreach ($ids as $i)
-						ThreadEntry::deleteDirect($db, $idb, $i);
+					ThreadEntry::deleteDirect($db, $idb, $ids);
+					Board::setLastUpdate($db, $subject);
 					
 					if ($db !== $idb)
 						$idb->commit();
@@ -78,10 +78,11 @@ class IndexHandler extends Handler
 		$this->subjectCount = Board::getLatestSubject($db);
 		$this->entryCount = Board::getEntryCount($db, $idb);
 		
+		if (!($this->lastUpdate = Board::getLastUpdate($db, $subject)))
+			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLastUpdate();'), $this->entries));
+		
 		App::closeDB($idb);
 		App::closeDB($db);
-		
-		$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLastUpdate();'), $this->entries));
 		
 		switch (App::$handlerType)
 		{
@@ -213,12 +214,15 @@ class IndexHandler extends Handler
 			switch ($mode = Util::escapeInput($_POST["admin"]))
 			{
 				case "unpost":
+					ThreadEntry::deleteDirect($db, $idb, $ids);
+					
+					foreach (array_unique(array_map(create_function('$_', 'return $_->subject;'), array_intersect_key($this->entries, array_flip($ids)))) as $i)
+						Board::setLastUpdate($db, $idb);
+					
 					foreach ($ids as $i)
-					{
-						ThreadEntry::deleteDirect($db, $idb, $i);
 						unset($this->entries[$i]);
-						$rt["count"]--;
-					}
+					
+					$rt["count"] -= count($ids);
 					
 					break;
 			}

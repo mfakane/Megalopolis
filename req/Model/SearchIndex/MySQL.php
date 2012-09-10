@@ -8,9 +8,6 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 	
 	function registerThread(PDO $idb, Thread $thread, $removeExisting)
 	{
-		if ($removeExisting)
-			self::unregister($idb, $thread->id);
-		
 		$words = array_filter(array
 		(
 			"title" => $this->getWords($thread->entry->title),
@@ -31,11 +28,13 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 			(
 				%d,
 				%s
-			);',
+			)
+			on duplicate key update %s;',
 			self::INDEX_TABLE,
 			implode(", ", array_keys($words)),
 			$thread->id,
-			implode(", ", array_map(create_function('$_', 'return ":{$_}";'), array_keys($words)))
+			implode(", ", array_map(create_function('$_', 'return ":{$_}";'), array_keys($words))),
+			implode(", ", array_map(create_function('$_', 'return "{$_} = values({$_})";'), array_keys($words)))
 		)));
 		Util::executeStatement($st, array_map(create_function('$_', 'return implode(" ", $_);'), $words));
 	}
@@ -85,6 +84,31 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		Util::executeStatement($st, array_fill(0, count($targetColumns), implode(" ", $queryArguments)));
 		
 		return $st->fetchAll(PDO::FETCH_COLUMN, 0);
+	}
+	
+	function unregisterThread(PDO $idb, array $ids)
+	{
+		$count = count($ids);
+		
+		if ($count == 1)
+			Util::executeStatement(Util::ensureStatement($idb, $idb->prepare(sprintf
+			('
+				delete from %s
+				where docid = ?
+				limit %d',
+				self::INDEX_TABLE,
+				$count
+			))), array($ids[0]));
+		else
+			Util::executeStatement(Util::ensureStatement($idb, $idb->prepare(sprintf
+			('
+				delete from %s
+				where docid in (%s)
+				limit %d',
+				self::INDEX_TABLE,
+				implode(", ", array_map('intval', $ids)),
+				$count
+			))));
 	}
 	
 	function getEntryCount(PDO $idb)

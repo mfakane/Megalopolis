@@ -4,6 +4,13 @@ class Board
 	const ORDER_ASCEND = 0;
 	const ORDER_DESCEND = 1;
 	
+	static $subjectSchema = array
+	(
+		"id" => "integer primary key not null",
+		
+		"lastUpdate" => "bigint",
+	);
+	
 	static $latestSubject = null;
 	
 	/**
@@ -50,8 +57,39 @@ class Board
 		return intval(array_shift($rt));
 	}
 	
+	/**
+	 * @param $subject
+	 * @return mixed
+	 */
+	static function getLastUpdate(PDO $db, $subject)
+	{
+		$st = Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			select lastUpdate from %s where id = ?',
+			App::SUBJECT_TABLE
+		)));
+		Util::executeStatement($st, array($subject));
+		$rt = $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
+		
+		return $rt ? intval(array_shift($rt)) : null;
+	}
+	
+	/**
+	 * @param $subject
+	 */
+	static function setLastUpdate(PDO $db, $subject)
+	{
+		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf
+		('
+			replace into %s(id, lastUpdate) values(?, ?)',
+			App::SUBJECT_TABLE
+		))), array($subject, time()));
+	}
+	
 	static function ensureTable(PDO $db)
 	{
+		Util::createTableIfNotExists($db, self::$subjectSchema, App::SUBJECT_TABLE);
+		
 		ThreadEntry::ensureTable($db);
 		Thread::ensureTable($db);
 		Comment::ensureTable($db);

@@ -6,6 +6,7 @@ class App
 	const MEGALITH_VERSION = 50;
 	
 	const META_TABLE = "meta";
+	const SUBJECT_TABLE = "subject";
 	const THREAD_ENTRY_TABLE = "threadEntry";
 	const THREAD_EVALUATION_TABLE = "threadEvaluation";
 	const THREAD_TAG_TABLE = "threadTag";

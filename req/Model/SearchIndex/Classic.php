@@ -41,17 +41,14 @@ class ClassicSearchIndex extends SearchIndex
 				Util::executeStatement($st, array($k, $i));
 	}
 	
-	/**
-	 * @param int $id
-	 */
-	function unregisterThread(PDO $idb, $id)
+	function unregisterThread(PDO $idb, array $ids)
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
 			delete from %s
-			where id = %d',
+			where id in (%s)',
 			self::INDEX_TABLE,
-			$id
+			implode(", ", array_map('intval', $ids))
 		)));
 		Util::executeStatement($st);
 	}
