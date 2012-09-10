@@ -269,8 +269,8 @@ class ThreadEntry
 			
 			if ($currentThreadEvaluationSchemaVersion < 2)
 			{
-				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(evaluationCount)', App::THREAD_EVALUATION_TABLE . "EvaluationCountIndex", App::THREAD_EVALUATION_TABLE))));
-				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(points)', App::THREAD_EVALUATION_TABLE . "PointsIndex", App::THREAD_EVALUATION_TABLE))));
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(evaluationCount)', App::THREAD_EVALUATION_TABLE . "EvaluationCountIndex", App::THREAD_EVALUATION_TABLE)), false));
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(points)', App::THREAD_EVALUATION_TABLE . "PointsIndex", App::THREAD_EVALUATION_TABLE)), false));
 			}
 			
 			if ($currentThreadEvaluationSchemaVersion < 3)
@@ -853,19 +853,35 @@ class ThreadEntry
 	
 	static function getMaxMinValues(PDO $db)
 	{
-		$st = Util::ensureStatement($db, $db->prepare(sprintf
-		('
-			select
-				max(a.evaluationCount) as maxEval,
-				min(a.evaluationCount) as minEval,
-				max(b.points) as maxPoints,
-				min(b.points) as minPoints,
-				max(c.dateTime) as maxDateTime,
-				min(c.dateTime) as minDateTime
-				from %2$s as a, %2$s as b, %1$s as c',
-			App::THREAD_ENTRY_TABLE,
-			App::THREAD_EVALUATION_TABLE
-		)));
+		if (Configuration::$instance->dataStore instanceof SQLiteDataStore)
+			$st = Util::ensureStatement($db, $db->prepare(sprintf
+			('
+				select
+					max(a.evaluationCount) as maxEval,
+					min(a.evaluationCount) as minEval,
+					max(a.points) as maxPoints,
+					min(a.points) as minPoints,
+					max(c.dateTime) as maxDateTime,
+					min(c.dateTime) as minDateTime
+					from %2$s as a, %1$s as c',
+				App::THREAD_ENTRY_TABLE,
+				App::THREAD_EVALUATION_TABLE
+			)));
+		else
+			$st = Util::ensureStatement($db, $db->prepare(sprintf
+			('
+				select
+					max(a.evaluationCount) as maxEval,
+					min(a.evaluationCount) as minEval,
+					max(b.points) as maxPoints,
+					min(b.points) as minPoints,
+					max(c.dateTime) as maxDateTime,
+					min(c.dateTime) as minDateTime
+					from %2$s as a, %2$s as b, %1$s as c',
+				App::THREAD_ENTRY_TABLE,
+				App::THREAD_EVALUATION_TABLE
+			)));
+		
 		Util::executeStatement($st);
 		
 		$rt = $st->fetch();

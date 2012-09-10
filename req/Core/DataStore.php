@@ -69,16 +69,18 @@ abstract class DataStore
 	 * @param PDOStatement $st
 	 * @return PDOStatement
 	 */
-	function ensureStatement(PDO $db, $st)
+	function ensureStatement(PDO $db, $st, $throw = true)
 	{
 		if ($st)
 			return $st;
-		else
+		else if ($throw)
 		{
 			$message = implode(":", $db->errorInfo());
 			
 			throw new ApplicationException($message);
 		}
+		else
+			return null;
 	}
 	
 	/**
@@ -87,6 +89,9 @@ abstract class DataStore
 	 */
 	function executeStatement(PDOStatement $st, array $params = null, $throw = true)
 	{
+		if (!$st)
+			return false;
+		
 		foreach(range(1, 5) as $i)
 		{
 			if (is_null($params))
