@@ -723,6 +723,37 @@ body>ul
 	line-height: 200%;
 }
 
+.taglist dl
+{
+	display: block;
+	margin: 0px;
+	margin: 8px;
+	padding: 0px;
+}
+
+.taglist dt
+{
+	display: block;
+	margin: 0px;
+	padding: 0px;
+	color: #005019;
+	font-weight: bold;
+}
+
+.taglist dd
+{
+	display: block;
+	margin: 0px;
+	padding: 0px;
+}
+
+.taglist ul
+{
+	display: block;
+	margin: 0px;
+	padding: 0px;
+}
+
 .taglist li
 {
 	display: inline-block;
