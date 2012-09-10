@@ -145,6 +145,7 @@ function entries($entries, $isAdmin, $listType = null)
 	{
 		$spanWidth = count(array_filter(array
 		(
+			"check" => $isAdmin,
 			"title" => $c->showTitle[Configuration::ON_SUBJECT],
 			"name" => $c->showName[Configuration::ON_SUBJECT],
 		))) + count(filterVisibleOnly($visibility, array
@@ -166,6 +167,10 @@ function entries($entries, $isAdmin, $listType = null)
 			<table>
 				<thead>
 					<tr>
+						<?php if ($isAdmin): ?>
+							<th class="checkbox">
+							</th>
+						<?php endif ?>
 						<?php if ($isAdmin || $c->showTitle[Configuration::ON_SUBJECT]): ?>
 							<th class="title">
 								作品名
@@ -194,6 +199,11 @@ function entries($entries, $isAdmin, $listType = null)
 				<tbody>
 					<?php foreach ($entries as $idx => $i): ?>
 						<tr class="article<?php if (!$c->showTags[Configuration::ON_SUBJECT] && Util::isEmpty($i->summary)) echo ' notags' ?>">
+							<?php if ($isAdmin): ?>
+								<td class="checkbox">
+									<input type="checkbox" name="id[]" value="<?php Visualizer::converted($i->id) ?>" />
+								</td>
+							<?php endif ?>
 							<?php if ($isAdmin || $c->showTitle[Configuration::ON_SUBJECT]): ?>
 								<td class="title">
 									<?php if (time() - $i->dateTime < $c->updatePeriod * 24 * 60 * 60): ?>
@@ -206,14 +216,7 @@ function entries($entries, $isAdmin, $listType = null)
 										</span>
 									<?php endif ?>
 									<h2>
-										<?php if ($isAdmin): ?>
-											<label>
-												<input type="checkbox" name="id[]" value="<?php Visualizer::converted($i->id) ?>" />
-										<?php endif ?>
 										<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array($i->subject, $i->id))) ?>"><?php Visualizer::converted($i->title) ?></a>
-										<?php if ($isAdmin): ?>
-											</label>
-										<?php endif ?>
 									</h2>
 									<?php if ($isAdmin): ?>
 										<?php if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
