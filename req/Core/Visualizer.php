@@ -781,6 +781,24 @@ class Visualizer
 	}
 	
 	/**
+	 * @param mixed $obj
+	 */
+	static function csv($obj)
+	{
+		header("Content-Type: text/csv; charset=Shift_JIS; header=present");
+		
+		$s = fopen("php://output", 'w');
+		mb_http_output("Shift_JIS");
+		
+		foreach ($obj as $i)
+			fputcsv($s, array_map(create_function('$_', 'return mb_convert_encoding($_, "SJIS", "UTF-8");'), $i));
+		
+		fclose($s);
+		
+		return true;
+	}
+	
+	/**
 	 * @param string $path
 	 * @param int $status
 	 * @return mixed

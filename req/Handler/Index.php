@@ -93,6 +93,8 @@ class IndexHandler extends Handler
 					"subject" => $this->subject,
 					"subjectCount" => $this->subjectCount
 				));
+			case "csv":
+				return self::toCSV($this->entries);
 			case "atom":
 				return Visualizer::visualize("Index/Index.Atom", 200, "application/atom+xml");
 			case "rss":
@@ -261,6 +263,8 @@ class IndexHandler extends Handler
 					"page" => $this->page,
 					"pageCount" => $this->pageCount
 				));
+			case "csv":
+				return self::toCSV($this->entries);
 			default:
 				return Visualizer::visualize();
 		}
@@ -428,6 +432,8 @@ class IndexHandler extends Handler
 						"page" => $this->page,
 						"pageCount" => $this->pageCount
 					));
+			case "csv":
+				return self::toCSV($this->entries);
 			case "atom":
 				if ($isNameList)
 					throw new ApplicationException("ファイルが見つかりません", 404);
@@ -519,6 +525,8 @@ class IndexHandler extends Handler
 						"page" => $this->page,
 						"pageCount" => $this->pageCount
 					));
+			case "csv":
+				return self::toCSV($this->entries);
 			case "atom":
 				if ($isTagList)
 					throw new ApplicationException("ファイルが見つかりません", 404);
@@ -532,6 +540,42 @@ class IndexHandler extends Handler
 			default:
 				return Visualizer::visualize($isTagList ? "Index/Tag" : "Index/Index");
 		}
+	}
+
+	private static function toCSV(array $entries)
+	{
+		$c = &Configuration::$instance;
+		$visibility = array_filter(array
+		(
+			"id" => true,
+			"subject" => true,
+			"title" => $c->showTitle[Configuration::ON_SUBJECT],
+			"name" => $c->showName[Configuration::ON_SUBJECT],
+			"dateTime" => true,
+			"lastUpdate" => true,
+			"pageCount" => $c->showPages[Configuration::ON_SUBJECT],
+			"size" => $c->showSize[Configuration::ON_SUBJECT],
+			"points" => $c->showPoint[Configuration::ON_SUBJECT],
+			"responseCount" => $c->showComment[Configuration::ON_SUBJECT],
+			"commentCount" => $c->showComment[Configuration::ON_SUBJECT],
+			"evaluationCount" => $c->showPoint[Configuration::ON_SUBJECT],
+			"readCount" => $c->showReadCount[Configuration::ON_SUBJECT],
+		));
+		$rt = array();
+		
+		foreach ($entries as $i)
+		{
+			$arr = $i->toArray();
+			$arr["dateTime"] = Visualizer::formatDateTime($arr["dateTime"]);
+			$arr["lastUpdate"] = Visualizer::formatDateTime($arr["lastUpdate"]);
+			$rt[] = array_intersect_key($arr, $visibility);
+		}
+		
+		return Visualizer::csv(array_merge
+		(
+			array(array_keys($visibility)),
+			$rt
+		));
 	}
 
 	function util()
