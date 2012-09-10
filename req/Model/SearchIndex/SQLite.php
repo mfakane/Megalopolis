@@ -63,8 +63,23 @@ class SQLiteSearchIndex extends SearchIndex
 		$queryArguments = array();
 		
 		foreach ($query as $i)
-			if ($words = $this->getWords(str_replace('"', "", $i)))
-				$queryArguments[] = '"' . implode(" ", $words) . '"';
+			if ($words = $this->getWords(array("endOnIncompletedGram" => true), $i))
+			{
+				$currentWord = array();
+				
+				foreach ($words as $j)
+				{
+					$currentLength = mb_strlen($j);
+					
+					if ($currentLength == $this->gramLength)
+						$currentWord[] = $j;
+					else
+						$currentWord[] = "{$j}*";
+				}
+				
+				if ($currentWord)
+					$queryArguments[] = '"' . implode(" ", $currentWord) . '"';
+			}
 		
 		if (!($queryArguments = array_filter($queryArguments)))
 			return array();

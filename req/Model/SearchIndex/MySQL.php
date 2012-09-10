@@ -57,18 +57,34 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		$queryArguments = array();
 		
 		foreach ($query as $i)
-			if ($words = $this->getWords(array("endOnIncompletedGram" => true), str_replace('"', "", $i)))
-				$queryArguments[] = implode
-				(
-					" ",
-					array_map
-					(
-						Configuration::$instance->mysqlSearchUseHeadMatching
-							? create_function('$_', 'return mb_strlen($_) >= ' . $this->gramLength . ' ? "+{$_}" : "+{$_}*";')
-							: create_function('$_', 'return ($len = mb_strlen($_)) >= ' . $this->gramLength . ' ? "+{$_}" : "+{$_}" . str_repeat("_", ' . $this->gramLength . ' - $len);'),
-						$words
-					)
-				);
+			if ($words = $this->getWords(array("endOnIncompletedGram" => true), $i))
+			{
+				$currentWord = array();
+				$lastLength = 0;
+				
+				foreach ($words as $j)
+				{
+					$currentLength = mb_strlen($j);
+					
+					if ($currentLength == $this->gramLength)
+						$currentWord[] = $j;
+					else
+					{
+						if ($currentWord)
+						{
+							$queryArguments[] = '+"' . implode(" ", $currentWord) . '"';
+							$currentWord = array();
+						}
+						
+						$queryArguments[] = "+{$j}" . (Configuration::$instance->mysqlSearchUseHeadMatching ? "*" : str_repeat("_", $this->gramLength - $currentLength));
+					}
+					
+					$lastLength = $currentLength;
+				}
+				
+				if ($currentWord)
+					$queryArguments[] = '+"' . implode(" ", $currentWord) . '"';
+			}
 		
 		if (!($queryArguments = array_filter($queryArguments)))
 			return array();
