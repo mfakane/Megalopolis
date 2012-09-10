@@ -61,7 +61,6 @@ class Visualizer
 		
 		?>
 		<meta charset="UTF-8" />
-		<meta name="application-name" content="<?php self::converted(Configuration::$instance->title) ?>" />
 		<?php if ($isMobile): ?>
 			<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width" />
 			<meta name="format-detection" content="telephone=no" />
@@ -78,6 +77,7 @@ class Visualizer
 			<link href="<?php self::converted(self::actionHref("style", "simple", "simple.css")) ?>" rel="stylesheet" />
 		<?php else: ?>
 			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+			<meta name="application-name" content="<?php self::converted(Configuration::$instance->title) ?>" />
 			<script src="http://code.jquery.com/jquery-1.8.1.min.js"></script>
 			<link href="<?php self::converted(self::actionHref("style", "style.css")) ?>" rel="stylesheet" />
 			<?php if (Configuration::$instance->skin): ?>
