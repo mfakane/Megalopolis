@@ -810,10 +810,10 @@ class Visualizer
 		header("Content-Type: text/csv; charset=Shift_JIS; header=present");
 		
 		$s = fopen("php://output", 'w');
-		mb_http_output("Shift_JIS");
+		mb_http_output("Windows-31J");
 		
 		foreach ($obj as $i)
-			fputcsv($s, array_map(create_function('$_', 'return mb_convert_encoding($_, "SJIS", "UTF-8");'), $i));
+			fputcsv($s, array_map(create_function('$_', 'return mb_convert_encoding($_, "Windows-31J", "UTF-8");'), $i));
 		
 		fclose($s);
 		
