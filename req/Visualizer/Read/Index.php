@@ -14,8 +14,9 @@ Visualizer::doctype();
 	<meta name="keywords" content="<?+implode(",", $h->entry->tags) ?>" />
 	<title>
 		<?+$h->entry->title ?>
-		-
-		<?+$c->title ?>
+		<?if ($c->showName[Configuration::ON_ENTRY]): ?>
+			作者: <? Visualizer::convertedName($h->entry->name) ?>
+		<?endif ?>
 	</title>
 	<script src="<?+Visualizer::actionHref("script", "taketori", "taketori.js") ?>"></script>
 	<script src="<?+Visualizer::actionHref("script", "Read", "Index.js") ?>"></script>

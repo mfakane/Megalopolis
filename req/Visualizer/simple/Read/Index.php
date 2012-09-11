@@ -27,7 +27,10 @@ $maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
 <head>
 	<? Visualizer::head() ?>
 	<title>
-		<?+$h->entry->title ?> - <?+$c->title ?>
+		<?+$h->entry->title ?>
+		<?if ($c->showName[Configuration::ON_ENTRY]): ?>
+			作者: <? Visualizer::convertedName($h->entry->name) ?>
+		<?endif ?>
 	</title>
 </head>
 <body>
