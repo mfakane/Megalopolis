@@ -37,7 +37,7 @@ App::load(VISUALIZER_DIR . "Template/Index");
 		"new" => !$c->adminOnly || $isAdmin ? array("新規投稿", "addIcon.png") : null,
 		(App::$actionName == "index" ? "random" : implode("/", array(App::$actionName, rawurlencode($d), "random"))) => array("おまかせ表示", "refreshIcon.png"),
 		"search" => array("詳細検索", "detailsIcon.png"),
-		"?visualizer=auto" => Visualizer::isMobile() || Visualizer::isSimple() ? array("携帯表示", "") : null
+		"?visualizer=auto" => Visualizer::isMobile() ? array("携帯表示", "") : null
 	);
 	
 	Visualizer::header
@@ -47,6 +47,9 @@ App::load(VISUALIZER_DIR . "Template/Index");
 		$h->pageCount > 1 ? "{$h->entryCount} 件中 " . (($h->page - 1) * $c->searchPaging + 1) . " - " . (($h->page - 1) * $c->searchPaging + count($h->entries)) .  " 件" : count($h->entries) . " 件"
 	);
 	?>
+	<?if (Visualizer::isSimple()): ?>
+		<a id="backToMobile" href="<?+Visualizer::actionHrefArray(array(array("visualizer" => "auto"))) ?>">携帯表示に戻る</a>
+	<?endif ?>
 	<dl class="status">
 		<?if ($h->entryCount > 0): ?>
 			<dt>全作品数</dt>
