@@ -172,7 +172,7 @@ class MegalithHandler extends Handler
 						"",
 						"no"
 					));'), $thread->nonCommentEvaluations),
-					array_map(create_function('$_', 'return str_replace("\r\n", "<br />", implode("<>", array_map("htmlspecialchars", array
+					array_map(create_function('$_', 'return strtr(implode("<>", array_map("htmlspecialchars", array
 					(
 						$_->body,
 						(Util::isEmpty($_->name) ? Configuration::$instance->defaultName : $_->name),
@@ -182,7 +182,7 @@ class MegalithHandler extends Handler
 						"",
 						"",
 						"no"
-					))));'), $thread->comments)
+					))), array("\r\n" => "<br />", "\r" => "<br />", "\n" => "<br />"));'), $thread->comments)
 				);
 			else
 				$content = array();
