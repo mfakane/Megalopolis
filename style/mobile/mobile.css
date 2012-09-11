@@ -77,7 +77,7 @@ header .ui-btn .ui-btn-inner
 
 .ui-btn-icon-notext .ui-btn-inner .ui-icon
 {
-	margin: 0px;
+	margin: -1px;
 }
 
 .ui-header .ui-icon:before, .ui-header .ui-icon:after
@@ -232,6 +232,11 @@ header .ui-btn[data-theme="b"] .ui-btn-inner
 	position: absolute;
 	right: 10px;
 	top: .4em;
+}
+
+.ui-header .ui-btn-left .ui-btn, .ui-header .ui-btn-right  .ui-btn
+{
+	margin: 0px;
 }
 
 .ui-header .ui-btn-left, .ui-header .ui-btn-right
