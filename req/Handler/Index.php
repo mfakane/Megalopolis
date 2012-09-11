@@ -79,7 +79,7 @@ class IndexHandler extends Handler
 		$this->entryCount = Board::getEntryCount($db, $idb);
 		
 		if (!($this->lastUpdate = Board::getLastUpdate($db, $subject)))
-			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLastUpdate();'), $this->entries));
+			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLastUpdate();'), $this->entries) + array(0));
 		
 		App::closeDB($idb);
 		App::closeDB($db);
