@@ -336,7 +336,7 @@ class UtilHandler extends Handler
 						($id = intval(mb_substr($i->getFilename(), 0, -4))) >= $start &&
 						($end == 0 || $id < $end))
 					{
-						$datLines = is_file($dat = "{$dir}dat/{$id}.dat") ? array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", array("Windows-31J", "SJIS-win"));'), file($dat, FILE_IGNORE_NEW_LINES)) : null;
+						$datLines = is_file($dat = "{$dir}dat/{$id}.dat") ? array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), file($dat, FILE_IGNORE_NEW_LINES)) : null;
 						$entry = null;
 						
 						if ($datLines)
@@ -517,7 +517,7 @@ class UtilHandler extends Handler
 				
 				if (is_file($subjectFile))
 				{
-					$sub = array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", array("Windows-31J", "SJIS-win"));'), file($subjectFile, FILE_IGNORE_NEW_LINES));
+					$sub = array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), file($subjectFile, FILE_IGNORE_NEW_LINES));
 					$datCount = count($sub);
 					
 					foreach (array_slice($sub, $offset, $buffer) as $i)

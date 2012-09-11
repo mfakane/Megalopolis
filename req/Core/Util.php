@@ -611,7 +611,7 @@ class Util
 		if (!is_array($dat))
 			foreach (file($dat, FILE_IGNORE_NEW_LINES) as $i)
 			{
-				$data[] = $j = mb_convert_encoding($i, "UTF-8", array("Windows-31J", "SJIS-win"));
+				$data[] = $j = mb_convert_encoding($i, "UTF-8", "Windows-31J");
 				
 				if ($whenContainsWin31JOnly && !$containsWin31JOnly && $j != mb_convert_encoding($i, "UTF-8", "SJIS"))
 					$containsWin31JOnly = true;
@@ -652,7 +652,7 @@ class Util
 			
 			foreach (file($aft, FILE_IGNORE_NEW_LINES) as $i)
 			{
-				$afterData[] = $j = mb_convert_encoding($i, "UTF-8", array("Windows-31J", "SJIS-win"));
+				$afterData[] = $j = mb_convert_encoding($i, "UTF-8", "Windows-31J");
 			
 				if ($whenContainsWin31JOnly && !$containsWin31JOnly && $j != mb_convert_encoding($i, "UTF-8", "SJIS"))
 					$containsWin31JOnly = true;
@@ -676,7 +676,7 @@ class Util
 		{
 			foreach (file($com, FILE_IGNORE_NEW_LINES) as $rawline)
 			{
-				$i = mb_convert_encoding($rawline, "UTF-8", array("Windows-31J", "SJIS-Win"));
+				$i = mb_convert_encoding($rawline, "UTF-8", "Windows-31J");
 				$i = self::convertLinesToCommentsAndEvaluations($thread->id, array($i));
 				
 				if (!$i)
