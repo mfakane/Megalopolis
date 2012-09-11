@@ -1,4 +1,187 @@
-﻿2012-09-07 COAH96KoxU <queue glasscore.net>
+﻿2012-09-11 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 17 
+	* readme.txt: 更新 
+	* req/Handler/Index.php,
+	  req/Visualizer/simple/Index/Index.php: 携帯表示に検索の種類を追加 
+	* req/Visualizer/Read/Index.php,
+	  req/Visualizer/simple/Read/Index.php: PC 表示と携帯表示の作品ページのタイトルに作者名を追加 
+	* req/Visualizer/Index/Index.php,
+	  style/style.css: 携帯端末から PC 表示にする際左上に携帯表示リンクを移動 
+	* style/simple/simple.css: 携帯表示のあとがきに枠を追加 
+	* req/Visualizer/simple/Read/Index.php: 携帯表示に簡易評価を追加 
+	* req/Core/Util.php,
+	  req/Handler/Index.php,
+	  req/Visualizer/Template/Index.php,
+	  script/Index/Index.js,
+	  style/style.css: 一覧の Javascript 処理を高速化 
+	* req/Handler/Megalith.php: Megalith 形式出力で dat にアクセスされたとき閲覧数をカウントするように 
+	* req/Core/Auth.php,
+	  req/Core/Util.php,
+	  req/Core/Visualizer.php,
+	  req/Handler/Index.php,
+	  req/Handler/Megalith.php,
+	  req/Handler/Read.php,
+	  req/Handler/Util.php: キャッシュに関するヘッダの出力を追加 
+	* req/Core/Util.php,
+	  req/Handler/Util.php,
+	  req/Model/Thread.php,
+	  req/Model/ThreadEntry.php: 変換時の重複処理削減 
+	* req/Handler/Index.php: 作品がない時にエラーが出るのを修正 
+	* req/Core/Visualizer.php,
+	  req/Handler/Index.php,
+	  req/Handler/Util.php,
+	  req/Visualizer/Util/Index.php,
+	  style/style.css: ホスト検索ツールを追加 
+	* req/Core/Util.php,
+	  req/Model/ThreadEntry.php: Megalith ログ変換時に評価数が記録されないのを修正 
+	* style/style.css: タグおよび作者一覧のデザイン変更 
+	* req/Core/Util.php,
+	  req/Handler/Index.php,
+	  req/Model/ThreadEntry.php,
+	  req/Visualizer/Index/Index.Atom.php,
+	  req/Visualizer/Index/Index.Rss.php: Notice および Strict Standards が表示される箇所を修正 
+	* req/Core/DataStore.php,
+	  req/Model/ThreadEntry.php: SQLite で検索画面を開くのが非常に遅くなることがあるのを修正 
+	* req/Model/SearchIndex/MySQL.php,
+	  req/Model/SearchIndex/SQLite.php: 検索のクエリ生成を変更 
+	* req/Visualizer/Util/Index.php: Megalith 形式のタグ順のインポートツールのリンクを修正 
+	* req/Model/ThreadEntry.php: JSON 出力において evaluationCount の出力条件が間違っているのを修正 
+	* req/Core/Visualizer.php,
+	  req/Handler/Index.php: 作品集の CSV 出力の追加 
+	* req/App.php,
+	  req/Handler/Index.php,
+	  req/Handler/Util.php,
+	  req/Model/Board.php,
+	  req/Model/SearchIndex.php,
+	  req/Model/SearchIndex/Classic.php,
+	  req/Model/SearchIndex/MySQL.php,
+	  req/Model/SearchIndex/SQLite.php,
+	  req/Model/ThreadEntry.php: 作品集更新日時を削除時にも更新するように 
+	* req/Visualizer/Template/Index.php,
+	  style/style.css: 管理者ログイン時テーブル表示のチェックボックスを独立カラムに変更 
+	* req/Core/Visualizer.php: X-UA-Compatible が先頭になるよう meta の順番を変更 
+	* script/Index/Index.js: 日時のソートを数値ソートに変更 
+	* req/Visualizer/Read/Index.php,
+	  req/Visualizer/Template/Index.php,
+	  req/Visualizer/mobile/Index/Index.php,
+	  req/Visualizer/simple/Read/Index.php,
+	  script/Index/Index.js,
+	  script/mobile/Index/Index.js: 評価数の表記を コメント付き評価数/全評価数 に変更 
+	* req/Handler/Index.php,
+	  req/Handler/Megalith.php,
+	  req/Model/Thread.php,
+	  req/Model/ThreadEntry.php,
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/Template/Index.php,
+	  req/Visualizer/mobile/Read/Index.php: コメントつき評価数およびコメント更新日時を追加 
+	* req/Handler/Megalith.php: Megalith 形式出力の改行が LF ではなく CRLF なのを修正 
+	* req/Handler/Megalith.php: Megalith 出力にて非表示の項目が数値欄の場合 0 にするように 
+	* req/Model/Thread.php: 作品の JSON 出力にてコメント一覧が連想配列になっているのを修正 
+	* style/style.css: 禁則処理がされるように修正 
+	* req/Handler/Util.php,
+	  req/Visualizer/Util/Index.php: Megalith 形式のタグ順のインポートツールを追加 
+	* style/trident.css: IE8 において縦書き時に本文がはみ出るのを修正 
+	* style/trident.css,
+	  style/webkit.css: writing-mode 使用時の縦書きにおいて本文下部に余白があるのを修正 
+	* style/trident.css: IE の縦書きにおけるあとがきのズレを修正 
+	* script/Read/Index.js,
+	  style/style.css,
+	  style/webkit.css: WebKit での縦書き方式を変更 
+	* req/Handler/Megalith.php: Megalith 形式出力において既定の名前が反映されないのを修正 
+	* req/Handler/Index.php,
+	  req/Model/ThreadEntry.php: MySQL において作者別一覧の総数の取得を高速化 
+	* req/Handler/Index.php,
+	  req/Visualizer/Index/Index.php: 作者別一覧およびタグ別一覧でページ分けされた場合一致総数も表示するように 
+	* req/Handler/Index.php,
+	  req/Model/ThreadEntry.php: タグ別一覧の取得を高速化 
+	* req/Visualizer/Index/Index.php,
+	  style/alt/style.css,
+	  style/style.css: 作者およびタグ別一覧のページャの配置を変更 
+	* req/Handler/Index.php,
+	  req/Model/Board.php,
+	  req/Model/SearchIndex.php,
+	  req/Model/SearchIndex/MySQL.php,
+	  req/Visualizer/Index/Index.php: 全作品数の表示を追加 
+	* req/Model/ThreadEntry.php: タグの順番を保持するように 
+	* req/Visualizer/Auth.php,
+	  req/Visualizer/Exception.php,
+	  req/Visualizer/Index/Index.php,
+	  req/Visualizer/Index/Notice.php,
+	  req/Visualizer/Index/Search.php,
+	  req/Visualizer/Index/Tag.php,
+	  req/Visualizer/Read/Edit.php,
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/Read/Success.php,
+	  req/Visualizer/Util/Config.php,
+	  req/Visualizer/Util/Convert.php,
+	  req/Visualizer/Util/Hash.php,
+	  req/Visualizer/Util/Index.php,
+	  req/Visualizer/Util/Reindex.php,
+	  req/Visualizer/mobile/Exception.php,
+	  req/Visualizer/mobile/Index/Index.php,
+	  req/Visualizer/mobile/Read/Index.php,
+	  req/Visualizer/simple/Exception.php,
+	  req/Visualizer/simple/Index/Index.php,
+	  req/Visualizer/simple/Read/Index.php: html に  lang="ja" を追加 
+	* req/Core/Util.php: AU 携帯端末など Shift_JIS でフォームデータが送られてくる場合への対応 
+	* req/Visualizer/simple/Read/Index.php,
+	  style/simple/simple.css: 携帯表示の作品冒頭に情報行を追加 
+	* script/Index/Index.js: テーブル形式の作品一覧でリンクをクリックすると概要が展開されてしまうのを修正 
+	* req/Model/Thread.php: 存在しないページ番号を指定されたときにエラーが出るのを修正 
+	* req/Visualizer/Template/Index.php,
+	  script/Index/Index.js: デフォルトのユーザ表示設定を変更 
+	* req/Visualizer/Index/Tag.php,
+	  script/Index/Index.js: 更新日時ソートを追加 
+	* req/Visualizer/Template/Index.php,
+	  script/Index/Index.js,
+	  style/style.css: 投稿日時および更新日時のユーザ表示設定を同時に使用できるように 
+	* req/Handler/Index.php: 作品や名前の非表示設定で一覧が非表示にならないのを修正 
+	* req/Handler/Read.php,
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/Template/Index.php: 作品や名前が非表示設定でも管理者ログイン時は見れるように 
+	* style/style.css: 本文枠とコメント欄の間のマージン調整 
+	* style/style.css: フォント指定からメイリオを削除 
+	* script/Read/Index.js: フォントサイズ変更を 10% 刻みに変更 
+	* req/Core/Visualizer.php,
+	  req/Visualizer/Read/Index.php,
+	  script/Read/Index.js,
+	  script/base.js: jQuery.tmpl および jQuery.easing の削減 
+	* req/Model/Thread.php: JSON 出力に変換済みの本文およびあとがきのフィールドを追加 
+	* req/Model/Thread.php: JSON 出力にて改行変換フラグが bool でないのを修正 
+	* req/Core/DataStore.php: PHP 5.3.1 にて改行変換フラグが保存できないのに対する対策 
+	* req/Core/Visualizer.php: 閉じられていないタグおよび開始タグが存在しないタグの取り扱いを変更 
+	* req/Visualizer/Index/Search.php,
+	  style/style.css: 検索画面のレイアウトを変更 
+	* req/Model/SearchIndex.php,
+	  req/Model/SearchIndex/MySQL.php,
+	  req/Model/SearchIndex/SQLite.php: 先の検索結果がない時にさらに条件を絞り込もうとしたときエラーが発生するのを修正 
+	* req/Visualizer/Index/Search.php: 検索結果の上にページャ追加 
+	* style/style.css: テーブル表示で検索結果のページャが消えるのを修正 
+	* req/Visualizer/Index/Search.php: 検索結果にソートを追加 
+	* req/Core/Visualizer.php: Megalith 形式出力の本文の改行タグの後に改行文字を追加 
+	* req/Core/Util.php,
+	  req/Handler/Read.php,
+	  req/Handler/Util.php,
+	  req/Model/ThreadEntry.php,
+	  req/Visualizer/Util/Convert.php,
+	  script/Util/Convert.js: Megalith ログ取扱時の文字コード指定を修正 
+	* req/Handler/Megalith.php: Megalith 互換出力にて番号が 0 で終わる作品集のテキストを取得できないのを修正 
+	* req/Handler/Index.php: JSON API で entries が配列ではなく連想配列を返すのを修正 
+	* req/Visualizer/Util/Reindex.php: 検索インデックスの再生成で、クリアオプションを既定でチェックするように 
+	* script/Index/Index.js: テーブル表示時にソートすると一番下にあった項目に概要リンクが増えるのを修正 
+	* req/Core/Visualizer.php: タグ間スペース除去で > 後のスペースが除去されないのを修正 
+	* req/Model/SearchIndex/MySQL.php: MySQL 全文検索にて N-gram 長に満たないキーワードも検索条件の必須条件に変更 
+	* style/style.css: 検索画面で項目の幅が統一されてないのを修正 
+	* req/Visualizer/Read/Index.php,
+	  script/Read/Index.js: コメントの名前がない時既定の名前が表示されないのを修正 
+	* style/style.css: 本文内の table にスタイルを追加 
+	* script/Read/Edit.js,
+	  style/style.css: 編集画面の入力欄の幅を自動調整 
+	* req/Visualizer/Template/Index.php,
+	  script/Index/Index.js: 一覧にコメント数が表示されないのを修正 
+
+2012-09-07 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 16
 	* req/Handler/Index.php,
