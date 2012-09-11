@@ -16,7 +16,7 @@ $config->adminHash = "109823e01afb58706d9c0e40062a505c00d814235a9900ae2f16c3e5f9
 // 推奨されませんが、ハッシュではなく以下のように平文でパスワードを設定することも可能です。
 // $config->adminHash = Util::hash("passwd");
 
-// 管理用ツールが使用可能か (true/false)
+// 管理用設定ツールが使用可能か (true/false)
 // 詳細については、readme.txt を参照してください。
 // 公開された環境で使用する場合、false にすることを推奨します
 $config->utilsEnabled = true;
@@ -95,7 +95,7 @@ $config->mysqlSearchNgramLength = 4;
 // true にすることで ft_min_word_len を変更不可能な環境においても 3 文字以下の文字にマッチしますが、
 // 作品や一致件数が増えると重くなることがあります。
 // この値を変更した場合でも検索インデックスの再生成は必要ありません
-$config->mysqlSearchUseHeadMatching = false;
+$config->mysqlSearchUseHeadMatching = true;
 
 /*
  * データストアに関する設定

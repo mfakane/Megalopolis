@@ -1,4 +1,10 @@
 ﻿2012-09-11 COAH96KoxU <queue glasscore.net>
+	
+	* req/App.php: release 18
+	* req/Handler/Util.php: 上書き変換時に上書きされないのを修正
+	* req/Handler/Megalith.php: Megalith 形式出力でアクセスできない作品集があるのを修正
+
+2012-09-11 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 17 
 	* readme.txt: 更新 
