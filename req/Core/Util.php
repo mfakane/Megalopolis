@@ -575,27 +575,38 @@ class Util
 		return $entry;
 	}
 	
-	private static function convertAndSaveToThreadInternal(PDO $db, PDO $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly = false, $allowSaveCommentsOnly = false, &$save)
+	private static function convertAndSaveToThreadInternal(PDO $db, PDO $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly = false, $allowSaveCommentsOnly = false, &$save, ThreadEntry $entry = null)
 	{
-		if (!is_file($dat))
+		if (!is_array($dat) && !is_file($dat))
 			return null;
 		
 		$containsWin31JOnly = false;
-		$data = array();
+		$data = is_array($dat) ? $dat : array();
 		
-		foreach (file($dat, FILE_IGNORE_NEW_LINES) as $i)
-		{
-			$data[] = $j = mb_convert_encoding($i, "UTF-8", array("Windows-31J", "SJIS-win"));
-			
-			if ($whenContainsWin31JOnly && !$containsWin31JOnly && $j != mb_convert_encoding($i, "UTF-8", "SJIS"))
-				$containsWin31JOnly = true;
-		}
+		if (!is_array($dat))
+			foreach (file($dat, FILE_IGNORE_NEW_LINES) as $i)
+			{
+				$data[] = $j = mb_convert_encoding($i, "UTF-8", array("Windows-31J", "SJIS-win"));
+				
+				if ($whenContainsWin31JOnly && !$containsWin31JOnly && $j != mb_convert_encoding($i, "UTF-8", "SJIS"))
+					$containsWin31JOnly = true;
+			}
 		
 		$thread = new Thread();
 		
-		$line = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", array_shift($data))) + array_fill(0, 15, null);
-		array_unshift($line, basename($dat));
-		self::convertLineToThreadEntry($line, $thread->entry);
+		$line = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", array_shift($data))) + array_fill(0, is_array($dat) ? 16 : 15, null);
+		
+		if (!is_array($dat))
+			array_unshift($line, basename($dat));
+		
+		if ($entry)
+		{
+			$thread->entry = $entry;
+			$thread->updatePropertyLink();
+		}
+		else
+			self::convertLineToThreadEntry($line, $thread->entry);
+		
 		array_shift($line);
 		$thread->subject = $subject;
 		$thread->foreground = $line[10];
@@ -737,19 +748,19 @@ class Util
 	 * @param bool $allowSaveCommentsOnly [optional]
 	 * @return Thread
 	 */
-	static function convertAndSaveToThread(PDO $db, PDO $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly = false, $allowSaveCommentsOnly = false)
+	static function convertAndSaveToThread(PDO $db, PDO $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly = false, $allowSaveCommentsOnly = false, ThreadEntry $entry = null)
 	{
 		$save = false;
-		$thread = self::convertAndSaveToThreadInternal($db, $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly, $allowSaveCommentsOnly, &$save);
+		$thread = self::convertAndSaveToThreadInternal($db, $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly, $allowSaveCommentsOnly, &$save, $entry);
 		
 		if ($thread && $save)
 		{
 			$thread->entry->updateCount($thread);
-			$thread->save($db);
+			$thread->save($db, false);
 			SearchIndex::register($idb, $thread);
+			
+			return $thread;
 		}
-		
-		return $thread;
 	}
 
 	/**

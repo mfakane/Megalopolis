@@ -109,7 +109,7 @@ class Thread
 		return isset($rt[$page - 1]) ? $rt[$page - 1] : null;
 	}
 	
-	private function updatePropertyLink()
+	function updatePropertyLink()
 	{
 		$this->id = &$this->entry->id;
 		$this->subject = &$this->entry->subject;
@@ -314,9 +314,9 @@ class Thread
 		return $rt;
 	}
 	
-	function save(PDO $db)
+	function save(PDO $db, $setSubjectLastUpdate = true)
 	{
-		$this->entry->save($db);
+		$this->entry->save($db, $setSubjectLastUpdate);
 		Util::saveToTable($db, $this, self::$threadSchema, App::THREAD_TABLE);
 		Util::saveToTable($db, $this, self::$threadStyleSchema, App::THREAD_STYLE_TABLE);
 		Util::saveToTable($db, $this, self::$threadPasswordSchema, App::THREAD_PASSWORD_TABLE);

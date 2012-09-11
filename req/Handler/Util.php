@@ -337,11 +337,15 @@ class UtilHandler extends Handler
 						($end == 0 || $id < $end))
 					{
 						$datLines = is_file($dat = "{$dir}dat/{$id}.dat") ? array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", array("Windows-31J", "SJIS-win"));'), file($dat, FILE_IGNORE_NEW_LINES)) : null;
+						$entry = null;
+						
+						if ($datLines)
+							$datLines[0] = "{$id}.dat<>{$datLines[0]}";
 						
 						if (in_array($id, $existing))
 							if ($allowOverwrite && $datLines)
 							{
-								$converting = Util::convertLineToThreadEntry("{$id}.dat<>" . $datLines[0]);
+								$converting = Util::convertLineToThreadEntry($datLines[0]);
 								$entry = ThreadEntry::load($db, $id);
 								
 								if ($entry->lastUpdate > $converting->lastUpdate)
@@ -350,14 +354,26 @@ class UtilHandler extends Handler
 							else
 								continue;
 						
-						if ($whenNoConvertLineBreakFieldOnly && $datLines && count(explode("<>", $datLines[0])) > 12)
+						if ($whenNoConvertLineBreakFieldOnly && $datLines && count(explode("<>", $datLines[0])) > 13)
 							continue;
 						
-						unset($datLines);
+						if ($whenContainsWin31JOnly)
+							unset($datLines);
 						
 						try
 						{
-							$thread = Util::convertAndSaveToThread($db, $idb, $subject, "{$dir}dat/{$id}.dat", "{$dir}com/{$id}.res.dat", "{$dir}aft/{$id}.aft.dat", $whenContainsWin31JOnly, $whenContainsWin31JOnly && $allowOverwrite);
+							$thread = Util::convertAndSaveToThread
+							(
+								$db,
+								$idb,
+								$subject,
+								$whenContainsWin31JOnly ? "{$dir}dat/{$id}.dat" : $datLines,
+								"{$dir}com/{$id}.res.dat",
+								"{$dir}aft/{$id}.aft.dat",
+								$whenContainsWin31JOnly,
+								$whenContainsWin31JOnly && $allowOverwrite,
+								$entry
+							);
 						}
 						catch (ApplicationException $ex)
 						{
@@ -567,7 +583,7 @@ class UtilHandler extends Handler
 	
 	private static function getFirstAndLastDataLineIDFromLines(array $lines)
 	{
-		return array(self::getDataLineID(array_shift($lines)), self::getDataLineID(array_pop($lines)));
+		return array(self::getDataLineID($lines[0]), self::getDataLineID($lines[count($lines) - 1]));
 	}
 	
 	private static function getDataLineID($s)

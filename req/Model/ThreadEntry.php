@@ -203,7 +203,7 @@ class ThreadEntry
 		$this->loaded = false;
 	}
 	
-	function save(PDO $db)
+	function save(PDO $db, $setSubjectLastUpdate = true)
 	{
 		Util::saveToTable($db, $this, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE);
 		Util::saveToTable($db, $this, self::$threadEvaluationSchema, App::THREAD_EVALUATION_TABLE);
@@ -238,7 +238,9 @@ class ThreadEntry
 			Util::executeStatement($st);
 		}
 		
-		Board::setLastUpdate($db, $this->subject);
+		if ($setSubjectLastUpdate)
+			Board::setLastUpdate($db, $this->subject);
+		
 		$this->loaded = true;
 	}
 	
