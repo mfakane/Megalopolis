@@ -119,6 +119,28 @@ class IndexHandler extends Handler
 		if (!Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
 			throw new ApplicationException("作品の閲覧は許可されていません", 403);
 		
+		if (!is_null($mode = self::param("mode")))
+			switch ($mode)
+			{
+				case "query":
+					break;
+				case "title":
+					$_GET["title"] = self::param("query");
+					unset($_GET["query"]);
+					
+					break;
+				case "name":
+					$_GET["name"] = self::param("query");
+					unset($_GET["query"]);
+					
+					break;
+				case "tag":
+					$_GET["tag"] = self::param("query");
+					unset($_GET["query"]);
+					
+					break;
+			}
+		
 		$this->page = max(intval(self::param("p", 1)), 1);
 		
 		switch ($s = self::param("s"))

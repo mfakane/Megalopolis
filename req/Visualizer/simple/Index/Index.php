@@ -2,9 +2,34 @@
 $c = &Configuration::$instance;
 $h = &IndexHandler::$instance;
 $d = &Visualizer::$data;
+$searchMode = "query";
+$search = "";
 
 if (App::$actionName == "search")
+{
 	$title = "検索";
+	
+	if (!is_null($search = IndexHandler::param("query")))
+	{
+		$searchMode = "query";
+		$title = "検索";
+	}
+	else if (!is_null($search = IndexHandler::param("title")))
+	{
+		$searchMode = "title";
+		$title = "作品名検索";
+	}
+	else if (!is_null($search = IndexHandler::param("name")))
+	{
+		$searchMode = "name";
+		$title = "作者検索";
+	}
+	else if (!is_null($search = IndexHandler::param("tag")))
+	{
+		$searchMode = "tag";
+		$title = "タグ検索";
+	}
+}
 else if (App::$actionName == "tag")
 	$title = "タグ: {$d}";
 else if (App::$actionName == "author")
@@ -70,44 +95,58 @@ Visualizer::doctype();
 		<?+$title ?>
 	</h1>
 	<?+$c->title ?>&nbsp;<a href="#menu">メニューへ</a>
-	<form class="search" action="<?+Visualizer::actionHref("search") ?>">
-		<input type="text" name="query" value="<?+IndexHandler::param("query") ?>" size="18" /><input type="submit" value="検索" />
-	</form>
-	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => IndexHandler::param("query")) : array()) + array("p" => ""))) ?>
+	<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
+		<form class="search" action="<?+Visualizer::actionHref("search") ?>">
+			<input type="text" name="query" value="<?+$search ?>" size="18" /><input type="submit" value="検索" /><br />
+			<label><input type="radio" name="mode" value="query"<?=$searchMode == "query" ? ' checked="checked"' : null ?> />全文</label>
+			<label><input type="radio" name="mode" value="title"<?=$searchMode == "title" ? ' checked="checked"' : null ?> />作品名</label>
+			<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
+				<label><input type="radio" name="mode" value="name"<?=$searchMode == "name" ? ' checked="checked"' : null ?> />作者</label>
+			<?endif ?>
+			<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>
+				<label><input type="radio" name="mode" value="tag"<?=$searchMode == "tag" ? ' checked="checked"' : null ?> />分類タグ</label>
+			<?endif ?>
+		</form>
+	<?endif ?>
+	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => IndexHandler::param("query"), "mode" => $searchMode) : array()) + array("p" => ""))) ?>
 	<?+count($h->entries) ?>件中<?+$offset + 1 ?>～<?+min($offset + $paging, count($h->entries)) ?>件
 	<ul class="entries">
-		<?foreach (App::$actionName == "index" ? array_slice($h->entries, $offset, $paging) : $h->entries as $i): ?>
-			<li>
-				<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
-					<a href="<?+Visualizer::actionHref($i->subject, $i->id) ?>"><?+$i->title ?></a><br />
-				<?endif ?>
-				<span class="dateTime"><?+Visualizer::formatShortDateTime($i->dateTime) ?></span>
-				<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
-					<span class="name"><? Visualizer::convertedName($i->name) ?></span>
-				<?endif ?>
-				<?if ($c->showComment[Configuration::ON_SUBJECT] || $c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
-					<br />
-					<?if ($c->showComment[Configuration::ON_SUBJECT]): ?>
-						<span class="commentCount">Cm:<?+$i->commentCount ?></span>
+		<?if ($h->entries): ?>
+			<?foreach (App::$actionName == "index" ? array_slice($h->entries, $offset, $paging) : $h->entries as $i): ?>
+				<li>
+					<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
+						<a href="<?+Visualizer::actionHref($i->subject, $i->id) ?>"><?+$i->title ?></a><br />
 					<?endif ?>
-					<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-						<span class="points">Pt:<?+$i->points ?></span>
+					<span class="dateTime"><?+Visualizer::formatShortDateTime($i->dateTime) ?></span>
+					<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
+						<span class="name"><? Visualizer::convertedName($i->name) ?></span>
 					<?endif ?>
-					<?if ($c->showRate[Configuration::ON_SUBJECT]): ?>
-						<span class="rate">Rt:<?+$i->rate ?></span>
+					<?if ($c->showComment[Configuration::ON_SUBJECT] || $c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
+						<br />
+						<?if ($c->showComment[Configuration::ON_SUBJECT]): ?>
+							<span class="commentCount">Cm:<?+$i->commentCount ?></span>
+						<?endif ?>
+						<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
+							<span class="points">Pt:<?+$i->points ?></span>
+						<?endif ?>
+						<?if ($c->showRate[Configuration::ON_SUBJECT]): ?>
+							<span class="rate">Rt:<?+$i->rate ?></span>
+						<?endif ?>
 					<?endif ?>
-				<?endif ?>
-				<?if ($c->showSize[Configuration::ON_SUBJECT]): ?>
-					<span class="size">Sz:<?+$i->size ?>KB</span>
-				<?endif ?>
-				<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>
-					<br />
-					<span class="tags"><?+implode(" ", $i->tags) ?></span>
-				<?endif ?>
-			</li>
-		<?endforeach ?>
+					<?if ($c->showSize[Configuration::ON_SUBJECT]): ?>
+						<span class="size">Sz:<?+$i->size ?>KB</span>
+					<?endif ?>
+					<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>
+						<br />
+						<span class="tags"><?+implode(" ", $i->tags) ?></span>
+					<?endif ?>
+				</li>
+			<?endforeach ?>
+		<?else: ?>
+			<li>結果はありません</li>
+		<?endif ?>
 	</ul>
-	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => IndexHandler::param("query")) : array()) + array("p" => ""))) ?>
+	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => IndexHandler::param("query"), "mode" => $searchMode) : array()) + array("p" => ""))) ?>
 	<ul id="menu" class="menu">
 		<? $i = 0 ?>
 		<?foreach (array
@@ -130,7 +169,7 @@ Visualizer::doctype();
 				$isParam = strstr($k, "=");
 				$param = $isParam ? explode("=", $k) : array();
 				?>
-				[<?=++$i ?>]<a href="<?+$k == "#" ? $k : Visualizer::actionHref($isParam ? (App::$actionName == "index" ? $h->subject : App::$actionName) : $k, $isParam ? (App::$actionName == "search" ? array("query" => IndexHandler::param("query"), $param[0] => $param[1]) : array($param[0] => $param[1])) : null) ?>" accesskey="<?=$i ?>"><?+$v ?></a>
+				[<?=++$i ?>]<a href="<?+$k == "#" ? $k : Visualizer::actionHref($isParam ? (App::$actionName == "index" ? $h->subject : App::$actionName) : $k, $isParam ? (App::$actionName == "search" ? array("query" => IndexHandler::param("query"), "mode" => $searchMode, $param[0] => $param[1]) : array($param[0] => $param[1])) : null) ?>" accesskey="<?=$i ?>"><?+$v ?></a>
 			</li>
 		<?endforeach ?>
 		<?if (App::$actionName == "index"): ?>
