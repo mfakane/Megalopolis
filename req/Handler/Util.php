@@ -350,6 +350,8 @@ class UtilHandler extends Handler
 								
 								if ($entry->lastUpdate > $converting->lastUpdate)
 									continue;
+								
+								$entry = $converting;
 							}
 							else
 								continue;
