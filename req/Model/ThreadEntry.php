@@ -172,9 +172,9 @@ class ThreadEntry
 	{
 		$nonCommentEvaluationCount = count($thread->nonCommentEvaluations);
 		
-		$this->responseCount = $nonCommentEvaluationCount + count($thread->comments);
 		$this->evaluationCount = count($thread->evaluations);
 		$this->commentCount = count($thread->comments);
+		$this->responseCount = $nonCommentEvaluationCount + $this->commentCount;
 		$this->commentedEvaluationCount = $this->evaluationCount - $nonCommentEvaluationCount;
 		$this->points = array_reduce($thread->evaluations, create_function('$x, $y', 'return $x + $y->point;'), 0);
 		$this->calculateRate();
@@ -473,7 +473,7 @@ class ThreadEntry
 		return $rt;
 	}
 
-	function getMegalithEntryIDsBySubject(PDO $db, $subject)
+	static function getMegalithEntryIDsBySubject(PDO $db, $subject)
 	{
 		$rt = array();
 		
@@ -485,7 +485,7 @@ class ThreadEntry
 		return $rt;
 	}
 	
-	private function getMegalithEntriesBySubject(PDO $db, $subject)
+	private static function getMegalithEntriesBySubject(PDO $db, $subject)
 	{
 		$rt = array();
 		
@@ -899,6 +899,85 @@ class ThreadEntry
 					"maxPoints" => max($rt["maxPoints"], $i->points),
 					"minPoints" => min($rt["minPoints"], $i->points),
 				);
+		
+		return $rt;
+	}
+
+	/**
+	 * @param string $tag
+	 * @param int $offset
+	 * @param int $limit
+	 * @param int $order [optional]
+	 * @param int $foundItems [optinal]
+	 * @return array of ThreadEntry
+	 */
+	static function getEntriesByHost(PDO $db, $host, array $subjectRange, array $target, $offset = 0, $limit = null, $order = Board::ORDER_DESCEND, &$foundItems = null)
+	{
+		$isMysql = Configuration::$instance->dataStore instanceof MySQLDataStore;
+		$rt = array();
+		$sql = sprintf
+		('
+			from (select * from %s where subject between :begin and :end) as t
+			left join %s as e on e.id = t.id
+			where host like :host %s %s',
+			App::THREAD_ENTRY_TABLE,
+			App::THREAD_EVALUATION_TABLE,
+			in_array("comment", $target) ? 'or exists (select * from comment as c where c.entryID = t.id and c.host like :host limit 1)' : null,
+			in_array("evaluation", $target) ? 'or exists (select * from evaluation as ee where ee.entryID = t.id and ee.host like :host limit 1)' : null
+		);
+		Util::executeStatement($st = Util::ensureStatement($db, $db->prepare
+		(
+			"select " . ($isMysql ? "sql_calc_found_rows " : " ") .
+				"* {$sql} order by t.id " . ($order == Board::ORDER_ASCEND ? "asc" : "desc") .
+				(is_null($limit) ? "" : " limit {$limit} offset {$offset}")
+		)), array
+		(
+			":begin" => $subjectRange[0],
+			":end" => $subjectRange[1],
+			":host" => str_replace("*", "%", $host)
+		));
+		
+		foreach ($st->fetchAll(PDO::FETCH_CLASS, "ThreadEntry") as $i)
+			$rt[$i->id] = $i;
+		
+		if ($isMysql)
+		{
+			Util::executeStatement($st2 = Util::ensureStatement($db, $db->prepare("select found_rows()")));
+			$foundItems = $st2->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
+			$foundItems = intval(array_pop($foundItems));
+		}
+		else
+		{
+			Util::executeStatement($st2 = Util::ensureStatement($db, $db->prepare("select count(*) {$sql}")));
+			$foundItems = $st2->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
+			$foundItems = intval(array_pop($foundItems));
+		}
+		
+		$tags = self::queryTags($db, sprintf
+		('
+			where id in (%s)',
+			implode(", ", array_keys($rt))
+		));
+		
+		if (Configuration::$instance->convertOnDemand &&
+			is_dir("Megalith/sub"))
+		{
+			foreach (range($subjectRange[0], $subjectRange[1] - $subjectRange[0], 1) as $subject)
+				foreach (self::getMegalithEntriesBySubject($db, $subject) as $i)
+					if (!isset($rt[$i->id]))
+					{
+						if (Util::wildcard($host, $i->host))
+							$rt[$i->id] = $i;
+						else if (is_file("Megalith/com/{$i->id}"))
+							foreach (Util::convertLinesToCommentsAndEvaluations($i->id, array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", array("Windows-31J", "SJIS-Win"));'), file("Megalith/com/{$i->id}", FILE_IGNORE_NEW_LINES))) as $j)
+								if (Util::wildcard($host, $j->host))
+									$rt[$i->id] = $i;
+					}
+			
+			krsort($rt);
+		}
+		
+		$rt = self::processResultEntries($db, $rt);
 		
 		return $rt;
 	}

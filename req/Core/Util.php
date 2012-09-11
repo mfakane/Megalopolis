@@ -522,7 +522,8 @@ class Util
 	 */
 	static function convertLineToThreadEntry($line, ThreadEntry $entry = null)
 	{
-		$line = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", $line));
+		if (!is_array($line))
+			$line = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", $line));
 		
 		if (count($line) < 12)
 			return null;
@@ -592,8 +593,10 @@ class Util
 		
 		$thread = new Thread();
 		
-		self::convertLineToThreadEntry(basename($dat) . "<>" . $data[0], $thread->entry);
-		$line = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", array_shift($data))) + array_fill(0, 14, null);
+		$line = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", array_shift($data))) + array_fill(0, 15, null);
+		array_unshift($line, basename($dat));
+		self::convertLineToThreadEntry($line, $thread->entry);
+		array_shift($line);
 		$thread->subject = $subject;
 		$thread->foreground = $line[10];
 		$thread->convertLineBreak = is_null($line[11]) || $line[11] == "yes";
@@ -638,68 +641,91 @@ class Util
 			foreach (file($com, FILE_IGNORE_NEW_LINES) as $rawline)
 			{
 				$i = mb_convert_encoding($rawline, "UTF-8", array("Windows-31J", "SJIS-Win"));
-				$i = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", trim($i)));
+				$i = self::convertLinesToCommentsAndEvaluations($thread->id, array($i));
 				
-				if (count($i) < 7)
+				if (!$i)
 					continue;
 				
-				$comment = new Comment();
-				list
-				(
-					$comment->body,
-					$comment->name,
-					$comment->mail,
-					$dateTime,
-					$point,
-					$comment->hash,
-					$comment->host
-				) = $i;
+				$i = $i[0];
+				$i->save($db);
 				
-				$point = intval($point);
-				$d = date_parse($dateTime);
-				$comment->id = $comment->dateTime = mktime($d["hour"], $d["minute"], $d["second"], $d["month"], $d["day"], $d["year"]);
-				$comment->entryID = $thread->id;
-				
-				if ($point || $comment->body == "#EMPTY#")
+				if ($i instanceof Evaluation)
+					$thread->evaluations[] = $thread->nonCommentEvaluations[] = $i;
+				else
 				{
-					$eval = new Evaluation();
-					$eval->id = $comment->id;
-					$eval->entryID = $comment->entryID;
-					$eval->dateTime = $comment->dateTime;
-					$eval->host = $comment->host;
-					$eval->point = $point;
-					$thread->evaluations[] = $eval;
+					$thread->comments[] = $i;
 					
-					if ($comment->body == "#EMPTY#")
-					{
-						$eval->save($db);
-						$thread->nonCommentEvaluations[] = $eval;
-					}
-					else
-						$comment->evaluation = $eval;
+					if ($i->evaluation)
+						$thread->evaluations[] = $i->evaluation;
 				}
-				
-				if ($comment->body != "#EMPTY#")
-				{
-					$comment->body = strtr($comment->body, array("<br />" => "\r\n"));
-					$comment->save($db);
-					$thread->comments[] = $comment;
-				}
-				
-				unset
-				(
-					$i,
-					$comment,
-					$d,
-					$point,
-					$rate
-				);
 			}
 		}
-		
 		$save = !$whenContainsWin31JOnly || !$allowSaveCommentsOnly || $containsWin31JOnly;
 		
 		return $thread;
+	}
+
+	static function convertLinesToCommentsAndEvaluations($entryID, array $lines)
+	{
+		$rt = array();
+		
+		foreach ($lines as $i)
+		{
+			$i = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", trim($i)));
+			
+			if (count($i) < 7)
+				continue;
+			
+			$comment = new Comment();
+			list
+			(
+				$comment->body,
+				$comment->name,
+				$comment->mail,
+				$dateTime,
+				$point,
+				$comment->hash,
+				$comment->host
+			) = $i;
+			
+			$point = intval($point);
+			$d = date_parse($dateTime);
+			$comment->id = $comment->dateTime = mktime($d["hour"], $d["minute"], $d["second"], $d["month"], $d["day"], $d["year"]);
+			$comment->entryID = $entryID;
+			
+			if ($point || $comment->body == "#EMPTY#")
+			{
+				$eval = new Evaluation();
+				$eval->id = $comment->id;
+				$eval->entryID = $entryID;
+				$eval->dateTime = $comment->dateTime;
+				$eval->host = $comment->host;
+				$eval->point = $point;
+				$thread->evaluations[] = $eval;
+				
+				if ($comment->body == "#EMPTY#")
+					$rt[] = $eval;
+				else
+					$comment->evaluation = $eval;
+			}
+			
+			if ($comment->body != "#EMPTY#")
+			{
+				$comment->body = strtr($comment->body, array("<br />" => "\r\n"));
+				$rt[] = $comment;
+			}
+			
+			unset
+			(
+				$i,
+				$d,
+				$comment,
+				$eval,
+				$point
+			);
+		}
+
+		return $rt;
 	}
 	
 	/**
@@ -714,7 +740,7 @@ class Util
 	static function convertAndSaveToThread(PDO $db, PDO $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly = false, $allowSaveCommentsOnly = false)
 	{
 		$save = false;
-		$thread = self::convertAndSaveToThreadInternal($db, $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly, $allowSaveCommentsOnly, $save);
+		$thread = self::convertAndSaveToThreadInternal($db, $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly, $allowSaveCommentsOnly, &$save);
 		
 		if ($thread && $save)
 		{
