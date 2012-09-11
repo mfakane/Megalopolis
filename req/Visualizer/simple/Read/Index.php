@@ -70,10 +70,46 @@ $maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
 			<div class="afterword">
 				<? Visualizer::convertedAfterword($h->thread) ?>
 			</div>
+			<?if ($c->pointMap): ?>
+				<form class="content" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "evaluate")) ?>" method="post">
+					<h2>簡易評価</h2>
+					<?if ($d && App::$actionName == "evaluate"): ?>
+						<ul>
+							<?foreach (Visualizer::$data as $i): ?>
+								<li>
+									<?+$i ?>
+								</li>
+							<?endforeach ?>
+						</ul>
+					<?endif ?>
+					<?foreach (array_reverse($c->pointMap) as $i): ?>
+						<input type="submit" name="point" value="<?+$i ?>" />
+					<?endforeach ?>
+					<?if (!Util::isEmpty($c->postPassword)): ?>
+						投稿キー<input type="password" name="postPassword" id="postPassword" />
+					<?endif ?>
+					<?if ($c->useComments): ?>
+						<br />
+						<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id, "p") ?>">またはコメント</a>
+					<?endif ?>
+				</form>
+			<?endif ?>
+		<?else: ?>
+			<? Visualizer::pager($h->page, $maxPage, 5, Visualizer::actionHref($h->entry->subject, $h->entry->id) . "/") ?>
 		<?endif ?>
-		<? Visualizer::pager($h->page, $maxPage, 5, Visualizer::actionHref($h->entry->subject, $h->entry->id) . "/") ?>
 	<?elseif ($m == "c"): ?>
 		コメント&nbsp;<a href="#menu">メニューへ</a>
+		<div class="info">
+			<?if ($c->showReadCount[Configuration::ON_ENTRY]): ?>
+				評価: <?+$c->pointMap && $c->commentPointMap ? "{$h->entry->commentedEvaluationCount}/{$h->entry->evaluationCount}" : $h->entry->evaluationCount ?>
+			<?endif ?>
+			<?if ($c->showComment[Configuration::ON_ENTRY]): ?>
+				コメント: <?+$h->entry->commentCount ?>
+			<?endif ?>
+			<?if ($c->showPoint[Configuration::ON_ENTRY]): ?>
+				POINT: <?+$h->entry->points ?>
+			<?endif ?>
+		</div>
 		<? Visualizer::pager($h->page, $maxCommentPage, 5, Visualizer::actionHref($h->entry->subject, $h->entry->id, "c") . "/") ?>
 		<ul class="entries">
 			<?if ($c->showComment[Configuration::ON_ENTRY] && $h->thread->comments): ?>
@@ -126,7 +162,7 @@ $maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
 									<option value="<?+$i ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?+$i ?> 点</option>
 								<?endif ?>
 							<?endforeach ?>
-							<option value="0"<?=!isset($_POST["point"]) ? ' selected="selected"' : null ?>>無評価</option>
+							<option value="0"<?=!ReadHandler::param("point") ? ' selected="selected"' : null ?>>無評価</option>
 							<?foreach ($c->commentPointMap as $i): ?>
 								<?if ($i < 0): ?>
 									<option value="<?+$i ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?+$i ?> 点</option>
@@ -161,7 +197,7 @@ $maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
 				[3]<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id, "c") ?>" accesskey="3">コメント</a>
 			</li>
 			<li>
-				[4]<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id, "p") ?>" accesskey="4">評価する</a>
+				[4]<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id, "p") ?>" accesskey="4">コメントする</a>
 			</li>
 		<?elseif ($m == "c"): ?>
 			<?if ($h->page < $maxCommentPage): ?>
@@ -178,7 +214,7 @@ $maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
 				[3]<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id) ?>" accesskey="3">本文</a>
 			</li>
 			<li>
-				[4]<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id, "p") ?>" accesskey="4">評価する</a>
+				[4]<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id, "p") ?>" accesskey="4">コメントする</a>
 			</li>
 		<?else: ?>
 			<li>
