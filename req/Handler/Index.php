@@ -70,7 +70,7 @@ class IndexHandler extends Handler
 		
 		$this->lastUpdate = Board::getLastUpdate($db, $subject);
 		
-		if ($this->lastUpdate && Util::isCachedByBrowser($this->lastUpdate))
+		if ($this->lastUpdate && Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY)))
 			return Visualizer::notModified();
 		
 		if ($subject == 0)
@@ -87,7 +87,7 @@ class IndexHandler extends Handler
 		{
 			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLastUpdate();'), $this->entries) + array(0));
 		
-			if (Util::isCachedByBrowser($this->lastUpdate))
+			if ($this->lastUpdate && Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY)))
 				return Visualizer::notModified();
 		}
 		

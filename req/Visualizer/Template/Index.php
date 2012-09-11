@@ -64,7 +64,7 @@ function entries($entries, $isAdmin, $listType = null)
 	if ($listType == "double")
 	{
 	?>
-		<div class="entries">
+		<div class="entries" id="entries">
 			<?php foreach ($entries as $idx => $i): ?>
 				<article>
 					<div class="articleBody">
@@ -163,7 +163,7 @@ function entries($entries, $isAdmin, $listType = null)
 			"rate" => $c->showRate[Configuration::ON_SUBJECT]
 		))));
 		?>
-		<section class="entries">
+		<section class="entries" id="entries">
 			<table>
 				<thead>
 					<tr>
@@ -198,7 +198,7 @@ function entries($entries, $isAdmin, $listType = null)
 				</thead>
 				<tbody>
 					<?php foreach ($entries as $idx => $i): ?>
-						<tr class="article<?php if (!$c->showTags[Configuration::ON_SUBJECT] && Util::isEmpty($i->summary)) echo ' notags' ?>">
+						<tr class="article<?php if (!$c->showTags[Configuration::ON_SUBJECT] && Util::isEmpty($i->summary)) echo ' notags' ?>" id="article<?=$i->id ?>">
 							<?php if ($isAdmin): ?>
 								<td class="checkbox">
 									<input type="checkbox" name="id[]" value="<?php Visualizer::converted($i->id) ?>" />
@@ -248,13 +248,9 @@ function entries($entries, $isAdmin, $listType = null)
 							<?php if ($c->showRate[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "rate", sprintf("%.2f", $i->rate)) ?>
 						</tr>
 						<?php if ($c->showTags[Configuration::ON_SUBJECT] || !Util::isEmpty($i->summary)): ?>
-							<tr class="tags">
+							<tr class="tags" id="tags<?=$i->id ?>">
 								<td colspan="<?php echo $spanWidth ?>">
-									<?php if (!Util::isEmpty($i->summary)): ?>
-										<script>
-											megalopolis.index.showSummary();
-										</script>
-									<?php endif ?>
+									<a href="javascript:void(0);" class="summaryButton">[概要]</a>
 									<ul>
 										<?php if ($i->tags): ?>
 											<?php foreach ($i->tags as $j): ?>
@@ -275,6 +271,9 @@ function entries($entries, $isAdmin, $listType = null)
 					<?php endforeach ?>
 				</tbody>
 			</table>
+			<script>
+				megalopolis.index.showSummary();
+			</script>
 		</section>
 		<?php
 	}

@@ -565,30 +565,20 @@ section.entries
 	background: #ffffff;
 }
 
-.entries table tr.tags
+.entries tbody tr.tags, .entries table tr.tags:hover
 {
 	background: #efefef;
 }
 
-.entries table tr.tags+tr,
-.entries table tr.notags+tr
+.entries tbody tr.tags+tr,
+.entries tbody tr.notags+tr
 {
-	border-top: #999999 1px solid;
+	border-top: #999999 1px solid !important;
 }
 
-.entries table tr.hover
+.entries tbody tr:hover, .entries table tr:hover+tr.tags
 {
 	background: #f6f6f6;
-}
-
-.entries table tr.hover+tr
-{
-	border-top: #efefef 1px solid;
-}
-
-.entries table tr.hover+tr.tags
-{
-	border-top: none;
 }
 
 .entries table tr.tags ul

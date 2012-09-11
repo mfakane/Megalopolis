@@ -192,6 +192,7 @@ class Util
 			header("Last-Modified: " . gmdate("D, d M Y H:i:s T", $lastModified));
 		
 		header("ETag: " . $eTag);
+		header("Cache-Control: private, max-age=0, pre-check=0, must-revalidate");
 		
 		return !Auth::hasSession()
 			&& (!$lastModified || isset($_SERVER["HTTP_IF_MODIFIED_SINCE"]) && strtotime($_SERVER["HTTP_IF_MODIFIED_SINCE"]) >= $lastModified)

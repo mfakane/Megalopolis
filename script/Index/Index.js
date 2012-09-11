@@ -16,13 +16,20 @@ megalopolis.index =
 			$.browser.version < 8)
 			return;
 		
+		var h1 = $("header+h1:first");
+		var entries = (function()
+		{
+			var elem = null;
+			
+			return function() { return elem ? elem : elem = $("#entries")[0]; };
+		})();
 		var lastSort =
 		{
 			label: "投稿日時",
 			value: "dateTime",
 			selector: function(x, y)
 			{
-				var arr = $.map([x, y], function(_) { return $(".dateTime .value", _).text() - 0; });
+				var arr = $.map([x, y], function(_) { return _.find(".dateTime").find(".value").text() - 0; });
 				
 				return arr[0] - arr[1];
 			}
@@ -106,7 +113,7 @@ megalopolis.index =
 					value: "lastUpdate",
 					selector: function(x, y)
 					{
-						var arr = $.map([x, y], function(_) { return $(".lastUpdate .value", _).text() - 0; });
+						var arr = $.map([x, y], function(_) { return _.find(".lastUpdate").find(".value").text() - 0; });
 						
 						return arr[0] - arr[1];
 					}
@@ -141,7 +148,7 @@ megalopolis.index =
 			.append(label)
 			.append(button)
 			.append(dropDown)
-			.appendTo($("header+h1"))
+			.appendTo(h1)
 			.mouseenter(function()
 			{
 				control.addClass("open");
@@ -200,7 +207,7 @@ megalopolis.index =
 							.click(function()
 							{
 								megalopolis.mainCookie("ListType", _.value);
-								location.href = location.href;
+								location.reload();
 							})[0];
 					}
 				))
@@ -263,16 +270,18 @@ megalopolis.index =
 								{
 									var elem = $(this);
 									var idx = $.inArray(_.value, visibilityCookie);
-									var tagRows = $(".entries>table tr.tags>td");
+									var table = $("table", entries());
+									var tagRows = table.find("tr.tags").find("td");
 									var fromColSpan = tagRows.prop("colspan");
+									var articles = $("article", entries());
 									
 									elem.toggleClass("selected");
 									
-									$(".entries>article dd." + _.value).each(function(k, v)
+									articles.find("dd." + _.value).each(function(k, v)
 									{
 										$([$(v), $(v).prev("dt")]).toggleClass("hidden");
 									});
-									$(".entries>article dl").each(function(k, v)
+									articles.find("dl").each(function(k, v)
 									{
 										var elems = $("dt", v);
 										var firstVisible = elems.not(".hidden").first();
@@ -280,7 +289,7 @@ megalopolis.index =
 										elems.removeClass("firstChild");
 										firstVisible.addClass("firstChild");
 									});
-									$(".entries>article time").each(function(k, v)
+									articles.find("time").each(function(k, v)
 									{
 										var e = $(v);
 										
@@ -288,7 +297,7 @@ megalopolis.index =
 											e.toggleClass("hidden");
 									});
 									
-									$(".entries>table th." + _.value + ", .entries>table td." + _.value).each(function(k, v)
+									$([table.find("th." + _.value), table.find("td." + _.value)]).each(function(k, v)
 									{
 										var elem = $(this);
 										
@@ -326,7 +335,7 @@ megalopolis.index =
 				
 				return false;
 			})
-			.appendTo($("header+h1"));
+			.appendTo(h1);
 	},
 	sort: function(control, ascending, selector)
 	{
@@ -335,16 +344,17 @@ megalopolis.index =
 		else
 			control.removeClass("ascending");
 		
-		var div = $(".entries");
+		var div = $("#entries");
+		var tbody = div.find("table").find("tbody");
 		
 		div.append($("article", div).sort(function(x, y)
 		{
 			return ascending ? selector($(x), $(y)) : selector($(y), $(x));
 		}));
 		
-		var list = $.map($("table>tbody>tr.article", div).map(function()
+		var list = $.map(tbody.find("tr.article").map(function()
 		{
-			return $([$(this), $(this).next("tr.tags")]);
+			return $(this).next("tr.tags").andSelf();
 		}).sort(function(x, y)
 		{
 			return ascending ? selector($(x[0]), $(y[0])) : selector($(y[0]), $(x[0]));
@@ -353,48 +363,25 @@ megalopolis.index =
 			return [_[0], _[1]];
 		});
 		
-		$("table>tbody", div).append(list);
-		$("table>tbody tr.tags .summaryButton", div).remove();
-		$("table>tbody tr.tags", div).each(function()
-		{
-			megalopolis.index.makeSummaryButton($(this));
-		});
-	},
-	makeSummaryButton: function(tagRow)
-	{
-		return $('<a href="javascript:void(0);" />').addClass("summaryButton").text("[概要]").prependTo($("td", tagRow));
+		tbody.append(list);
 	},
 	showSummary: function()
 	{
-		var tagRow = $("tr.tags").last();
-		var button = megalopolis.index.makeSummaryButton(tagRow);
-		var rows = $([tagRow.prev("tr")[0], tagRow[0]]);
+		var tbody = $("#entries").find("table").find("tbody");
 		
-		$("a, input", rows).each(function(k, v)
+		tbody.click(function(e)
 		{
-			var elem = $(v).click(function(event)
-			{
-				if (!elem.hasClass("summaryButton"))
-				{
-					event.stopImmediatePropagation();
-					event.stopPropagation();
-				}
-			});
-		});
-		
-		rows.mouseenter(function()
-		{
-			rows.addClass("hover");
-		})
-		.mouseleave(function()
-		{
-			rows.removeClass("hover");
-		})
-		.click(function()
-		{
-			var summary = $("p", $(this).hasClass("tags") ? $(this) : $(this).next("tr.tags"));
+			var tagName = e.target.tagName.toLowerCase();
 			
-			summary.toggleClass("hidden");
+			if (tagName != "a" &&
+				tagName != "input" ||
+				e.target.className == "summaryButton")
+			{
+				var row = $(e.target).parents("tr");
+				var summary = (row.hasClass("tags") ? row : row.next("tr.tags")).find("p");
+				
+				summary.toggleClass("hidden");
+			}
 		});
 	}
 };
