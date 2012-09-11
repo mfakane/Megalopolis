@@ -11,12 +11,13 @@ Visualizer::doctype();
 </head>
 <body>
 	<? Visualizer::header("管理用ツール") ?>
-	<?if (!$c->utilsEnabled): ?>
-		<p class="notify warning">
-			管理用ツールは無効化されています
-		</p>
-	<?else: ?>
-		<ul>
+	<ul>
+		<?if (Auth::hasSession(true)): ?>
+			<li>
+				<a href="<?+Visualizer::actionHref("util", "track") ?>">ホスト検索</a>
+			</li>
+		<?endif ?>
+		<?if ($c->utilsEnabled): ?>
 			<li>
 				<a href="<?+Visualizer::actionHref("util", "hash") ?>">パスワード用ハッシュ算出</a>
 			</li>
@@ -31,8 +32,8 @@ Visualizer::doctype();
 					<a href="<?+Visualizer::actionHref("util", "reindex") ?>">検索インデックスの再生成</a>
 				</li>
 			<?endif ?>
-		</ul>
-	<?endif ?>
+		<?endif ?>
+	</ul>
 	<? Visualizer::footer() ?>
 </body>
 </html>

@@ -8,7 +8,100 @@ class UtilHandler extends Handler
 	
 	function index()
 	{
-		self::ensureTestMode(false);
+		Auth::$caption = "管理者ログイン";
+		
+		if (!Configuration::$instance->utilsEnabled && !Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+			Auth::loginError("管理者パスワードが一致しません");
+		
+		return Visualizer::visualize();
+	}
+	
+	function track()
+	{
+		Auth::$caption = "管理者ログイン";
+		
+		if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+			Auth::loginError("管理者パスワードが一致しません");
+		
+		$db = App::openDB();
+		$subjectCount = Board::getLatestSubject($db);
+		$subjectBegin = max(1, min(IndexHandler::param("subjectBegin", $subjectCount), $subjectCount));
+		$subjectEnd = max(1, min(IndexHandler::param("subjectEnd", $subjectCount), $subjectCount));
+		list($subjectBegin, $subjectEnd) = array(min($subjectBegin, $subjectEnd), max($subjectBegin, $subjectEnd));
+		Visualizer::$data = array
+		(
+			"host" => IndexHandler::param("host"),
+			"subjectCount" => $subjectCount,
+			"subjectBegin" => $subjectBegin,
+			"subjectEnd" => $subjectEnd,
+			"target" => IndexHandler::param("target", "thread,evaluation,comment"),
+			"entries" => null,
+			"page" => intval(IndexHandler::param("p", 1)),
+			"pageCount" => 0,
+			"count" => 0,
+		);
+		
+		if (!is_array(Visualizer::$data["target"]))
+			Visualizer::$data["target"] = explode(",", Visualizer::$data["target"]);
+		
+		if (isset($_GET["host"]))
+		{
+			Visualizer::$data["entries"] = ThreadEntry::getEntriesByHost
+			(
+				$db,
+				Visualizer::$data["host"],
+				array($subjectBegin, $subjectEnd),
+				Visualizer::$data["target"],
+				(Visualizer::$data["page"] - 1) * Configuration::$instance->searchPaging,
+				Configuration::$instance->searchPaging,
+				Board::ORDER_DESCEND,
+				Visualizer::$data["count"]
+			);
+			
+			Visualizer::$data["pageCount"] = Visualizer::$data["count"] / Configuration::$instance->searchPaging;
+			
+			if (isset($_POST["admin"]))
+			{
+				Auth::ensureToken();
+				Auth::createToken();
+				
+				$idb = App::openDB(App::INDEX_DATABASE);
+				
+				if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+					Auth::loginError("管理者パスワードが一致しません");
+				
+				$ids = array_map("intval", array_map(array("Util", "escapeInput"), isset($_POST["id"]) ? (is_array($_POST["id"]) ? $_POST["id"] : array($_POST["id"])) : array()));
+				$db->beginTransaction();
+				
+				if ($db !== $idb)
+					$idb->beginTransaction();
+				
+				switch ($mode = Util::escapeInput($_POST["admin"]))
+				{
+					case "unpost":
+						ThreadEntry::deleteDirect($db, $idb, $ids);
+					
+						foreach (array_unique(array_map(create_function('$_', 'return $_->subject;'), array_intersect_key(Visualizer::$data["entries"], array_flip($ids)))) as $i)
+							Board::setLastUpdate($db, $i);
+						
+						foreach ($ids as $i)
+							unset(Visualizer::$data["entries"][$i]);
+						
+						Visualizer::$data["count"] -= count($ids);
+						
+						break;
+				}
+				
+				if ($db !== $idb)
+					$idb->commit();
+				
+				$db->commit();
+				
+				App::closeDB($idb);
+			}
+		}
+		
+		App::closeDB($db);
 		
 		return Visualizer::visualize();
 	}

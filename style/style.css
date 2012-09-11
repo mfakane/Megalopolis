@@ -165,6 +165,7 @@ textarea
 input[type="checkbox"], input[type="radio"]
 {
 	margin: 0px;
+	margin-right: 4px;
 	padding: 0px;
 	width: 16px;
 	height: 16px;
@@ -414,11 +415,6 @@ div.entries article .articleBody
 	border-radius: 4px;
 	background: #ffffff;
 	overflow: hidden;
-}
-
-div.entries input[type="checkbox"]
-{
-	margin-right: 4px;
 }
 
 div.entries article time
@@ -1553,11 +1549,6 @@ body.index>h1, body.read>h1
 	padding-top: 0px;
 	border-top: none;
 	color: #666666;
-}
-
-.read #comments dt input[type="checkbox"]
-{
-	margin-right: 4px;
 }
 
 .read #comments dt .point

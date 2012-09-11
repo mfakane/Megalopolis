@@ -201,6 +201,11 @@ class Visualizer
 						<?php echo $i ?>
 					</li>
 				<?php endforeach ?>
+				<?php if (Auth::hasSession(true)): ?>
+					<li>
+						<a href="<?php self::converted(self::actionHref("util")) ?>">管理用ツール</a>
+					</li>
+				<?php endif ?>
 				<li>
 					<?php if (Auth::hasSession(true)): ?>
 						<a href="<?php self::converted(self::actionHref("logout", $redir)) ?>">ログアウト</a>

@@ -219,7 +219,7 @@ class IndexHandler extends Handler
 					ThreadEntry::deleteDirect($db, $idb, $ids);
 					
 					foreach (array_unique(array_map(create_function('$_', 'return $_->subject;'), array_intersect_key($this->entries, array_flip($ids)))) as $i)
-						Board::setLastUpdate($db, $idb);
+						Board::setLastUpdate($db, $i);
 					
 					foreach ($ids as $i)
 						unset($this->entries[$i]);
@@ -273,7 +273,10 @@ class IndexHandler extends Handler
 	static function param($name, $value = null)
 	{
 		if (isset($_GET[$name]))
-			return Util::escapeInput($_GET[$name]);
+			if (is_array($_GET[$name]))
+				return array_map(array("Util", "escapeInput"), $_GET[$name]);
+			else
+				return Util::escapeInput($_GET[$name]);
 		else
 			return $value;
 	}
