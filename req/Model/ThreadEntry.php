@@ -374,7 +374,7 @@ class ThreadEntry
 						".txt" => ""
 					)));
 				
-				foreach (array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), file($i, FILE_IGNORE_NEW_LINES)) as $j)
+				foreach (array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), Util::readLines($i)) as $j)
 					if (strstr($id, "<>"))
 						$rt[] = intval(array_shift(explode("<>", $j)));
 			}
@@ -397,7 +397,7 @@ class ThreadEntry
 						".txt" => ""
 					)));
 				
-				foreach (array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), file($i, FILE_IGNORE_NEW_LINES)) as $j)
+				foreach (array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), Util::readLines($i)) as $j)
 				{
 					$entry = Util::convertLineToThreadEntry($j);
 					
@@ -447,8 +447,8 @@ class ThreadEntry
 			if ($matches && isset($query["dateTime"]) && $query["dateTime"])
 				$matches = $matches && $i->dateTime >= $query["dateTime"][0] && $i->dateTime <= $query["dateTime"][1];
 			
-			$body = $matches && is_file($aft = "Megalith/dat/{$i->id}.dat") ? mb_convert_encoding(implode("\r\n", file($aft, FILE_IGNORE_NEW_LINES)), "UTF-8", "Windows-31J") : "";
-			$afterword = $matches && is_file($aft = "Megalith/aft/{$i->id}.aft.dat") ? mb_convert_encoding(implode("\r\n", file($aft, FILE_IGNORE_NEW_LINES)), "UTF-8", "Windows-31J") : "";
+			$body = $matches && is_file($aft = "Megalith/dat/{$i->id}.dat") ? mb_convert_encoding(implode("\r\n", Util::readLines($aft)), "UTF-8", "Windows-31J") : "";
+			$afterword = $matches && is_file($aft = "Megalith/aft/{$i->id}.aft.dat") ? mb_convert_encoding(implode("\r\n", Util::readLines($aft)), "UTF-8", "Windows-31J") : "";
 			
 			if ($matches && isset($query["body"]) && $query["body"])
 				foreach ($query["body"] as $j)
@@ -480,7 +480,7 @@ class ThreadEntry
 		$rt = array();
 		
 		if (is_file($path = "Megalith/sub/" . ($subject == Board::getLatestSubject($db) ? "subject.txt" : "subject{$subject}.txt")))
-			foreach (array_reverse(file($path, FILE_IGNORE_NEW_LINES)) as $i)
+			foreach (array_reverse(Util::readLines($path)) as $i)
 				if (count($line = explode("<>", $i)) > 2)
 					$rt[] = intval(str_replace(".dat", "", $line[0]));
 		
@@ -492,7 +492,7 @@ class ThreadEntry
 		$rt = array();
 		
 		if (is_file($path = "Megalith/sub/" . ($subject == Board::getLatestSubject($db) ? "subject.txt" : "subject{$subject}.txt")))
-			foreach (array_reverse(file($path, FILE_IGNORE_NEW_LINES)) as $i)
+			foreach (array_reverse(Util::readLines($path)) as $i)
 			{
 				$entry = Util::convertLineToThreadEntry(mb_convert_encoding($i, "UTF-8", "Windows-31J"));
 				
@@ -971,7 +971,7 @@ class ThreadEntry
 						if (Util::wildcard($host, $i->host))
 							$rt[$i->id] = $i;
 						else if (is_file("Megalith/com/{$i->id}"))
-							foreach (Util::convertLinesToCommentsAndEvaluations($i->id, array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), file("Megalith/com/{$i->id}", FILE_IGNORE_NEW_LINES))) as $j)
+							foreach (Util::convertLinesToCommentsAndEvaluations($i->id, array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), Util::readLines("Megalith/com/{$i->id}"))) as $j)
 								if (Util::wildcard($host, $j->host))
 									$rt[$i->id] = $i;
 					}

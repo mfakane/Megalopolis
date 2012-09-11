@@ -37,7 +37,6 @@ class App
 			self::precondition(extension_loaded("pdo"), "PDO");
 			self::precondition(in_array(Util::HASH_ALGORITHM, hash_algos()), "hash_algos() " . Util::HASH_ALGORITHM);
 			
-			mb_language("Japanese");
 			mb_internal_encoding("UTF-8");
 			mb_http_output("UTF-8");
 			mb_regex_encoding("UTF-8");

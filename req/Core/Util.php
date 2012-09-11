@@ -540,7 +540,22 @@ class Util
 		
 		return $result;
 	}
-
+	
+	static function trimLineBreak($s)
+	{
+		return rtrim($s, "\r\n");
+	}
+	
+	static function readLines($file, $option = 0)
+	{
+		$rt = array_map(array("self", "trimLineBreak"), file($file));
+		
+		if ($option & FILE_SKIP_EMPTY_LINES)
+			$rt = array_filter($rt, "strlen");
+		
+		return $rt;
+	}
+	
 	/**
 	 * @param string $line
 	 * @return ThreadEntry
@@ -609,7 +624,7 @@ class Util
 		$data = is_array($dat) ? $dat : array();
 		
 		if (!is_array($dat))
-			foreach (file($dat, FILE_IGNORE_NEW_LINES) as $i)
+			foreach (self::readLines($dat) as $i)
 			{
 				$data[] = $j = mb_convert_encoding($i, "UTF-8", "Windows-31J");
 				
@@ -650,7 +665,7 @@ class Util
 		{
 			$afterData = array();
 			
-			foreach (file($aft, FILE_IGNORE_NEW_LINES) as $i)
+			foreach (self::readLines($aft) as $i)
 			{
 				$afterData[] = $j = mb_convert_encoding($i, "UTF-8", "Windows-31J");
 			
@@ -674,7 +689,7 @@ class Util
 		
 		if (is_file($com))
 		{
-			foreach (file($com, FILE_IGNORE_NEW_LINES) as $rawline)
+			foreach (self::readLines($com) as $rawline)
 			{
 				$i = mb_convert_encoding($rawline, "UTF-8", "Windows-31J");
 				$i = self::convertLinesToCommentsAndEvaluations($thread->id, array($i));

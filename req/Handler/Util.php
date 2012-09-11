@@ -250,7 +250,7 @@ class UtilHandler extends Handler
 			
 			if ($params[0] == "list")
 			{
-				$subjects = array_merge(array_slice(file("{$dir}sub/subjects.txt"), 1), array("subject.txt"));
+				$subjects = array_merge(array_slice(Util::readLines("{$dir}sub/subjects.txt"), 1), array("subject.txt"));
 				$subjectNum = 0;
 				$subjectRange = array();
 				
@@ -264,16 +264,16 @@ class UtilHandler extends Handler
 					
 					$previousSubjectFile = "{$dir}sub/subject{$subjectNum}.txt";
 					$nextSubjectFile = "{$dir}sub/subject" . ($subjectNum == count($subjects) - 2 ? "" : $subjectNum + 2) . ".txt";
-					$stats = file($subjectFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+					$stats = Util::readLines($subjectFile, FILE_SKIP_EMPTY_LINES);
 					$count = count($stats);
 					
 					$set = array
 					(
 						"start" => $subjectNum > 0
-							? (is_file($previousSubjectFile) ? max(self::getFirstAndLastDataLineIDFromLines(file($previousSubjectFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES))) + 1 : min(self::getFirstAndLastDataLineIDFromLines($stats)))
+							? (is_file($previousSubjectFile) ? max(self::getFirstAndLastDataLineIDFromLines(Util::readLines($previousSubjectFile, FILE_SKIP_EMPTY_LINES))) + 1 : min(self::getFirstAndLastDataLineIDFromLines($stats)))
 							: 0,
 						"end" => $subjectNum < count($subjects)
-							? (is_file($nextSubjectFile) ? min(self::getFirstAndLastDataLineIDFromLines(file($nextSubjectFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES))) : max(self::getFirstAndLastDataLineIDFromLines($stats)) + 1)
+							? (is_file($nextSubjectFile) ? min(self::getFirstAndLastDataLineIDFromLines(Util::readLines($nextSubjectFile, FILE_SKIP_EMPTY_LINES))) : max(self::getFirstAndLastDataLineIDFromLines($stats)) + 1)
 							: 0
 					);
 					$subjectRange[] = $set;
@@ -336,7 +336,7 @@ class UtilHandler extends Handler
 						($id = intval(mb_substr($i->getFilename(), 0, -4))) >= $start &&
 						($end == 0 || $id < $end))
 					{
-						$datLines = is_file($dat = "{$dir}dat/{$id}.dat") ? array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), file($dat, FILE_IGNORE_NEW_LINES)) : null;
+						$datLines = is_file($dat = "{$dir}dat/{$id}.dat") ? array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), Util::readLines($dat)) : null;
 						$entry = null;
 						
 						if ($datLines)
@@ -517,7 +517,7 @@ class UtilHandler extends Handler
 				
 				if (is_file($subjectFile))
 				{
-					$sub = array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), file($subjectFile, FILE_IGNORE_NEW_LINES));
+					$sub = array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), Util::readLines($subjectFile));
 					$datCount = count($sub);
 					
 					foreach (array_slice($sub, $offset, $buffer) as $i)
