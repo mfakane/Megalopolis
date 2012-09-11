@@ -68,11 +68,14 @@ class Visualizer
 			<link href="<?php self::converted(self::actionHref("style", "splash.png")) ?>" rel="apple-touch-startup-image" type="image/png" />
 			<link href="<?php self::converted(self::actionHref("style", "iosIcon.png")) ?>" rel="apple-touch-icon" type="image/png" />
 			<link href="http://code.jquery.com/mobile/1.2.0-beta.1/jquery.mobile-1.2.0-beta.1.min.css" rel="stylesheet" />
-			<script src="http://code.jquery.com/jquery-1.8.1.min.js"></script>
-			<script src="http://code.jquery.com/mobile/1.2.0-beta.1/jquery.mobile-1.2.0-beta.1.min.js"></script>
 			<link href="<?php self::converted(self::actionHref("style", "mobile", "mobile.css")) ?>" rel="stylesheet" />
+			<script src="http://code.jquery.com/jquery-1.8.1.min.js"></script>
 			<script src="<?php self::converted(self::actionHref("script", "base.js")) ?>"></script>
 			<script src="<?php self::converted(self::actionHref("script", "mobile", "base.js")) ?>"></script>
+			<script src="http://code.jquery.com/mobile/1.2.0-beta.1/jquery.mobile-1.2.0-beta.1.min.js"></script>
+			<script>
+				megalopolis.baseUrl = '<?php self::converted(self::absoluteHref()) ?>';
+			</script>
 		<?php elseif ($isSimple): ?>
 			<link href="<?php self::converted(self::actionHref("style", "simple", "simple.css")) ?>" rel="stylesheet" />
 		<?php else: ?>

@@ -2,6 +2,7 @@ $.extend(megalopolis,
 {
 	maxHistoryCount: 50,
 	minHeight: 0,
+	baseUrl: null,
 	resizeMinHeight: function(e, orientation)
 	{
 		var portrait = orientation ? orientation == "portrait" : $("html").hasClass("portrait");
@@ -42,14 +43,28 @@ $.extend(megalopolis,
 			entries.shift();
 		
 		this.cookie("History", JSON.stringify(entries));
-	}
+	},
+	
 });
 
-$(function()
-{
-	megalopolis.resizeMinHeight();
-	$.mobile.defaultPageTransition = "slide";
-	$(document).bind("orientationchange", function()
+$(document)
+	.bind("mobileinit", function()
+	{	
+		$.mobile.defaultPageTransition = "slide";
+	})
+	.bind("pagebeforeload", function(e, data)
+	{
+		if (data.absUrl.indexOf(megalopolis.baseUrl) != 0)
+		{
+			e.preventDefault();
+			data.deferred.reject(data.absUrl, data.options);
+		}
+	})
+	.bind("pageinit", function()
+	{
+		megalopolis.resizeMinHeight();
+	})
+	.bind("orientationchange", function()
 	{
 		megalopolis.resizeMinHeight();
 		
@@ -59,4 +74,3 @@ $(function()
 				document.body.scrollTop = 1;
 		}, 1);
 	});
-});
