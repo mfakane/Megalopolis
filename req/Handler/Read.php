@@ -41,6 +41,10 @@ class ReadHandler extends Handler
 		$this->subject = $this->thread->subject;
 		$this->entry = &$this->thread->entry;
 		$this->page = $page;
+		
+		if (Util::isCachedByBrowser($this->thread->entry->responseLastUpdate, $page))
+			return Visualizer::notModified();
+		
 		$this->forceTaketori = preg_match('/<\s*font|font:\s*|font-family:\s*/i', $this->thread->body);
 
 		if (Cookie::getCookie(Cookie::LAST_ID_KEY) != $id)

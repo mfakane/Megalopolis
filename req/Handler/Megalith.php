@@ -19,17 +19,32 @@ class MegalithHandler extends Handler
 		{
 			$db = App::openDB();
 			$content = null;
+			$latest = Board::getLatestSubject($db);
 			
 			if ($matches[1] == "s")
-				$content = implode("\n", array_map(create_function('$_', 'return "subject{$_}.txt";'), array_merge(array(""), Board::getLatestSubject($db) > 1 ? range(1, Board::getLatestSubject($db) - 1) : array())));
+			{
+				if (Util::isCachedByBrowser(Board::getLastUpdate($db, $latest), $latest))
+					return Visualizer::notModified();
+				
+				$content = implode("\n", array_map(create_function('$_', 'return "subject{$_}.txt";'), array_merge(array(""), $latest > 1 ? range(1, $latest - 1) : array())));
+			}
 			else
 			{
-				$latest = Board::getLatestSubject($db);
-				
-				if (($subject = $matches[1] == "" ? $latest : intval($matches[1])) > Board::getLatestSubject($db))
+				if (($subject = $matches[1] == "" ? $latest : intval($matches[1])) > $latest)
 					throw new ApplicationException("ファイルが見つかりません", 404);
 				
+				if (($lastUpdate = Board::getLastUpdate($db, $latest)) &&
+					Util::isCachedByBrowser($lastUpdate))
+					return Visualizer::notModified();
+				
 				if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
+				{
+					$entries = ThreadEntry::getEntriesBySubject($db, $subject);
+					$lastUpdate = max(array_map(create_function('$_', 'return $_->getLastUpdate();'), $entries) + array(0));
+				
+					if (Util::isCachedByBrowser($lastUpdate))
+						return Visualizer::notModified();
+					
 					$content = implode("\n", array_reverse(array_map(create_function('$_', 'return implode("<>", array_map("htmlspecialchars", array
 					(
 						"{$_->id}.dat",
@@ -47,7 +62,8 @@ class MegalithHandler extends Handler
 						"",
 						Configuration::$instance->showTags[Configuration::ON_SUBJECT] ? implode(" ", $_->tags) : "",
 						Configuration::$instance->showSize[Configuration::ON_SUBJECT] ? $_->size : ""
-					)));'), ThreadEntry::getEntriesBySubject($db, $subject))));
+					)));'), $entries)));
+				}
 				else
 					$content = "";
 			}
@@ -74,6 +90,9 @@ class MegalithHandler extends Handler
 			
 			if (!($thread = Thread::load($db, intval($name))))
 				throw new ApplicationException("ファイルが見つかりません", 404);
+			
+			if (Util::isCachedByBrowser($thread->entry->responseLastUpdate))
+				return Visualizer::notModified();
 			
 			$c = &Configuration::$instance;
 			$_ = &$thread->entry;
@@ -127,6 +146,9 @@ class MegalithHandler extends Handler
 			if (!($thread = Thread::load($db, intval($name))))
 				throw new ApplicationException("ファイルが見つかりません", 404);
 			
+			if (Util::isCachedByBrowser($thread->entry->responseLastUpdate))
+				return Visualizer::notModified();
+			
 			if (Configuration::$instance->showComment[Configuration::ON_ENTRY])
 				$content = array_merge
 				(
@@ -179,6 +201,9 @@ class MegalithHandler extends Handler
 			if (!($thread = Thread::load($db, intval($name))))
 				throw new ApplicationException("ファイルが見つかりません", 404);
 			
+			if (Util::isCachedByBrowser($thread->entry->responseLastUpdate))
+				return Visualizer::notModified();
+			
 			App::closeDB($db);
 			
 			if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
@@ -197,6 +222,9 @@ class MegalithHandler extends Handler
 	{
 		if (App::$handlerType != "ini")
 			throw new ApplicationException("ファイルが見つかりません", 404);
+		
+		if (Util::isCachedByBrowser(filemtime("config.php")))
+			return Visualizer::notModified();
 		
 		return Visualizer::visualize("Index/Settings.Ini", 200, "text/plain");
 	}

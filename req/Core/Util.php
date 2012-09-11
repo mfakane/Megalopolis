@@ -180,6 +180,25 @@ class Util
 	}
 	
 	/**
+	 * @param int $lastModified [optional]
+	 * @param string $eTagSeed [optional]
+	 * @return bool
+	 */
+	static function isCachedByBrowser($lastModified = null, $eTagSeed = null)
+	{
+		$eTag = md5(implode("_", array(App::VERSION, max(array_map('filemtime', get_included_files())), $eTagSeed)));
+		
+		if ($lastModified)
+			header("Last-Modified: " . gmdate("D, d M Y H:i:s T", $lastModified));
+		
+		header("ETag: " . $eTag);
+		
+		return !Auth::hasSession()
+			&& (!$lastModified || isset($_SERVER["HTTP_IF_MODIFIED_SINCE"]) && strtotime($_SERVER["HTTP_IF_MODIFIED_SINCE"]) >= $lastModified)
+			&& (isset($_SERVER["HTTP_IF_NONE_MATCH"]) && $_SERVER["HTTP_IF_NONE_MATCH"] == $eTag);
+	}
+	
+	/**
 	 * @return string
 	 */
 	static function getAbsoluteUrl($path = "")

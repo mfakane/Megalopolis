@@ -68,6 +68,11 @@ class IndexHandler extends Handler
 			$db->commit();
 		}
 		
+		$this->lastUpdate = Board::getLastUpdate($db, $subject);
+		
+		if ($this->lastUpdate && Util::isCachedByBrowser($this->lastUpdate))
+			return Visualizer::notModified();
+		
 		if ($subject == 0)
 			$subject = Board::getLatestSubject($db);
 		else if ($subject > Board::getLatestSubject($db))
@@ -78,8 +83,13 @@ class IndexHandler extends Handler
 		$this->subjectCount = Board::getLatestSubject($db);
 		$this->entryCount = Board::getEntryCount($db, $idb);
 		
-		if (!($this->lastUpdate = Board::getLastUpdate($db, $subject)))
+		if (!$this->lastUpdate)
+		{
 			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLastUpdate();'), $this->entries) + array(0));
+		
+			if (Util::isCachedByBrowser($this->lastUpdate))
+				return Visualizer::notModified();
+		}
 		
 		App::closeDB($idb);
 		App::closeDB($db);

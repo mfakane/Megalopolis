@@ -20,6 +20,7 @@ class Auth
 			ini_set("session.use_trans_sid", 0);
 			ini_set("session.cookie_httponly", 1);
 			
+			session_cache_limiter(false);
 			session_set_cookie_params(0);
 			session_name("MEGALOPOLIS_" . basename(dirname(dirname(dirname(__FILE__)))));
 			session_start();
@@ -48,7 +49,12 @@ class Auth
 	static function commitSession()
 	{
 		if (self::isSessionEnabled())
+		{
 			session_commit();
+			
+			if (self::hasSession())
+				Visualizer::noCache();
+		}
 	}
 	
 	static function logout()
@@ -211,6 +217,7 @@ class Auth
 		unset($_SESSION[self::SESSION_IS_ADMIN]);
 		self::createToken();
 		Visualizer::$data = $error;
+		Visualizer::noCache();
 		Visualizer::visualize("Auth");
 		
 		exit;

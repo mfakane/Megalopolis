@@ -593,6 +593,9 @@ class UtilHandler extends Handler
 	
 	function config()
 	{
+		if (Util::isCachedByBrowser(filemtime("config.php")))
+			return Visualizer::notModified();
+		
 		$c = Configuration::$instance;
 		$isAdmin = Auth::hasSession(true);
 		$idb = App::openDB(App::INDEX_DATABASE);

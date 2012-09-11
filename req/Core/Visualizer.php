@@ -403,6 +403,19 @@ class Visualizer
 		return Util::getAbsoluteUrl(self::href(func_get_args()));
 	}
 	
+	static function noCache()
+	{
+		header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
+		header("Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
+		header("Pragma: no-cache");
+	}
+	
+	static function notModified()
+	{
+		self::statusCode(304);
+		exit;
+	}
+	
 	static function statusCode($code)
 	{
 		switch ($code)
@@ -780,6 +793,7 @@ class Visualizer
 	{
 		header("Content-Type: application/json");
 		
+		Auth::commitSession();
 		echo json_encode($obj);
 		
 		return true;
