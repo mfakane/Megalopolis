@@ -186,7 +186,7 @@ class Util
 	 */
 	static function isCachedByBrowser($lastModified = null, $eTagSeed = null)
 	{
-		$eTag = md5(implode("_", array(App::VERSION, max(array_map('filemtime', get_included_files())), $eTagSeed)));
+		$eTag = md5(implode("_", array(App::VERSION, self::getIncludedFilesLastModified(), $eTagSeed)));
 		
 		if ($lastModified)
 			header("Last-Modified: " . gmdate("D, d M Y H:i:s T", $lastModified));
@@ -197,6 +197,11 @@ class Util
 		return !Auth::hasSession()
 			&& (!$lastModified || isset($_SERVER["HTTP_IF_MODIFIED_SINCE"]) && strtotime($_SERVER["HTTP_IF_MODIFIED_SINCE"]) >= $lastModified)
 			&& (isset($_SERVER["HTTP_IF_NONE_MATCH"]) && $_SERVER["HTTP_IF_NONE_MATCH"] == $eTag);
+	}
+	
+	static function getIncludedFilesLastModified()
+	{
+		return max(array_map('filemtime', get_included_files()));
 	}
 	
 	/**

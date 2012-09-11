@@ -641,22 +641,19 @@ class IndexHandler extends Handler
 	{
 		header("Content-Type: text/cache-manifest");
 		
-		?>
-CACHE MANIFEST
-# rev 0
-		<?php
 		echo implode("\r\n", array
 		(
+			"CACHE MANIFEST",
+			"# rev " . Util::getIncludedFilesLastModified(),
 			"http://code.jquery.com/",
 			"http://nehan.googlecode.com/",
 			"style/",
-			"script/"
+			"script/",
+			"",
+			"NETWORK:",
+			"*",
+			Util::getAbsoluteUrl(),
 		));
-		?>
-NETWORK:
-*
-		<?php
-		echo Util::getAbsoluteUrl();
 		
 		return null;
 	}
