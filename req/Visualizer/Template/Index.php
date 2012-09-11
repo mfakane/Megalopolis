@@ -146,8 +146,8 @@ function entries($entries, $isAdmin, $listType = null)
 		$spanWidth = count(array_filter(array
 		(
 			"check" => $isAdmin,
-			"title" => $c->showTitle[Configuration::ON_SUBJECT],
-			"name" => $c->showName[Configuration::ON_SUBJECT],
+			"title" => $isAdmin || $c->showTitle[Configuration::ON_SUBJECT],
+			"name" => $isAdmin || $c->showName[Configuration::ON_SUBJECT],
 		))) + count(filterVisibleOnly($visibility, array
 		(
 			"dateTime" => true,
