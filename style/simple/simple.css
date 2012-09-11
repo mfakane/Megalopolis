@@ -57,11 +57,20 @@ h2
 	font-weight: bold;
 }
 
-.info, .menu, .content, .afterword
+.info, .menu, .content
 {
 	margin: 4px 0px 4px 0px;
 	padding: 4px 0px 0px 0px;
 	border-top: #999999 3px solid;
+}
+
+.afterword
+{
+	margin: 4px 0px -4px 0px;
+	padding: 4px;
+	background: #efefef;
+	border: #999999 3px solid;
+	border-bottom: 0px;
 }
 
 .menu li
