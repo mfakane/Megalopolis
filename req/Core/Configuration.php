@@ -239,10 +239,5 @@ class Configuration
 		return $this->usePoints()
 			|| $this->useCommentPoints();
 	}
-	
-	function __construct()
-	{
-		$this->dataStore = new SQLiteDataStore();
-	}
 }
 ?>
