@@ -317,7 +317,7 @@ Visualizer::doctype();
 				megalopolis.read.loadForms(<?+$c->defaultEvaluator ?>, '<?+$c->defaultName ?>', <?=$isAdmin || $c->showName[Configuration::ON_COMMENT] ? "true" : "false" ?>, <?=$isAdmin || $c->showPoint[Configuration::ON_COMMENT] ? "true" : "false" ?>);
 			</script>
 		<?endif ?>
-		<?if ($c->showComment[Configuration::ON_ENTRY]): ?>
+		<?if ($isAdmin || $c->showComment[Configuration::ON_ENTRY]): ?>
 			<?if ($isAdmin): ?>
 				<form action="" method="post">
 			<?endif ?>
