@@ -94,6 +94,15 @@ class MegalithHandler extends Handler
 			if (Util::isCachedByBrowser($thread->entry->responseLastUpdate))
 				return Visualizer::notModified();
 			
+			if (Cookie::getCookie(Cookie::LAST_ID_KEY) != $thread->entry->id)
+			{
+				$db->beginTransaction();
+				$thread->entry->incrementReadCount($db);
+				$db->commit();
+				Cookie::setCookie(Cookie::LAST_ID_KEY, $thread->entry->id);
+				Cookie::sendCookie();
+			}
+			
 			$c = &Configuration::$instance;
 			$_ = &$thread->entry;
 			
