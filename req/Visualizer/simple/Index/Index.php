@@ -109,7 +109,7 @@ Visualizer::doctype();
 		</form>
 	<?endif ?>
 	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => IndexHandler::param("query"), "mode" => $searchMode) : array()) + array("p" => ""))) ?>
-	<?+count($h->entries) ?>件中<?+$offset + 1 ?>～<?+min($offset + $paging, count($h->entries)) ?>件
+	<?+App::$actionName == "search" ? $d["count"] : (App::$actionName == "index" ? count($h->entries) : $h->entryCount) ?>件中<?+$offset + 1 ?>～<?+$offset + min($paging, count($h->entries)) ?>件
 	<ul class="entries">
 		<?if ($h->entries): ?>
 			<?foreach (App::$actionName == "index" ? array_slice($h->entries, $offset, $paging) : $h->entries as $i): ?>
