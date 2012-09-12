@@ -1,4 +1,78 @@
-﻿2012-09-11 COAH96KoxU <queue glasscore.net>
+﻿2012-09-13 COAH96KoxU <queue glasscore.net>
+	
+	* req/App.php: release 19
+	* req/Core/Util.php: Expires ヘッダ追加 
+	* style/style.css: 編集画面の本文枠の高さを増加 
+	* readme.txt,
+	  req/Handler/Index.php,
+	  req/Visualizer/mobile/Index/Index.php,
+	  req/Visualizer/mobile/Read/Index.php: nehan の削除 
+	* req/Visualizer/Read/Index.php: 作品ページのページャ幅を増加 
+	* req/Visualizer/mobile/Read/Index.php,
+	  script/mobile/Read/Index.js,
+	  script/mobile/base.js,
+	  style/mobile/mobile.css: iPhone 表示の作品の表示方法を変更 
+	* req/Visualizer/simple/Index/Index.php: 携帯表示にて一覧の件数表示が間違っているのを修正 
+	* req/Visualizer/mobile/Index/Index.php: iPhone 表示で一覧以外のページからスタートした時に並べ替えが表示されないのを修正 
+	* req/Visualizer/mobile/Index/Index.php: iPhone 表示に携帯表示へのリンクを追加 
+	* script/mobile/base.js,
+	  style/mobile/mobile.css: iPhone 表示にてローディングの表示を修正 
+	* req/Visualizer/mobile/Index/Index.php: iPhone 表示にて検索結果がない場合にエラーが出るのを修正 
+	* req/Visualizer/mobile/Index/Index.php,
+	  style/mobile/mobile.css: iPhone 表示に検索の種類を追加 
+	* req/Visualizer/mobile/Index/Index.php,
+	  script/mobile/Index/Index.js,
+	  style/mobile/mobile.css: iPhone 表示にて投稿日時が常に表示されるように 
+	* style/mobile/mobile.css: iPhone 表示の検索欄のクリアボタンがずれているのを修正 
+	* style/mobile/mobile.css: iPhone 表示にて検索ボックスの文字が表示されないのを修正 
+	* req/Core/Visualizer.php,
+	  req/Visualizer/mobile/Index/Index.php,
+	  script/mobile/Index/Index.js: iPhone 表示で最初に表示した作品集以外を並べ替えできないのを修正 
+	* req/Handler/Index.php,
+	  req/Handler/Megalith.php,
+	  req/Handler/Util.php,
+	  req/Model/ThreadEntry.php,
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/Template/Index.php,
+	  req/Visualizer/mobile/Read/Index.php: 更新日時の取得タイミング変更時不要になっていた関数の削除 
+	* req/Core/Visualizer.php,
+	  req/Handler/Megalith.php: Megalith 形式出力の文字コードが UTF-8 になっているのを修正 
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Visualizer/Read/Index.php,
+	  style/style.css: 本文がページ分割されている場合コメントを最後のページのみに表示するオプションを追加 
+	* style/style.css: 作品画面でページャが表示されている場合コメントまたは評価フォームのヘッダテキストが消えるのを修正 
+	* req/Core/Util.php,
+	  req/Visualizer/mobile/Index/Index.php,
+	  req/Visualizer/mobile/Read/Index.php,
+	  req/Visualizer/simple/Read/Index.php: 文字列の長さ判定処理の高速化 
+	* req/Handler/Read.php: 編集画面で Cookie に保存されている名前で上書きされるのを修正 
+	* req/Visualizer/Template/Index.php,
+	  style/style.css: テーブル表示において概要がない作品にも概要リンクが表示されているのを修正 
+	* req/Core/Util.php: Megalith ログの行読み込み処理の変更 
+	* req/App.php,
+	  req/Core/Configuration.php: pdo_sqlite がない時に設定を変更しても起動できないのを修正 
+	* req/App.php,
+	  req/Core/Util.php,
+	  req/Handler/Util.php,
+	  req/Model/ThreadEntry.php: Megalith 形式ログ取り扱いにおいて改行文字を環境に関わらず CRLF 両方トリムするように 
+	* req/App.php,
+	  req/Core/Util.php,
+	  req/Handler/Util.php,
+	  req/Model/ThreadEntry.php: 変換の文字コード指定を調整 
+	* req/Core/Visualizer.php: CSV 出力の文字コード調整 
+	* req/Core/Visualizer.php,
+	  req/Handler/Megalith.php: Megalith 形式出力の文字コード調整 
+	* req/Handler/Megalith.php: Megalith 形式出力にてコメント出力の改行の取り扱いを強化 
+	* req/Core/Util.php,
+	  req/Handler/Index.php: キャッシュマニフェストの形式を変更 
+	* style/mobile/mobile.css: iPhone 表示にてコメント送信ボタンがずれているのを修正 
+	* req/Core/Visualizer.php,
+	  script/mobile/base.js: iPhone 表示にて Megalopolis ディレクトリ配下以外の同一ドメイン上のファイルを参照できるのをを修正 (thanks to スレ 2 >>813) 
+	* req/Visualizer/Template/Index.php: 作品名および作者名が非表示設定の場合管理者ログイン時表示される時テーブル表示においてタグ行の幅が足りないのを修正 
+	* req/Visualizer/Read/Index.php: 設定に関わらず管理者ログインでコメント一覧が表示されるように 
+
+2012-09-11 COAH96KoxU <queue glasscore.net>
 	
 	* req/App.php: release 18
 	* req/Handler/Util.php: 上書き変換時に上書きされないのを修正
