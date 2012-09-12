@@ -9,13 +9,6 @@ $.extend(megalopolis,
 		
 		$(document.body).css("minHeight", this.minHeight = portrait ? 460 - 44 : 268);
 	},
-	resetPage: function(cls, id, skipFirst)
-	{
-		var selector = "." + cls + "[id!='" + id + "']";
-		var c = 0;
-		
-		$(selector).one("pagehide", function() { if (!skipFirst || c++) $(selector).remove(); });
-	},
 	getHistory: function()
 	{
 		var rt = this.cookie("History");

@@ -568,19 +568,25 @@ li.ui-li.ui-btn-hover-c *
 
 .read .content
 {
+	overflow-x: scroll;
+	-webkit-overflow-scrolling: touch;
+	direction: rtl;
+	unicode-bidi: bidi-override;
 	background-color: rgba(245, 245, 245, 0.5);
 }
 
 .contentWrapper
 {
 	margin: 0px;
-	padding: 24px 0px 24px 16px;
+	padding: 24px;
 	color: #000000;
-	font-family: "HGP明朝B", "Hiragino Mincho Pro W3", "Hiragino Kaku Gothic Pro W3", "ＭＳ 明朝", serif;
+	font-family: "@HGP明朝B", 'Hiragino Mincho ProN', "@ＭＳ 明朝", serif;
 	box-sizing: border-box;
-	-webkit-box-sizing: border-box;
+	-webkit-writing-mode: vertical-rl;
+	-webkit-text-orientation: mixed-right;
+	direction: ltr;
 	text-shadow: none;
-	overflow: hidden;
+	line-height: 200%;
 }
 
 .contentWrapper h1
@@ -601,39 +607,16 @@ li.ui-li.ui-btn-hover-c *
 .contentWrapper address
 {
 	margin-right: 4px;
-	text-align: right;
+	font-size: 80%;
 	font-style: normal;
 }
 
-.contentWrapper .page
+.contentWrapper footer
 {
-	position: relative;
-	float: right;
-	margin: 0px;
-	padding: 0px 8px 0px 8px;
-	height: 100%;
-	-webkit-box-sizing: border-box;
-}
-
-.contentWrapper .page .pageNumber
-{
-	position: absolute;
-	right: 9px;
-	top: -18px;
-	font-size: 10px;
-}
-
-.contentWrapper .page .title
-{
-	position: absolute;
-	left: 9px;
-	top: -18px;
-	width: 90%;
-	font-size: 10px;
+	margin-right: 64px;
+	padding-right: 64px;
+	border-right: #666666 solid 1px;
 	color: #666666;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
 }
 
 .read#rhome .ui-header h1.ui-title
@@ -878,10 +861,12 @@ form.read .ui-listview .ui-li:last-child
 			color-stop(0.965, #abb7bf),
 		to(#81929f));
 	background-size: 100% 44px;
+	height: 41px;
 }
 
 .ui-header .ui-navbar .ui-controlgroup.ui-controlgroup-horizontal
 {
+	margin-top: 6px;
 	border-radius: 5px;
 }
 

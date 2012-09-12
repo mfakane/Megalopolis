@@ -41,20 +41,13 @@ Visualizer::doctype();
 </head>
 <body>
 	<?if ($m == "h"): ?>
-		<div id="rhome" data-role="page" data-fullscreen="true" class="read">
+		<div id="rhome" data-role="page" data-fullscreen="true" class="read" data-id="<?+$h->entry->id ?>">
 			<script>
-				megalopolis.resetPage("index", "", true);
-				megalopolis.resetPage("read", "rhome");
 				megalopolis.addHistory(<?+$h->entry->id ?>, <?+$h->entry->subject ?>, '<?+$h->entry->title ?>', '<?+$h->entry->name ?>');
 			</script>
 			<header data-role="header" data-position="fixed" data-backbtn="false" data-theme="b">
 				<h1><?+$h->entry->title ?></h1>
-				<h2 class="currentPage"></h2>
 				<a href="<?+Visualizer::absoluteHref($h->entry->subject) ?>" data-direction="reverse">戻る</a>
-				<div data-role="controlgroup" data-type="horizontal" class="ui-btn-right">
-					<button class="nextPageButton" data-theme="b">次頁</button>
-					<button class="previousPageButton" data-theme="b">前頁</button>
-				</div>
 			</header>
 			<div data-role="content" data-theme="e">
 				<div class="content">
@@ -78,7 +71,6 @@ Visualizer::doctype();
 							<? Visualizer::convertedBody($h->thread) ?>
 						</div>
 						<footer>
-							<h2>あとがき</h2>
 							<? Visualizer::convertedAfterword($h->thread) ?>
 							<?if ($c->showName[Configuration::ON_ENTRY]): ?>
 								<address>
@@ -95,15 +87,11 @@ Visualizer::doctype();
 				</div>
 			</footer>
 			<script>
-				megalopolis.read.baseHtml = null;
 				megalopolis.read.renderPage();
 			</script>
 		</div>
 	<?elseif ($m == "c"): ?>
 		<div id="rcomments" data-role="page" class="read fulllist">
-			<script>
-				megalopolis.resetPage("read", "rcomments");
-			</script>
 			<header data-role="header" data-backbtn="false">
 				<h1>コメント</h1>
 				<?if ($c->useComments): ?>
@@ -139,7 +127,6 @@ Visualizer::doctype();
 	<?elseif ($m == "p"): ?>
 		<form id="rpost" data-role="page" class="read fulllist" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::absoluteHref($h->subject, $h->entry->id, "comment")) ?>" action="post">
 			<script>
-				megalopolis.resetPage("read", "rpost");
 				$("#rpost").one("pageshow", function() { megalopolis.read.adjustTextBox('<?=Visualizer::absoluteHref($h->subject, $h->entry->id, "c") ?>'); });
 			</script>
 			<header data-role="header" data-backbtn="false">
@@ -191,9 +178,6 @@ Visualizer::doctype();
 		</form>
 	<?else: ?>
 		<div id="rinfo" data-role="page" class="read">
-			<script>
-				megalopolis.resetPage("read", "rinfo");
-			</script>
 			<header data-role="header" data-backbtn="false">
 				<h1>情報</h1>
 			</header>
