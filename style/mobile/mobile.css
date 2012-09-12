@@ -931,3 +931,8 @@ form.read .ui-listview .ui-li:last-child
 {
 	border-right-width: 1px;
 }
+
+.ui-loader .ui-icon
+{
+	background: transparent url('http://code.jquery.com/mobile/1.2.0-beta.1/images/ajax-loader.gif');
+}

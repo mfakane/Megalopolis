@@ -50,7 +50,11 @@ $.extend(megalopolis,
 $(document)
 	.bind("mobileinit", function()
 	{	
-		$.mobile.defaultPageTransition = "slide";
+		$.extend($.mobile, 
+		{
+			pageLoadErrorMessage: "ページの読み込みに失敗しました",
+			defaultPageTransition: "slide",
+		});
 	})
 	.bind("pagebeforeload", function(e, data)
 	{
