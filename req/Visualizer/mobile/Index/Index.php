@@ -126,7 +126,6 @@ Visualizer::doctype();
 	<title>
 		<?+$c->title ?>
 	</title>
-	<script src="<?+Visualizer::actionHref("script", "nehan", "nehan2-min.js") ?>"></script>
 	<script src="<?+Visualizer::actionHref("script", "mobile", "Index", "Index.js") ?>"></script>
 	<script src="<?+Visualizer::actionHref("script", "mobile", "Read", "Index.js") ?>"></script>
 </head>
