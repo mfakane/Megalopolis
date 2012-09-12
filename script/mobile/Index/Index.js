@@ -45,8 +45,8 @@ megalopolis.index =
 			
 			var aside = $(".ui-li-aside");
 			
-			aside.children("span", ul).css("display", "none");
-			aside.children("." + sort, ul).css("display", "inline");
+			aside.children("span", ul).not(".dateTime").css("display", "none");
+			aside.children("." + (["title", "name", "dateTime"].indexOf(sort) == -1 ? sort : "evaluationCount"), ul).css("display", "inline");
 		}
 	},
 	timeToString: function(time)

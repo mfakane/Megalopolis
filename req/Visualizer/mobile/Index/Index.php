@@ -51,12 +51,12 @@ function entries($h, $c)
 				<a href="<?+Visualizer::actionHref($i->subject, $i->id) ?>">
 					<h2 class="title"><?+$i->title?></h2>
 					<p class="ui-li-aside">
+						<? entryInfo("dateTime", Visualizer::formatShortDateTime($i->dateTime)) ?><br />
 						<?if ($c->showSize[Configuration::ON_SUBJECT]) entryInfo("size", "{$i->size}KB") ?>
 						<?if ($c->showComment[Configuration::ON_SUBJECT]) entryInfo("commentCount", $i->commentCount) ?>
 						<?if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfo("evaluationCount", $c->pointMap && $c->commentPointMap ? "{$i->commentedEvaluationCount}/{$i->evaluationCount}" : $i->evaluationCount) ?>
 						<?if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfo("points", $i->points) ?>
 						<?if ($c->showRate[Configuration::ON_SUBJECT]) entryInfo("rate", sprintf("%.2f", $i->rate)) ?>
-						<? entryInfo("dateTime", Visualizer::formatShortDateTime($i->dateTime)) ?>
 					</p>
 					<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
 						<p class="name"><? Visualizer::convertedName($i->name) ?></p>
@@ -258,24 +258,14 @@ Visualizer::doctype();
 				<ul data-role="listview">
 					<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
 						<? sortMenu($h, "作品名", "title") ?>
-						<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
-							<? sortMenu($h, "作者", "name") ?>
+						<?if ($c->showName[Configuration::ON_SUBJECT]) sortMenu($h, "作者", "name") ?>
+						<?if ($c->showSize[Configuration::ON_SUBJECT]) sortMenu($h, "サイズ", "size") ?>
+						<?if ($c->showComment[Configuration::ON_SUBJECT]) sortMenu($h, "コメント数", "commentCount") ?>
+						<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
+							<? sortMenu($h, "評価数", "evaluationCount") ?>
+							<? sortMenu($h, "POINT", "points") ?>
 						<?endif ?>
-						<?if ($c->showSize[Configuration::ON_SUBJECT]): ?>
-							<? sortMenu($h, "サイズ", "size") ?>
-						<?endif ?>
-						<?if ($c->showComment[Configuration::ON_SUBJECT]): ?>
-							<? sortMenu($h, "コメント数", "commentCount") ?>
-						<?endif ?>
-						<?if ($c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
-							<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-								<? sortMenu($h, "評価数", "evaluationCount") ?>
-								<? sortMenu($h, "POINT", "points") ?>
-							<?endif ?>
-							<?if ($c->showRate[Configuration::ON_SUBJECT]): ?>
-								<? sortMenu($h, "Rate", "rate") ?>
-							<?endif ?>
-						<?endif ?>
+						<?if ($c->showRate[Configuration::ON_SUBJECT]) sortMenu($h, "Rate", "rate") ?>
 						<? sortMenu($h, "投稿日時", "dateTime") ?>
 					<?endif ?>
 				</ul>

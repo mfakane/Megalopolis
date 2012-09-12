@@ -542,6 +542,7 @@ li.ui-li.ui-btn-hover-c *
 .entries .ui-li-aside>span.dateTime
 {
 	display: inline;
+	color: #666666;
 }
 
 .name
