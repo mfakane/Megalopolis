@@ -252,6 +252,11 @@ Visualizer::doctype();
 							<h2>PC 版表示</h2>
 						</a>
 					</li>
+					<li>
+						<a href="<?+Visualizer::actionHref(array("visualizer" => "simple")) ?>" rel="external">
+							<h2>携帯表示</h2>
+						</a>
+					</li>
 				</ul>
 			</div>
 			<footer data-role="footer" data-position="fixed" data-id="homeTab">
