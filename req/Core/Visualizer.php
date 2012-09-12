@@ -843,9 +843,12 @@ class Visualizer
 	 * @param string $mbencoding
 	 * @return mixed
 	 */ 
-	static function text($content, $encoding = "UTF-8", $mbencoding = "UTF8")
+	static function text($content, $encoding = "UTF-8", $mbencoding = null)
 	{
 		Auth::commitSession();
+		
+		if (!$mbencoding)
+			$mbencoding = $encoding;
 		
 		mb_http_output($mbencoding);
 		header("Content-Type: text/plain; charset={$encoding}");

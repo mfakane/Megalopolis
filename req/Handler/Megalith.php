@@ -70,7 +70,7 @@ class MegalithHandler extends Handler
 			
 			App::closeDB($db);
 			
-			return Visualizer::text($content, "Shift_JIS");
+			return Visualizer::text($content, "Shift_JIS", "Windows-31J");
 		}
 		else
 			throw new ApplicationException("ファイルが見つかりません", 404);
@@ -216,9 +216,9 @@ class MegalithHandler extends Handler
 			App::closeDB($db);
 			
 			if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
-				return Visualizer::text(str_replace("\r\n", "\n", Visualizer::escapeAfterword($thread)), "Shift_JIS");
+				return Visualizer::text(str_replace("\r\n", "\n", Visualizer::escapeAfterword($thread)), "Shift_JIS", "Windows-31J");
 			else
-				return Visualizer::text("", "Shift_JIS");
+				return Visualizer::text("", "Shift_JIS", "Windows-31J");
 		}
 		else
 			throw new ApplicationException("ファイルが見つかりません", 404);
