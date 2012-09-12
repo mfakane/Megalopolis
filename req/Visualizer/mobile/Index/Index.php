@@ -2,7 +2,10 @@
 $c = &Configuration::$instance;
 $h = &IndexHandler::$instance;
 $d = &Visualizer::$data;
-$basePath = App::$actionName == "index" ? Visualizer::absoluteHref($h->subject) : Visualizer::absoluteHref(App::$actionName, $d);
+$basePath = App::$actionName == "index" ? Visualizer::actionHref($h->subject) : Visualizer::actionHref(App::$actionName, $d);
+
+global $m;
+
 $m = App::$actionName == "search" ? "s" : (App::$pathInfo ? Util::escapeInput(App::$pathInfo[count(App::$pathInfo) - 1]) : "h");
 
 if (!Util::isLength($m, 1) || intval($m))
@@ -23,12 +26,19 @@ function makeMenu($basePath, $current)
 		list($n, $i) = explode(", ", $v);
 	?>
 		<li>
-			<a href="<?+Visualizer::absoluteHref($k) ?>" data-transition="none"<?if ($k == $current): ?> class="ui-btn-active"<?endif ?> data-icon="<?=$i ?>"><?+$n ?></a>
+			<a href="<?+Visualizer::actionHref($k) ?>" data-transition="none"<?if ($k == $current): ?> class="ui-btn-active"<?endif ?> data-icon="<?=$i ?>"><?+$n ?></a>
 		</li>
 	<?php
 	}
 	
 	echo '</ul>';
+}
+
+function entryInfo($columnName, $value)
+{
+	?>
+	<span class="<?=$columnName ?>"><?+$value ?></span>
+	<?php
 }
 
 function entries($h, $c)
@@ -38,23 +48,15 @@ function entries($h, $c)
 	?>
 		<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
 			<li>
-				<a href="<?+Visualizer::absoluteHref($i->subject, $i->id) ?>">
+				<a href="<?+Visualizer::actionHref($i->subject, $i->id) ?>">
 					<h2 class="title"><?+$i->title?></h2>
 					<p class="ui-li-aside">
-						<?if ($c->showSize[Configuration::ON_SUBJECT]): ?>
-							<span class="size"><?+$i->size ?>KB</span>
-						<?endif ?>
-						<?if ($c->showComment[Configuration::ON_SUBJECT]): ?>
-							<span class="commentCount"><?+$i->commentCount ?></span>
-						<?endif ?>
-						<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-							<span class="evaluationCount"><?+$c->pointMap && $c->commentPointMap ? "{$i->commentedEvaluationCount}/{$i->evaluationCount}" : $i->evaluationCount ?></span>
-							<span class="points"><?+$i->points ?></span>
-						<?endif ?>
-						<?if ($c->showRate[Configuration::ON_SUBJECT]): ?>
-							<span class="rate"><?+sprintf("%.2f", $i->rate) ?></span>
-						<?endif ?>
-						<span class="dateTime"><?+Visualizer::formatShortDateTime($i->dateTime) ?></span>
+						<?if ($c->showSize[Configuration::ON_SUBJECT]) entryInfo("size", "{$i->size}KB") ?>
+						<?if ($c->showComment[Configuration::ON_SUBJECT]) entryInfo("commentCount", $i->commentCount) ?>
+						<?if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfo("evaluationCount", $c->pointMap && $c->commentPointMap ? "{$i->commentedEvaluationCount}/{$i->evaluationCount}" : $i->evaluationCount) ?>
+						<?if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfo("points", $i->points) ?>
+						<?if ($c->showRate[Configuration::ON_SUBJECT]) entryInfo("rate", sprintf("%.2f", $i->rate)) ?>
+						<? entryInfo("dateTime", Visualizer::formatShortDateTime($i->dateTime)) ?>
 					</p>
 					<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
 						<p class="name"><? Visualizer::convertedName($i->name) ?></p>
@@ -73,6 +75,17 @@ function entries($h, $c)
 		<?endif ?>
 	<?php
 	}
+}
+
+function sortMenu($h, $label, $columnName)
+{
+	?>
+	<li>
+		<a href="javascript:void(0);" onclick="megalopolis.index.setSort('<?+$columnName ?>'); history.back();">
+			<h2><?+$label ?></h2>
+		</a>
+	</li>
+	<?php
 }
 
 if (App::$actionName == "tag")
@@ -156,7 +169,7 @@ Visualizer::doctype();
 			<div data-role="content">
 				<ul data-role="listview" class="entries">
 					<script>
-						megalopolis.index.renderHistory('<?+Visualizer::absoluteHref() ?>');
+						megalopolis.index.renderHistory('<?+Visualizer::actionHref() ?>');
 					</script>
 				</ul>
 			</div>
@@ -170,13 +183,13 @@ Visualizer::doctype();
 		<div id="subjects" data-role="page" class="index fulllist">
 			<header data-role="header" data-backbtn="false">
 				<h1>作品集</h1>
-				<a href="<?+Visualizer::absoluteHref($h->subject) ?>" class="ui-btn-right">戻る</a>
+				<a href="<?+Visualizer::actionHref($h->subject) ?>" class="ui-btn-right">戻る</a>
 			</header>
 			<div data-role="content">
 				<ul data-role="listview">
 					<?foreach (range($h->subjectCount, 1, -1) as $i): ?>
 						<li>
-							<a href="<?+Visualizer::absoluteHref($i) ?>">
+							<a href="<?+Visualizer::actionHref($i) ?>">
 								<h2><?+$i == $h->subjectCount ? "最新作品集" : "作品集 {$i}"?></h2>
 							</a>
 						</li>
@@ -197,12 +210,12 @@ Visualizer::doctype();
 						</a>
 					</li>
 					<li>
-						<a href="<?+Visualizer::absoluteHref("random") ?>">
+						<a href="<?+Visualizer::actionHref("random") ?>">
 							<h2>おまかせ表示</h2>
 						</a>
 					</li>
 					<li>
-						<a href="<?+Visualizer::absoluteHref(array("visualizer" => "normal")) ?>" rel="external">
+						<a href="<?+Visualizer::actionHref(array("visualizer" => "normal")) ?>" rel="external">
 							<h2>PC 版表示</h2>
 						</a>
 					</li>
@@ -237,9 +250,6 @@ Visualizer::doctype();
 	<?endif ?>
 	<?if ($m == "h" || $m == "s"): ?>
 		<div id="sort" data-role="page" class="index fulllist">
-			<script>
-				megalopolis.index.setSortMenu();
-			</script>
 			<header data-role="header" data-backbtn="false">
 				<h1>並べ替え</h1>
 				<a href="#" data-rel="back">戻る</a>
@@ -247,58 +257,26 @@ Visualizer::doctype();
 			<div data-role="content">
 				<ul data-role="listview">
 					<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
-						<li>
-							<a href="#sort-title">
-								<h2>作品名</h2>
-							</a>
-						</li>
+						<? sortMenu($h, "作品名", "title") ?>
 						<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
-							<li>
-								<a href="#sort-name">
-									<h2>作者</h2>
-								</a>
-							</li>
+							<? sortMenu($h, "作者", "name") ?>
 						<?endif ?>
 						<?if ($c->showSize[Configuration::ON_SUBJECT]): ?>
-							<li>
-								<a href="#sort-size">
-									<h2>サイズ</h2>
-								</a>
-							</li>
+							<? sortMenu($h, "サイズ", "size") ?>
 						<?endif ?>
 						<?if ($c->showComment[Configuration::ON_SUBJECT]): ?>
-								<li>
-									<a href="#sort-commentCount">
-										<h2>コメント数</h2>
-									</a>
-								</li>
-							<?endif ?>
+							<? sortMenu($h, "コメント数", "commentCount") ?>
+						<?endif ?>
 						<?if ($c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
 							<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-								<li>
-									<a href="#sort-evaluationCount">
-										<h2>評価数</h2>
-									</a>
-								</li>
-								<li>
-									<a href="#sort-points">
-										<h2>POINT</h2>
-									</a>
-								</li>
+								<? sortMenu($h, "評価数", "evaluationCount") ?>
+								<? sortMenu($h, "POINT", "points") ?>
 							<?endif ?>
 							<?if ($c->showRate[Configuration::ON_SUBJECT]): ?>
-								<li>
-									<a href="#sort-rate">
-										<h2>Rate</h2>
-									</a>
-								</li>
+								<? sortMenu($h, "Rate", "rate") ?>
 							<?endif ?>
 						<?endif ?>
-						<li>
-							<a href="#sort-dateTime">
-								<h2>投稿日時</h2>
-							</a>
-						</li>
+						<? sortMenu($h, "投稿日時", "dateTime") ?>
 					<?endif ?>
 				</ul>
 			</div>

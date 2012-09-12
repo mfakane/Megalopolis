@@ -403,7 +403,12 @@ class Visualizer
 	
 	static function absoluteHref()
 	{
-		return Util::getAbsoluteUrl(self::href(func_get_args()));
+		return self::absoluteHrefArray(func_get_args());
+	}
+	
+	static function absoluteHrefArray($args)
+	{
+		return Util::getAbsoluteUrl(self::href($args));
 	}
 	
 	static function noCache()
