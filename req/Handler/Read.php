@@ -158,13 +158,7 @@ class ReadHandler extends Handler
 			!($type = Util::hashEquals($this->thread->hash, $login)))
 			Auth::loginError("編集キーが一致しません");
 		
-		if (!$_POST)
-		{
-			$this->entry->name = Cookie::getCookie(Cookie::NAME_KEY);
-			$this->entry->mail = Cookie::getCookie(Cookie::MAIL_KEY);
-			$this->entry->link = Cookie::getCookie(Cookie::LINK_KEY);
-		}
-		else
+		if ($_POST)
 		{
 			Cookie::setCookie(Cookie::NAME_KEY, self::param("name"));
 			Cookie::setCookie(Cookie::MAIL_KEY, self::param("mail"));
