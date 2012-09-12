@@ -1016,7 +1016,7 @@ form[action="unpost"] button:active img, button.unpost:active img
 	margin-top: -22px;
 }
 
-#body+#links
+#body+#links, .pagerContainer+#links
 {
 	margin-top: 50px;
 }
