@@ -123,7 +123,7 @@ Visualizer::doctype();
 			<?+$h->page ?> ページ目のプレビューです
 		</p>
 	<?endif ?>
-	<? Visualizer::pager($h->page, $h->entry->pageCount, 5, App::$actionName != "index"
+	<? Visualizer::pager($h->page, $h->entry->pageCount, 10, App::$actionName != "index"
 		? (App::$actionName == "new" ? Visualizer::actionHref(App::$actionName) . "/" : Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName, array("p" => "")))
 		: Visualizer::actionHref($h->subject, $h->entry->id) . "/") ?>
 	<section id="body">
@@ -198,7 +198,7 @@ Visualizer::doctype();
 			</div>
 		</div>
 	</section>
-	<? Visualizer::pager($h->page, $h->entry->pageCount, 5, App::$actionName != "index"
+	<? Visualizer::pager($h->page, $h->entry->pageCount, 10, App::$actionName != "index"
 		? (App::$actionName == "new" ? Visualizer::actionHref(App::$actionName) . "/" : Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName, array("p" => "")))
 		: Visualizer::actionHref($h->subject, $h->entry->id) . "/") ?>
 	<?if ($isEdit): ?>
