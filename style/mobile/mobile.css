@@ -828,6 +828,7 @@ form.read .ui-listview .ui-li:last-child
 {
 	padding: 4px 0px 4px 0px;
 	text-shadow: none;
+	color: #000000;
 }
 
 .ui-input-search .ui-btn
