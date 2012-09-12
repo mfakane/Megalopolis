@@ -85,7 +85,7 @@ class IndexHandler extends Handler
 		
 		if (!$this->lastUpdate)
 		{
-			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLastUpdate();'), $this->entries) + array(0));
+			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->responseLastUpdate;'), $this->entries) + array(0));
 		
 			if ($this->lastUpdate && Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY)))
 				return Visualizer::notModified();

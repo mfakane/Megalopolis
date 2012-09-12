@@ -141,7 +141,7 @@ class ThreadEntry
 			"link" => $c->showName[Configuration::ON_ENTRY] ? $this->link : null,
 			"mail" => $c->showName[Configuration::ON_ENTRY] ? $this->mail : null,
 			"dateTime" => intval($this->dateTime),
-			"lastUpdate" => $this->getLastUpdate(),
+			"lastUpdate" => $this->responseLastUpdate,
 			"pageCount" => $c->showPages[Configuration::ON_ENTRY] ? intval($this->pageCount) : null,
 			"size" => $c->showSize[Configuration::ON_ENTRY] ? intval($this->size) : null,
 			"points" => $c->showPoint[Configuration::ON_ENTRY] ? intval($this->points) : null,
@@ -150,11 +150,6 @@ class ThreadEntry
 			"evaluationCount" => $c->showPoint[Configuration::ON_ENTRY] ? intval($this->evaluationCount) : null,
 			"readCount" => $c->showReadCount[Configuration::ON_ENTRY] ? intval($this->readCount) : null
 		);
-	}
-
-	function getLastUpdate()
-	{
-		return max($this->lastUpdate, $this->responseLastUpdate);
 	}
 	
 	function incrementReadCount(PDO $db)

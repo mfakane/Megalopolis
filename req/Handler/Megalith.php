@@ -40,7 +40,7 @@ class MegalithHandler extends Handler
 				if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
 				{
 					$entries = ThreadEntry::getEntriesBySubject($db, $subject);
-					$lastUpdate = max(array_map(create_function('$_', 'return $_->getLastUpdate();'), $entries) + array(0));
+					$lastUpdate = max(array_map(create_function('$_', 'return $_->responseLastUpdate;'), $entries) + array(0));
 				
 					if (Util::isCachedByBrowser($lastUpdate))
 						return Visualizer::notModified();
@@ -55,7 +55,7 @@ class MegalithHandler extends Handler
 						Configuration::$instance->showComment[Configuration::ON_SUBJECT] ? "{$_->commentedEvaluationCount}/{$_->responseCount}" : "0/0",
 						Configuration::$instance->showPoint[Configuration::ON_SUBJECT] ? $_->points : "0",
 						Configuration::$instance->showRate[Configuration::ON_SUBJECT] ? $_->rate : "0",
-						date("Y/m/d H:i:s", $_->getLastUpdate()),
+						date("Y/m/d H:i:s", $_->responseLastUpdate),
 						"",
 						"",
 						"",
@@ -118,7 +118,7 @@ class MegalithHandler extends Handler
 						$c->showPoint[Configuration::ON_COMMENT] ? "{$_->commentedEvaluationCount}/{$_->responseCount}" : "0",
 						$c->showPoint[Configuration::ON_ENTRY] ? $_->points : "0",
 						$c->showRate[Configuration::ON_ENTRY] ? $_->rate : "0",
-						date("Y/m/d H:i:s", $_->getLastUpdate()),
+						date("Y/m/d H:i:s", $_->responseLastUpdate),
 						"",
 						!Util::isEmpty($thread->backgroundImage) ? $thread->backgroundImage : $thread->background,
 						$thread->foreground,
