@@ -223,14 +223,14 @@ header .ui-btn[data-theme="b"] .ui-btn-inner
 .ui-header .ui-btn-left
 {
 	position: absolute;
-	left: 10px;
+	left: 5px;
 	top: .4em;
 }
 
 .ui-header .ui-btn-right
 {
 	position: absolute;
-	right: 10px;
+	right: 5px;
 	top: .4em;
 }
 
@@ -805,7 +805,7 @@ form.read .ui-listview .ui-li:last-child
 
 .ui-header .searchcontainer
 {
-	margin: 0px 88px 0px 0px;
+	margin: 0px 83px 0px 0px;
 	padding: 6px;
 }
 
@@ -865,4 +865,69 @@ form.read .ui-listview .ui-li:last-child
 #search>header>h1
 {
 	display: none;
+}
+
+.ui-header .ui-navbar
+{
+	margin: 1px 0px -1px 0px;
+	padding: 1px 5px 2px 5px;
+	border-top: #2d3642 1px solid;
+	background-image: -webkit-gradient(linear, left top, left bottom,
+		from(#ccddd9),
+			color-stop(0.04, #c0c9cf),
+			color-stop(0.965, #abb7bf),
+		to(#81929f));
+	background-size: 100% 44px;
+}
+
+.ui-header .ui-navbar .ui-controlgroup.ui-controlgroup-horizontal
+{
+	border-radius: 5px;
+}
+
+.ui-header .ui-navbar .ui-controlgroup-controls .ui-btn
+{
+	border-right-width: 0px;
+	border-color: #637282 #6d7e91 #708194 #6d7e91;
+	color: #446187;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#d4dbdf), to(#b4bec6));
+	text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.5);
+}
+
+.ui-header .ui-navbar .ui-controlgroup-controls .ui-btn-inner
+{
+	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
+}
+
+.ui-header .ui-navbar .ui-controlgroup-controls .ui-btn.ui-radio-on, .ui-header .ui-navbar .ui-controlgroup-controls .ui-btn.ui-btn-down-a
+{
+	border-color: #41536d #566480 #4b5f7c #566480;
+	color: #ffffff;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#8795a9), to(#677a94));
+	text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.5);
+}
+
+.ui-header .ui-navbar .ui-controlgroup-horizontal .ui-controlgroup-controls
+{
+	display: block;
+}
+
+.ui-header .ui-navbar .items2 .ui-radio
+{
+	width: 50%;
+}
+
+.ui-header .ui-navbar .items3 .ui-radio
+{
+	width: 33%;
+}
+
+.ui-header .ui-navbar .items4 .ui-radio
+{
+	width: 25%;
+}
+
+.ui-header .ui-navbar .ui-controlgroup-controls .ui-btn.ui-controlgroup-last
+{
+	border-right-width: 1px;
 }

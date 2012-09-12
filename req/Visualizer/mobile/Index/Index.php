@@ -3,6 +3,18 @@ $c = &Configuration::$instance;
 $h = &IndexHandler::$instance;
 $d = &Visualizer::$data;
 $basePath = App::$actionName == "index" ? Visualizer::actionHref($h->subject) : Visualizer::actionHref(App::$actionName, $d);
+$searchMode = "query";
+$search = "";
+
+if (App::$actionName == "search")
+	if (!is_null($search = IndexHandler::param("query")))
+		$searchMode = "query";
+	else if (!is_null($search = IndexHandler::param("title")))
+		$searchMode = "title";
+	else if (!is_null($search = IndexHandler::param("name")))
+		$searchMode = "name";
+	else if (!is_null($search = IndexHandler::param("tag")))
+		$searchMode = "tag";
 
 global $m;
 
@@ -140,12 +152,30 @@ Visualizer::doctype();
 				<h1>検索</h1>
 				<a href="#sort" class="ui-btn-right" data-transition="slideup">並べ替え</a>
 				<div class="searchcontainer">
-					<input type="search" placeholder="全体を検索" name="query" value="<?+IndexHandler::param("query") ?>" />
+					<input type="search" placeholder="全体を検索" name="query" value="<?+$search ?>" />
 				</div>
+				<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
+					<div data-role="navbar">
+						<fieldset data-role="controlgroup" data-type="horizontal" class="items<?=(2 + $c->showName[Configuration::ON_SUBJECT] + $c->showTags[Configuration::ON_SUBJECT]) ?>">
+						     	<input type="radio" name="mode" id="modeQuery" value="query"<?=$searchMode == "query" ? ' checked="checked"' : null ?> />
+						     	<label for="modeQuery">全文</label>
+						     	<input type="radio" name="mode" id="modeTitle" value="title"<?=$searchMode == "title" ? ' checked="checked"' : null ?> />
+						     	<label for="modeTitle">作品名</label>
+						     	<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
+							     	<input type="radio" name="mode" id="modeName" value="name"<?=$searchMode == "name" ? ' checked="checked"' : null ?> />
+							     	<label for="modeName">作者名</label>
+						     	<?endif ?>
+								<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>
+							     	<input type="radio" name="mode" id="modeTag" value="tag"<?=$searchMode == "tag" ? ' checked="checked"' : null ?> />
+							     	<label for="modeTag">分類タグ</label>
+						     	<?endif ?>
+						</fieldset>
+					</div>
+				<?endif ?>
 			</header>
 			<div data-role="content">
 				<ul data-role="listview" class="entries">
-					<?if (IndexHandler::param("query")) entries($h, $c) ?>
+					<?if (!Util::isEmpty($search)) entries($h, $c) ?>
 					<?if ($h->page < $h->pageCount): ?>
 						<li class="nextpage">
 							<a href="<?+Visualizer::actionHref("search", array("query" => IndexHandler::param("query"), "p" => $h->page + 1)) ?>">
