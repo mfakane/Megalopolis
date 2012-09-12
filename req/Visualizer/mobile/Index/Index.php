@@ -286,29 +286,27 @@ Visualizer::doctype();
 			</footer>
 		</div>
 	<?endif ?>
-	<?if ($m == "h" || $m == "s"): ?>
-		<div id="sort" data-role="page" class="index fulllist">
-			<header data-role="header" data-backbtn="false">
-				<h1>並べ替え</h1>
-				<a href="#" data-rel="back">戻る</a>
-			</header>
-			<div data-role="content">
-				<ul data-role="listview">
-					<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
-						<? sortMenu($h, "作品名", "title") ?>
-						<?if ($c->showName[Configuration::ON_SUBJECT]) sortMenu($h, "作者", "name") ?>
-						<?if ($c->showSize[Configuration::ON_SUBJECT]) sortMenu($h, "サイズ", "size") ?>
-						<?if ($c->showComment[Configuration::ON_SUBJECT]) sortMenu($h, "コメント数", "commentCount") ?>
-						<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-							<? sortMenu($h, "評価数", "evaluationCount") ?>
-							<? sortMenu($h, "POINT", "points") ?>
-						<?endif ?>
-						<?if ($c->showRate[Configuration::ON_SUBJECT]) sortMenu($h, "Rate", "rate") ?>
-						<? sortMenu($h, "投稿日時", "dateTime") ?>
+	<div id="sort" data-role="page" class="index fulllist">
+		<header data-role="header" data-backbtn="false">
+			<h1>並べ替え</h1>
+			<a href="#" data-rel="back">戻る</a>
+		</header>
+		<div data-role="content">
+			<ul data-role="listview">
+				<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
+					<? sortMenu($h, "作品名", "title") ?>
+					<?if ($c->showName[Configuration::ON_SUBJECT]) sortMenu($h, "作者", "name") ?>
+					<?if ($c->showSize[Configuration::ON_SUBJECT]) sortMenu($h, "サイズ", "size") ?>
+					<?if ($c->showComment[Configuration::ON_SUBJECT]) sortMenu($h, "コメント数", "commentCount") ?>
+					<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
+						<? sortMenu($h, "評価数", "evaluationCount") ?>
+						<? sortMenu($h, "POINT", "points") ?>
 					<?endif ?>
-				</ul>
-			</div>
+					<?if ($c->showRate[Configuration::ON_SUBJECT]) sortMenu($h, "Rate", "rate") ?>
+					<? sortMenu($h, "投稿日時", "dateTime") ?>
+				<?endif ?>
+			</ul>
 		</div>
-	<?endif ?>
+	</div>
 </body>
 </html>
