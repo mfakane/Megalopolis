@@ -1138,6 +1138,11 @@ form[action="unpost"] button:active img, button.unpost:active img
 	width: 360px;
 }
 
+.edit textarea[name="body"]
+{
+	min-height: 420px;
+}
+
 .edit section p
 {
 	margin-top: -8px;
