@@ -8,7 +8,7 @@ if (App::$actionName == "comment")
 	$m = "p";
 else if (App::$pathInfo &&
 	isset(App::$pathInfo[2]) &&
-	strlen(App::$pathInfo[2]) == 1 &&
+	Util::isLength(App::$pathInfo[2], 1) &&
 	!intval(App::$pathInfo[2]))
 	$m = App::$pathInfo[2];
 else

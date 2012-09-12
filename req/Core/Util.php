@@ -374,7 +374,7 @@ class Util
 				if (!$stretch)
 					$stretch = mt_rand(10, 1000);
 				
-				if (strlen($salt) != 16)
+				if (!self::isLength($salt, 16))
 					throw new ApplicationException("salt must be 16 chars");
 				
 				$rt = $raw;
@@ -399,9 +399,9 @@ class Util
 		{
 			if (empty($hash))
 				return empty($raw);
-			else if (strlen($hash) == 13 && crypt($raw, mb_substr($hash, 0, 2)) == $hash)
+			else if (self::isLength($hash, 13) && crypt($raw, mb_substr($hash, 0, 2)) == $hash)
 				return self::HASH_TYPE_ANTHOLOGYS;
-			else if (strlen($hash) == 40 && sha1($raw) == $hash)
+			else if (self::isLength($hash, 40) == 40 && sha1($raw) == $hash)
 				return self::HASH_TYPE_MEGALITH;
 			else if (mb_substr($hash, 0, 1) == 1 && self::hash($raw, 1, mb_substr($hash, -16), intval(mb_substr($hash, 1, 4))) == $hash)
 				return self::HASH_TYPE_MEGALOPOLIS1;
@@ -555,7 +555,7 @@ class Util
 		{
 			$l = self::trimLineBreak(fgets($fp));
 			
-			if (($option & FILE_SKIP_EMPTY_LINES) && !strlen($l))
+			if (($option & FILE_SKIP_EMPTY_LINES) && self::isEmpty($l))
 				continue;
 			
 			$rt[] = $l;
@@ -820,6 +820,26 @@ class Util
 	static function isEmpty($str)
 	{
 		return !isset($str[0]);
+	}
+	
+	/**
+	 * @param string $str
+	 * @param int $length
+	 * @return bool
+	 */
+	static function isLength($str, $length)
+	{
+		return isset($str[$length - 1]) && !isset($str[$length]);
+	}
+	
+	/**
+	 * @param string $str
+	 * @param int $length
+	 * @return bool
+	 */
+	static function hasLength($str, $length)
+	{
+		return isset($str[$length - 1]);
 	}
 }
 ?>

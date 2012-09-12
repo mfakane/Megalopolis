@@ -3,7 +3,7 @@ $c = &Configuration::$instance;
 $h = &ReadHandler::$instance;
 $d = &Visualizer::$data;
 $basePath = Visualizer::absoluteHref($h->subject, $h->entry->id);
-$m = strlen(App::$pathInfo[$last = count(App::$pathInfo) - 1]) == 1 ? Util::escapeInput(App::$pathInfo[$last]) : "h";
+$m = Util::isLength(App::$pathInfo[$last = count(App::$pathInfo) - 1], 1) ? Util::escapeInput(App::$pathInfo[$last]) : "h";
 
 function makeMenu($basePath, $current)
 {

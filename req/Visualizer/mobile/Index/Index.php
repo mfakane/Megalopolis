@@ -5,7 +5,7 @@ $d = &Visualizer::$data;
 $basePath = App::$actionName == "index" ? Visualizer::absoluteHref($h->subject) : Visualizer::absoluteHref(App::$actionName, $d);
 $m = App::$actionName == "search" ? "s" : (App::$pathInfo ? Util::escapeInput(App::$pathInfo[count(App::$pathInfo) - 1]) : "h");
 
-if (strlen($m) != 1 || intval($m))
+if (!Util::isLength($m, 1) || intval($m))
 	$m = "h";
 
 function makeMenu($basePath, $current)
