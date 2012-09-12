@@ -572,7 +572,7 @@ section.entries
 	background: #ffffff;
 }
 
-.entries tbody tr.tags, .entries table tr.tags:hover
+.entries tbody .tags
 {
 	background: #efefef;
 }
@@ -583,7 +583,7 @@ section.entries
 	border-top: #999999 1px solid !important;
 }
 
-.entries tbody tr:hover, .entries table tr:hover+tr.tags
+.entries tbody .hasSummary:hover, .entries table .hasSummary:hover+.tags
 {
 	background: #f6f6f6;
 }

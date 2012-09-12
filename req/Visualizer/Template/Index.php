@@ -198,7 +198,7 @@ function entries($entries, $isAdmin, $listType = null)
 				</thead>
 				<tbody>
 					<?php foreach ($entries as $idx => $i): ?>
-						<tr class="article<?php if (!$c->showTags[Configuration::ON_SUBJECT] && Util::isEmpty($i->summary)) echo ' notags' ?>" id="article<?=$i->id ?>">
+						<tr class="article<?php if (!$c->showTags[Configuration::ON_SUBJECT] && Util::isEmpty($i->summary)) { echo ' notags'; } else if (!Util::isEmpty($i->summary)) { echo ' hasSummary'; } ?>" id="article<?=$i->id ?>">
 							<?php if ($isAdmin): ?>
 								<td class="checkbox">
 									<input type="checkbox" name="id[]" value="<?php Visualizer::converted($i->id) ?>" />
@@ -250,7 +250,9 @@ function entries($entries, $isAdmin, $listType = null)
 						<?php if ($c->showTags[Configuration::ON_SUBJECT] || !Util::isEmpty($i->summary)): ?>
 							<tr class="tags" id="tags<?=$i->id ?>">
 								<td colspan="<?php echo $spanWidth ?>">
-									<a href="javascript:void(0);" class="summaryButton">[概要]</a>
+									<?php if (!Util::isEmpty($i->summary)): ?>
+										<a href="javascript:void(0);" class="summaryButton">[概要]</a>
+									<?php endif ?>
 									<ul>
 										<?php if ($i->tags): ?>
 											<?php foreach ($i->tags as $j): ?>
