@@ -192,6 +192,7 @@ class Util
 			header("Last-Modified: " . gmdate("D, d M Y H:i:s T", $lastModified));
 		
 		header("ETag: " . $eTag);
+		header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
 		header("Cache-Control: private, max-age=0, pre-check=0, must-revalidate");
 		
 		return !Auth::hasSession()
