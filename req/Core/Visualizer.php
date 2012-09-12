@@ -731,9 +731,11 @@ class Visualizer
 	 * @param string $path
 	 * @param int $status
 	 * @param string $contentType
+	 * @param string $encoding [optional]
+	 * @param string $mbencoding [optional]
 	 * @return mixed
 	 */ 
-	static function visualize($path = null, $status = null, $contentType = null)
+	static function visualize($path = null, $status = null, $contentType = null, $encoding = null, $mbencoding = null)
 	{
 		Auth::commitSession();
 		
@@ -763,6 +765,8 @@ class Visualizer
 		
 		if ($contentType)
 			header("Content-Type: {$contentType}");
+		else if ($encoding)
+			header("Content-Type: text/html; charset={$encoding}");
 		else
 			header("Content-Type: text/html; charset=UTF-8");
 		
@@ -781,16 +785,17 @@ class Visualizer
 		$output = ob_get_contents();
 		ob_end_clean();
 		$output = mb_ereg_replace('[\t \r\n]+?<', '<', mb_ereg_replace('>[\t \r\n]+', '>', $output));
-		
-        header("Content-Type: text/html; charset=utf-8");
 
+		if ($mbencoding)
+			$output = mb_convert_encoding($output, $mbencoding, "UTF8");
+		
 		echo strtr($output, array
 		(
 			"<!DOCTYPE html>" => "<!DOCTYPE html>\r\n",
 			"__RENDER_TIME__" => round((microtime(true) - $start) * 1000, 2) . "ms",
 			"__PROCESS_TIME__" => round(($start - App::$startTime) * 1000, 2) . "ms"
 		));
-
+		
 		return true;
 	}
 	

@@ -235,7 +235,7 @@ class MegalithHandler extends Handler
 		if (Util::isCachedByBrowser(filemtime("config.php")))
 			return Visualizer::notModified();
 		
-		return Visualizer::visualize("Index/Settings.Ini", 200, "text/plain");
+		return Visualizer::visualize("Index/Settings.Ini", 200, "text/plain", "Shift_JIS", "Windows-31J");
 	}
 	
 	function parseQuery()
