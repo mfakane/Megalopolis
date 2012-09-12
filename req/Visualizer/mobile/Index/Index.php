@@ -55,6 +55,9 @@ function entryInfo($columnName, $value)
 
 function entries($h, $c)
 {
+	if (!$h->entries)
+		return;
+	
 	foreach ($h->entries as $i)
 	{
 	?>
