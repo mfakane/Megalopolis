@@ -813,6 +813,12 @@ form.read .ui-listview .ui-li:last-child
 	margin: 0px;
 }
 
+.ui-input-search .ui-input-clear.ui-btn-icon-notext
+{
+	margin-right: 5px;
+	width: 24px;
+}
+
 .ui-body-a.ui-input-search
 {
 	border: none;
