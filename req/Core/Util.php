@@ -548,10 +548,20 @@ class Util
 	
 	static function readLines($file, $option = 0)
 	{
-		$rt = array_map(array("self", "trimLineBreak"), file($file));
+		$rt = array();
+		$fp = fopen($file, "r");
 		
-		if ($option & FILE_SKIP_EMPTY_LINES)
-			$rt = array_filter($rt, "strlen");
+		while (!feof($fp))
+		{
+			$l = self::trimLineBreak(fgets($fp));
+			
+			if (($option & FILE_SKIP_EMPTY_LINES) && !strlen($l))
+				continue;
+			
+			$rt[] = $l;
+		}
+		
+		fclose($fp);
 		
 		return $rt;
 	}
