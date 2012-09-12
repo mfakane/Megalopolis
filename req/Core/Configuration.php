@@ -161,6 +161,7 @@ class Configuration
 	public $listType = self::LIST_DOUBLE;
 	public $updatePeriod = 3;
 	public $showHeaderInsideBorder = false;
+	public $showCommentsOnLastPageOnly = true;
 	public $defaultEvaluator = self::EVAL_POINT;
 	public $showTitle = array
 	(

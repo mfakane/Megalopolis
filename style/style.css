@@ -333,6 +333,11 @@ body>footer>ul:first-child+a
 	line-height: 16px;
 }
 
+.pagerContainer+footer
+{
+	margin-top: 32px;
+}
+
 .notify, .admin
 {
 	margin: 0px 0px 8px 0px;
@@ -1384,6 +1389,12 @@ body.index>h1, body.read>h1
 {
 	border: #999999 1px solid;
 	padding: 4px;
+}
+
+.read .commentIsOnLastPage
+{
+	margin-bottom: 8px;
+	color: #666666;
 }
 
 .read ul.options

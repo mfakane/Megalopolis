@@ -233,40 +233,11 @@ Visualizer::doctype();
 		</section>
 	<? else: ?>
 		<div id="links"></div>
-		<?if ($c->usePoints()): ?>
-			<a id="evaluateformHeadding" href="#evaluateform" class="first">簡易評価</a>
-			<form id="evaluateform" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "evaluate")) ?>#evaluateformHeadding" method="post">
-				<?if ($d && App::$actionName == "evaluate"): ?>
-					<ul class="notify warning">
-						<?foreach (Visualizer::$data as $i): ?>
-							<li>
-								<?+$i ?>
-							</li>
-						<?endforeach ?>
-					</ul>
-				<?endif ?>
-				<ul class="buttons">
-					<?foreach (array_reverse($c->pointMap) as $i): ?>
-						<li>
-							<input type="submit" name="point" value="<?+$i ?>" />
-						</li>
-					<?endforeach ?>
-				</ul>
-				<?if (!Util::isEmpty($c->postPassword)): ?>
-					<div>
-						<label for="postPassword">投稿キー</label><input type="password" name="postPassword" id="postPassword" />
-					</div>
-				<?endif ?>
-				<p>
-					点数のボタンをクリックしコメントなしで評価します。
-				</p>
-			</form>
-		<?endif ?>
-		<?if ($c->useComments): ?>
-			<a id="commentformHeadding" href="#commentform"<?if (!$c->usePoints()) echo 'class="first"' ?>>コメント</a>
-			<form id="commentform" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "comment")) ?>#commentformHeadding" method="post">
-				<div id="commentformContent">
-					<?if ($d && App::$actionName == "comment"): ?>
+		<?if (!$c->showCommentsOnLastPageOnly || $h->page == $h->entry->pageCount): ?>
+			<?if ($c->usePoints()): ?>
+				<a id="evaluateformHeadding" href="#evaluateform" class="first">簡易評価</a>
+				<form id="evaluateform" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "evaluate")) ?>#evaluateformHeadding" method="post">
+					<?if ($d && App::$actionName == "evaluate"): ?>
 						<ul class="notify warning">
 							<?foreach (Visualizer::$data as $i): ?>
 								<li>
@@ -275,164 +246,201 @@ Visualizer::doctype();
 							<?endforeach ?>
 						</ul>
 					<?endif ?>
-					<div>
-						<div>
-							<label for="name">名前</label><input type="text" name="name" id="name" value="<?+ReadHandler::param("name", Cookie::getCookie(Cookie::NAME_KEY)) ?>"<?=$c->requireName[Configuration::ON_COMMENT] ? 'required="required"' : null ?> /><br />
-							<label for="mail">メール</label><input type="email" name="mail" id="mail" value="<?+ReadHandler::param("mail", Cookie::getCookie(Cookie::MAIL_KEY)) ?>" /><br />
-							<label for="password">削除キー</label><input type="password" name="password" id="password" value="<?+ReadHandler::param("password", Cookie::getCookie(Cookie::PASSWORD_KEY)) ?>"<?=$c->requirePassword[Configuration::ON_ENTRY] ? ' required="required"' : null ?> /><br />
-							<?if (!Util::isEmpty($c->postPassword)): ?>
-								<label for="postPassword2">投稿キー</label><input type="password" name="postPassword" id="postPassword2" /><br />
-							<?endif ?>
-							<?if ($c->useCommentPoints()): ?>
-								<label for="point">評価</label>
-								<select name="point" id="point">
-									<?foreach ($c->commentPointMap as $i): ?>
-										<?if ($i > 0): ?>
-											<option value="<?+$i ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?+$i ?> 点</option>
-										<?endif ?>
-									<?endforeach ?>
-									<option value="0"<?=!isset($_POST["point"]) ? ' selected="selected"' : null ?>>無評価</option>
-									<?foreach ($c->commentPointMap as $i): ?>
-										<?if ($i < 0): ?>
-											<option value="<?+$i ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?+$i ?> 点</option>
-										<?endif ?>
-									<?endforeach ?>
-								</select>
-							<?endif ?>
-						</div>
-						<textarea name="body" class="<?+implode(" ", array($c->useCommentPoints() ? "usePoint" : "", !Util::isEmpty($c->postPassword) ? "usePostPassword" : ""))?>" rows="2" cols="80"><?+ReadHandler::param("body")?></textarea>
-					</div>
 					<ul class="buttons">
-						<li>
-							<button type="submit">
-								<img src="<?+Visualizer::actionHref("style", "writeButtonIcon.png") ?>" />送信
-							</button>
-						</li>
+						<?foreach (array_reverse($c->pointMap) as $i): ?>
+							<li>
+								<input type="submit" name="point" value="<?+$i ?>" />
+							</li>
+						<?endforeach ?>
 					</ul>
-				</div>
-			</form>
-		<?endif ?>
-		<?if ($c->usePoints() && $c->useComments): ?>
-			<script>
-				megalopolis.read.loadForms(<?+$c->defaultEvaluator ?>, '<?+$c->defaultName ?>', <?=$isAdmin || $c->showName[Configuration::ON_COMMENT] ? "true" : "false" ?>, <?=$isAdmin || $c->showPoint[Configuration::ON_COMMENT] ? "true" : "false" ?>);
-			</script>
-		<?endif ?>
-		<?if ($isAdmin || $c->showComment[Configuration::ON_ENTRY]): ?>
-			<?if ($isAdmin): ?>
-				<form action="" method="post">
-			<?endif ?>
-			<dl id="comments">
-				<?if (($h->thread->nonCommentEvaluations || $c->pointMap) && $c->showPoint[Configuration::ON_COMMENT]): ?>
-					<?if ($isAdmin): ?>
-						<?if ($h->thread->nonCommentEvaluations): ?>
-							<? $count = 0 ?>
-							<?foreach ($h->thread->nonCommentEvaluations as $i): ?>
-								<dt class="evaluation">
-									<input type="checkbox" name="id[]" value="<?+$i->id ?>" />
-									<?+(++$count) ?>.
-									<?if ($i->point < 0): ?>
-										<span class="point minus"><?+$i->point ?></span>点
-									<?else: ?>
-										<span class="point plus"><?+$i->point ?></span>点
-									<?endif ?>
-									<span class="name">簡易評価</span>
-									<time datetime="<?+date("c", $i->dateTime) ?>">
-										<?+Visualizer::formatDateTime($i->dateTime) ?>
-									</time>
-									<?if ($isAdmin): ?>
-										<span class="host"><?+$i->host ?></span>
-									<?endif ?>
-								</dt>
-							<?endforeach ?>
-						<?else: ?>
-							<dt class="evaluation">
-								0. <span class="point none">簡易評価なし</span>
-							</dt>
-						<?endif ?>
-					<?else: ?>
-						<dt class="evaluation">
-							0.
-							<?if ($h->thread->nonCommentEvaluations): ?>
-								<? $p = array_reduce($h->thread->nonCommentEvaluations, create_function('$x, $y', 'return $x + $y->point;'), 0) ?>
-								<?if ($p < 0): ?>
-									<span class="point minus"><?+$p ?></span>点
-								<?else: ?>
-									<span class="point plus"><?+$p ?></span>点
-								<?endif ?>
-								<span class="name">簡易評価</span>
-							<?else: ?>
-								<span class="point none">簡易評価なし</span>
-							<?endif ?>
-						</dt>
+					<?if (!Util::isEmpty($c->postPassword)): ?>
+						<div>
+							<label for="postPassword">投稿キー</label><input type="password" name="postPassword" id="postPassword" />
+						</div>
 					<?endif ?>
-				<?endif ?>
-				<?if ($h->thread->comments): ?>
-					<? $count = 0 ?>
-					<?foreach ($h->thread->comments as $i): ?>
-						<dt id="comment<?+(++$count) ?>">
-							<?if ($isAdmin): ?>
-								<input type="checkbox" name="id[]" value="<?+$i->id ?>" />
-							<?endif ?>
-							<?+$count ?>.
-							<?if ($isAdmin || $c->showPoint[Configuration::ON_COMMENT]): ?>
-								<?if ($i->evaluation): ?>
-									<?if ($i->evaluation->point < 0): ?>
-										<span class="point minus"><?+$i->evaluation->point ?></span>点
-									<?else: ?>
-										<span class="point plus"><?+$i->evaluation->point ?></span>点
-									<?endif ?>
-								<?else: ?>
-									<span class="point none">無評価</span>
+					<p>
+						点数のボタンをクリックしコメントなしで評価します。
+					</p>
+				</form>
+			<?endif ?>
+			<?if ($c->useComments): ?>
+				<a id="commentformHeadding" href="#commentform"<?if (!$c->usePoints()) echo 'class="first"' ?>>コメント</a>
+				<form id="commentform" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "comment")) ?>#commentformHeadding" method="post">
+					<div id="commentformContent">
+						<?if ($d && App::$actionName == "comment"): ?>
+							<ul class="notify warning">
+								<?foreach (Visualizer::$data as $i): ?>
+									<li>
+										<?+$i ?>
+									</li>
+								<?endforeach ?>
+							</ul>
+						<?endif ?>
+						<div>
+							<div>
+								<label for="name">名前</label><input type="text" name="name" id="name" value="<?+ReadHandler::param("name", Cookie::getCookie(Cookie::NAME_KEY)) ?>"<?=$c->requireName[Configuration::ON_COMMENT] ? 'required="required"' : null ?> /><br />
+								<label for="mail">メール</label><input type="email" name="mail" id="mail" value="<?+ReadHandler::param("mail", Cookie::getCookie(Cookie::MAIL_KEY)) ?>" /><br />
+								<label for="password">削除キー</label><input type="password" name="password" id="password" value="<?+ReadHandler::param("password", Cookie::getCookie(Cookie::PASSWORD_KEY)) ?>"<?=$c->requirePassword[Configuration::ON_ENTRY] ? ' required="required"' : null ?> /><br />
+								<?if (!Util::isEmpty($c->postPassword)): ?>
+									<label for="postPassword2">投稿キー</label><input type="password" name="postPassword" id="postPassword2" /><br />
 								<?endif ?>
-							<?endif ?>
-							<?if ($isAdmin || $c->showName[Configuration::ON_COMMENT]): ?>
-								<span class="name">
-									<?if (!Util::isEmpty($i->mail)): ?>
-										<a href="mailto:<?+$i->mail ?>">
-											<? Visualizer::convertedName($i->name) ?>
-										</a>
-									<?else: ?>
-										<? Visualizer::convertedName($i->name) ?>
-									<?endif ?>
-								</span>
-							<?endif ?>
-							<time datetime="<?+date("c", $i->dateTime) ?>">
-								<?+Visualizer::formatDateTime($i->dateTime) ?>
-							</time>
-							<?if ($isAdmin): ?>
-								<span class="host"><?+$i->host ?></span>
-							<?else: ?>
-								<a href="<?+Visualizer::actionHref($h->subject, $h->entry->id, "uncomment", array("id" => $i->id)) ?>">削除</a>
-							<?endif ?>
-						</dt>
-						<dd>
-							<? Visualizer::convertedSummary($i->body) ?>
-						</dd>
-					<?endforeach ?>
-				<?else: ?>
-					<dt class="none">
-						0. コメントなし
-					</dt>
-				<?endif ?>
-			</dl>
-			<?if ($isAdmin): ?>
-					<input type="hidden" name="token" value="<?+$_SESSION[Auth::SESSION_TOKEN] ?>" />
-					<section class="admin">
+								<?if ($c->useCommentPoints()): ?>
+									<label for="point">評価</label>
+									<select name="point" id="point">
+										<?foreach ($c->commentPointMap as $i): ?>
+											<?if ($i > 0): ?>
+												<option value="<?+$i ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?+$i ?> 点</option>
+											<?endif ?>
+										<?endforeach ?>
+										<option value="0"<?=!isset($_POST["point"]) ? ' selected="selected"' : null ?>>無評価</option>
+										<?foreach ($c->commentPointMap as $i): ?>
+											<?if ($i < 0): ?>
+												<option value="<?+$i ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?+$i ?> 点</option>
+											<?endif ?>
+										<?endforeach ?>
+									</select>
+								<?endif ?>
+							</div>
+							<textarea name="body" class="<?+implode(" ", array($c->useCommentPoints() ? "usePoint" : "", !Util::isEmpty($c->postPassword) ? "usePostPassword" : ""))?>" rows="2" cols="80"><?+ReadHandler::param("body")?></textarea>
+						</div>
 						<ul class="buttons">
 							<li>
-								<button type="submit" class="unpost" name="admin" value="unevaluate" id="unevaluateButton">
-									<img src="<?+Visualizer::actionHref("style", "deleteButtonIcon.png") ?>" />選択した評価を削除
-								</button>
-							</li>
-							<li>
-								<button type="submit" class="unpost" name="admin" value="uncomment" id="uncommentButton">
-									<img src="<?+Visualizer::actionHref("style", "deleteButtonIcon.png") ?>" />選択したコメントを削除
+								<button type="submit">
+									<img src="<?+Visualizer::actionHref("style", "writeButtonIcon.png") ?>" />送信
 								</button>
 							</li>
 						</ul>
-					</section>
+					</div>
 				</form>
 			<?endif ?>
+			<?if ($c->usePoints() && $c->useComments): ?>
+				<script>
+					megalopolis.read.loadForms(<?+$c->defaultEvaluator ?>, '<?+$c->defaultName ?>', <?=$isAdmin || $c->showName[Configuration::ON_COMMENT] ? "true" : "false" ?>, <?=$isAdmin || $c->showPoint[Configuration::ON_COMMENT] ? "true" : "false" ?>);
+				</script>
+			<?endif ?>
+			<?if ($isAdmin || $c->showComment[Configuration::ON_ENTRY]): ?>
+				<?if ($isAdmin): ?>
+					<form action="" method="post">
+				<?endif ?>
+				<dl id="comments">
+					<?if (($h->thread->nonCommentEvaluations || $c->pointMap) && $c->showPoint[Configuration::ON_COMMENT]): ?>
+						<?if ($isAdmin): ?>
+							<?if ($h->thread->nonCommentEvaluations): ?>
+								<? $count = 0 ?>
+								<?foreach ($h->thread->nonCommentEvaluations as $i): ?>
+									<dt class="evaluation">
+										<input type="checkbox" name="id[]" value="<?+$i->id ?>" />
+										<?+(++$count) ?>.
+										<?if ($i->point < 0): ?>
+											<span class="point minus"><?+$i->point ?></span>点
+										<?else: ?>
+											<span class="point plus"><?+$i->point ?></span>点
+										<?endif ?>
+										<span class="name">簡易評価</span>
+										<time datetime="<?+date("c", $i->dateTime) ?>">
+											<?+Visualizer::formatDateTime($i->dateTime) ?>
+										</time>
+										<?if ($isAdmin): ?>
+											<span class="host"><?+$i->host ?></span>
+										<?endif ?>
+									</dt>
+								<?endforeach ?>
+							<?else: ?>
+								<dt class="evaluation">
+									0. <span class="point none">簡易評価なし</span>
+								</dt>
+							<?endif ?>
+						<?else: ?>
+							<dt class="evaluation">
+								0.
+								<?if ($h->thread->nonCommentEvaluations): ?>
+									<? $p = array_reduce($h->thread->nonCommentEvaluations, create_function('$x, $y', 'return $x + $y->point;'), 0) ?>
+									<?if ($p < 0): ?>
+										<span class="point minus"><?+$p ?></span>点
+									<?else: ?>
+										<span class="point plus"><?+$p ?></span>点
+									<?endif ?>
+									<span class="name">簡易評価</span>
+								<?else: ?>
+									<span class="point none">簡易評価なし</span>
+								<?endif ?>
+							</dt>
+						<?endif ?>
+					<?endif ?>
+					<?if ($h->thread->comments): ?>
+						<? $count = 0 ?>
+						<?foreach ($h->thread->comments as $i): ?>
+							<dt id="comment<?+(++$count) ?>">
+								<?if ($isAdmin): ?>
+									<input type="checkbox" name="id[]" value="<?+$i->id ?>" />
+								<?endif ?>
+								<?+$count ?>.
+								<?if ($isAdmin || $c->showPoint[Configuration::ON_COMMENT]): ?>
+									<?if ($i->evaluation): ?>
+										<?if ($i->evaluation->point < 0): ?>
+											<span class="point minus"><?+$i->evaluation->point ?></span>点
+										<?else: ?>
+											<span class="point plus"><?+$i->evaluation->point ?></span>点
+										<?endif ?>
+									<?else: ?>
+										<span class="point none">無評価</span>
+									<?endif ?>
+								<?endif ?>
+								<?if ($isAdmin || $c->showName[Configuration::ON_COMMENT]): ?>
+									<span class="name">
+										<?if (!Util::isEmpty($i->mail)): ?>
+											<a href="mailto:<?+$i->mail ?>">
+												<? Visualizer::convertedName($i->name) ?>
+											</a>
+										<?else: ?>
+											<? Visualizer::convertedName($i->name) ?>
+										<?endif ?>
+									</span>
+								<?endif ?>
+								<time datetime="<?+date("c", $i->dateTime) ?>">
+									<?+Visualizer::formatDateTime($i->dateTime) ?>
+								</time>
+								<?if ($isAdmin): ?>
+									<span class="host"><?+$i->host ?></span>
+								<?else: ?>
+									<a href="<?+Visualizer::actionHref($h->subject, $h->entry->id, "uncomment", array("id" => $i->id)) ?>">削除</a>
+								<?endif ?>
+							</dt>
+							<dd>
+								<? Visualizer::convertedSummary($i->body) ?>
+							</dd>
+						<?endforeach ?>
+					<?else: ?>
+						<dt class="none">
+							0. コメントなし
+						</dt>
+					<?endif ?>
+				</dl>
+				<?if ($isAdmin): ?>
+						<input type="hidden" name="token" value="<?+$_SESSION[Auth::SESSION_TOKEN] ?>" />
+						<section class="admin">
+							<ul class="buttons">
+								<li>
+									<button type="submit" class="unpost" name="admin" value="unevaluate" id="unevaluateButton">
+										<img src="<?+Visualizer::actionHref("style", "deleteButtonIcon.png") ?>" />選択した評価を削除
+									</button>
+								</li>
+								<li>
+									<button type="submit" class="unpost" name="admin" value="uncomment" id="uncommentButton">
+										<img src="<?+Visualizer::actionHref("style", "deleteButtonIcon.png") ?>" />選択したコメントを削除
+									</button>
+								</li>
+							</ul>
+						</section>
+					</form>
+				<?endif ?>
+			<?endif ?>
+		<?else: ?>
+			<section>
+				<p class="commentIsOnLastPage">
+					コメントは最後のページに表示されます。
+				</p>
+			</section>
 		<?endif ?>
 	<?endif ?>
 	<? Visualizer::footer($h->thread->background) ?>
