@@ -40,7 +40,7 @@ Visualizer::doctype();
 </head>
 <body>
 	<?if ($m == "h"): ?>
-		<div id="rhome" data-role="page" data-fullscreen="true" class="read" data-id="<?+$h->entry->id ?>">
+		<div id="rhome" data-role="page" data-fullscreen="true" class="read">
 			<script>
 				megalopolis.addHistory(<?+$h->entry->id ?>, <?+$h->entry->subject ?>, '<?+$h->entry->title ?>', '<?+$h->entry->name ?>');
 			</script>
@@ -49,7 +49,7 @@ Visualizer::doctype();
 				<a href="<?+Visualizer::absoluteHref($h->entry->subject) ?>" data-direction="reverse">戻る</a>
 			</header>
 			<div data-role="content" data-theme="e">
-				<div class="content">
+				<div class="content id<?+$h->entry->id ?>">
 					<article class="contentWrapper">
 						<?if ($c->showHeaderInsideBorder): ?>
 							<header>

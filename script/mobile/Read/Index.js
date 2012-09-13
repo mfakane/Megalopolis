@@ -1,5 +1,6 @@
 megalopolis.read =
 {
+	scrollLeft: -1,
 	renderPage: function()
 	{
 		$(document)
@@ -9,12 +10,16 @@ megalopolis.read =
 				
 				if (page.id == "rhome")
 				{
-					var pageId = $(page).prop("data-id");
 					var content = $(".content", page);
+					var pageId = content.prop("class").split(" ").filter(function(_) { return _.indexOf("id") == 0; }).pop();
 					
 					if (!content.hasClass("hasinit"))
 						content
 							.addClass("hasinit")
+							.on("scroll", function()
+							{
+								megalopolis.read.scrollLeft = content.scrollLeft();
+							})
 							.find(".contentWrapper")
 							.fadeTo(0, 0.0001)
 							.on("mousewheel", function(e)
@@ -34,21 +39,36 @@ megalopolis.read =
 				
 				if (page.id == "rhome")
 				{
-					var pageId = $(page).prop("data-id");
-					var content = $(".content", this);
+					var content = $(".content", page);
+					var pageId = content.prop("class").split(" ").filter(function(_) { return _.indexOf("id") == 0; }).pop();
 					
-					$(document.body).parent().css("overflow", "hidden");
-					content
-						.height(window.innerHeight)
-						.scrollLeft(content.find(".contentWrapper").width())
-						.find(".contentWrapper")
-						.fadeTo(250, 1);
+					if (!content.hasClass("shown"))
+					{
+						$(document.body).parent().css("overflow", "hidden");
+						content.addClass("shown").height(window.innerHeight);
+						
+						var saved = megalopolis.cookie("Scroll");
+						var savedScroll = saved != null ? saved.split(",") : ["0", "0"];
+						var offset = savedScroll[0] == pageId ? savedScroll[1]  - 0 : content.find(".contentWrapper").width();
+						
+						content.scrollLeft(offset)
+							.find(".contentWrapper")
+							.fadeTo(250, 1);
+					}
 				}
 			})
 			.bind("pagehide", function(e)
 			{
-				if (e.target.id == "rhome")
+				var page = e.target;
+				
+				if (page.id == "rhome")
+				{
+					var content = $(".content", page);
+					var pageId = content.prop("class").split(" ").filter(function(_) { return _.indexOf("id") == 0; }).pop();
+					
 					$(document.body).parent().css("overflow", "auto");
+					megalopolis.cookie("Scroll", pageId + "," + megalopolis.read.scrollLeft);
+				}
 			});
 	},
 	adjustTextBox: function(href)

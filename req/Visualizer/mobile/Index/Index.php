@@ -38,7 +38,7 @@ function makeMenu($basePath, $current)
 		list($n, $i) = explode(", ", $v);
 	?>
 		<li>
-			<a href="<?+Visualizer::actionHref($k) ?>" data-transition="none"<?if ($k == $current): ?> class="ui-btn-active"<?endif ?> data-icon="<?=$i ?>"><?+$n ?></a>
+			<a href="<?+$basePath . "/" . $k ?>" data-transition="none"<?if ($k == $current): ?> class="ui-btn-active"<?endif ?> data-icon="<?=$i ?>"><?+$n ?></a>
 		</li>
 	<?php
 	}
