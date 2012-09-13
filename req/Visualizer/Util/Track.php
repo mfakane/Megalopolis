@@ -17,6 +17,18 @@ $pagerHref = Visualizer::actionHref("util", "track", array
 <html lang="ja">
 <head>
 	<? Visualizer::head() ?>
+	<link rel="home" href="<?+Visualizer::actionHrefArray(array()) ?>" />
+	<link rel="search" href="<?+Visualizer::actionHrefArray(array("search")) ?>" />
+	<?if ($d["entries"]): ?>
+		<link rel="first" href="<?+$pagerHref . "1" ?>" />
+		<link rel="last" href="<?+$pagerHref . $d["pageCount"] ?>" />
+		<?if ($d["page"] > 1): ?>
+			<link rel="prev" href="<?+$pagerHref . ($d["page"] - 1) ?>" />
+		<?endif ?>
+		<?if ($d["page"] < $d["pageCount"]): ?>
+			<link rel="next" href="<?+$pagerHref . ($d["page"] + 1) ?>" />
+		<?endif ?>
+	<?endif ?>
 	<title>ホスト検索 - <?+$c->title ?></title>
 	<script src="<?+Visualizer::actionHref("script", "Index", "Index.js") ?>"></script>
 	<script src="<?+Visualizer::actionHref("script", "Index", "Search.js") ?>"></script>

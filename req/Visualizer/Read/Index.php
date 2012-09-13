@@ -12,6 +12,20 @@ Visualizer::doctype();
 	<meta name="author" content="<?+$h->entry->name ?>" />
 	<meta name="description" content="<?+$h->entry->summary ?>" />
 	<meta name="keywords" content="<?+implode(",", $h->entry->tags) ?>" />
+	<link rel="home" href="<?+Visualizer::actionHref() ?>" />
+	<?if (App::$actionName == "index"): ?>
+		<link rel="contents" href="<?+Visualizer::actionHref($h->subject) ?>" />
+		<?if ($h->entry->pageCount > 1): ?>
+			<link rel="first" href="<?+Visualizer::actionHref($h->subject, $h->entry->id) ?>" />
+			<link rel="last" href="<?+Visualizer::actionHref($h->subject, $h->entry->id, $h->entry->pageCount) ?>" />
+			<?if ($h->page > 1): ?>
+				<link rel="prev" href="<?+Visualizer::actionHref($h->subject, $h->entry->id, $h->page - 1) ?>" />
+			<?endif ?>
+			<?if ($h->page < $h->entry->pageCount): ?>
+				<link rel="next" href="<?+Visualizer::actionHref($h->subject, $h->entry->id, $h->page + 1) ?>" />
+			<?endif ?>
+		<?endif ?>
+	<?endif ?>
 	<title>
 		<?+$h->entry->title ?>
 		<?if ($c->showName[Configuration::ON_ENTRY]): ?>

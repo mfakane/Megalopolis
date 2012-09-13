@@ -24,6 +24,18 @@ $pagerHref = Visualizer::actionHref("search", array
 <html lang="ja">
 <head>
 	<? Visualizer::head() ?>
+	<link rel="home" href="<?+Visualizer::actionHrefArray(array()) ?>" />
+	<link rel="search" href="<?+Visualizer::actionHrefArray(array("search")) ?>" />
+	<?if ($h->entries): ?>
+		<link rel="first" href="<?+$pagerHref . "1" ?>" />
+		<link rel="last" href="<?+$pagerHref . $h->pageCount ?>" />
+		<?if ($h->page > 1): ?>
+			<link rel="prev" href="<?+$pagerHref . ($h->page - 1) ?>" />
+		<?endif ?>
+		<?if ($h->page < $h->pageCount): ?>
+			<link rel="next" href="<?+$pagerHref . ($h->page + 1) ?>" />
+		<?endif ?>
+	<?endif ?>
 	<title>
 		詳細検索 - <?+$c->title ?>
 	</title>

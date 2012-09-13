@@ -25,6 +25,18 @@ App::load(VISUALIZER_DIR . "Template/Index");
 		<link href="<?+Visualizer::actionHrefArray(array(App::$actionName, $d)) ?>.rss" rel="alternate" type="application/rss+xml" title="RSS 2.0" />
 		<link href="<?+Visualizer::actionHrefArray(array(App::$actionName, $d)) ?>.atom" rel="alternate" type="application/atom+xml" title="Atom" />
 	<?endif ?>
+	<link rel="home" href="<?+Visualizer::actionHrefArray(array()) ?>" />
+	<link rel="search" href="<?+Visualizer::actionHrefArray(array("search")) ?>" />
+	<?if ($h->subjectCount): ?>
+		<link rel="first" href="<?+Visualizer::actionHrefArray(array($h->subjectCount)) ?>" />
+		<link rel="last" href="<?+Visualizer::actionHrefArray(array(1)) ?>" />
+		<?if ($h->subject < $h->subjectCount): ?>
+			<link rel="prev" href="<?+Visualizer::actionHrefArray(array($h->subject + 1)) ?>" />
+		<?endif ?>
+		<?if ($h->subject > 1): ?>
+			<link rel="next" href="<?+Visualizer::actionHrefArray(array($h->subject - 1)) ?>" />
+		<?endif ?>
+	<?endif ?>
 	<title>
 		<?+$title ?> - <?+$c->title ?>
 	</title>
