@@ -41,6 +41,12 @@
 	padding: 8px 8px 8px 0px;
 }
 
+.read #body.vertical #afterword footer
+{
+	display: inline-block;
+	margin-left: 8px;
+}
+
 *:first-child+html .taglist li
 {
 	display: inline;
