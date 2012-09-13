@@ -6,15 +6,17 @@ megalopolis.convert =
 	minimumBuffer: 10,
 	submit: function()
 	{
-		var allowOverwrite = $("#allowOverwrite").is(":checked");
-		var whenNoConvertLineBreakFieldOnly = $("#whenNoConvertLineBreakFieldOnly").is(":checked");
-		var whenContainsWin31JOnly = $("#whenContainsWin31JOnly").is(":checked");
+		var elems = [$("#allowOverwrite"), $("#whenNoConvertLineBreakFieldOnly"), $("#whenContainsWin31JOnly")];
+		var allowOverwrite = elems[0].is(":checked");
+		var whenNoConvertLineBreakFieldOnly = elems[1].is(":checked");
+		var whenContainsWin31JOnly = elems[2].is(":checked");
+		var options = $.map(elems, function(_) { return _.is(":checked") ? [_.parent().text()] : []; });
 		
 		$("#form").remove();
 		
 		var div = $("<div />")
-			.append($("<p />")
-				.text("現在変換処理中です。ページを移動しないでください..."))
+			.append($("<p />").html("現在変換処理中です。ページを移動しないでください..."))
+			.append($("<p />").html("オプション: " + (options.length ? options.join("<br />") : "なし")))
 			.appendTo($("#convert"));
 		var bar = $("<div />")
 			.width("0%")
