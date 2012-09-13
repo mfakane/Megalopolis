@@ -98,7 +98,11 @@ function entries($entries, $isAdmin, $listType = null)
 							</span>
 						<?php endif ?>
 						<?php if ($isAdmin || $c->showName[Configuration::ON_SUBJECT]): ?>
-							<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("author", $i->name))) ?>" class="name"><?php Visualizer::convertedName($i->name) ?></a>
+							<?php if (Util::isEmpty($i->name)): ?>
+								<?php Visualizer::convertedName($i->name) ?>
+							<?php else: ?>
+								<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("author", $i->name))) ?>"><?php Visualizer::convertedName($i->name) ?></a>
+							<?php endif ?>
 						<?php endif ?>
 						<?php if ($isAdmin): ?>
 							<br />
@@ -228,7 +232,11 @@ function entries($entries, $isAdmin, $listType = null)
 							<?php endif ?>
 							<?php if ($isAdmin || $c->showName[Configuration::ON_SUBJECT]): ?>
 								<td class="name">
-									<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("author", $i->name))) ?>"><?php Visualizer::convertedName($i->name) ?></a>
+									<?php if (Util::isEmpty($i->name)): ?>
+										<?php Visualizer::convertedName($i->name) ?>
+									<?php else: ?>
+										<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("author", $i->name))) ?>"><?php Visualizer::convertedName($i->name) ?></a>
+									<?php endif ?>
 								</td>
 							<?php endif ?>
 							<td class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>">

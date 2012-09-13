@@ -135,7 +135,7 @@ Visualizer::doctype();
 					</h1>
 					<?if ($c->showName[Configuration::ON_ENTRY]): ?>
 						<address>
-							<?if (App::$actionName == "index"): ?>
+							<?if (App::$actionName == "index" && !Util::isEmpty($h->entry->name)): ?>
 								<a href="<?+Visualizer::actionHref("author", $h->entry->name) ?>"><? Visualizer::convertedName($h->entry->name) ?></a>
 							<?else: ?>
 								<? Visualizer::convertedName($h->entry->name) ?>
@@ -159,7 +159,7 @@ Visualizer::doctype();
 						<? Visualizer::convertedAfterword($h->thread) ?>
 						<?if ($isAdmin || $c->showName[Configuration::ON_ENTRY]): ?>
 							<address>
-								<?if (App::$actionName == "index"): ?>
+								<?if (App::$actionName == "index" && !Util::isEmpty($h->entry->name)): ?>
 									<a href="<?+Visualizer::actionHref("author", $h->entry->name) ?>"><? Visualizer::convertedName($h->entry->name) ?></a>
 								<?else: ?>
 									<? Visualizer::convertedName($h->entry->name) ?>
