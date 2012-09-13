@@ -1,9 +1,9 @@
 /* Taketori - Make Text Vertical 
  * Copyright 2010-2011 CMONOS. Co,Ltd (http://cmonos.jp)
  *
- * Version: 1.1.3
+ * Version: 1.3.0
  * Lisence: MIT Lisence
- * Last-Modified: 2011-01-13
+ * Last-Modified: 2012-04-06
  */
 
 
@@ -149,17 +149,17 @@ TaketoriTool.prototype = {
 
 var Taketori = function () {};
 Taketori.prototype = {
-	isMSIE : ((navigator.appVersion.search(/MSIE/) != -1) ? ((document.documentMode && document.documentMode > 7) ? 2 : 1) : 0),
+	isMSIE : ((navigator.appVersion.search(/MSIE/) != -1) ? ((document.documentMode) ? document.documentMode : 5) : 0),
 	isWritingModeReady : ((
 							navigator.appVersion.search(/MSIE/) != -1
-						// || typeof (document.createElement('div')).style.MozWritingMode != 'undefined'
-						// || typeof (document.createElement('div')).style.webkitWritingMode != 'undefined'
-						// || typeof (document.createElement('div')).style.OWritingMode != 'undefined'
+						 || typeof (document.createElement('div')).style.MozWritingMode != 'undefined'
+						 || typeof (document.createElement('div')).style.webkitWritingMode != 'undefined'
+						 || typeof (document.createElement('div')).style.OWritingMode != 'undefined'
 						 ) ? true : false),
 	isMultiColumnReady : ((
 							typeof (document.createElement('div')).style.MozColumnWidth != 'undefined'
-						// || typeof (document.createElement('div')).style.webkitColumnWidth != 'undefined'
-						// || (typeof (document.createElement('div')).style.webkitWritingMode != 'undefined' && typeof (document.createElement('div')).style.webkitColumnWidth != 'undefined')
+						 || typeof (document.createElement('div')).style.webkitColumnWidth != 'undefined'
+						 || (typeof (document.createElement('div')).style.webkitWritingMode != 'undefined' && typeof (document.createElement('div')).style.webkitColumnWidth != 'undefined')
 						 || typeof (document.createElement('div')).style.OColumnWidth != 'undefined'
 						 || typeof (document.createElement('div')).style.msColumnWidth != 'undefined'
 						 || typeof (document.createElement('div')).style.columnWidth != 'undefined'
@@ -169,6 +169,13 @@ Taketori.prototype = {
 			 || typeof (document.createElement('div')).style.webkitTransform != 'undefined'
 			 || typeof (document.createElement('div')).style.OTransform != 'undefined'
 			 || typeof (document.createElement('div')).style.transform != 'undefined') ? false : true),
+	isTextEmphasisReady : ((
+							typeof (document.createElement('div')).style.MozTextEmphasisStyle != 'undefined'
+						 || typeof (document.createElement('div')).style.webkitTextEmphasisStyle != 'undefined'
+						 || typeof (document.createElement('div')).style.OTextEmphasisStyle != 'undefined'
+						 || typeof (document.createElement('div')).style.msTextEmphasisStyle != 'undefined'
+						 || typeof (document.createElement('div')).style.textEmphasisStyle != 'undefined'
+						 ) ? true : false),
 
 	document : (new TaketoriTool()),
 
@@ -450,10 +457,15 @@ Taketori.prototype = {
 		}
 		if (this.isWritingModeReady && cssTextOnly) {
 			if (style.width && style.width.search(/\d+\.?\d*(px|em)/i) != -1 && parseInt(style.width) > 0 && style.height && style.height.search(/\d+\.?\d*(px|em)/i) != -1 && parseInt(style.height) > 0) {
-				swapWH = true;
+				if (element.currentStyle || (style.cssFloat && style.cssFloat != 'none') || (style.display == 'inline-block')) { 
+					swapWH = true;
+				} else {
+					temp.style.width = 'auto';
+					temp.style.height = 'auto';
+				}
 			} else if ((style.width && style.width.search(/\d+\.?\d*%/) != -1) || (style.height && style.height.search(/\d+\.?\d*%/) != -1)) {
-				temp.style.width = (style.height) ? style.height : 'auto';
-				temp.style.height = (style.width) ? style.width : 'auto';
+				temp.style.width = (style.height && style.height.search(/\d+\.?\d*%/) != -1) ? style.height : 'auto';
+				temp.style.height = (style.width && style.width.search(/\d+\.?\d*%/) != -1) ? style.width : 'auto';
 			} else {
 				if (style.width == '0px') temp.style.width = 'auto';
 				if (style.height == '0px') temp.style.height = 'auto';
@@ -498,9 +510,13 @@ Taketori.prototype = {
 					var cw = w - mw;
 					var ch = h - mh;
 					if (swapWH) {
-						temp.width = ch;
+						if (element.currentStyle || (style.display == 'inline-block')) { 
+							temp.width = ch;
+							temp.style.width = ch + 'px';
+						} else {
+							temp.style.width = 'auto';
+						}
 						temp.height = cw;
-						temp.style.width = ch + 'px';
 						temp.style.height = cw + 'px';
 					} else {
 						temp.width = cw;
@@ -512,34 +528,40 @@ Taketori.prototype = {
 				}
 			}
 		}
-		if (style.borderLeftWidth) temp.style.borderTopWidth = style.borderLeftWidth;
-		if (style.borderTopWidth) temp.style.borderRightWidth = style.borderTopWidth;
-		if (style.borderRightWidth) temp.style.borderBottomWidth = style.borderRightWidth;
-		if (style.borderBottomWidth) temp.style.borderLeftWidth = style.borderBottomWidth;
-		if (style.borderLeftColor) temp.style.borderTopColor = style.borderLeftColor;
-		if (style.borderTopColor) temp.style.borderRightColor = style.borderTopColor;
-		if (style.borderRightColor) temp.style.borderBottomColor = style.borderRightColor;
-		if (style.borderBottomColor) temp.style.borderLeftColor = style.borderBottomColor;
-		if (style.borderLeftStyle) temp.style.borderTopStyle = style.borderLeftStyle;
-		if (style.borderTopStyle) temp.style.borderRightStyle = style.borderTopStyle;
-		if (style.borderRightStyle) temp.style.borderBottomStyle = style.borderRightStyle;
-		if (style.borderBottomStyle) temp.style.borderLeftStyle = style.borderBottomStyle;
-		if (isBlock || !cssTextOnly || (this.isWritingModeReady && (!this.isMSIE || this.isMSIE == 1))) {
-			if (style.paddingLeft) temp.style.paddingTop = style.paddingLeft;
-			if (style.paddingTop) temp.style.paddingRight = style.paddingTop;
-			if (style.paddingRight) temp.style.paddingBottom = style.paddingRight;
-			if (style.paddingBottom) temp.style.paddingLeft = style.paddingBottom;
+		temp.style.borderTopWidth = style.borderLeftWidth || 0;
+		temp.style.borderRightWidth = style.borderTopWidth || 0;
+		temp.style.borderBottomWidth = style.borderRightWidth || 0;
+		temp.style.borderLeftWidth = style.borderBottomWidth || 0;
+		temp.style.borderTopColor = style.borderLeftColor || '';
+		temp.style.borderRightColor = style.borderTopColor || '';
+		temp.style.borderBottomColor = style.borderRightColor || '';
+		temp.style.borderLeftColor = style.borderBottomColor || '';
+		temp.style.borderTopStyle = style.borderLeftStyle || 'none';
+		temp.style.borderRightStyle = style.borderTopStyle || 'none';
+		temp.style.borderBottomStyle = style.borderRightStyle || 'none';
+		temp.style.borderLeftStyle = style.borderBottomStyle || 'none';
+		if (isBlock || !cssTextOnly || (this.isWritingModeReady && (!this.isMSIE || this.isMSIE < 8))) {
+			temp.style.paddingTop = style.paddingLeft || 0;
+			temp.style.paddingRight = style.paddingTop || 0;
+			temp.style.paddingBottom = style.paddingRight || 0;
+			temp.style.paddingLeft = style.paddingBottom || 0;
 		}
 		if (this.isWritingModeReady) {
 			if (isBlock && cssTextOnly) {
 				temp.style.overflowX = (style.overflowY) ? style.overflowY : 'visible';
 				temp.style.overflowY = (style.overflowX) ? style.overflowX : 'visible';
 			}
-			if (isBlock || !cssTextOnly || (this.isWritingModeReady && (!this.isMSIE || this.isMSIE == 1))) {
-				if (style.marginLeft) temp.style.marginTop = style.marginLeft;
-				if (style.marginTop) temp.style.marginRight = style.marginTop;
-				if (style.marginRight) temp.style.marginBottom = style.marginRight;
-				if (style.marginBottom) temp.style.marginLeft = style.marginBottom;
+			if (style.backgroundPositionX || style.backgroundPositionY) {
+				temp.style.backgroundPositionX = (style.backgroundPositionY) ? (style.backgroundPositionY == 'top') ? 'left' : (style.backgroundPositionY == 'bottom') ? 'right' : style.backgroundPositionY : '50%';
+				temp.style.backgroundPositionY = (style.backgroundPositionX) ? (style.backgroundPositionX == 'left') ? 'top' : (style.backgroundPositionX == 'right') ? 'bottom' : style.backgroundPositionX : '50%';
+			} else if (style.backgroundPosition && style.backgroundPosition.search(/(\S+)\s+(\S)/) != -1) {
+				temp.style.backgroundPosition = RegExp.$2 + ' ' + RegExp.$1 + ';';
+			}
+			if (isBlock || !cssTextOnly || !this.isMSIE || this.isMSIE < 8) {
+				temp.style.marginTop = style.marginLeft || 0;
+				temp.style.marginRight = style.marginTop || 0;
+				temp.style.marginBottom = style.marginRight || 0;
+				temp.style.marginLeft = style.marginBottom || 0;
 			}
 		} else {
 			temp.style.marginTop = parseInt(((style.marginTop && style.marginTop != 'auto') ? parseInt(style.marginTop) : 0) + ((w - h)/2)) + 'px';
@@ -550,7 +572,7 @@ Taketori.prototype = {
 				temp.style.backgroundPosition = RegExp.$2 + ' ' + RegExp.$1 + ';';
 			}
 		}
-		return (cssTextOnly) ? temp.style.cssText : this.outerHTML(temp);
+		return (cssTextOnly) ? temp.style.cssText + ';' + element.style.cssText : this.outerHTML(temp);
 	},
 
 	outerHTML : function(element) {
@@ -595,7 +617,7 @@ Taketori.prototype = {
 				} else if (this.config.elements[0] == '=dblclick') {
 					setOnly = setDblClickEvent = true;
 				} else {
-					var targets = (new TaketoriTool()).element(this.config.elements).list();
+					var targets = this.document.element(this.config.elements).list();
 					this.targetElements = new Array();
 					for (var i=0; i<targets.length; i++) {
 						if (!this.isVerticalTextElement(targets[i])) {
@@ -671,15 +693,30 @@ Taketori.prototype = {
 		if (!this.config.cookieDomain) this.config.cookieDomain = document.domain;
 		if (!this.config.cookiePath) this.config.cookiePath = '/';
 		if (this.ttbDisabled) {
-			//this.deleteCookie('TTB_DISABLED');
+			this.deleteCookie('TTB_DISABLED');
 			this.ttbDisabled = false;
 		} else {
-			//this.setCookie('TTB_DISABLED','true');
+			this.setCookie('TTB_DISABLED','true');
 			this.ttbDisabled = true;
 		}
 		for(var i=0; i<this.targetElements.length; i++) {
 			var element = this.targetElements[i];
 			this.toggle(element,this.ttbDisabled,true);
+		}
+		return this;
+	},
+
+	clearAll : function () {
+		if (this.isLegacy) return this;
+		if (!this.config.cookieDomain) this.config.cookieDomain = document.domain;
+		if (!this.config.cookiePath) this.config.cookiePath = '/';
+		if (!this.ttbDisabled) {
+			this.setCookie('TTB_DISABLED','true');
+			this.ttbDisabled = true;
+		}
+		for(var i=0; i<this.targetElements.length; i++) {
+			var element = this.targetElements[i];
+			this.toggle(element,true,true,true);
 		}
 		return this;
 	},
@@ -792,7 +829,7 @@ Taketori.prototype = {
 			var windowSize = (this.process.config.contentHeight) ? this.process.config.contentHeight : this.windowHeight;
 			if (this.process.config.multiColumnEnabled) {
 				var r = Math.ceil(windowSize / (maxHeight + this.process.config.gap));
-				this.process.config.height = parseInt((windowSize+this.process.config.gap) / r) - this.process.config.gap;
+				this.process.config.height = parseInt((windowSize-40) / r) - this.process.config.gap;
 				if (this.process.config.contentHeight) this.process.config.columnCount = r;
 			} else {
 				windowSize = windowSize - this.process.config.gap - 18;
@@ -952,7 +989,10 @@ Taketori.prototype = {
 	setTaketoriClassName : function (element) {
 		var className = (this.isWritingModeReady) ? 'taketori-writingmode-ttb' : 'taketori-ttb';
 		if (this.rubyDisabled) className += ' taketori-ruby-disabled';
-		if (this.process.currentConfig.fontFamily) className += (
+		if (!this.isTextEmphasisReady) className += ' taketori-text-emphasis-disabled';
+		className += (
+			(this.isWritingModeReady && navigator.userAgent.search(/WebKit/i) != -1 && navigator.userAgent.search(/Windows/i) != -1) ? ' taketori-atsign' : 
+			(!this.process.currentConfig.fontFamily) ? ' taketori-serif' : 
 			(this.process.currentConfig.fontFamily == 'sans-serif') ? ' taketori-sans-serif' : 
 			(this.process.currentConfig.fontFamily == 'cursive') ? ' taketori-cursive' : 
 			(this.process.currentConfig.fontFamily == 'kai') ? ' taketori-kai' : 
@@ -967,11 +1007,16 @@ Taketori.prototype = {
 	},
 
 	make : function(element,configReady) {
-		if (!configReady) this.setCurrentConfig(element);
-		this.makeClipboard(element);
-		this.parse(element,true);
-		this.complement(element);
-		this.removeClipboard();
+		this.document.element(element).addClassName('taketori-in-progress');
+		var taketori = this;
+		setTimeout( function () {
+			if (!configReady) taketori.setCurrentConfig(element);
+			taketori.makeClipboard(element);
+			taketori.parse(element,true);
+			taketori.complement(element);
+			taketori.removeClipboard();
+			taketori.document.element(element).removeClassName('taketori-in-progress');
+		},120);
 	},
 
 	isSkipClass : function (element) {
@@ -1031,7 +1076,7 @@ Taketori.prototype = {
 						return;
 					} else if (tag == '!') {
 						return;
-					} else if (this.isIncludedIn(['br','input','select','option'],tag) || (this.isMSIE && this.isMSIE == 1 && tag == 'table')) {
+					} else if (this.isIncludedIn(['br','input','select','option'],tag) || (this.isMSIE && this.isMSIE < 8 && tag == 'table')) {
 						this.appendHTML(this.outerHTML(thisNode));
 						return;
 					}
@@ -1073,7 +1118,7 @@ Taketori.prototype = {
 					} else if (this.isWritingModeReady && !this.isIncludedIn(['table','caption','thead','tbody','tr','td','th','tfoot'],tag)) {
 						cssText += this.counterClockwiseRotatedOuterHTML(thisNode,nodeStyle,true)
 					}
-					if (!this.process.ltr && this.isMSIE != 1) {
+					if (!this.process.ltr && (!this.isMSIE || this.isMSIE > 7)) {
 						if (tag == 'li' && this.process.listStyleType && this.process.listStyleType[this.process.listStyleType.length-1] != '') {
 							attrText += ' data-marker="'+this.getListMarkerText()+'"';
 						}
@@ -1090,8 +1135,10 @@ Taketori.prototype = {
 						}
 						if (this.isWritingModeReady) {
 							if (tag == 'strong') {
-								if (!this.process.kenten) setKenten = true;
-								this.process.kenten = true;
+								if (!this.isTextEmphasisReady) {
+									if (!this.process.kenten) setKenten = true;
+									this.process.kenten = true;
+								}
 								className += ((className) ? ' ' : '') + 'bo-ten';
 							}
 						}
@@ -1162,7 +1209,7 @@ Taketori.prototype = {
 				text.replace(/&#?\w+;|\s+|./g,function (w) {
 
 					//CJK
-					if (w.search(/^[\u1100-\u11FF\u2030-\u217F\u2600-\u261B\u2620-\u277F\u2E80-\u2FDF\u2FF0-\u4DBF\u4E00-\u9FFF\uA960-\uA97F\uAC00-\uD7AF\uD7B0-\uD7FF\uF900-\uFAFF\uFE30-\uFE4F\uFF00\uFF01\uFF03-\uFF06\uFF08-\uFF0C\uFF0E-\uFF1B\uFF1F-\uFF3D\uFF40-\uFF5B\uFF5D-\uFFEF]$/) != -1) {
+					if (w.search(/^[\u1100-\u11FF\u2030-\u217F\u2460-\u24FF\u2600-\u261B\u2620-\u277F\u2E80-\u2FDF\u2FF0-\u4DBF\u4E00-\u9FFF\uA960-\uA97F\uAC00-\uD7AF\uD7B0-\uD7FF\uF900-\uFAFF\uFE30-\uFE4F\uFF00\uFF01\uFF03-\uFF06\uFF08-\uFF0C\uFF0E-\uFF1B\uFF1F-\uFF3D\uFF40-\uFF5B\uFF5D-\uFFEF]$/) != -1) {
 						taketori.setCJK();
 						if ((!taketori.isWritingModeReady || taketori.process.kenten) && !taketori.process.ltr) w = taketori.kinsokuShori('<span' + ((!taketori.process.ltr) ? ' class="' + taketori.getCJKClassName(w) + '"' : '') + ((!taketori.process.ltr && taketori.process.lineMarginHeight) ? ' style="margin-top:' + taketori.process.lineMarginHeight + 'px;margin-bottom:' + taketori.process.lineMarginHeight + 'px;"' : '') + '>' + w + '</span>');
 						count++;
@@ -1181,7 +1228,7 @@ Taketori.prototype = {
 							taketori.process.latin = 0;
 						}
 						if (taketori.process.noCJK == 0) w = '<span class="nocjk notcy">' + w;
-						taketori.process.noCJK++;
+						if (!this.isTextEmphasisReady) taketori.process.noCJK++;
 					}
 					if (!taketori.process.isBreakable || (count > 1 && taketori.isNoBreak(taketori.process.width + (count * taketori.process.roughFormula) + taketori.process.lineHeight))) {
 						taketori.process.columnHTML += w;
@@ -1512,7 +1559,7 @@ Taketori.prototype = {
 		}
 	},
 
-	toggle : function (element,ttbDisabled,keep) {
+	toggle : function (element,ttbDisabled,keepTargets,cacheDisabled) {
 		if (this.isLegacy || this.isVerticalTextElement(element) || (ttbDisabled != null && ((ttbDisabled && (!element.taketori || !element.taketori.ttb)) || ((!ttbDisabled && element.taketori && element.taketori.ttb))))) return this;
 		this.init();
 		if (element.taketori && element.taketori.alt && (element.taketori.ttb || (element.clientWidth == element.taketori.clientWidth && element.taketori.windowHeight == this.windowHeight))) {
@@ -1522,11 +1569,11 @@ Taketori.prototype = {
 				this.removeTaketoriClassName(element);
 			} else {
 				this.setTaketoriClassName(element);
-				keep = true;
+				keepTargets = true;
 			}
-			if (keep) {
+			if (keepTargets) {
+				element.taketori.alt = ((cacheDisabled || this.config.cacheDisabled) && element.taketori.ttb) ? null : alt;
 				element.taketori.ttb = (element.taketori.ttb) ? false : true;
-				element.taketori.alt = alt;
 				element.taketori.clientWidth = element.clientWidth;
 				element.taketori.windowHeight = this.windowHeight;
 			} else {
@@ -1538,5 +1585,9 @@ Taketori.prototype = {
 			this.make(element,false);
 		}
 		return this;
+	},
+
+	clear : function (element) {
+		this.toggle(element,true,true,true);
 	}
 }
