@@ -223,7 +223,7 @@ class Visualizer
 					Process time: __PROCESS_TIME__
 				</li>-->
 			</ul>
-			<a id="scrollToTop" href="#"<?php if (!Util::isEmpty($backgroundColor)): ?> style="background-color: <?=$backgroundColor ?>;"<?php endif ?>>
+			<a id="scrollToTop" href="#"<?php if (!Util::isEmpty($backgroundColor)): ?> style="background-color: <?php echo $backgroundColor ?>;"<?php endif ?>>
 				ページの先頭へ	
 			</a>
 		</footer>
