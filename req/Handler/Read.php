@@ -390,7 +390,7 @@ class ReadHandler extends Handler
 			{
 				return Visualizer::json($comment->toArray() + array
 				(
-					"num" => count($this->thread->comments),
+					"num" => count($this->thread->comments + $this->thread->nonCommentEvaluations),
 					"formattedBody" => Visualizer::escapeSummary($comment->body),
 					"deleteAction" => Util::getAbsoluteUrl() . "{$this->entry->subject}/{$this->entry->id}/uncomment?id={$comment->id}"
 				));

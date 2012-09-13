@@ -333,6 +333,11 @@ Visualizer::doctype();
 				</script>
 			<?endif ?>
 			<?if ($isAdmin || $c->showComment[Configuration::ON_ENTRY]): ?>
+				<?php
+				$arr = $h->thread->comments + $h->thread->nonCommentEvaluations;
+				ksort($arr);
+				$arr = array_values($arr);
+				?>
 				<?if ($isAdmin): ?>
 					<form action="" method="post">
 				<?endif ?>
@@ -340,11 +345,10 @@ Visualizer::doctype();
 					<?if (($h->thread->nonCommentEvaluations || $c->pointMap) && $c->showPoint[Configuration::ON_COMMENT]): ?>
 						<?if ($isAdmin): ?>
 							<?if ($h->thread->nonCommentEvaluations): ?>
-								<? $count = 0 ?>
-								<?foreach ($h->thread->nonCommentEvaluations as $i): ?>
+								<?foreach (array_filter($arr, create_function('$_', 'return $_ instanceof Evaluation;')) as $k => $i): ?>
 									<dt class="evaluation">
 										<input type="checkbox" name="id[]" value="<?+$i->id ?>" />
-										<?+(++$count) ?>.
+										<?+$k + 1 ?>.
 										<?if ($i->point < 0): ?>
 											<span class="point minus"><?+$i->point ?></span>点
 										<?else: ?>
@@ -382,13 +386,12 @@ Visualizer::doctype();
 						<?endif ?>
 					<?endif ?>
 					<?if ($h->thread->comments): ?>
-						<? $count = 0 ?>
-						<?foreach ($h->thread->comments as $i): ?>
-							<dt id="comment<?+(++$count) ?>">
+						<?foreach (array_filter($arr, create_function('$_', 'return $_ instanceof Comment;')) as $k => $i): ?>
+							<dt id="comment<?+$k + 1 ?>">
 								<?if ($isAdmin): ?>
 									<input type="checkbox" name="id[]" value="<?+$i->id ?>" />
 								<?endif ?>
-								<?+$count ?>.
+								<?+$k + 1 ?>.
 								<?if ($isAdmin || $c->showPoint[Configuration::ON_COMMENT]): ?>
 									<?if ($i->evaluation): ?>
 										<?if ($i->evaluation->point < 0): ?>
