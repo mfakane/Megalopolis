@@ -15,8 +15,8 @@ megalopolis.read =
 					if (!content.hasClass("hasinit"))
 						content
 							.addClass("hasinit")
-							.css("visibility", "hidden")
 							.find(".contentWrapper")
+							.fadeTo(0, 0.0001)
 							.on("mousewheel", function(e)
 							{
 								content.stop(true, true).animate
@@ -37,15 +37,18 @@ megalopolis.read =
 					var pageId = $(page).prop("data-id");
 					var content = $(".content", this);
 					
-					$(document.body).css("overflowY", "hidden");
-					
-					content.css("visibility", "");
+					$(document.body).parent().css("overflow", "hidden");
+					content
+						.height(window.innerHeight)
+						.scrollLeft(content.find(".contentWrapper").width())
+						.find(".contentWrapper")
+						.fadeTo(250, 1);
 				}
 			})
 			.bind("pagehide", function(e)
 			{
 				if (e.target.id == "rhome")
-					$(document.body).css("overflowY", "");
+					$(document.body).parent().css("overflow", "auto");
 			});
 	},
 	adjustTextBox: function(href)

@@ -1,5 +1,7 @@
 html
 {
+	margin: 0px;
+	padding: 0px;
 	-webkit-user-select: none;
 	-webkit-text-size-adjust: none;
 }
@@ -11,6 +13,12 @@ html,
 .ui-body-c, .ui-body-c input, .ui-body-c select, .ui-body-c textarea, .ui-body-c button, .ui-btn-up-c, .ui-btn-hover-c, .ui-btn-down-c
 {
 	font-family: "Segoe UI", "Meiryo", "Hiragino Kaku Gothic Pro W3", sans-serif;
+}
+
+body
+{
+	margin: 0px;
+	padding: 0px;
 }
 
 .ui-header .ui-btn-inner, .ui-footer .ui-btn-inner, .ui-bar .ui-btn-inner, .ui-header .ui-fullsize .ui-btn-inner, .ui-footer .ui-fullsize .ui-btn-inner
@@ -570,23 +578,22 @@ li.ui-li.ui-btn-hover-c *
 {
 	overflow-x: scroll;
 	-webkit-overflow-scrolling: touch;
-	direction: rtl;
-	unicode-bidi: bidi-override;
-	background-color: rgba(245, 245, 245, 0.5);
+	background-color: rgba(245, 245, 245, 0.75);
 }
 
 .contentWrapper
 {
 	margin: 0px;
 	padding: 24px;
+	min-width: 320px;
 	color: #000000;
 	font-family: "@HGP明朝B", 'Hiragino Mincho ProN', "@ＭＳ 明朝", serif;
 	box-sizing: border-box;
 	-webkit-writing-mode: vertical-rl;
 	-webkit-text-orientation: mixed-right;
-	direction: ltr;
 	text-shadow: none;
 	line-height: 200%;
+	text-align: justify;
 }
 
 .contentWrapper h1

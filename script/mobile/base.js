@@ -7,7 +7,8 @@ $.extend(megalopolis,
 	{
 		var portrait = orientation ? orientation == "portrait" : $("html").hasClass("portrait");
 		
-		$(document.body).css("minHeight", this.minHeight = portrait ? 460 - 44 : 268);
+		$(document.body).css("minHeight", (this.minHeight = portrait ? window.innerHeight - 48 : 268) + "px");
+		$(".read .content").height(window.innerHeight);
 	},
 	getHistory: function()
 	{
