@@ -36,15 +36,15 @@ $pagerHref = Visualizer::actionHref("search", array
 		<script>
 			megalopolis.index.loadDropDown
 			(
-				<?=$c->showTitle[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$c->showName[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$c->showPages[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$c->showReadCount[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$c->showSize[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$c->showComment[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$c->showPoint[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$isAdmin || $c->showTitle[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$isAdmin || $c->showName[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$isAdmin || $c->showPages[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$isAdmin || $c->showReadCount[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$isAdmin || $c->showSize[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$isAdmin || $c->showComment[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$isAdmin && $c->useAnyPoints() || $c->showPoint[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+				<?=$isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
 				<?=$c->listType ?>
 			);
 		</script>
