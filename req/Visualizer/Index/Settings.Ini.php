@@ -62,7 +62,7 @@ define("RECENT_COUNT", 3);
 define("RECENT_TARGET", "_top");
 define("DISPLAY_SUBJECT", <?=$c->showTitle[Configuration::ON_SUBJECT] ? "true" : "false" ?>);
 define("DISPLAY_NAME", <?=$c->showName[Configuration::ON_SUBJECT] ? "true" : "false" ?>);
-define("DISPLAY_RES", <?=$c->showPoint[Configuration::ON_SUBJECT] ? "true" : "false" ?>);
+define("DISPLAY_RES", <?=$c->useAnyPoints() || $c->showComment[Configuration::ON_SUBJECT] ? "true" : "false" ?>);
 define("DISPLAY_POINT", <?=$c->showPoint[Configuration::ON_COMMENT] ? "true" : "false" ?>);
 define("DISPLAY_ALL_POINT", true);
 define("DISPLAY_EDIT", true);
