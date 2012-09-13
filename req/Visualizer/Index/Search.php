@@ -58,22 +58,22 @@ $pagerHref = Visualizer::actionHref("search", array
 				<li>
 					<label for="title">作品名</label><input type="text" name="title" id="title" value="<?+IndexHandler::param("title") ?>" />
 				</li>
-				<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
+				<?if ($isAdmin || $c->showName[Configuration::ON_SUBJECT]): ?>
 					<li>
 						<label for="name">作者</label><input type="text" name="name" id="name" value="<?+IndexHandler::param("name") ?>" />
 					</li>
 				<?endif ?>
-				<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>
+				<?if ($isAdmin || $c->showTags[Configuration::ON_SUBJECT]): ?>
 					<li>
 						<label for="tags">タグ</label><input type="text" name="tags" id="tags" value="<?+IndexHandler::param("tags") ?>" />
 					</li>
 				<?endif ?>
-				<?if ($c->showRate[Configuration::ON_SUBJECT]): ?>
+				<?if ($isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT]): ?>
 					<li>
 						<label for="eval">評価数</label><input type="number" name="evalBegin" id="eval" value="<?+$d["evalBegin"] ?>" min="<?+$d["evalMin"] ?>" max="<?+$d["evalMax"] ?>" /><span>～</span><input type="number" name="evalEnd" value="<?+$d["evalEnd"] ?>" min="<?+$d["evalMin"] ?>" max="<?+$d["evalMax"] ?>" />
 					</li>
 				<?endif ?>
-				<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
+				<?if ($isAdmin || $c->showPoint[Configuration::ON_SUBJECT]): ?>
 					<li>
 						<label for="points">POINT</label><input type="number" name="pointsBegin" id="points" value="<?+$d["pointsBegin"] ?>" min="<?+$d["pointsMin"] ?>" max="<?+$d["pointsMax"] ?>" /><span>～</span><input type="number" name="pointsEnd" value="<?+$d["pointsEnd"] ?>" min="<?+$d["pointsMin"] ?>" max="<?+$d["pointsMax"] ?>" />
 					</li>

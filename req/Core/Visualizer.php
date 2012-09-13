@@ -143,7 +143,7 @@ class Visualizer
 			<a href="<?php self::converted(self::$basePath) ?>">
 				<?php self::converted(Configuration::$instance->title) ?>
 			</a>
-			<?php if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT]): ?>
+			<?php if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT] || Auth::hasSession(true)): ?>
 				<form action="<?php self::converted(self::actionHref("search")) ?>" method="get">
 					<div>
 						<input type="search" name="query" placeholder="検索" />

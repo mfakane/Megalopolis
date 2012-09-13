@@ -116,7 +116,7 @@ class IndexHandler extends Handler
 	
 	function search()
 	{
-		if (!Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
+		if (!Configuration::$instance->showTitle[Configuration::ON_SUBJECT] && !Auth::hasSession(true))
 			throw new ApplicationException("作品の閲覧は許可されていません", 403);
 		
 		if (!is_null($mode = self::param("mode")))
