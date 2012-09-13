@@ -23,6 +23,11 @@ class UtilHandler extends Handler
 		if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
 			Auth::loginError("管理者パスワードが一致しません");
 		
+		Auth::cleanSession(!Auth::hasSession(true));
+		
+		if (!Auth::hasToken())
+			Auth::createToken();
+		
 		$db = App::openDB();
 		$subjectCount = Board::getLatestSubject($db);
 		$subjectBegin = max(1, min(IndexHandler::param("subjectBegin", $subjectCount), $subjectCount));
@@ -58,7 +63,7 @@ class UtilHandler extends Handler
 				Visualizer::$data["count"]
 			);
 			
-			Visualizer::$data["pageCount"] = Visualizer::$data["count"] / Configuration::$instance->searchPaging;
+			Visualizer::$data["pageCount"] = ceil(Visualizer::$data["count"] / Configuration::$instance->searchPaging);
 			
 			if (isset($_POST["admin"]))
 			{
