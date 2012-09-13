@@ -61,12 +61,12 @@ $maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
 			</div>
 		<?endif ?>
 		<? Visualizer::pager($h->page, $maxPage, 5, Visualizer::actionHref($h->entry->subject, $h->entry->id) . "/") ?>
+		<?if ($h->page == 1 && $c->useSummary && $c->showSummary[Configuration::ON_ENTRY] && !Util::isEmpty($h->entry->summary)): ?>
+			<div class="summary">
+				<? Visualizer::convertedSummary($h->entry->summary) ?>
+			</div>
+		<?endif ?>
 		<div class="content">
-			<?if ($h->page == 1 && $c->useSummary && $c->showSummary[Configuration::ON_ENTRY]): ?>
-				<div>
-					<? Visualizer::convertedSummary($h->entry->summary) ?>
-				</div>
-			<?endif ?>
 			<? Visualizer::convertedBody($h->thread, null, $h->page * $paging - $paging, $paging) ?>
 		</div>
 		<?if ($h->page == $maxPage): ?>
