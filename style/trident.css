@@ -1,3 +1,29 @@
+input[type="text"],
+input[type="password"],
+input[type="search"],
+input[type="email"],
+input[type="url"],
+input[type="color"],
+input[type="number"],
+input[type="date"],
+textarea,
+select
+{
+	min-height: 20px;
+	line-height: 21px;
+}
+
+body>header form input[type="search"]
+{
+	line-height: 22px;
+}
+
+body>header form input[type="submit"]
+{
+	top: 2px;
+	right: 2px;
+}
+
 .read #body
 {
 	overflow: visible;
