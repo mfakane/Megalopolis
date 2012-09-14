@@ -337,7 +337,7 @@ $config->updatePeriod = 3;
 // 本文枠内に作品名および名前を表示するか (true/false)
 $config->showHeaderInsideBorder = false;
 
-// 本文gページ分割されている場合最後のページのみにコメントを表示するか (true/false)
+// 本文がページ分割されている場合最後のページのみにコメントを表示するか (true/false)
 $config->showCommentsOnLastPageOnly = true;
 
 // コメントおよび簡易評価両方が有効な場合の既定の評価方法 (特定値)
