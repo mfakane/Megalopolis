@@ -271,6 +271,7 @@ megalopolis.read =
 	loadOptions: function(basePath, writingMode, forceTaketori)
 	{
 		var content = $("#body");
+		var wrapper = $("#verticalWrapper");
 		var cookie = megalopolis.mainCookie("FontSize");
 		var f = 0;
 		var working = false;
@@ -368,8 +369,7 @@ megalopolis.read =
 			.insertBefore(content);
 		
 		if (megalopolis.read.isWebKit() && !forceTaketori)
-		{
-			var wrapper = $("#verticalWrapper", content).on("mousewheel", function(e)
+			wrapper.on("mousewheel", function(e)
 			{
 				if (megalopolis.read.isVertical)
 				{
@@ -381,22 +381,29 @@ megalopolis.read =
 					return false;
 				}
 			});
-		}
 		
-		if (window.opera)
+		var firstLoad = true;
+		
+		megalopolis.read.resizeAction = function()
 		{
-			var firstLoad = true;
-				
-			megalopolis.read.resizeAction = function()
-			{
-				if (!megalopolis.read.taketori && megalopolis.read.isVertical)
-					$("#verticalWrapper", content).height(content.width() + (firstLoad ? 18 : 32));
+			if (megalopolis.read.isVertical)
+				content.height($(window).height() - 256);
+			else
+				content.height("auto");
+			
+			if (!megalopolis.read.taketori && window.opera)
+				if (megalopolis.read.isVertical)
+				{
+					var ow = content.outerWidth();
+					var oh = content.outerHeight();
+					
+					wrapper.width(oh - 2).height(ow - (firstLoad ? 16 : 0)).css("right", -oh + "px");
+				}
 				else
-					$("#verticalWrapper", content).css("height", "auto");
-				
-				firstLoad = false;
-			};
-		}
+					wrapper.width("auto").height("auto").css("right", "");
+			
+			firstLoad = false;
+		};
 		
 		if (megalopolis.read.resizeAction)
 			$(window).resize(megalopolis.read.resizeAction);
