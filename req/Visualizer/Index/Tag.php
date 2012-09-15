@@ -32,7 +32,7 @@ Visualizer::doctype();
 			
 			foreach ($d as $k => $v)
 			{
-				$baseCount = strval(pow(10, max(strlen($v) - 1, 1)));
+				$baseCount = strval(substr($v, 0, 1) . str_repeat("0", strlen($v) - 1));
 				
 				if (!isset($byCount[$baseCount]))
 					$byCount[$baseCount] = array();
