@@ -120,6 +120,11 @@ section, .taglist, body>ul
 	border-color: #480000;
 }
 
+.taglist dt
+{
+	color: #480000;
+}
+
 h1
 {
 	color: #480000;
