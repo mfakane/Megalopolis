@@ -108,7 +108,7 @@ Visualizer::doctype();
 			<?endif ?>
 		</form>
 	<?endif ?>
-	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => IndexHandler::param("query"), "mode" => $searchMode) : array()) + array("p" => ""))) ?>
+	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode) : array()) + array("p" => ""))) ?>
 	<?+App::$actionName == "search" ? $d["count"] : (App::$actionName == "index" ? count($h->entries) : $h->entryCount) ?>件中<?+$offset + 1 ?>～<?+$offset + min($paging, count($h->entries)) ?>件
 	<ul class="entries">
 		<?if ($h->entries): ?>
@@ -146,7 +146,7 @@ Visualizer::doctype();
 			<li>結果はありません</li>
 		<?endif ?>
 	</ul>
-	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => IndexHandler::param("query"), "mode" => $searchMode) : array()) + array("p" => ""))) ?>
+	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode) : array()) + array("p" => ""))) ?>
 	<ul id="menu" class="menu">
 		<? $i = 0 ?>
 		<?foreach (array
@@ -169,7 +169,7 @@ Visualizer::doctype();
 				$isParam = strstr($k, "=");
 				$param = $isParam ? explode("=", $k) : array();
 				?>
-				[<?=++$i ?>]<a href="<?+$k == "#" ? $k : Visualizer::actionHref($isParam ? (App::$actionName == "index" ? $h->subject : App::$actionName) : $k, $isParam ? (App::$actionName == "search" ? array("query" => IndexHandler::param("query"), "mode" => $searchMode, $param[0] => $param[1]) : array($param[0] => $param[1])) : null) ?>" accesskey="<?=$i ?>"><?+$v ?></a>
+				[<?=++$i ?>]<a href="<?+$k == "#" ? $k : Visualizer::actionHref($isParam ? (App::$actionName == "index" ? $h->subject : App::$actionName) : $k, $isParam ? (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode, $param[0] => $param[1]) : array($param[0] => $param[1])) : null) ?>" accesskey="<?=$i ?>"><?+$v ?></a>
 			</li>
 		<?endforeach ?>
 		<?if (App::$actionName == "index"): ?>
