@@ -42,7 +42,7 @@ Visualizer::doctype();
 			<?endif ?>
 		}
 		
-		#body
+		.read #body
 		{
 			<?if (!Util::isEmpty($h->thread->foreground)): ?>
 				color: <?+$h->thread->foreground ?>;
@@ -163,10 +163,10 @@ Visualizer::doctype();
 					<?endif ?>
 				<?endif ?>
 				<div id="content">
+					<? Visualizer::convertedBody($h->thread, $h->page) ?>
 					<script>
 						megalopolis.read.loadOptions('<?+Visualizer::$basePath ?>style/<?+$c->skin && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null ?>', <?+intval($h->thread->writingMode) ?>, <?+$h->forceTaketori ? "true" : "false" ?>);
 					</script>
-					<? Visualizer::convertedBody($h->thread, $h->page) ?>
 				</div>
 				<?if ($h->page == $h->entry->pageCount): ?>
 					<div id="afterword">
