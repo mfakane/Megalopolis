@@ -6,6 +6,7 @@ body>header form input[name="query"]::-webkit-input-placeholder
 .read #body.vertical #verticalWrapper
 {
 	-webkit-writing-mode: vertical-rl;
+	-webkit-text-orientation: upright-right;
 	letter-spacing: 1px;
 	line-height: 130%;
 	height: 100%;

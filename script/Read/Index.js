@@ -3,6 +3,8 @@ megalopolis.read =
 	taketori: null,
 	isVertical: false,
 	forceTaketori: false,
+	originalHtml: null,
+	verticalBodyWidth: null,
 	resizeAction: null,
 	defaultName: null,
 	isWebKit: function()
@@ -332,7 +334,10 @@ megalopolis.read =
 					image: writingMode == 0 && megalopolis.mainCookie("Vertical") == "yes" || writingMode == 2 ? "horizontalIcon.png" : "verticalIcon.png",
 					separator: true,
 					click: function(sender)
-					{	
+					{
+						if (megalopolis.read.taketori && $("#contentWrapper").hasClass("taketori-in-progress"))
+							return;
+						
 						var rt = megalopolis.mainCookie("Vertical", megalopolis.read.isVertical ? "no" : "yes");
 						
 						megalopolis.read.toggleVertical();
@@ -382,27 +387,23 @@ megalopolis.read =
 				}
 			});
 		
-		var firstLoad = true;
-		
 		megalopolis.read.resizeAction = function()
 		{
 			if (megalopolis.read.isVertical)
-				content.height($(window).height() - 256);
+				content.height(megalopolis.read.verticalBodyWidth ? megalopolis.read.verticalBodyWidth + 24 : $(window).height() - 256);
 			else
 				content.height("auto");
 			
 			if (!megalopolis.read.taketori && window.opera)
 				if (megalopolis.read.isVertical)
 				{
-					var ow = content.outerWidth();
-					var oh = content.outerHeight();
+					var ow = Math.floor(content.outerWidth());
+					var oh = Math.floor(content.outerHeight());
 					
-					wrapper.width(oh - 2).height(ow - (firstLoad ? 16 : 0)).css("right", -oh + "px");
+					wrapper.width(oh - 2).height(ow).css("right", -oh + "px");
 				}
 				else
 					wrapper.width("auto").height("auto").css("right", "");
-			
-			firstLoad = false;
 		};
 		
 		if (megalopolis.read.resizeAction)
@@ -500,23 +501,112 @@ megalopolis.read =
 		
 		if (this.isVertical != setVertical)
 			if (setVertical)
+			{
+				if (megalopolis.read.verticalBodyWidth == null)
+				{
+					var children = $("#content").find("*").filter(function() { return this.style.width && this.style.width.indexOf("%") == -1; });
+					
+					if (children.length > 0)
+					{
+						var max = 0;
+						
+						children.each(function()
+						{
+							max = Math.max(max, $(this).outerWidth());
+						});
+						
+						megalopolis.read.verticalBodyWidth = Math.floor(max);
+					}
+				}
+				
 				if (this.taketori)
 					this.taketori.toggleAll();
-				else if (!$.browser.msie && (this.forceTaketori || $.browser.mozilla || navigator.platform.indexOf("Win") == -1))
+				else if (!$.browser.msie && (this.forceTaketori || $.browser.mozilla || !this.isWebKit() && navigator.platform.indexOf("Win") == -1))
+				{
 					this.taketori = new Taketori()
 						.set
 						({
 							fontFamily: "sans-serif",
-							height: "520px"
+							height: megalopolis.read.verticalBodyWidth ? megalopolis.read.verticalBodyWidth + 16 + "px" : ($(window).height() - 256 - 8) + "px"
 						})
-						.element("#contentWrapper")
-						.toVertical(onLoad ? true : false);
+						.element("#contentWrapper");
+					this.taketori.ttbDisabled = false;
+					this.taketori.deleteCookie("TTB_DISABLED");
+					this.taketori.toVertical(onLoad ? true : false);
+				}
 				else
+				{
+					if (!window.opera)
+					{
+						if (!megalopolis.read.originalHtml)
+							megalopolis.read.originalHtml =
+							{
+								summary: $("#summary").html(),
+								contentBody: $("#contentBody").html(),
+								afterwordBody: $("#afterwordBody").html()
+							};
+						
+						var set = $("#summary, #contentBody, #afterwordBody")
+							.find("*")
+							.filter(function() { return $(this).attr("style"); })
+							.each(function()
+							{
+								var elem = $(this);
+								var style = elem[0].style;
+								
+								$.each
+								({
+									"margin": "",
+									"marginRight": style.marginTop || elem.css("marginTop") || "",
+									"marginBottom": style.marginRight || elem.css("marginRight") || "",
+									"marginLeft": style.marginBottom || elem.css("marginBottom") || "",
+									"marginTop": style.marginLeft || elem.css("marginLeft") || "",
+									"padding": "",
+									"paddingRight": style.paddingTop || elem.css("paddingTop") || "",
+									"paddingBottom": style.paddingRight || elem.css("paddingRight") || "",
+									"paddingLeft": style.paddingBottom || elem.css("paddingBottom") || "",
+									"paddingTop": style.paddingLeft || elem.css("paddingLeft") || "",
+									"border": "",
+									"borderRight": style.borderTop || elem.css("borderTop") || "",
+									"borderBottom": style.borderRight || elem.css("borderRight") || "",
+									"borderLeft": style.borderBottom || elem.css("borderBottom") || "",
+									"borderTop": style.borderLeft || elem.css("borderLeft") || "",
+									"width": style.height || "auto",
+									"height": style.width || "auto"
+								}, function(k, v)
+								{
+									style[k] = v;
+									elem.css(k, v);
+								});
+							});
+						$.each
+						({
+							summary: $("#summary").html(),
+							contentBody: $("#contentBody").html(),
+							afterwordBody: $("#afterwordBody").html()
+						}, function(k, v)
+						{
+							if (v)
+								$("#" + k).html(v);
+						});
+					}
+					
 					$("#body").addClass("vertical");
+				}
+			}
 			else if (this.taketori)
 				this.taketori.toggleAll();
 			else
+			{
 				$("#body").removeClass("vertical");
+				
+				if (megalopolis.read.originalHtml)
+					$.each(megalopolis.read.originalHtml, function(k, v)
+					{
+						if (v)
+							$("#" + k).html(v);
+					});
+			}
 		
 		this.isVertical = setVertical;
 		

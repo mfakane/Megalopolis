@@ -1479,16 +1479,19 @@ body.index>h1, body.read>h1
 
 .read #body .taketori-ttb
 {
-	margin: 0px 0px -32px -16px;
-	line-height: 130%;
+	margin: -16px;
 }
 
 .read #body .taketori-ttb>.taketori-col
 {
 	position: relative;
-	top: -24px;
-	padding-top: 16px;
-	padding-bottom: 8px;
+	top: -32px;
+	padding: 16px 16px 16px 16px !important;
+}
+
+.read #body .taketori-ttb>.taketori-col #afterword
+{
+	margin-bottom: 8px;
 }
 
 .read #body #content
@@ -1507,7 +1510,7 @@ body.index>h1, body.read>h1
 .read #afterword
 {
 	margin: 64px -8px 0px -8px;
-	padding: 8px 0px 0px 8px;
+	padding: 8px 8px 0px 8px;
 	border: none;
 	border-radius: 4px;
 	color: #000000;
@@ -1516,7 +1519,7 @@ body.index>h1, body.read>h1
 
 .read #afterword address
 {
-	margin: 0px 8px 0px 0px;
+	margin: 0px;
 	padding: 0px;
 	font-style: normal;
 	font-weight: bold;

@@ -163,14 +163,18 @@ Visualizer::doctype();
 					<?endif ?>
 				<?endif ?>
 				<div id="content">
-					<? Visualizer::convertedBody($h->thread, $h->page) ?>
+					<div id="contentBody">
+						<? Visualizer::convertedBody($h->thread, $h->page) ?>
+					</div>
 					<script>
 						megalopolis.read.loadOptions('<?+Visualizer::$basePath ?>style/<?+$c->skin && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null ?>', <?+intval($h->thread->writingMode) ?>, <?+$h->forceTaketori ? "true" : "false" ?>);
 					</script>
 				</div>
 				<?if ($h->page == $h->entry->pageCount): ?>
 					<div id="afterword">
-						<? Visualizer::convertedAfterword($h->thread) ?>
+						<div id="afterwordBody">
+							<? Visualizer::convertedAfterword($h->thread) ?>
+						</div>
 						<?if ($isAdmin || $c->showName[Configuration::ON_ENTRY]): ?>
 							<address>
 								<?if (App::$actionName == "index" && !Util::isEmpty($h->entry->name)): ?>
