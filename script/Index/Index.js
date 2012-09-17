@@ -122,7 +122,8 @@ megalopolis.index =
 			function(_)
 			{
 				if (_ != null)
-					return $("<li />")
+				{
+					var item = $("<li />")
 						.text(_.label)
 						.click(function()
 						{
@@ -136,7 +137,23 @@ megalopolis.index =
 							label.text(_.label);
 							
 							return false;
-						})[0];
+						});
+					
+					$(function()
+					{
+						$("#entries")
+							.find("th." + _.value)
+							.click(function()
+							{
+								item.click();
+								
+								return false;
+							})
+							.addClass("clickable");
+					});
+					
+					return item[0];
+				}
 			}))
 			.hide();
 		var label = $("<span />")

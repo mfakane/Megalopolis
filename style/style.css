@@ -588,9 +588,14 @@ section.entries
 	border-top: #999999 1px solid !important;
 }
 
-.entries tbody .hasSummary:hover, .entries table .hasSummary:hover+.tags
+.entries tbody .hasSummary:hover, .entries table .hasSummary:hover+.tags, .entries th.clickable:hover
 {
 	background: #f6f6f6;
+}
+
+.entries th.clickable:hover
+{
+	border-bottom: #999999 1px solid;
 }
 
 .entries table tr.tags ul
