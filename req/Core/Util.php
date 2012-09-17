@@ -13,6 +13,9 @@ class Util
 	const BROWSER_TYPE_IPHONE = "iPhone";
 	const BROWSER_TYPE_IPAD = "iPad";
 	const BROWSER_TYPE_ANDROID = "Android";
+	const BROWSER_TYPE_ANDROIDMOBILE = "Android Mobile";
+	const BROWSER_TYPE_PSP = "PlayStation Portable";
+	const BROWSER_TYPE_3DS = "Nintendo 3DS";
 	const BROWSER_TYPE_NETFRONT = "NetFront";
 	const BROWSER_TYPE_IEMOBILE7 = "Trident/3.1";
 	const BROWSER_TYPE_MOBILE = "Mobile";
@@ -53,6 +56,8 @@ class Util
 			"iPod"							=> self::BROWSER_TYPE_IPHONE,
 			self::BROWSER_TYPE_IPAD			=> self::BROWSER_TYPE_IPAD,
 			self::BROWSER_TYPE_ANDROID		=> self::BROWSER_TYPE_ANDROID,
+			self::BROWSER_TYPE_PSP			=> self::BROWSER_TYPE_PSP,
+			self::BROWSER_TYPE_3DS			=> self::BROWSER_TYPE_3DS,
 			self::BROWSER_TYPE_NETFRONT		=> self::BROWSER_TYPE_NETFRONT,
 			self::BROWSER_TYPE_IEMOBILE7	=> self::BROWSER_TYPE_IEMOBILE7,
 			"DoCoMo"						=> self::BROWSER_TYPE_MOBILE,
@@ -80,7 +85,10 @@ class Util
 			self::BROWSER_TYPE_GECKO		=> self::BROWSER_TYPE_GECKO,
 		) as $k => $v)
 			if (mb_strstr($ua, $k))
-				return $browserType = $v;
+				if ($k == self::BROWSER_TYPE_ANDROID && mb_strstr($ua, self::BROWSER_TYPE_MOBILE))
+					return $browserType = self::BROWSER_TYPE_ANDROIDMOBILE;
+				else
+					return $browserType = $v;
 		
 		return $browserType = self::BROWSER_TYPE_UNKNOWN;
 	}

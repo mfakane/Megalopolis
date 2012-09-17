@@ -45,6 +45,7 @@ function entries($entries, $isAdmin, $listType = null)
 	$c = Configuration::$instance;
 	
 	if (!$listType)
+	{
 		switch ($c->listType)
 		{
 			case Configuration::LIST_DOUBLE:
@@ -56,8 +57,10 @@ function entries($entries, $isAdmin, $listType = null)
 				
 				break;
 		}
+		
+		$listType = Cookie::getCookie(Cookie::LIST_TYPE_KEY, $listType);
+	}
 	
-	$listType = Cookie::getCookie(Cookie::LIST_TYPE_KEY, $listType);
 	$visibility = array_filter(explode(",", Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "readCount,size,commentCount,evaluationCount,points,rate,dateTime")));
 	$visibility = array_flip($visibility);
 	

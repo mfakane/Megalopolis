@@ -14,7 +14,13 @@ class Visualizer
 	
 	static function isSimple()
 	{
-		return Util::getBrowserType() == Util::BROWSER_TYPE_MOBILE;
+		return in_array(Util::getBrowserType(), array
+		(
+			Util::BROWSER_TYPE_ANDROIDMOBILE,
+			Util::BROWSER_TYPE_PSP,
+			Util::BROWSER_TYPE_3DS,
+			Util::BROWSER_TYPE_MOBILE,
+		));
 	}
 	
 	static function doctype()
@@ -77,6 +83,7 @@ class Visualizer
 				megalopolis.baseUrl = '<?php self::converted(self::absoluteHref()) ?>';
 			</script>
 		<?php elseif ($isSimple): ?>
+			<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width" />
 			<link href="<?php self::converted(self::actionHref("style", "simple", "simple.css")) ?>" rel="stylesheet" />
 		<?php else: ?>
 			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
