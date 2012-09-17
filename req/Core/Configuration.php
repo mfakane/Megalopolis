@@ -103,39 +103,62 @@ class Configuration
 	public $disallowedWordsForName = array();
 	public $disallowedTags = array
 	(
-		"style",
-		"script",
-		"iframe",
+		"html",
+		
+		// head
 		"base",
-		"form",
-		"input",
-		"select",
-		"option",
-		"frameset",
-		"textarea",
-		"legend",
-		"button",
+		"link",
+		"meta",
+		"style",
+		"title",
+		
+		// scripting
+		"script",
+		
+		// embedding
+		"audio",
+		"embed",
+		"iframe",
 		"object",
 		"param",
-		"title",
-		"comment",
-		"listing",
-		"xmp",
-		"nextid",
-		"plaintext",
+		"video",
+		
+		// forms
+		"button",
+		"datalist",
+		"fieldset",
+		"form",
+		"input",
+		"keygen",
+		"label",
+		"legend",
+		"meter",
+		"optgroup",
+		"option",
+		"output",
+		"progress",
+		"select",
+		"textarea",
+		
+		// obsolete
 		"acronym",
 		"applet",
 		"basefont",
 		"bgsound",
 		"blink",
+		"comment",
 		"dir",
 		"frame",
 		"frameset",
 		"isindex",
+		"listing",
 		"marquee",
+		"nextid",
 		"nobr",
 		"noembed",
-		"noframes"
+		"noframes",
+		"plaintext",
+		"xmp",
 	);
 	public $disallowedAttributes = array
 	(

@@ -572,9 +572,22 @@ class Visualizer
 	{
 		static $selfClosingTags = array
 		(
-			"img" => true,
+			"area" => true,
+			"base" => true,
 			"br" => true,
+			"col" => true,
+			"command" => true,
+			"embed" => true,
 			"hr" => true,
+			"img" => true,
+			"input" => true,
+			"keygen" => true,
+			"link" => true,
+			"meta" => true,
+			"param" => true,
+			"source" => true,
+			"track" => true,
+			"wbr" => true,
 		);
 		
 		foreach ($rt->find("*") as $i)
@@ -772,6 +785,8 @@ class Visualizer
 		if ($status)
 			self::statusCode($status);
 		
+		self::defaultHeaders();
+		
 		if ($contentType)
 			header("Content-Type: {$contentType}");
 		else if ($encoding)
@@ -813,6 +828,7 @@ class Visualizer
 	 */
 	static function json($obj)
 	{
+		self::defaultHeaders();
 		header("Content-Type: application/json");
 		
 		Auth::commitSession();
@@ -826,6 +842,7 @@ class Visualizer
 	 */
 	static function csv($obj)
 	{
+		self::defaultHeaders();
 		header("Content-Type: text/csv; charset=Shift_JIS; header=present");
 		
 		$s = fopen("php://output", 'w');
@@ -870,10 +887,18 @@ class Visualizer
 			$mbencoding = $encoding;
 		
 		mb_http_output($mbencoding);
+		self::defaultHeaders();
 		header("Content-Type: text/plain; charset={$encoding}");
 		echo mb_convert_encoding($content, $mbencoding, "UTF-8");
 		
 		return true;
+	}
+	
+	private static function defaultHeaders()
+	{
+		header("X-Content-Type-Options: nosniff");
+		header("X-Frame-Options: SAMEORIGIN");
+		header("X-Content-Security-Policy: allow 'self'; img-src *; script-src 'self' code.jquery.com; options inline-script");
 	}
 }
 
