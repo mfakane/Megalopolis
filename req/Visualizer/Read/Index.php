@@ -137,9 +137,9 @@ Visualizer::doctype();
 			<?+$h->page ?> ページ目のプレビューです
 		</p>
 	<?endif ?>
-	<? Visualizer::pager($h->page, $h->entry->pageCount, 10, App::$actionName != "index"
+	<? Visualizer::pager($h->page, $h->entry->pageCount, 10, array(App::$actionName != "index"
 		? (App::$actionName == "new" ? Visualizer::actionHref(App::$actionName) . "/" : Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName, array("p" => "")))
-		: Visualizer::actionHref($h->subject, $h->entry->id) . "/") ?>
+		: Visualizer::actionHref($h->subject, $h->entry->id) . "/", "#body")) ?>
 	<section id="body">
 		<div id="verticalWrapper">
 			<div id="contentWrapper">
@@ -216,9 +216,9 @@ Visualizer::doctype();
 			</div>
 		</div>
 	</section>
-	<? Visualizer::pager($h->page, $h->entry->pageCount, 10, App::$actionName != "index"
+	<? Visualizer::pager($h->page, $h->entry->pageCount, 10, array(App::$actionName != "index"
 		? (App::$actionName == "new" ? Visualizer::actionHref(App::$actionName) . "/" : Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName, array("p" => "")))
-		: Visualizer::actionHref($h->subject, $h->entry->id) . "/") ?>
+		: Visualizer::actionHref($h->subject, $h->entry->id) . "/", "#body")) ?>
 	<?if ($isEdit): ?>
 		<section class="notify info">
 			<ul class="buttons">
