@@ -204,7 +204,7 @@ function entries($entries, $isAdmin, $listType = null)
 				</thead>
 				<tbody>
 					<?php foreach ($entries as $idx => $i): ?>
-						<tr class="article<?php if (!$isAdmin && !$c->showTags[Configuration::ON_SUBJECT] && !$c->showSummary[Configuration::ON_SUBJECT]) { echo ' notags'; } else if (!Util::isEmpty($i->summary)) { echo ' hasSummary'; } ?>" id="article<?php echo $i->id ?>">
+						<tr class="article<?php if (!$isAdmin && !$c->showTags[Configuration::ON_SUBJECT] && !$c->showSummary[Configuration::ON_SUBJECT]) { echo ' notags'; } else if ($c->useSummary && !Util::isEmpty($i->summary)) { echo ' hasSummary'; } ?>" id="article<?php echo $i->id ?>">
 							<?php if ($isAdmin): ?>
 								<td class="checkbox">
 									<input type="checkbox" name="id[]" value="<?php Visualizer::converted($i->id) ?>" />
@@ -273,7 +273,7 @@ function entries($entries, $isAdmin, $listType = null)
 										<?php endif ?>
 									</ul>
 									<?php if ($c->useSummary && ($c->showSummary[Configuration::ON_SUBJECT] || $isAdmin) && !Util::isEmpty($i->summary)): ?>
-										<p class="hidden">
+										<p class="summary<?php echo isset($visibility["summary"]) ? null : " hidden" ?>">
 											<?php Visualizer::convertedSummary($i->summary) ?>
 										</p>
 									<?php endif ?>

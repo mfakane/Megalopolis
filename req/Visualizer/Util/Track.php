@@ -48,6 +48,7 @@ $pagerHref = Visualizer::actionHref("util", "track", array
 				true,
 				<?=$c->useAnyPoints() ? "true" : "false" ?>,
 				<?=$c->useAnyPoints() ? "true" : "false" ?>,
+				<?=$c->useSummary ? "true" : "false" ?>,
 				<?=$c->listType ?>
 			);
 		</script>

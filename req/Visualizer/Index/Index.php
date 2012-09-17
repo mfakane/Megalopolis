@@ -88,6 +88,7 @@ App::load(VISUALIZER_DIR . "Template/Index");
 			<?=$isAdmin || $c->showComment[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
 			<?=$isAdmin && $c->useAnyPoints() || $c->showPoint[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
 			<?=$isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
+			<?=$c->useSummary && ($isAdmin || $c->showSummary[Configuration::ON_SUBJECT]) ? "true" : "false" ?>,
 			<?=$c->listType ?>
 		);
 	</script>

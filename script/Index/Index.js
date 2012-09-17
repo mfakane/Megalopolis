@@ -10,7 +10,7 @@ megalopolis.index =
 			location.href = form.prop("action") + $(this).val();
 		});
 	},
-	loadDropDown: function(useTitle, useName, usePageCount, useReadCount, useSize, useEvaluationCount, useCommentCount, usePoints, useRate, defaultStyle)
+	loadDropDown: function(useTitle, useName, usePageCount, useReadCount, useSize, useEvaluationCount, useCommentCount, usePoints, useRate, useSummary, defaultStyle)
 	{
 		if ($.browser.msie &&
 			$.browser.version < 8)
@@ -256,6 +256,11 @@ megalopolis.index =
 						{
 							label: "更新日時",
 							value: "lastUpdate"
+						},
+						!useSummary || currentStyleValue != "single" ? null :
+						{
+							label: "概要",
+							value: "summary"
 						}
 					],
 					function(_)
@@ -271,43 +276,54 @@ megalopolis.index =
 									var elem = $(this);
 									var idx = $.inArray(_.value, visibilityCookie);
 									var table = $("table", entries());
-									var tagRows = table.find("tr.tags").find("td");
-									var fromColSpan = tagRows.prop("colspan");
-									var articles = $("article", entries());
 									
 									elem.toggleClass("selected");
 									
-									articles.find("dd." + _.value).each(function(k, v)
+									if (_.value == "summary")
 									{
-										$([$(v), $(v).prev("dt")]).toggleClass("hidden");
-									});
-									articles.find("dl").each(function(k, v)
-									{
-										var elems = $("dt", v);
-										var firstVisible = elems.not(".hidden").first();
-										
-										elems.removeClass("firstChild");
-										firstVisible.addClass("firstChild");
-									});
-									articles.find("time").each(function(k, v)
-									{
-										var e = $(v);
-										
-										if (e.hasClass(_.value))
-											e.toggleClass("hidden");
-									});
-									
-									$([table.find("th." + _.value), table.find("td." + _.value)]).each(function(k, v)
-									{
-										var elem = $(this);
-										
-										if (elem.hasClass("hidden"))
-											tagRows.prop("colspan", fromColSpan + 1);
+										if (!elem.hasClass("selected"))
+											table.find(".summary").addClass("hidden");
 										else
-											tagRows.prop("colspan", fromColSpan - 1);
+											table.find(".summary").removeClass("hidden");
+									}
+									else
+									{
+										var tagRows = table.find("tr.tags").find("td");
+										var fromColSpan = tagRows.prop("colspan");
+										var articles = $("article", entries());
 										
-										elem.toggleClass("hidden");
-									});
+										articles.find("dd." + _.value).each(function(k, v)
+										{
+											$([$(v), $(v).prev("dt")]).toggleClass("hidden");
+										});
+										articles.find("dl").each(function(k, v)
+										{
+											var elems = $("dt", v);
+											var firstVisible = elems.not(".hidden").first();
+											
+											elems.removeClass("firstChild");
+											firstVisible.addClass("firstChild");
+										});
+										articles.find("time").each(function(k, v)
+										{
+											var e = $(v);
+											
+											if (e.hasClass(_.value))
+												e.toggleClass("hidden");
+										});
+										
+										$([table.find("th." + _.value), table.find("td." + _.value)]).each(function(k, v)
+										{
+											var elem = $(this);
+											
+											if (elem.hasClass("hidden"))
+												tagRows.prop("colspan", fromColSpan + 1);
+											else
+												tagRows.prop("colspan", fromColSpan - 1);
+											
+											elem.toggleClass("hidden");
+										});
+									}
 									
 									if (idx != -1)
 										delete visibilityCookie[idx];
