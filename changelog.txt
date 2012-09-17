@@ -1,4 +1,19 @@
-﻿2012-09-13 COAH96KoxU <queue glasscore.net>
+﻿2012-09-17 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 21
+	* req/Core/Util.php,
+	  req/Core/Visualizer.php,
+	  req/Visualizer/Template/Index.php: PSP, 3DS, Android Mobile に携帯表示を使用するように
+	* req/Visualizer/simple/Index/Index.php: 携帯表示にて全文以外の検索における他ページへのリンクを修正
+	* req/Visualizer/Read/Index.php,
+	  script/Read/Index.js,
+	  style/style.css,
+	  style/webkit.css: 幅が指定されている本文の縦書き表示で本文枠の高さを幅に合わせるよう対応
+	* req/Visualizer/Read/Index.php: 見た目 alt にて作品の枠色指定が反映されないのを修正
+	* style/alt/style.css: 見た目 alt 時のタグおよび作者一覧のカウント数の色を修正
+	* req/Visualizer/Index/Tag.php: タグおよび作者一覧の作品数の分割単位を修正
+
+2012-09-13 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 20
 	* style/trident.css: IE8 にて全角文字をフォームに入力すると位置がずれることがあるのを修正
