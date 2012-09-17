@@ -68,15 +68,15 @@ class IndexHandler extends Handler
 			$db->commit();
 		}
 		
-		$this->lastUpdate = Board::getLastUpdate($db, $subject);
-		
-		if ($this->lastUpdate && Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY)))
-			return Visualizer::notModified();
-		
 		if ($subject == 0)
 			$subject = Board::getLatestSubject($db);
 		else if ($subject > Board::getLatestSubject($db))
 			throw new ApplicationException("指定された番号 {$subject} の作品集は存在しません", 404);
+		
+		$this->lastUpdate = Board::getLastUpdate($db, $subject);
+		
+		if ($this->lastUpdate && Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY)))
+			return Visualizer::notModified();
 		
 		$this->entries = ThreadEntry::getEntriesBySubject($db, $subject);
 		$this->subject = $subject;
