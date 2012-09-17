@@ -79,9 +79,9 @@ function entries($entries, $isAdmin, $listType = null)
 								<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array($i->subject, $i->id))) ?>"><?php Visualizer::converted($i->title) ?></a>
 							</h2>
 						<?php endif ?>
-						<time class="lastUpdate<?php echo isset($visibility["lastUpdate"]) ? null : " hidden" ?>" datetime="<?php Visualizer::converted(date("c", $i->responseLastUpdate)) ?>">
-							<?php Visualizer::converted(Visualizer::formatDateTime($i->responseLastUpdate)) ?>
-							<span class="value hidden"><?php Visualizer::converted($i->responseLastUpdate) ?></span>
+						<time class="lastUpdate<?php echo isset($visibility["lastUpdate"]) ? null : " hidden" ?>" datetime="<?php Visualizer::converted(date("c", $i->getLatestLastUpdate())) ?>">
+							<?php Visualizer::converted(Visualizer::formatDateTime($i->getLatestLastUpdate())) ?>
+							<span class="value hidden"><?php Visualizer::converted($i->getLatestLastUpdate()) ?></span>
 						</time>
 						<time class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>" pubdate="pubdate" datetime="<?php Visualizer::converted(date("c", $i->dateTime)) ?>">
 							<?php Visualizer::converted(Visualizer::formatDateTime($i->dateTime)) ?>
@@ -91,7 +91,7 @@ function entries($entries, $isAdmin, $listType = null)
 							<span class="update">
 								NEW
 							</span>
-						<?php elseif (time() - $i->responseLastUpdate < $c->updatePeriod * 24 * 60 * 60): ?>
+						<?php elseif (time() - $i->getLatestLastUpdate() < $c->updatePeriod * 24 * 60 * 60): ?>
 							<span class="update">
 								UP
 							</span>
@@ -216,7 +216,7 @@ function entries($entries, $isAdmin, $listType = null)
 										<span class="update">
 											NEW
 										</span>
-									<?php elseif (time() - $i->responseLastUpdate < $c->updatePeriod * 24 * 60 * 60): ?>
+									<?php elseif (time() - $i->getLatestLastUpdate() < $c->updatePeriod * 24 * 60 * 60): ?>
 										<span class="update">
 											UP
 										</span>
@@ -246,8 +246,8 @@ function entries($entries, $isAdmin, $listType = null)
 								<span class="value hidden"><?php Visualizer::converted($i->dateTime) ?></span>
 							</td>
 							<td class="lastUpdate<?php echo isset($visibility["lastUpdate"]) ? null : " hidden" ?>">
-								<?php Visualizer::converted(substr(Visualizer::formatDateTime($i->responseLastUpdate), 2, -3)) ?>
-								<span class="value hidden"><?php Visualizer::converted($i->responseLastUpdate) ?></span>
+								<?php Visualizer::converted(substr(Visualizer::formatDateTime($i->getLatestLastUpdate()), 2, -3)) ?>
+								<span class="value hidden"><?php Visualizer::converted($i->getLatestLastUpdate()) ?></span>
 							</td>
 							<?php if ($isAdmin || $c->showPages[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "pageCount", $i->pageCount) ?>
 							<?php if ($isAdmin || $c->showSize[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "size", "{$i->size}KB") ?>

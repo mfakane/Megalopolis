@@ -42,7 +42,7 @@ class ReadHandler extends Handler
 		$this->entry = &$this->thread->entry;
 		$this->page = $page;
 		
-		if (Util::isCachedByBrowser($this->thread->entry->responseLastUpdate, $page))
+		if (Util::isCachedByBrowser($this->thread->entry->getLatestLastUpdate(), $page))
 			return Visualizer::notModified();
 		
 		$this->forceTaketori = preg_match('/<\s*font|font:\s*|font-family:\s*/i', $this->thread->body);

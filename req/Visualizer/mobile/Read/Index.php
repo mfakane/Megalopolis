@@ -197,7 +197,7 @@ Visualizer::doctype();
 					</li>
 					<li>
 						<h3>更新日時</h3>
-						<?+Visualizer::formatDateTime($h->entry->responseLastUpdate) ?>
+						<?+Visualizer::formatDateTime($h->entry->getLatestLastUpdate()) ?>
 					</li>
 					<?if ($c->showPoint[Configuration::ON_ENTRY]): ?>
 						<li>

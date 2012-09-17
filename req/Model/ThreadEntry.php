@@ -101,6 +101,11 @@ class ThreadEntry
 		}
 	}
 	
+	function getLatestLastUpdate()
+	{
+		return max($this->lastUpdate, $this->responseLastUpdate);
+	}
+	
 	/**
 	 * @param int $id
 	 * @return ThreadEntry

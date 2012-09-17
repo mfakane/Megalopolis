@@ -40,7 +40,7 @@ class MegalithHandler extends Handler
 				if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
 				{
 					$entries = ThreadEntry::getEntriesBySubject($db, $subject);
-					$lastUpdate = max(array_map(create_function('$_', 'return $_->responseLastUpdate;'), $entries) + array(0));
+					$lastUpdate = max(array_map(create_function('$_', 'return $_->getLatestLastUpdate();'), $entries) + array(0));
 				
 					if (Util::isCachedByBrowser($lastUpdate))
 						return Visualizer::notModified();
@@ -55,7 +55,7 @@ class MegalithHandler extends Handler
 						Configuration::$instance->showComment[Configuration::ON_SUBJECT] ? (Configuration::$instance->showPoint[Configuration::ON_SUBJECT] ? "{$_->commentedEvaluationCount}/{$_->responseCount}" : "0/{$_->responseCount}") : "0/0",
 						Configuration::$instance->showPoint[Configuration::ON_SUBJECT] ? $_->points : "0",
 						Configuration::$instance->showRate[Configuration::ON_SUBJECT] ? $_->rate : "0",
-						date("Y/m/d H:i:s", $_->responseLastUpdate),
+						date("Y/m/d H:i:s", $_->getLatestLastUpdate()),
 						"",
 						"",
 						"",
@@ -91,7 +91,7 @@ class MegalithHandler extends Handler
 			if (!($thread = Thread::load($db, intval($name))))
 				throw new ApplicationException("ファイルが見つかりません", 404);
 			
-			if (Util::isCachedByBrowser($thread->entry->responseLastUpdate))
+			if (Util::isCachedByBrowser($thread->entry->getLatestLastUpdate()))
 				return Visualizer::notModified();
 			
 			if (Cookie::getCookie(Cookie::LAST_ID_KEY) != $thread->entry->id)
@@ -118,7 +118,7 @@ class MegalithHandler extends Handler
 						$c->showComment[Configuration::ON_SUBJECT] ? ($c->showPoint[Configuration::ON_SUBJECT] ? "{$_->commentedEvaluationCount}/{$_->responseCount}" : "0/{$_->responseCount}") : "0/0",
 						$c->showPoint[Configuration::ON_ENTRY] ? $_->points : "0",
 						$c->showRate[Configuration::ON_ENTRY] ? $_->rate : "0",
-						date("Y/m/d H:i:s", $_->responseLastUpdate),
+						date("Y/m/d H:i:s", $_->getLatestLastUpdate()),
 						"",
 						!Util::isEmpty($thread->backgroundImage) ? $thread->backgroundImage : $thread->background,
 						$thread->foreground,
@@ -155,7 +155,7 @@ class MegalithHandler extends Handler
 			if (!($thread = Thread::load($db, intval($name))))
 				throw new ApplicationException("ファイルが見つかりません", 404);
 			
-			if (Util::isCachedByBrowser($thread->entry->responseLastUpdate))
+			if (Util::isCachedByBrowser($thread->entry->getLatestLastUpdate()))
 				return Visualizer::notModified();
 			
 			if (Configuration::$instance->showComment[Configuration::ON_ENTRY])
@@ -210,7 +210,7 @@ class MegalithHandler extends Handler
 			if (!($thread = Thread::load($db, intval($name))))
 				throw new ApplicationException("ファイルが見つかりません", 404);
 			
-			if (Util::isCachedByBrowser($thread->entry->responseLastUpdate))
+			if (Util::isCachedByBrowser($thread->entry->getLatestLastUpdate()))
 				return Visualizer::notModified();
 			
 			App::closeDB($db);
