@@ -64,7 +64,59 @@ function entries($entries, $isAdmin, $listType = null)
 	$visibility = array_filter(explode(",", Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "readCount,size,commentCount,evaluationCount,points,rate,dateTime")));
 	$visibility = array_flip($visibility);
 	
-	if ($listType == "double")
+	if ($listType == "compact")
+	{
+	?>
+		<ul class="compact">
+			<?php foreach ($entries as $idx => $i): ?>
+				<li>
+					<?php if ($isAdmin || $c->showTitle[Configuration::ON_SUBJECT]): ?>
+						<h2>
+							<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array($i->subject, $i->id))) ?>"><?php Visualizer::converted($i->title) ?></a>
+						</h2>
+					<?php endif ?>
+					<time class="lastUpdate" datetime="<?php Visualizer::converted(date("c", $i->getLatestLastUpdate())) ?>">
+						<?php Visualizer::converted(Visualizer::formatDateTime($i->getLatestLastUpdate())) ?>
+					</time>
+					<?php if (time() - $i->dateTime < $c->updatePeriod * 24 * 60 * 60): ?>
+						<span class="update">
+							NEW
+						</span>
+					<?php elseif (time() - $i->getLatestLastUpdate() < $c->updatePeriod * 24 * 60 * 60): ?>
+						<span class="update">
+							UP
+						</span>
+					<?php endif ?>
+					<?php if ($isAdmin || $c->showName[Configuration::ON_SUBJECT]): ?>
+						<span class="name">
+							<?php if (Util::isEmpty($i->name)): ?>
+								<?php Visualizer::convertedName($i->name) ?>
+							<?php else: ?>
+								<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("author", $i->name))) ?>"><?php Visualizer::convertedName($i->name) ?></a>
+							<?php endif ?>
+						</span>
+					<?php endif ?>
+					<?php if ($isAdmin
+						   || $c->showPoint[Configuration::ON_SUBJECT]
+						   || $c->showComment[Configuration::ON_SUBJECT]
+						   || $c->showRate[Configuration::ON_SUBJECT]): ?>
+						<dl>
+							<?php
+							$idx = 0;
+							$v = "evaluationCount,commentCount,points,rate";
+							?>
+							<?php if ($isAdmin && $c->useAnyPoints() || $c->showPoint[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $v, "評価", "evaluationCount", $c->pointMap && $c->commentPointMap ? "{$i->commentedEvaluationCount}/{$i->evaluationCount}" : $i->evaluationCount) ?>
+							<?php if ($isAdmin || $c->showComment[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $v, "コメント", "commentCount", $i->commentCount) ?>
+							<?php if ($isAdmin && $c->useAnyPoints() || $c->showPoint[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $v, "POINT", "points", $i->points) ?>
+							<?php if ($isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT]) entryInfo($idx, $i, $v, "Rate", "rate", sprintf("%.2f", $i->rate)) ?>
+						</dl>
+					<?php endif ?>
+				</li>
+			<?php endforeach ?>
+		</ul>
+	<?php
+	}
+	else if ($listType == "double")
 	{
 	?>
 		<div class="entries" id="entries">
@@ -137,7 +189,7 @@ function entries($entries, $isAdmin, $listType = null)
 							</ul>
 						<?php endif ?>
 						<?php if (!Util::isEmpty($i->summary) && $c->useSummary && ($isAdmin || $c->showSummary[Configuration::ON_SUBJECT])): ?>
-							<p>
+							<p class="summary">
 								<?php Visualizer::convertedSummary($i->summary) ?>
 							</p>
 						<?php endif ?>

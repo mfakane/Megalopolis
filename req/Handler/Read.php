@@ -42,19 +42,28 @@ class ReadHandler extends Handler
 		$this->entry = &$this->thread->entry;
 		$this->page = $page;
 		
-		if (Util::isCachedByBrowser($this->thread->entry->getLatestLastUpdate(), $page))
-			return Visualizer::notModified();
+		$history = array_filter(explode(",", Cookie::getCookie(Cookie::VIEW_HISTORY_KEY, "")));
 		
-		$this->forceTaketori = preg_match('/<\s*font|font:\s*|font-family:\s*/i', $this->thread->body);
-
-		if (Cookie::getCookie(Cookie::LAST_ID_KEY) != $id)
+		if (!in_array($id, $history))
 		{
 			$db->beginTransaction();
 			$this->entry->incrementReadCount($db);
 			$db->commit();
-			Cookie::setCookie(Cookie::LAST_ID_KEY, $id);
-			Cookie::sendCookie();
 		}
+		
+		if (($idx = array_search($id, $history)) !== false)
+			unset($history[$idx]);
+		
+		array_unshift($history, $id);
+		$history = array_slice($history, 0, Configuration::$instance->maxHistory);
+		
+		Cookie::setCookie(Cookie::VIEW_HISTORY_KEY, implode(",", $history));
+		Cookie::sendCookie();
+		
+		if (Util::isCachedByBrowser($this->thread->entry->getLatestLastUpdate(), $page))
+			return Visualizer::notModified();
+		
+		$this->forceTaketori = preg_match('/<\s*font|font:\s*|font-family:\s*/i', $this->thread->body);
 		
 		if (isset($_POST["admin"]))
 		{
@@ -381,6 +390,15 @@ class ReadHandler extends Handler
 		}
 		else
 		{
+			$history = array_filter(explode(",", Cookie::getCookie(Cookie::EVALUATION_HISTORY_KEY, "")));
+			
+			if (($idx = array_search($id, $history)) !== false)
+				unset($history[$idx]);
+			
+			array_unshift($history, $id);
+			Cookie::setCookie(Cookie::EVALUATION_HISTORY_KEY, implode(",", array_slice($history, 0, Configuration::$instance->maxHistory)));
+			Cookie::sendCookie();
+			
 			$db->beginTransaction();
 			$comment = $this->thread->comment($db, $name, $mail, $body, $password, $point);
 			$db->commit();
@@ -482,6 +500,15 @@ class ReadHandler extends Handler
 		}
 		else
 		{
+			$history = array_filter(explode(",", Cookie::getCookie(Cookie::EVALUATION_HISTORY_KEY, "")));
+			
+			if (($idx = array_search($id, $history)) !== false)
+				unset($history[$idx]);
+			
+			array_unshift($history, $id);
+			Cookie::setCookie(Cookie::EVALUATION_HISTORY_KEY, implode(",", array_slice($history, 0, Configuration::$instance->maxHistory)));
+			Cookie::sendCookie();
+			
 			$db->beginTransaction();
 			$eval = $this->thread->evaluate($db, $point);
 			$db->commit();

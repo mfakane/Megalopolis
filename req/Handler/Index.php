@@ -114,6 +114,40 @@ class IndexHandler extends Handler
 		}
 	}
 	
+	function recent()
+	{
+		$db = App::openDB();
+		$this->entries = array
+		(
+			"view" => array(),
+			"evaluation" => array(),
+		);
+		
+		if ($view = Cookie::getCookie(Cookie::VIEW_HISTORY_KEY))
+			foreach (explode(",", $view, Configuration::$instance->maxHistory) as $i)
+				if ($entry = ThreadEntry::load($db, intval($i)))
+					$this->entries["view"][] = $entry;
+		
+		if ($evaluation = Cookie::getCookie(Cookie::EVALUATION_HISTORY_KEY))
+			foreach (explode(",", $evaluation, Configuration::$instance->maxHistory) as $i)
+				if ($entry = ThreadEntry::load($db, intval($i)))
+					$this->entries["evaluation"][] = $entry;
+		
+		App::closeDB($db);
+		
+		switch (App::$handlerType)
+		{
+			case "json":
+				return Visualizer::json(array
+				(
+					"view" => array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->entries["view"])),
+					"evaluation" => array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->entries["evaluation"])),
+				));
+			default:
+				return Visualizer::visualize();
+		}
+	}
+	
 	function search()
 	{
 		if (!Configuration::$instance->showTitle[Configuration::ON_SUBJECT] && !Auth::hasSession(true))

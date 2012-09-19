@@ -136,11 +136,11 @@ class Visualizer
 	}
 	
 	/**
-	 * @param string $title
-	 * @param array $menu
+	 * @param string $title [optional]
+	 * @param array $menu [optional]
 	 * @param string $subTitle [optional]
 	 */
-	static function header($title, array $menu = array(), $subTitle = null)
+	static function header($title = null, array $menu = array(), $subTitle = null)
 	{
 		$menu = array_reverse($menu, true);
 		$menu[""] = array("ホーム", "homeIcon.png");
@@ -183,13 +183,15 @@ class Visualizer
 				</ul>
 			</nav>
 		</header>
-		<h1>
-			<?php self::converted($title) ?>
-			<?php if (!Util::isEmpty($subTitle)): ?>
-				<span><?php self::converted($subTitle) ?></span>
-			<?php endif ?>
-		</h1>
+		<?php if (!Util::isEmpty($title)): ?>
+			<h1>
+				<?php self::converted($title) ?>
+				<?php if (!Util::isEmpty($subTitle)): ?>
+					<span><?php self::converted($subTitle) ?></span>
+				<?php endif ?>
+			</h1>
 		<?php
+		endif;
 	}
 	
 	static function footer($backgroundColor = null)

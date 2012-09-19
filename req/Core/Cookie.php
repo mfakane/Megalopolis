@@ -11,6 +11,8 @@ class Cookie
 	const ORIENTATION_KEY = "Orientation";
 	const LIST_TYPE_KEY = "ListType";
 	const LIST_VISIBILITY_KEY = "ListVisibility";
+	const VIEW_HISTORY_KEY = "ViewHistory";
+	const EVALUATION_HISTORY_KEY = "EvaluationHistory";
 	
 	static $data = null;
 	

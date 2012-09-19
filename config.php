@@ -320,6 +320,7 @@ $config->showFooterVersion = true;
 // フッターに表示する追加情報 (HTML 一覧)
 $config->footers = array
 (
+	'<a href="' . Visualizer::actionHref("recent") . '">閲覧履歴</a>',
 	'<a href="' . Visualizer::actionHref("tag") . '">タグ一覧</a>',
 	'<a href="' . Visualizer::actionHref("author") . '">作者一覧</a>',
 	'<a href="' . Visualizer::actionHref("config.html") . '">設定情報</a>',

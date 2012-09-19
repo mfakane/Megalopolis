@@ -419,6 +419,12 @@ div.entries article
 	vertical-align: top;
 }
 
+div.entries article .notify
+{
+	margin-left: 4px;
+	margin-right: 4px;
+}
+
 div.entries article .articleBody
 {
 	margin: 0px 4px 8px 4px;
@@ -450,6 +456,27 @@ div.entries article time.hidden+time
 div.entries article time.lastUpdate
 {
 	color: #666666;
+}
+
+.entries .compact
+{
+	display: block;
+	margin: 0px;
+	padding: 0px;
+}
+
+.entries .compact>li
+{
+	display: block;
+	margin: 0px;
+	padding: 0px;
+}
+
+.entries .compact>li+li
+{
+	margin-top: 4px;
+	padding-top: 8px;
+	border-top: #999999 1px solid;
 }
 
 .entries .host
@@ -484,6 +511,7 @@ div.entries dl
 	padding: 4px;
 	background: #efefef;
 	font-size: 90%;
+	clear: both;
 }
 
 div.entries article time+dl
@@ -535,7 +563,7 @@ div.entries ul.tags li
 	border: none;
 }
 
-div.entries p
+div.entries .summary
 {
 	margin: 4px 0px 0px 0px;
 	padding: 8px 0px 0px 0px;
@@ -786,9 +814,16 @@ h1
 	font-size: 20px;
 }
 
-body>h1
+body>h1, .entries h1
 {
 	height: 20px;
+}
+
+.entries h1
+{
+	margin-top: 8px;
+	margin-left: 4px;
+	margin-right: 4px;
 }
 
 body>h1>span

@@ -177,6 +177,7 @@ class Configuration
 	public $rateType = self::RATE_AVERAGE;
 	public $searchPaging = 30;
 	public $tagListing = 100;
+	public $maxHistory = 30;
 	public $head = null;
 	public $notes = null;
 	public $showFooterVersion = true;
