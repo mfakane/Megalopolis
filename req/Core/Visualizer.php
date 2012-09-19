@@ -503,15 +503,18 @@ class Visualizer
 		)));
 	}
 	
-	static function convertedBody(Thread $thread, $page = null, $offset = null, $length = null)
+	static function convertedBody(Thread $thread, $page = null, $offset = null, $length = null, $stripExcept = null)
 	{
-		echo self::escapeBody($thread, $page, $offset, $length);
+		echo self::escapeBody($thread, $page, $offset, $length, $stripExcept);
 	}
 	
-	static function escapeBody(Thread $thread, $page = null, $offset = null, $length = null)
+	static function escapeBody(Thread $thread, $page = null, $offset = null, $length = null, $stripExcept = null)
 	{
 		$content = $page ? $thread->page($page) : $thread->body;
 		$s = self::ensureHtml(!is_null($offset) && $length ? mb_substr($content, $offset, $length) : $content);
+		
+		if (is_array($stripExcept))
+			$s = strip_tags($s, "<" . implode("><", $stripExcept) . ">");
 		
 		if ($thread->convertLineBreak)
 			return self::convertLineBreak($s);
@@ -519,14 +522,17 @@ class Visualizer
 			return $s;
 	}
 	
-	static function convertedAfterword(Thread $thread)
+	static function convertedAfterword(Thread $thread, $stripExcept = null)
 	{
-		echo self::escapeAfterword($thread);
+		echo self::escapeAfterword($thread, $stripExcept);
 	}
 	
-	static function escapeAfterword(Thread $thread)
+	static function escapeAfterword(Thread $thread, $stripExcept = null)
 	{
 		$s = self::ensureHtml($thread->afterword);
+		
+		if (is_array($stripExcept))
+			$s = strip_tags($s, "<" . implode("><", $stripExcept) . ">");
 		
 		if ($thread->convertLineBreak)
 			return self::convertLineBreak($s);

@@ -67,10 +67,10 @@ Visualizer::doctype();
 							</p>
 						<?endif ?>
 						<div>
-							<? Visualizer::convertedBody($h->thread) ?>
+							<? Visualizer::convertedBody($h->thread, null, null, null, array("br", "p", "a", "span", "font")) ?>
 						</div>
 						<footer>
-							<? Visualizer::convertedAfterword($h->thread) ?>
+							<? Visualizer::convertedAfterword($h->thread, array("br", "p", "a", "span", "font")) ?>
 							<?if ($c->showName[Configuration::ON_ENTRY]): ?>
 								<address>
 									<? Visualizer::convertedName($h->entry->name) ?>
