@@ -2,7 +2,7 @@
 $c = &Configuration::$instance;
 $h = &IndexHandler::$instance;
 $d = &Visualizer::$data;
-$basePath = App::$actionName == "index" ? Visualizer::actionHref($h->subject) : Visualizer::actionHref(App::$actionName, $d);
+$basePath = App::$actionName == "index" ? Visualizer::absoluteHref($h->subject) : Visualizer::absoluteHref(App::$actionName, $d);
 $searchMode = "query";
 $search = "";
 
@@ -265,7 +265,7 @@ Visualizer::doctype();
 			</footer>
 		</div>
 	<?elseif ($m == "n"): ?>
-		<div id="more" data-role="page" class="index">
+		<div id="info" data-role="page" class="index">
 			<header data-role="header" data-backbtn="false">
 				<h1>情報</h1>
 				<a href="#" data-rel="back">戻る</a>
