@@ -188,7 +188,11 @@ Visualizer::doctype();
 					<?if ($c->showName[Configuration::ON_ENTRY]): ?>
 						<li>
 							<h3>名前</h3>
-							<a href="<?+Visualizer::absoluteHref("author", $h->entry->name) ?>"><? Visualizer::convertedName($h->entry->name) ?></a>
+							<?if (Util::isEmpty($h->entry->name)): ?>
+								<? Visualizer::convertedName($h->entry->name) ?>
+							<?else: ?>
+								<a href="<?+Visualizer::absoluteHref("author", $h->entry->name) ?>"><? Visualizer::convertedName($h->entry->name) ?></a>
+							<?endif ?>
 						</li>
 					<?endif ?>
 					<li>
