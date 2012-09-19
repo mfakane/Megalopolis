@@ -413,8 +413,10 @@ class ReadHandler extends Handler
 					"deleteAction" => Util::getAbsoluteUrl() . "{$this->entry->subject}/{$this->entry->id}/uncomment?id={$comment->id}"
 				));
 			}
-			else
+			else if (Configuration::$instance->showComment[Configuration::ON_ENTRY])
 				return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}");
+			else
+				return Visualizer::visualize("Read/Success");
 		}
 	}
 	
@@ -521,8 +523,10 @@ class ReadHandler extends Handler
 					"dateTime" => intval($eval->dateTime),
 					"point" => $eval->point
 				));
-			else
+			else if (Configuration::$instance->showPoint[Configuration::ON_ENTRY])
 				return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}");
+			else
+				return Visualizer::visualize("Read/Success");
 		}
 	}
 
