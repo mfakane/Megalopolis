@@ -194,7 +194,13 @@ class Util
 	 */
 	static function isCachedByBrowser($lastModified = null, $eTagSeed = null)
 	{
-		$eTag = md5(implode("_", array(App::VERSION, self::getIncludedFilesLastModified(), $eTagSeed)));
+		$eTag = md5(implode("_", array
+		(
+			App::VERSION,
+			self::getIncludedFilesLastModified(),
+			isset($_COOKIE[Visualizer::MODE_COOKIE_NAME]) ? $_COOKIE[Visualizer::MODE_COOKIE_NAME] : "auto",
+			$eTagSeed
+		)));
 		
 		if ($lastModified)
 			header("Last-Modified: " . gmdate("D, d M Y H:i:s T", $lastModified));
