@@ -511,10 +511,7 @@ class Visualizer
 	static function escapeBody(Thread $thread, $page = null, $offset = null, $length = null, $stripExcept = null)
 	{
 		$content = $page ? $thread->page($page) : $thread->body;
-		$s = self::ensureHtml(!is_null($offset) && $length ? mb_substr($content, $offset, $length) : $content);
-		
-		if (is_array($stripExcept))
-			$s = strip_tags($s, "<" . implode("><", $stripExcept) . ">");
+		$s = self::ensureHtml(!is_null($offset) && $length ? mb_substr($content, $offset, $length) : $content, $stripExcept);
 		
 		if ($thread->convertLineBreak)
 			return self::convertLineBreak($s);
@@ -529,10 +526,7 @@ class Visualizer
 	
 	static function escapeAfterword(Thread $thread, $stripExcept = null)
 	{
-		$s = self::ensureHtml($thread->afterword);
-		
-		if (is_array($stripExcept))
-			$s = strip_tags($s, "<" . implode("><", $stripExcept) . ">");
+		$s = self::ensureHtml($thread->afterword, $stripExcept);
 		
 		if ($thread->convertLineBreak)
 			return self::convertLineBreak($s);
@@ -560,7 +554,7 @@ class Visualizer
 			return htmlspecialchars($s, ENT_QUOTES, "UTF-8");
 	}
 	
-	private static function ensureHtml($str)
+	private static function ensureHtml($str, $stripExcept = null)
 	{
 		$rt = str_get_html($str);
 		self::ensureHtmlTagEnd($rt);
@@ -572,7 +566,13 @@ class Visualizer
 		$str = $rt->save();
 		$rt->clear();
 		unset($rt);
-
+		
+		if (!is_array($stripExcept))
+			$stripExcept = Configuration::$instance->allowedTags;
+			
+		if (is_array($stripExcept))
+			$str = strip_tags($str, "<" . implode("><", $stripExcept) . ">");
+		
 		return $str;
 	}
 	
