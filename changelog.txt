@@ -1,4 +1,55 @@
-﻿2012-09-17 COAH96KoxU <queue glasscore.net>
+﻿2012-09-20 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 22
+	* req/Visualizer/mobile/Index/Index.php,
+	  req/Visualizer/mobile/Read/Index.php,
+	  script/mobile/Index/Index.js,
+	  script/mobile/base.js,
+	  style/mobile/mobile.css: iPhone 表示の一覧の表示を変更
+	* req/Core/Cookie.php,
+	  req/Handler/Index.php,
+	  req/Handler/Read.php,
+	  req/Visualizer/mobile/Index/Index.php,
+	  req/Visualizer/mobile/Read/Index.php,
+	  script/mobile/Index/Index.js,
+	  script/mobile/Read/Index.js,
+	  script/mobile/base.js,
+	  style/mobile/mobile.css: iPhone 表示に縦書きオフのユーザ表示設定を追加
+	* req/Handler/Read.php: コメントまたは評価非表示時 Javascript 無効時に成功画面へ遷移するように
+	* req/Core/Util.php: 表示形式が違ってもキャッシュが共有されてしまうのを修正
+	* req/Visualizer/mobile/Read/Index.php: iPhone 表示にて名無しのリンクを削除
+	* req/Core/Visualizer.php,
+	  req/Visualizer/mobile/Read/Index.php: iPhone 表示で本文のタグを削るように
+	* req/Visualizer/mobile/Index/Index.php: iPhone 表示でモード切り替えができないことがあるのを修正
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Core/Cookie.php,
+	  req/Core/Visualizer.php,
+	  req/Handler/Index.php,
+	  req/Handler/Read.php,
+	  req/Visualizer/Template/Index.php,
+	  style/style.css: 閲覧および評価履歴を追加
+	* script/Index/Index.js,
+	  style/style.css: テーブル表示にてカラム名クリックでソート順を変更可能に
+	* req/Visualizer/Index/Index.php,
+	  req/Visualizer/Index/Search.php,
+	  req/Visualizer/Template/Index.php,
+	  req/Visualizer/Util/Track.php,
+	  script/Index/Index.js: テーブル表示で既定で概要を展開するかのユーザ表示設定を追加
+	* req/Handler/Index.php,
+	  req/Handler/Megalith.php,
+	  req/Handler/Read.php,
+	  req/Model/ThreadEntry.php,
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/Template/Index.php,
+	  req/Visualizer/mobile/Read/Index.php: 作品の更新が最終更新日時の表示に反映されないのを修正
+	* req/Core/Configuration.php,
+	  req/Core/Visualizer.php: 禁止タグの整理
+	* req/Core/Visualizer.php,
+	  req/Visualizer/Read/Index.php: 本文がページ分割されている場合ページのリンク先で本文まで飛ぶように
+	* req/Handler/Index.php: 最新作品集に番号なしでアクセスしたとき作品集更新日時が正しくないのを修正
+
+2012-09-17 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 21
 	* req/Core/Util.php,
