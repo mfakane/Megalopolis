@@ -205,7 +205,7 @@ class IndexHandler extends Handler
 			"query" => Util::splitTags(self::param("query")),
 			"title" => Util::splitTags(self::param("title")),
 			"name" => Util::splitTags(self::param("name")),
-			"tag" => Util::splitTags(self::param("tags")),
+			"tag" => Util::splitTags(self::param("tags", self::param("tag"))),
 			"eval" => array
 			(
 				!Util::isEmpty(self::param("evalBegin")) ? intval(self::param("evalBegin")) : $vals["minEval"],
