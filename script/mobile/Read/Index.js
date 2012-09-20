@@ -1,6 +1,6 @@
 megalopolis.read =
 {
-	scrollLeft: -1,
+	scroll: -1,
 	renderPage: function()
 	{
 		$(document)
@@ -12,16 +12,18 @@ megalopolis.read =
 				{
 					var content = $(".content", page);
 					var pageId = content.prop("class").split(" ").filter(function(_) { return _.indexOf("id") == 0; }).pop();
+					var isVertical = content.hasClass("vertical");
 					
 					if (!content.hasClass("hasinit"))
 						content
 							.addClass("hasinit")
 							.on("scroll", function()
 							{
-								megalopolis.read.scrollLeft = content.scrollLeft();
+								megalopolis.read.scroll = isVertical ? content.scrollLeft() : content.scrollTop();
 							})
 							.find(".contentWrapper")
 							.fadeTo(0, 0.0001)
+							.filter(".vertical")
 							.on("mousewheel", function(e)
 							{
 								content.stop(true, true).animate
@@ -41,17 +43,23 @@ megalopolis.read =
 				{
 					var content = $(".content", page);
 					var pageId = content.prop("class").split(" ").filter(function(_) { return _.indexOf("id") == 0; }).pop();
+					var isVertical = content.hasClass("vertical");
 					
 					if (!content.hasClass("shown"))
 					{
-						$(document.body).parent().css("overflow", "hidden");
-						content.addClass("shown").height(window.innerHeight);
+						if (isVertical)
+						{
+							$(document.body).parent().css("overflow", "hidden");
+							content.height(window.innerHeight);
+						}
+						
+						content.addClass("shown");
 						
 						var saved = megalopolis.cookie("Scroll");
 						var savedScroll = saved != null ? saved.split(",") : ["0", "0"];
-						var offset = savedScroll[0] == pageId ? savedScroll[1]  - 0 : content.find(".contentWrapper").width();
+						var offset = savedScroll[0] == pageId ? savedScroll[1]  - 0 : isVertical ? content.find(".contentWrapper").width() : 0;
 						
-						content.scrollLeft(offset)
+						(isVertical ? content.scrollLeft(offset) : content.scrollTop(offset))
 							.find(".contentWrapper")
 							.fadeTo(250, 1);
 					}
@@ -66,8 +74,8 @@ megalopolis.read =
 					var content = $(".content", page);
 					var pageId = content.prop("class").split(" ").filter(function(_) { return _.indexOf("id") == 0; }).pop();
 					
+					megalopolis.cookie("Scroll", pageId + "," + megalopolis.read.scroll);
 					$(document.body).parent().css("overflow", "auto");
-					megalopolis.cookie("Scroll", pageId + "," + megalopolis.read.scrollLeft);
 				}
 			});
 	},

@@ -8,7 +8,7 @@ class Cookie
 	const PASSWORD_KEY = "Password";
 	const LAST_ID_KEY = "LastID";
 	const FONT_SIZE_KEY = "FontSize";
-	const ORIENTATION_KEY = "Orientation";
+	const MOBILE_VERTICAL_KEY = "MobileVertical";
 	const LIST_TYPE_KEY = "ListType";
 	const LIST_VISIBILITY_KEY = "ListVisibility";
 	const VIEW_HISTORY_KEY = "ViewHistory";

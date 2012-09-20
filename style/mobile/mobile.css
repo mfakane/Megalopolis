@@ -576,12 +576,26 @@ li.ui-li.ui-btn-hover-c *
 
 .read .content
 {
-	overflow-x: scroll;
 	-webkit-overflow-scrolling: touch;
+	background-color: #ffffff;
+}
+
+.content.vertical
+{
+	overflow-x: scroll;
 	background-color: rgba(245, 245, 245, 0.75);
 }
 
-.contentWrapper
+.horizontal .contentWrapper
+{
+	margin: 0px;
+	padding: 24px;
+	color: #000000;
+	text-shadow: none;
+	text-align: justify;
+}
+
+.vertical .contentWrapper
 {
 	margin: 0px;
 	padding: 24px;
@@ -611,14 +625,28 @@ li.ui-li.ui-btn-hover-c *
 	font-size: 18px;
 }
 
-.contentWrapper address
+.horizontal .contentWrapper header, .horizontal .contentWrapper footer
+{
+	margin: 8px -8px 8px -8px;
+	padding: 8px;
+	background-color: #efefef;
+	border-radius: 5px;
+}
+
+.horizontal .contentWrapper address
+{
+	text-align: right;
+	font-weight: bold;
+}
+
+.vertical .contentWrapper address
 {
 	margin-right: 4px;
 	font-size: 80%;
 	font-style: normal;
 }
 
-.contentWrapper footer
+.vertical .contentWrapper footer
 {
 	margin-right: 64px;
 	padding-right: 64px;
@@ -927,4 +955,87 @@ form.read .ui-listview .ui-li:last-child
 .ui-loader .ui-icon
 {
 	background: transparent url('http://code.jquery.com/mobile/1.2.0-beta.1/images/ajax-loader.gif');
+}
+
+label.ui-slider
+{
+	display: inline-block;
+	position: relative;
+	top: -6px;
+	margin: 0px;
+	padding: 0px;
+	line-height: normal;
+	font-weight: bold;
+	width: 198px !important;
+}
+
+.ui-field-contain, fieldset.ui-field-contain
+{
+	padding: 0px;
+	height: 28px;
+}
+
+div.ui-slider-switch
+{
+	top: 0px;
+	margin-left: 0px;
+	margin-right: -3px;
+	width: 75px !important;
+	height: 25px;
+	border-color: #7f7f7f #b8b8b8 #e5e5e5 #b8b8b8;
+	-webkit-box-shadow: none !important;
+}
+
+div.ui-slider-switch *
+{
+	-webkit-box-shadow: none !important;
+}
+
+span.ui-slider-label
+{
+	font-size: 120%;
+	line-height: 25px;
+}
+
+.ui-slider-inneroffset
+{
+	margin-left: 9px;
+}
+
+div.ui-slider-switch .ui-slider-handle
+{
+	margin: 0px 0px 0px -9px;
+	padding: 0px;
+	width: 24px;
+	height: 24px;
+	-webkit-box-shadow: 0 1px 1px rgba(255, 255, 255, 1) inset, 1px 0 1px rgba(0, 0, 0, 0.2), -1px 0 1px rgba(0, 0, 0, 0.2) !important;
+	background-image: -webkit-gradient(linear, left top, left bottom,
+		from(#d0d0d0),
+			color-stop(0.5, #e4e4e4),
+		to(#fafafa));
+}
+
+.ui-slider.ui-btn-corner-all, .ui-slider .ui-btn-corner-all
+{
+	border-radius: 12px;
+}
+
+.ui-slider .ui-btn-active, .ui-slider .ui-btn-down-c
+{
+	-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15) inset, 0 -1px 5px rgba(255, 255, 255, 0.2) inset, 0 -1px 1px rgba(0, 0, 0, 0.1) inset !important;
+}
+
+.ui-slider .ui-btn-down-c
+{
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#d3d3d3), to(#fcfcfc));
+}
+
+.ui-slider .ui-btn-active
+{
+	padding-top: 1px;
+	background-image: -webkit-gradient(linear, left top, left bottom,
+		from(#0071cf),
+			color-stop(0.4, #007de9),
+			color-stop(0.6, #2693ed),
+		to(#4aa6f3));
 }

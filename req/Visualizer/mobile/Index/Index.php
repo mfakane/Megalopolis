@@ -256,6 +256,11 @@ Visualizer::doctype();
 							<h2>携帯表示</h2>
 						</a>
 					</li>
+					<li>
+						<a href="<?+$basePath ?>/c">
+							<h2>設定</h2>
+						</a>
+					</li>
 				</ul>
 			</div>
 			<footer data-role="footer" data-position="fixed" data-id="homeTab">
@@ -283,6 +288,26 @@ Visualizer::doctype();
 					<? makeMenu($basePath, "m") ?>
 				</div>
 			</footer>
+		</div>
+	<?elseif ($m == "c"): ?>
+		<div id="config" data-role="page" class="index">
+			<header data-role="header" data-backbtn="false">
+				<h1>設定</h1>
+				<a href="#" data-rel="back">戻る</a>
+			</header>
+			<div data-role="content">
+				<ul data-role="listview" data-inset="true">
+					<li>
+						<div data-role="fieldcontain">
+							<label for="verticalSwitch">縦書き</label>
+							<select id="verticalSwitch" data-role="slider" onchange="megalopolis.index.settingsChanged()">
+								<option value="no">オフ</option>
+								<option value="yes">オン</option>
+							</select>
+						</div>
+					</li>
+				</ul>
+			</div>
 		</div>
 	<?endif ?>
 	<div id="sort" data-role="page" class="index fulllist">

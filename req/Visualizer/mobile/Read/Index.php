@@ -4,6 +4,7 @@ $h = &ReadHandler::$instance;
 $d = &Visualizer::$data;
 $basePath = Visualizer::absoluteHref($h->subject, $h->entry->id);
 $m = Util::isLength(App::$pathInfo[$last = count(App::$pathInfo) - 1], 1) ? Util::escapeInput(App::$pathInfo[$last]) : "h";
+$isVertical = Cookie::getCookie(Cookie::MOBILE_VERTICAL_KEY, "yes") == "yes";
 
 function makeMenu($basePath, $current)
 {
@@ -37,6 +38,27 @@ Visualizer::doctype();
 	</title>
 	<script src="<?+Visualizer::actionHref("script", "mobile", "Index", "Index.js") ?>"></script>
 	<script src="<?+Visualizer::actionHref("script", "mobile", "Read", "Index.js") ?>"></script>
+	<?if (!$isVertical): ?>
+		<style>
+			body.ui-mobile-viewport, div.ui-mobile-viewport, .ui-content
+			{
+				overflow-x: auto;
+			}
+			
+			.read .content
+			{
+				<?if (!Util::isEmpty($h->thread->foreground)): ?>
+					color: <?+$h->thread->foreground ?>;
+				<?endif ?>
+				<?if (!Util::isEmpty($h->thread->background)): ?>
+					background-color: <?+$h->thread->background ?>;
+				<?endif ?>
+				<?if (!Util::isEmpty($h->thread->backgroundImage)): ?>
+					background-image: url('<?+(strpos($h->thread->backgroundImage, "http://") === 0 ? null : Visualizer::$basePath) . $h->thread->backgroundImage ?>');
+				<?endif ?>
+			}
+		</style>
+	<?endif ?>
 </head>
 <body>
 	<?if ($m == "h"): ?>
@@ -49,7 +71,7 @@ Visualizer::doctype();
 				<a href="<?+Visualizer::absoluteHref($h->entry->subject) ?>" data-direction="reverse">戻る</a>
 			</header>
 			<div data-role="content" data-theme="e">
-				<div class="content id<?+$h->entry->id ?>">
+				<div class="content <?=$isVertical ? "vertical" : "horizontal" ?> id<?+$h->entry->id ?>">
 					<article class="contentWrapper">
 						<?if ($c->showHeaderInsideBorder): ?>
 							<header>
@@ -67,10 +89,10 @@ Visualizer::doctype();
 							</p>
 						<?endif ?>
 						<div>
-							<? Visualizer::convertedBody($h->thread, null, null, null, array("br", "p", "a", "span", "font")) ?>
+							<? Visualizer::convertedBody($h->thread, null, null, null, $isVertical ? array("br", "p", "a", "span", "font") : null) ?>
 						</div>
 						<footer>
-							<? Visualizer::convertedAfterword($h->thread, array("br", "p", "a", "span", "font")) ?>
+							<? Visualizer::convertedAfterword($h->thread, $isVertical ? array("br", "p", "a", "span", "font") : null) ?>
 							<?if ($c->showName[Configuration::ON_ENTRY]): ?>
 								<address>
 									<? Visualizer::convertedName($h->entry->name) ?>

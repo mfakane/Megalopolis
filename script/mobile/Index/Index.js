@@ -95,6 +95,14 @@ megalopolis.index =
 						$("<p />").addClass("name").html(_.name)
 					))[0];
 		}));
+	},
+	renderSettings: function()
+	{
+		$("#verticalSwitch").val(megalopolis.mainCookie("MobileVertical") || "yes").slider("refresh");
+	},
+	settingsChanged: function()
+	{
+		megalopolis.mainCookie("MobileVertical", $("#verticalSwitch").val());
 	}
 };
 
@@ -104,4 +112,6 @@ $(document).bind("pageinit", function(e)
 	
 	if (page.id == "home" || page.id == "search")
 		megalopolis.index.setSort();
+	else if (page.id == "config")
+		megalopolis.index.renderSettings();
 });

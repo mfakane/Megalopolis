@@ -8,7 +8,7 @@ $.extend(megalopolis,
 		var portrait = orientation ? orientation == "portrait" : $("html").hasClass("portrait");
 		
 		$(document.body).css("minHeight", (this.minHeight = portrait ? window.innerHeight - 48 : 268) + "px");
-		$(".read .content").height(window.innerHeight);
+		$(".read .content.vertical").height(window.innerHeight);
 	},
 	getHistory: function()
 	{
@@ -72,3 +72,19 @@ $(document)
 				document.body.scrollTop = 1;
 		}, 1);
 	});
+
+if (window.applicationCache)
+{
+	var cache = window.applicationCache;
+
+	cache.addEventListener("updateready", function()
+	{
+		try
+		{
+			cache.swapCache();
+		}
+		catch(ex)
+		{
+		}
+	});
+}

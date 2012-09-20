@@ -679,7 +679,10 @@ class IndexHandler extends Handler
 		(
 			"CACHE MANIFEST",
 			"# rev " . Util::getIncludedFilesLastModified(),
-			"http://code.jquery.com/",
+			"http://code.jquery.com/jquery-1.8.1.min.js",
+			"http://code.jquery.com/mobile/1.2.0-beta.1/jquery.mobile-1.2.0-beta.1.min.js",
+			"http://code.jquery.com/mobile/1.2.0-beta.1/jquery.mobile-1.2.0-beta.1.min.css",
+			"http://code.jquery.com/mobile/1.2.0-beta.1/images/ajax-loader.gif",
 			implode("\r\n", glob("style/mobile/*")),
 			"script/base.js",
 			"script/mobile/base.js",
@@ -688,7 +691,7 @@ class IndexHandler extends Handler
 			"",
 			"NETWORK:",
 			"*",
-			Util::getAbsoluteUrl(),
+			"/",
 		));
 		
 		return null;
