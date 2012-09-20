@@ -604,6 +604,7 @@ li.ui-li.ui-btn-hover-c *
 
 .content.vertical
 {
+	overflow: hidden;
 	overflow-x: scroll;
 	background-color: rgba(245, 245, 245, 0.75);
 }

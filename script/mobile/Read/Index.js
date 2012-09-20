@@ -23,15 +23,17 @@ megalopolis.read =
 							})
 							.find(".contentWrapper")
 							.fadeTo(0, 0.0001)
-							.filter(".vertical")
 							.on("mousewheel", function(e)
 							{
-								content.stop(true, true).animate
-								({
-									scrollLeft: content.scrollLeft() + e.originalEvent.wheelDelta,
-								}, 20, "linear");
-								
-								return false;
+								if (isVertical)
+								{
+									content.stop(true, true).animate
+									({
+										scrollLeft: content.scrollLeft() + e.originalEvent.wheelDelta,
+									}, 20, "linear");
+									
+									return false;
+								}
 							});
 				}
 			})
