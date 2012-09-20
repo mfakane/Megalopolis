@@ -23,75 +23,6 @@ $m = App::$actionName == "search" ? "s" : (App::$pathInfo ? Util::escapeInput(Ap
 if (!Util::isLength($m, 1) || intval($m))
 	$m = "h";
 
-function makeMenu($basePath, $current)
-{
-	echo '<ul>';
-	
-	foreach (array
-	(
-		"h" => "作品一覧, home",
-		"s" => "検索, search",
-		"i" => "履歴, history",
-		"m" => "その他, more"
-	) as $k => $v)
-	{
-		list($n, $i) = explode(", ", $v);
-	?>
-		<li>
-			<a href="<?+$basePath . "/" . $k ?>" data-transition="none"<?if ($k == $current): ?> class="ui-btn-active"<?endif ?> data-icon="<?=$i ?>"><?+$n ?></a>
-		</li>
-	<?php
-	}
-	
-	echo '</ul>';
-}
-
-function entryInfo($columnName, $value)
-{
-	?>
-	<span class="<?=$columnName ?>"><?+$value ?></span>
-	<?php
-}
-
-function entries($h, $c)
-{
-	if (!$h->entries)
-		return;
-	
-	foreach ($h->entries as $i)
-	{
-	?>
-		<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
-			<li>
-				<a href="<?+Visualizer::actionHref($i->subject, $i->id) ?>">
-					<h2 class="title"><?+$i->title?></h2>
-					<p class="ui-li-aside">
-						<? entryInfo("dateTime", Visualizer::formatShortDateTime($i->dateTime)) ?><br />
-						<?if ($c->showSize[Configuration::ON_SUBJECT]) entryInfo("size", "{$i->size}KB") ?>
-						<?if ($c->showComment[Configuration::ON_SUBJECT]) entryInfo("commentCount", $i->commentCount) ?>
-						<?if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfo("evaluationCount", $c->pointMap && $c->commentPointMap ? "{$i->commentedEvaluationCount}/{$i->evaluationCount}" : $i->evaluationCount) ?>
-						<?if ($c->showPoint[Configuration::ON_SUBJECT]) entryInfo("points", $i->points) ?>
-						<?if ($c->showRate[Configuration::ON_SUBJECT]) entryInfo("rate", sprintf("%.2f", $i->rate)) ?>
-					</p>
-					<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
-						<p class="name"><? Visualizer::convertedName($i->name) ?></p>
-					<?endif ?>
-					<?if ($i->tags && $c->showTags[Configuration::ON_SUBJECT]): ?>
-						<ul class="tags">
-							<?if ($i->tags): ?>
-								<?foreach ($i->tags as $j): ?>
-									<li><?+$j ?></li>
-								<?endforeach ?>
-							<?endif ?>
-						</ul>
-					<?endif ?>
-				</a>
-			</li>
-		<?endif ?>
-	<?php
-	}
-}
-
 function sortMenu($h, $label, $columnName)
 {
 	?>
@@ -111,6 +42,7 @@ else
 	$title = $h->subject == $h->subjectCount ? "最新作品集" : "作品集 {$h->subject}";
 
 Visualizer::doctype();
+App::load(VISUALIZER_DIR . "mobile/Template/Index");
 ?>
 <html lang="ja" manifest="<?+Visualizer::actionHref("manifest") ?>">
 <head>
@@ -139,7 +71,7 @@ Visualizer::doctype();
 			</header>
 			<div data-role="content">
 				<ul data-role="listview" class="entries">
-					<? entries($h, $c) ?>
+					<? entries($h->entries, $c) ?>
 				</ul>
 			</div>
 			<footer data-role="footer" data-position="fixed">
@@ -177,7 +109,7 @@ Visualizer::doctype();
 			</header>
 			<div data-role="content">
 				<ul data-role="listview" class="entries">
-					<?if (!Util::isEmpty($search)) entries($h, $c) ?>
+					<?if (!Util::isEmpty($search)) entries($h->entries, $c) ?>
 					<?if ($h->page < $h->pageCount): ?>
 						<li class="nextpage">
 							<a href="<?+Visualizer::actionHref("search", array("query" => IndexHandler::param("query"), "p" => $h->page + 1)) ?>">
@@ -193,24 +125,6 @@ Visualizer::doctype();
 				</div>
 			</footer>
 		</form>
-	<?elseif ($m == "i"): ?>
-		<div id="history" data-role="page" class="index fulllist">
-			<header data-role="header" data-backbtn="false">
-				<h1>履歴</h1>
-			</header>
-			<div data-role="content">
-				<ul data-role="listview" class="entries">
-					<script>
-						megalopolis.index.renderHistory('<?+Visualizer::actionHref() ?>');
-					</script>
-				</ul>
-			</div>
-			<footer data-role="footer" data-position="fixed">
-				<div data-role="navbar">
-					<? makeMenu($basePath, "i") ?>
-				</div>
-			</footer>
-		</div>
 	<?elseif ($m == "l"): ?>
 		<div id="subjects" data-role="page" class="index fulllist">
 			<header data-role="header" data-backbtn="false">
@@ -322,10 +236,7 @@ Visualizer::doctype();
 					<?if ($c->showName[Configuration::ON_SUBJECT]) sortMenu($h, "作者", "name") ?>
 					<?if ($c->showSize[Configuration::ON_SUBJECT]) sortMenu($h, "サイズ", "size") ?>
 					<?if ($c->showComment[Configuration::ON_SUBJECT]) sortMenu($h, "コメント数", "commentCount") ?>
-					<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-						<? sortMenu($h, "評価数", "evaluationCount") ?>
-						<? sortMenu($h, "POINT", "points") ?>
-					<?endif ?>
+					<?if ($c->showPoint[Configuration::ON_SUBJECT]) sortMenu($h, "POINT", "points") ?>
 					<?if ($c->showRate[Configuration::ON_SUBJECT]) sortMenu($h, "Rate", "rate") ?>
 					<? sortMenu($h, "投稿日時", "dateTime") ?>
 				<?endif ?>

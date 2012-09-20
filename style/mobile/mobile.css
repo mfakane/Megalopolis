@@ -530,27 +530,47 @@ li.ui-li.ui-btn-hover-c *
 	margin: 0px;
 }
 
-.ul-li-aside
+.entries .dateTime
 {
+	float: right;
 	color: #586b96;
+	font-weight: normal;
 }
 
-.entries .ui-li-aside
-{
-	margin-left: 4px;
-	width: auto;
-	color: #586b96;
-}
-
-.entries .ui-li-aside>span
+.entries .dateTimeValue
 {
 	display: none;
 }
 
-.entries .ui-li-aside>span.dateTime
+.entries .info
 {
-	display: inline;
+	display: block;
+	clear: both;
+	margin: 0px;
+	padding: 0px;
+	font-weight: normal;
+	font-size: 85%;
 	color: #666666;
+}
+
+.entries .info li
+{
+	display: inline-block;
+	margin: 0px;
+	padding: 0px;
+	width: 27%;
+}
+
+.entries .info .size
+{
+	width: 19%;
+	text-align: right;
+}
+
+.entries .info li span
+{
+	margin-left: 2px;
+	font-weight: bold;
 }
 
 .name
@@ -562,7 +582,9 @@ li.ui-li.ui-btn-hover-c *
 .tags
 {
 	display: inline;
+	margin-left: -8px;
 	padding: 0px;
+	font-size: 85%;
 	color: #4c5f70;
 	white-space: normal;
 }

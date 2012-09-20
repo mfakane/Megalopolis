@@ -9,36 +9,7 @@ $.extend(megalopolis,
 		
 		$(document.body).css("minHeight", (this.minHeight = portrait ? window.innerHeight - 48 : 268) + "px");
 		$(".read .content.vertical").height(window.innerHeight);
-	},
-	getHistory: function()
-	{
-		var rt = this.cookie("History");
-		
-		if (rt &&
-			(rt = JSON.parse(rt)))
-			return rt;
-		else
-			return [];
-	},
-	addHistory: function(id, subject, title, name)
-	{
-		var entries = $.grep(this.getHistory(), function(_) { return _.id != id; });
-
-		entries.push
-		({
-			id: id,
-			subject: subject,
-			title: title,
-			name: name,
-			historySet: $.now()
-		});
-		
-		while (entries.length > this.maxHistoryCount)
-			entries.shift();
-		
-		this.cookie("History", JSON.stringify(entries));
-	},
-	
+	}
 });
 
 $(document)

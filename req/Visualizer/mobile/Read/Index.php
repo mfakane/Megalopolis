@@ -63,9 +63,6 @@ Visualizer::doctype();
 <body>
 	<?if ($m == "h"): ?>
 		<div id="rhome" data-role="page" data-fullscreen="true" class="read">
-			<script>
-				megalopolis.addHistory(<?+$h->entry->id ?>, <?+$h->entry->subject ?>, '<?+$h->entry->title ?>', '<?+$h->entry->name ?>');
-			</script>
 			<header data-role="header" data-position="fixed" data-backbtn="false" data-theme="b">
 				<h1><?+$h->entry->title ?></h1>
 				<a href="<?+Visualizer::absoluteHref($h->entry->subject) ?>" data-direction="reverse">戻る</a>

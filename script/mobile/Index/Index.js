@@ -14,8 +14,7 @@ megalopolis.index =
 			var allEval = y.replace(/^[0-9]+\//, "") - x.replace(/^[0-9]+\//, "");
 			
 			return allEval != 0 ? allEval : x.indexOf("/") == -1 ? 0 : y.replace(/\/[0-9]+$/, "") - x.replace(/\/[0-9]+$/, "");
-		},
-		dateTime: function(x, y) { return megalopolis.index.textSort(y, x); }
+		}
 	},
 	initSort: function(id)
 	{
@@ -31,7 +30,10 @@ megalopolis.index =
 		if (sort)
 		{
 			var ul = $("ul.entries").last();
-		
+			
+			if (sort == "dateTime")
+				sort = "dateTimeValue";
+			
 			ul.append(ul.children("li").sort(function(x, y)
 			{
 				var xt = $("." + sort, x).text();
@@ -42,11 +44,6 @@ megalopolis.index =
 					: yt - xt;
 			}));
 			ul.append(ul.children("li.nextpage"));
-			
-			var aside = $(".ui-li-aside");
-			
-			aside.children("span", ul).not(".dateTime").css("display", "none");
-			aside.children("." + (["title", "name", "dateTime"].indexOf(sort) == -1 ? sort : "evaluationCount"), ul).css("display", "inline");
 		}
 	},
 	timeToString: function(time)
@@ -77,24 +74,6 @@ megalopolis.index =
 			return Math.floor(diff / day) + " 日前 " + padLeft(date.getHours(), 2) + ":" + padLeft(date.getMinutes(), 2);
 		else
 			return padLeft(date.getMonth() + 1, 2) + "/" + padLeft(date.getDate(), 2) + " " + padLeft(date.getHours(), 2) + ":" + padLeft(date.getMinutes(), 2);
-	},
-	renderHistory: function(basePath)
-	{
-		var self = this;
-		var ul = $("ul.entries:last");
-		
-		ul.append($.map(megalopolis.getHistory().reverse(), function(_)
-		{
-			return $("<li />")
-				.append($("<a />")
-					.attr("href", basePath + _.subject + "/" + _.id)
-					.append
-					(
-						$("<h2 />").html(_.title),
-						$("<p />").addClass("ul-li-aside").css({ "float": "right", "margin": "0px" }).text(self.timeToString(_.historySet)),
-						$("<p />").addClass("name").html(_.name)
-					))[0];
-		}));
 	},
 	renderSettings: function()
 	{
