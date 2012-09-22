@@ -1,7 +1,8 @@
-megalopolis.edit =
+$(function()
 {
-	paletteID: 0,
-	setBodyBoxStyle: function(boxName, cssProperty, value, defaultValue)
+	var section = $(".edit section+section");
+	var textAreas = $("textarea, input[type='text']", section).width(section.width() - 8);
+	var setBodyBoxStyle = function(boxName, cssProperty, value, defaultValue)
 	{
 		var t = $("#" + boxName);
 		
@@ -11,78 +12,50 @@ megalopolis.edit =
 			value = t.val();
 		
 		$("#body").css(cssProperty, value == "" ? defaultValue : cssProperty == "backgroundImage" ? "url('" + value + "')" : value);
-	},
-	updateForeground: function(value)
+	};
+	var createPalette = function(selector, func, cssProperty)
 	{
-		megalopolis.edit.setBodyBoxStyle("foreground", "color", value, "#000000");
-	},
-	updateBackground: function(value)
-	{
-		megalopolis.edit.setBodyBoxStyle("background", "backgroundColor", value, "#ffffff");
-	},
-	updateBackgroundImage: function(value)
-	{
-		megalopolis.edit.setBodyBoxStyle("backgroundImage", "backgroundImage", value, "none");
-	},
-	updateBorder: function(value)
-	{
-		megalopolis.edit.setBodyBoxStyle("border", "borderColor", value, "#999999");
-	},
-	palette: function(values, func, cssProperty)
-	{
-		var id = "a" + this.paletteID++;
+		var target = $(selector);
 		
-		document.write($("<div />")
-			.append($("<ul />")
-				.addClass("palette")
-				.attr("id", id))
-			.html());
+		if (target.length == 0)
+			return;
 		
-		$("#" + id).append($("<li />")
-				.append($("<a />")
-					.attr("href", "javascript:void(0);")
-					.click(function()
-					{
-						func("");
-						
-						return false;
-					})))
-			.append($.map(values, function(_)
-			{
-				return $("<li />")
-					.append($("<a />")
-						.attr("href", "javascript:void(0);")
-						.css(cssProperty, _)
+		var map = (target.data("map") || "").split(" ");
+		
+		target.change(function() { func(); });
+		
+		if (map.length && map[0].length)
+		{
+			var list = $('<ul class="palette"></ul>');
+		
+			list.append($("<li />")
+					.append($('<a href="#" />')
 						.click(function()
 						{
-							func(_);
+							func("");
 							
 							return false;
-						}))[0];
-			}));
-	},
-	foregroundPalette: function(values)
-	{
-		this.palette(values, this.updateForeground, "backgroundColor");
-	},
-	backgroundPalette: function(values)
-	{
-		this.palette(values, this.updateBackground, "backgroundColor");
-	},
-	backgroundImagePalette: function(values)
-	{
-		this.palette(values, this.updateBackgroundImage, "backgroundImage");
-	},
-	borderPalette: function(values)
-	{
-		this.palette(values, this.updateBorder, "backgroundColor");
-	}
-};
-
-$(function()
-{
-	var section = $(".edit section+section");
-	var textAreas = $("textarea, input[type='text']", section).width(section.width() - 8);
+						})))
+				.append($.map(map, function(_)
+				{
+					return $("<li />")
+						.append($('<a href="#" />')
+							.css(cssProperty, cssProperty == "backgroundImage" ? "url('" + _ + "')" : _)
+							.click(function()
+							{
+								func(_);
+								
+								return false;
+							}));
+				}))
+				.insertAfter(target);
+		}
+	};
+	
+	createPalette("#foreground", function(value) { setBodyBoxStyle("foreground", "color", value, "#000000"); }, "backgroundColor");
+	createPalette("#background", function(value) { setBodyBoxStyle("background", "backgroundColor", value, "#ffffff"); }, "backgroundColor");
+	createPalette("#backgroundImage", function(value) { setBodyBoxStyle("backgroundImage", "backgroundImage", value, "none"); }, "backgroundImage");
+	createPalette("#border", function(value) { setBodyBoxStyle("border", "borderColor", value, "#999999"); }, "backgroundColor");
 	
 	$(window).resize(function()
 	{

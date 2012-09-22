@@ -71,6 +71,7 @@ class Visualizer
 			<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width" />
 			<meta name="format-detection" content="telephone=no" />
 			<meta name="apple-mobile-web-app-capable" content="yes" />
+			<link href="<?php self::converted(self::absoluteHref()) ?>" rel="home" />
 			<link href="<?php self::converted(self::actionHref("style", "splash.png")) ?>" rel="apple-touch-startup-image" type="image/png" />
 			<link href="<?php self::converted(self::actionHref("style", "iosIcon.png")) ?>" rel="apple-touch-icon" type="image/png" />
 			<link href="http://code.jquery.com/mobile/1.2.0-beta.1/jquery.mobile-1.2.0-beta.1.min.css" rel="stylesheet" />
@@ -79,9 +80,6 @@ class Visualizer
 			<script src="<?php self::converted(self::actionHref("script", "base.js")) ?>"></script>
 			<script src="<?php self::converted(self::actionHref("script", "mobile", "base.js")) ?>"></script>
 			<script src="http://code.jquery.com/mobile/1.2.0-beta.1/jquery.mobile-1.2.0-beta.1.min.js"></script>
-			<script>
-				megalopolis.baseUrl = '<?php self::converted(self::absoluteHref()) ?>';
-			</script>
 		<?php elseif ($isSimple): ?>
 			<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width" />
 			<link href="<?php self::converted(self::actionHref("style", "simple", "simple.css")) ?>" rel="stylesheet" />
@@ -355,7 +353,7 @@ class Visualizer
 		
 		?>
 		<a href="https://twitter.com/share?<?php self::converted(implode("&", array_map(create_function('$k, $v', 'return rawurlencode($k) . "=" . rawurlencode($v);'), array_keys($params), array_values($params)))) ?>" class="twitter-share-button" data-lang="ja" target="_blank">Tweet</a>
-		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+		<script src="http://platform.twitter.com/widgets.js"></script>
 		<?php
 	}
 	
@@ -906,7 +904,11 @@ class Visualizer
 	{
 		header("X-Content-Type-Options: nosniff");
 		header("X-Frame-Options: SAMEORIGIN");
-		header("X-Content-Security-Policy: allow 'self'; img-src *; script-src 'self' code.jquery.com; options inline-script");
+		
+		$csp = "default-src 'self'; img-src *; script-src 'self' code.jquery.com platform.twitter.com; style-src 'self' code.jquery.com 'unsafe-inline'; frame-src platform.twitter.com";
+		
+		header("X-Content-Security-Policy: {$csp}");
+		header("X-WebKit-CSP: {$csp}");
 	}
 }
 

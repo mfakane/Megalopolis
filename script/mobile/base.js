@@ -2,7 +2,6 @@ $.extend(megalopolis,
 {
 	maxHistoryCount: 50,
 	minHeight: 0,
-	baseUrl: null,
 	resizeMinHeight: function(e, orientation)
 	{
 		var portrait = orientation ? orientation == "portrait" : $("html").hasClass("portrait");
@@ -23,7 +22,7 @@ $(document)
 	})
 	.bind("pagebeforeload", function(e, data)
 	{
-		if (data.absUrl.indexOf(megalopolis.baseUrl) != 0)
+		if (data.absUrl.indexOf($("link[rel='home']").prop("href")) != 0)
 		{
 			e.preventDefault();
 			data.deferred.reject(data.absUrl, data.options);

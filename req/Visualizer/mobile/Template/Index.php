@@ -14,7 +14,7 @@ function makeMenu($basePath, $current)
 		list($n, $i) = explode(", ", $v);
 	?>
 		<li>
-			<a href="<?php Visualizer::converted($k == "recent" ? Visualizer::absoluteHref($k) : $basePath . "/" . $k) ?>"
+			<a href="<?php Visualizer::converted($k == "recent" ? Visualizer::absoluteHref($k) : rtrim($basePath, "/") . "/" . $k) ?>"
 			   data-transition="none"
 			   <?php if ($k == $current) echo ' class="ui-btn-active"' ?>
 			   data-icon="<?php echo $i ?>">

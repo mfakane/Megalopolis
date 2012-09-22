@@ -44,24 +44,6 @@ $pagerHref = Visualizer::actionHref("search", array
 </head>
 <body class="search">
 	<? Visualizer::header("詳細検索", array(), !is_null($h->entries) ? ($d['count'] <= $c->searchPaging ? "{$d['count']} 件" : "{$d['count']} 件中 " . (($h->page - 1) * $c->searchPaging + 1) . " - " . (($h->page - 1) * $c->searchPaging + count($h->entries)) .  " 件") : null) ?>
-	<?if ($h->entries): ?>
-		<script>
-			megalopolis.index.loadDropDown
-			(
-				<?=$isAdmin || $c->showTitle[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$isAdmin || $c->showName[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$isAdmin || $c->showPages[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$isAdmin || $c->showReadCount[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$isAdmin || $c->showSize[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$isAdmin || $c->showComment[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$isAdmin && $c->useAnyPoints() || $c->showPoint[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-				<?=$c->useSummary && ($isAdmin || $c->showSummary[Configuration::ON_SUBJECT]) ? "true" : "false" ?>,
-				<?=$c->listType ?>
-			);
-		</script>
-	<?endif ?>
 	<form>
 		<section class="filter">
 			<ul class="params">

@@ -35,24 +35,6 @@ $pagerHref = Visualizer::actionHref("util", "track", array
 </head>
 <body class="search">
 	<? Visualizer::header("ホスト検索", array(), !is_null($d["entries"]) ? ($d['count'] <= $c->searchPaging ? "{$d['count']} 件" : "{$d['count']} 件中 " . (($d["page"] - 1) * $c->searchPaging + 1) . " - " . (($d["page"] - 1) * $c->searchPaging + count($d["entries"])) .  " 件") : "作品集数 {$d['subjectCount']}") ?>
-	<?if ($d["entries"]): ?>
-		<script>
-			megalopolis.index.loadDropDown
-			(
-				true,
-				true,
-				true,
-				true,
-				true,
-				<?=$c->useAnyPoints() ? "true" : "false" ?>,
-				true,
-				<?=$c->useAnyPoints() ? "true" : "false" ?>,
-				<?=$c->useAnyPoints() ? "true" : "false" ?>,
-				<?=$c->useSummary ? "true" : "false" ?>,
-				<?=$c->listType ?>
-			);
-		</script>
-	<?endif ?>
 	<form>
 		<section class="filter">
 			<ul class="params">

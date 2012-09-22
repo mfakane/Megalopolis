@@ -63,6 +63,26 @@ function entries($entries, $isAdmin, $listType = null)
 	
 	$visibility = array_filter(explode(",", Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "readCount,size,commentCount,evaluationCount,points,rate,dateTime")));
 	$visibility = array_flip($visibility);
+	$data = "";
+	
+	foreach (array
+	(
+		"use" => implode(" ", array_keys(array_filter(array
+		(
+			"title" => $isAdmin || $c->showTitle[Configuration::ON_SUBJECT],
+			"name" => $isAdmin || $c->showName[Configuration::ON_SUBJECT],
+			"pageCount" => $isAdmin || $c->showPages[Configuration::ON_SUBJECT],
+			"readCount" => $isAdmin || $c->showReadCount[Configuration::ON_SUBJECT],
+			"size" => $isAdmin || $c->showSize[Configuration::ON_SUBJECT],
+			"evaluationCount" => $isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT],
+			"commentCount" => $isAdmin || $c->showComment[Configuration::ON_SUBJECT],
+			"points" => $isAdmin && $c->useAnyPoints() || $c->showPoint[Configuration::ON_SUBJECT],
+			"rate" => $isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT],
+			"summary" => $isAdmin && $c->useSummary || $c->showSummary[Configuration::ON_SUBJECT],
+		)))),
+		"type" => $listType,
+	) as $k => $v)
+		$data .= " data-{$k}='{$v}'";
 	
 	if ($listType == "compact")
 	{
@@ -119,7 +139,7 @@ function entries($entries, $isAdmin, $listType = null)
 	else if ($listType == "double")
 	{
 	?>
-		<div class="entries" id="entries">
+		<div class="entries" id="entries"<?php echo $data ?>>
 			<?php foreach ($entries as $idx => $i): ?>
 				<article>
 					<div class="articleBody">
@@ -131,13 +151,11 @@ function entries($entries, $isAdmin, $listType = null)
 								<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array($i->subject, $i->id))) ?>"><?php Visualizer::converted($i->title) ?></a>
 							</h2>
 						<?php endif ?>
-						<time class="lastUpdate<?php echo isset($visibility["lastUpdate"]) ? null : " hidden" ?>" datetime="<?php Visualizer::converted(date("c", $i->getLatestLastUpdate())) ?>">
+						<time class="lastUpdate<?php echo isset($visibility["lastUpdate"]) ? null : " hidden" ?>" datetime="<?php Visualizer::converted(date("c", $i->getLatestLastUpdate())) ?>" data-unixtime="<?php Visualizer::converted($i->getLatestLastUpdate()) ?>">
 							<?php Visualizer::converted(Visualizer::formatDateTime($i->getLatestLastUpdate())) ?>
-							<span class="value hidden"><?php Visualizer::converted($i->getLatestLastUpdate()) ?></span>
 						</time>
-						<time class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>" pubdate="pubdate" datetime="<?php Visualizer::converted(date("c", $i->dateTime)) ?>">
+						<time class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>" pubdate="pubdate" datetime="<?php Visualizer::converted(date("c", $i->dateTime)) ?>" data-unixtime="<?php Visualizer::converted($i->dateTime) ?>">
 							<?php Visualizer::converted(Visualizer::formatDateTime($i->dateTime)) ?>
-							<span class="value hidden"><?php Visualizer::converted($i->dateTime) ?></span>
 						</time>
 						<?php if (time() - $i->dateTime < $c->updatePeriod * 24 * 60 * 60): ?>
 							<span class="update">
@@ -221,7 +239,7 @@ function entries($entries, $isAdmin, $listType = null)
 			"rate" => $isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT]
 		))));
 		?>
-		<section class="entries" id="entries">
+		<section class="entries" id="entries"<?php echo $data ?>>
 			<table>
 				<thead>
 					<tr>
@@ -293,13 +311,11 @@ function entries($entries, $isAdmin, $listType = null)
 									<?php endif ?>
 								</td>
 							<?php endif ?>
-							<td class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>">
+							<td class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>" data-unixtime="<?php Visualizer::converted($i->dateTime) ?>">
 								<?php Visualizer::converted(substr(Visualizer::formatDateTime($i->dateTime), 2, -3)) ?>
-								<span class="value hidden"><?php Visualizer::converted($i->dateTime) ?></span>
 							</td>
-							<td class="lastUpdate<?php echo isset($visibility["lastUpdate"]) ? null : " hidden" ?>">
+							<td class="lastUpdate<?php echo isset($visibility["lastUpdate"]) ? null : " hidden" ?>" data-unixtime="<?php Visualizer::converted($i->getLatestLastUpdate()) ?>">
 								<?php Visualizer::converted(substr(Visualizer::formatDateTime($i->getLatestLastUpdate()), 2, -3)) ?>
-								<span class="value hidden"><?php Visualizer::converted($i->getLatestLastUpdate()) ?></span>
 							</td>
 							<?php if ($isAdmin || $c->showPages[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "pageCount", $i->pageCount) ?>
 							<?php if ($isAdmin || $c->showSize[Configuration::ON_SUBJECT]) entryInfoSingle($i, $visibility, "size", "{$i->size}KB") ?>
@@ -313,7 +329,7 @@ function entries($entries, $isAdmin, $listType = null)
 							<tr class="tags" id="tags<?php echo $i->id ?>">
 								<td colspan="<?php echo $spanWidth ?>">
 									<?php if ($c->useSummary && ($c->showSummary[Configuration::ON_SUBJECT] || $isAdmin) && !Util::isEmpty($i->summary)): ?>
-										<a href="javascript:void(0);" class="summaryButton">[概要]</a>
+										<a href="#" class="summaryButton">[概要]</a>
 									<?php endif ?>
 									<ul>
 										<?php if (($c->showTags[Configuration::ON_SUBJECT] || $isAdmin) && $i->tags): ?>
@@ -335,9 +351,6 @@ function entries($entries, $isAdmin, $listType = null)
 					<?php endforeach ?>
 				</tbody>
 			</table>
-			<script>
-				megalopolis.index.showSummary();
-			</script>
 		</section>
 		<?php
 	}

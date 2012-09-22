@@ -104,9 +104,6 @@ Visualizer::doctype();
 					<? makeMenu($basePath, "h") ?>
 				</div>
 			</footer>
-			<script>
-				megalopolis.read.renderPage();
-			</script>
 		</div>
 	<?elseif ($m == "c"): ?>
 		<div id="rcomments" data-role="page" class="read fulllist">
@@ -144,9 +141,6 @@ Visualizer::doctype();
 		</div>
 	<?elseif ($m == "p"): ?>
 		<form id="rpost" data-role="page" class="read fulllist" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::absoluteHref($h->subject, $h->entry->id, "comment")) ?>" action="post">
-			<script>
-				$("#rpost").one("pageshow", function() { megalopolis.read.adjustTextBox('<?=Visualizer::absoluteHref($h->subject, $h->entry->id, "c") ?>'); });
-			</script>
 			<header data-role="header" data-backbtn="false">
 				<h1>評価する</h1>
 				<a href="#" data-rel="back">キャンセル</a>

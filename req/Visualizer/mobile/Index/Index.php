@@ -27,7 +27,7 @@ function sortMenu($h, $label, $columnName)
 {
 	?>
 	<li>
-		<a href="javascript:void(0);" onclick="megalopolis.index.setSort('<?+$columnName ?>'); history.back();">
+		<a href="#" data-column="<?+$columnName ?>">
 			<h2><?+$label ?></h2>
 		</a>
 	</li>
@@ -214,7 +214,7 @@ App::load(VISUALIZER_DIR . "mobile/Template/Index");
 					<li>
 						<div data-role="fieldcontain">
 							<label for="verticalSwitch">縦書き</label>
-							<select id="verticalSwitch" data-role="slider" onchange="megalopolis.index.settingsChanged()">
+							<select id="verticalSwitch" data-role="slider">
 								<option value="no">オフ</option>
 								<option value="yes">オン</option>
 							</select>

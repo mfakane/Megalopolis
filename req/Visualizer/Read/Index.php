@@ -140,7 +140,7 @@ Visualizer::doctype();
 	<? Visualizer::pager($h->page, $h->entry->pageCount, 10, array(App::$actionName != "index"
 		? (App::$actionName == "new" ? Visualizer::actionHref(App::$actionName) . "/" : Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName, array("p" => "")))
 		: Visualizer::actionHref($h->subject, $h->entry->id) . "/", "#body")) ?>
-	<section id="body">
+	<section id="body" data-style-path="<?+Visualizer::$basePath ?>style/<?+$c->skin && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null ?>" data-writing-mode="<?=intval($h->thread->writingMode) ?>" data-force-taketori="<?=$h->forceTaketori ? "true" : "false" ?>">
 		<div id="verticalWrapper">
 			<div id="contentWrapper">
 				<?if ($h->page == 1 && $c->showHeaderInsideBorder): ?>
@@ -166,9 +166,6 @@ Visualizer::doctype();
 					<div id="contentBody">
 						<? Visualizer::convertedBody($h->thread, $h->page) ?>
 					</div>
-					<script>
-						megalopolis.read.loadOptions('<?+Visualizer::$basePath ?>style/<?+$c->skin && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null ?>', <?+intval($h->thread->writingMode) ?>, <?+$h->forceTaketori ? "true" : "false" ?>);
-					</script>
 				</div>
 				<?if ($h->page == $h->entry->pageCount): ?>
 					<div id="afterword">
@@ -227,7 +224,7 @@ Visualizer::doctype();
 						? Visualizer::actionHref(App::$actionName)
 						: Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName))) ?>" method="post">
 						<div>
-							<button type="submit" onclick="$(this).prop('disabled', true); $('#resumeForm').submit(); return false;">
+							<button type="submit">
 								<img src="<?+Visualizer::actionHref("style", "backButtonIcon.png") ?>" />修正
 							</button>
 							<? ReadHandler::printHiddenParams() ?>
@@ -239,7 +236,7 @@ Visualizer::doctype();
 						? Visualizer::actionHref("post")
 						: Visualizer::actionHref($h->subject, $h->entry->id, "post"))) ?>" method="post">
 						<div>
-							<button type="submit" onclick="$(this).prop('disabled', true); $('#sendForm').submit(); return false;">
+							<button type="submit">
 								送信<img src="<?+Visualizer::actionHref("style", "sendButtonIcon.png") ?>" class="last" />
 							</button>
 							<? ReadHandler::printHiddenParams() ?>
@@ -250,7 +247,7 @@ Visualizer::doctype();
 			間違いが無ければ [送信] をクリックし投稿します。修正すべき箇所がある場合は [修正] をクリックし編集画面に戻ります
 		</section>
 	<? else: ?>
-		<div id="links"></div>
+		<div id="links" data-default-evaluator="<?=$c->defaultEvaluator ?>"></div>
 		<?if (!$c->showCommentsOnLastPageOnly || $h->page == $h->entry->pageCount): ?>
 			<?if ($c->usePoints()): ?>
 				<a id="evaluateformHeadding" href="#evaluateform" class="first">簡易評価</a>
@@ -283,7 +280,11 @@ Visualizer::doctype();
 			<?endif ?>
 			<?if ($c->useComments): ?>
 				<a id="commentformHeadding" href="#commentform"<?if (!$c->usePoints()) echo 'class="first"' ?>>コメント</a>
-				<form id="commentform" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "comment")) ?>#commentformHeadding" method="post">
+				<form id="commentform"
+					  action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "comment")) ?>#commentformHeadding"
+					  method="post"
+					  data-default-name="<?+$c->defaultName ?>"
+					  data-use="<?=implode(" ", array_filter(array($isAdmin || $c->showName[Configuration::ON_COMMENT] ? "name" : null, $isAdmin || $c->showPoint[Configuration::ON_COMMENT] ? "points" : null))) ?>">
 					<div id="commentformContent">
 						<?if ($d && App::$actionName == "comment"): ?>
 							<ul class="notify warning">
@@ -330,11 +331,6 @@ Visualizer::doctype();
 						</ul>
 					</div>
 				</form>
-			<?endif ?>
-			<?if ($c->usePoints() && $c->useComments): ?>
-				<script>
-					megalopolis.read.loadForms(<?+$c->defaultEvaluator ?>, '<?+$c->defaultName ?>', <?=$isAdmin || $c->showName[Configuration::ON_COMMENT] ? "true" : "false" ?>, <?=$isAdmin || $c->showPoint[Configuration::ON_COMMENT] ? "true" : "false" ?>);
-				</script>
 			<?endif ?>
 			<?if ($isAdmin || $c->showComment[Configuration::ON_ENTRY]): ?>
 				<?php

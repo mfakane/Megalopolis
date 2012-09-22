@@ -76,22 +76,6 @@ App::load(VISUALIZER_DIR . "Template/Index");
 			</time>
 		</dd>
 	</dl>
-	<script>
-		megalopolis.index.loadDropDown
-		(
-			<?=$isAdmin || $c->showTitle[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-			<?=$isAdmin || $c->showName[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-			<?=$isAdmin || $c->showPages[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-			<?=$isAdmin || $c->showReadCount[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-			<?=$isAdmin || $c->showSize[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-			<?=$isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-			<?=$isAdmin || $c->showComment[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-			<?=$isAdmin && $c->useAnyPoints() || $c->showPoint[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-			<?=$isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT] ? "true" : "false" ?>,
-			<?=$c->useSummary && ($isAdmin || $c->showSummary[Configuration::ON_SUBJECT]) ? "true" : "false" ?>,
-			<?=$c->listType ?>
-		);
-	</script>
 	<?if (App::$actionName == "tag" && (is_array($c->showTweetButton) ? $c->showTweetButton[Configuration::ON_TAG] : $c->showTweetButton)): ?>
 		<div class="headdingButtons">
 			<? Visualizer::tweetButton(Visualizer::absoluteHref(App::$actionName, $d), $c->tagTweetButtonText, $c->tagTweetButtonHashtags, array
@@ -121,9 +105,6 @@ App::load(VISUALIZER_DIR . "Template/Index");
 				<button type="submit">
 					GO
 				</button>
-				<script>
-					megalopolis.index.loadSubjectPager();
-				</script>
 			</form>
 		</div>
 	<?endif ?>

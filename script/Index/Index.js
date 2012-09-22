@@ -1,432 +1,397 @@
-megalopolis.index =
+$(function()
 {
-	loadSubjectPager: function()
+	var h1 = $("header+h1").first();
+	var entries = $("#entries");
+	var listType = !entries.length ? null : entries.data("type");
+	var use = !entries.length ? null : $.extend((function(arr, obj) { return $.each(obj, function(k) { obj[k] = $.inArray(k, arr) >= 0; }); })
+	(
+		entries.data("use").split(" "),
+		{
+			title: null,
+			name: null,
+			pageCount: null,
+			readCount: null,
+			size: null,
+			evaluationCount: null,
+			commentCount: null,
+			size: null,
+			evaluationCount: null,
+			commentCount: null,
+			points: null,
+			rate: null,
+			summary: null
+		}
+	),
 	{
-		var form = $("form").last();
+		dateTime: true,
+		lastUpdate: true,
+	});
+	var loadSortDropDown = function()
+	{
+		var selector =
+		{
+			numeric: function(elem)
+			{
+				return function(cls, x, y) { return x.find(elem || "." + cls).text() - y.find(elem || "." + cls).text(); };
+			},
+			dateTime: function(elem)
+			{
+				return function(cls, x, y) { return x.find(elem || "." + cls).data("unixtime") - y.find(elem || "." + cls).data("unixtime"); };
+			},
+			text: function(elem)
+			{
+				return function(cls, x, y)
+				{
+					var arr = [x.find(elem || "." + cls).text(), y.find(elem || "." + cls).text()];
+					
+					return arr[0] == arr.sort()[0] ? -1 : 1;
+				};
+			},
+			size: function(elem)
+			{
+				return function(cls, x, y) { return x.find(elem || "." + cls).text().replace(/KB$/, "") - y.find(elem || "." + cls).text().replace(/KB$/, ""); };
+			},
+			evaluation: function(elem)
+			{
+				return function(cls, x, y)
+				{
+					var a = $(elem || "." + cls, x).text();
+					var b = $(elem || "." + cls, y).text();
+					var allEval = a.replace(/^[0-9]+\//, "") - b.replace(/^[0-9]+\//, "");
+					
+					return allEval != 0 ? allEval : a.indexOf("/") == -1 ? 0 : a.replace(/\/[0-9]+$/, "") - b.replace(/\/[0-9]+$/, "");
+				};
+			}
+		};
+		var sortItems = (function(obj)
+		{
+			return $.each(obj, function(k, v)
+			{
+				if (use[k])
+					obj[k] =
+					{
+						label: v.label || v,
+						value: k,
+						selector: v.selector ? function(x, y) { return v.selector(k, x, y); } : function(x, y) { return selector.numeric()(k, x, y); }
+					};
+				else
+					delete obj[k];
+			});
+		})
+		({
+			title:
+			{
+				label: "作品名",
+				selector: selector.text("h2>a")
+			},
+			name:
+			{
+				label: "作者",
+				selector: selector.text(),
+			},
+			pageCount: "ページ",
+			size:
+			{
+				label: "サイズ",
+				selector: selector.size(),
+			},
+			readCount: "閲覧",
+			evaluationCount:
+			{
+				label: "評価",
+				selector: selector.evaluation(),
+			},
+			commentCount: "コメント",
+			points: "POINT",
+			rate: "Rate",
+			dateTime:
+			{
+				label: "投稿日時",
+				selector: selector.dateTime(),
+			},
+			lastUpdate:
+			{
+				label: "更新日時",
+				selector: selector.dateTime(),
+			}
+		});
+		var lastSort = sortItems.dateTime;
+		var ascending = false;
 		
-		$("button", form).remove();
-		$("select", form).change(function()
+		var control = $('<div class="dropDown"><span>投稿日時</span><div class="button"></div><ul></ul></div>');
+		var label = control.find("span");
+		var dropDown = control.find("ul").hide().append($.map(sortItems, function(v)
+		{
+			var item = $("<li />")
+				.text(v.label)
+				.click(function()
+				{
+					if (lastSort == v)
+						ascending = !ascending;
+					
+					lastSort = v;
+					sort(v.selector);
+					label.text(v.label);
+					
+					return false;
+				});
+			
+			if (listType == "single")
+				$(function()
+				{
+					entries
+						.find("th." + v.value)
+						.click(function()
+						{
+							item.click();
+							
+							return false;
+						})
+						.addClass("clickable");
+				});
+			
+			return item;
+		}));
+		var sort = function(selector)
+		{
+			selector = selector || lastSort.selector;
+			
+			if (ascending)
+				control.addClass("ascending");
+			else
+				control.removeClass("ascending");
+			
+			if (listType == "single")
+			{
+				var tbody = entries.find("tbody");
+				
+				var list = $.map(tbody.find("tr.article").map(function()
+				{
+					return $(this).next("tr.tags").andSelf();
+				}).sort(function(x, y)
+				{
+					return ascending ? selector($(x[0]), $(y[0])) : selector($(y[0]), $(x[0]));
+				}), function(_)
+				{
+					return [_[0], _[1]];
+				});
+				
+				tbody.append(list);
+			}
+			else
+				entries.append(entries.find("article").sort(function(x, y)
+				{
+					return ascending ? selector($(x), $(y)) : selector($(y), $(x));
+				}));
+		};
+		
+		control.mouseenter(function()
+		{
+			control.addClass("open");
+			dropDown.show();
+			
+			return false;
+		})
+		.mouseleave(function()
+		{
+			control.removeClass("open");
+			dropDown.hide();
+			
+			return false;
+		})
+		.click(function()
+		{
+			ascending = !ascending;
+			sort();
+			
+			return false;
+		})
+		.appendTo(h1);
+	};
+	var loadVisibilityDropDown = function()
+	{
+		var styleMap =
+		{
+			"double": "二列表示",
+			"single": "テーブル"
+		};
+		var visibilityMap = (function(obj) { return $.each(obj, function(k, v) { if (!use[k]) delete obj[k]; }); })
+		({
+			pageCount: "ページ",
+			size: "サイズ",
+			readCount: "閲覧",
+			evaluationCount: "評価",
+			commentCount: "コメント",
+			points: "POINT",
+			rate: "Rate",
+			dateTime: "投稿日時",
+			lastUpdate: "更新日時",
+			summary: "概要"
+		});
+		var visible = (megalopolis.mainCookie("ListVisibility") || "readCount,size,commentCount,evaluationCount,points,rate,dateTime").split(",");
+		
+		if (listType != "single")
+			delete visibilityMap["summary"];
+		
+		var control = $('<div class="dropDown"><span></span><ul></ul></div>');
+		var label = control.find("span").text(styleMap[listType]);
+		var dropDown = control.find("ul").hide();
+		
+		dropDown.append($.map(styleMap, function(v, k)
+		{
+			return $('<li>' + v + '<div class="button"></div></li>')
+				.addClass("listType")
+				.addClass(k == listType ? "selected" : null)
+				.click(function()
+				{
+					megalopolis.mainCookie("ListType", k);
+					location.reload();
+					
+					return false;
+				});
+		}));
+		dropDown.append($.map(visibilityMap, function(v, k)
+		{
+			return $('<li>' + v + '<div class="button"></div></li>')
+				.addClass("listVisibility")
+				.addClass($.inArray(k, visible) >= 0 ? "selected" : null)
+				.click(function()
+				{
+					var elem = $(this);
+					var articles = listType == "double" ? entries.find("article") : null;
+					var table = listType == "single" ? entries.find("table") : null;
+					var selected = !elem.hasClass("selected");
+					
+					elem.toggleClass("selected");
+					
+					if (selected)
+					{
+						visible.push(k);
+						
+						if (table && k == "summary")
+							table.find(".summary").removeClass("hidden");
+					}
+					else
+					{
+						delete visible[$.inArray(k, visible)];
+						
+						if (table && k == "summary")
+							table.find(".summary").addClass("hidden");
+					}
+					
+					megalopolis.mainCookie("ListVisibility", visible.join(",").replace(/,{2,}/g, ","));
+					
+					if (k != "summary")
+					{
+						if (articles)
+						{
+							articles.find("dd." + k).prev("dt").andSelf().toggleClass("hidden");
+							articles.find("dl").each(function(k, v)
+							{
+								var elems = $("dt", v);
+								var firstVisible = elems.not(".hidden").first();
+								
+								elems.removeClass("firstChild");
+								firstVisible.addClass("firstChild");
+							});
+							articles.find("time ." + k).toggleClass("hidden");
+						}
+						else if (table)
+						{
+							var tagRows = table.find("tr.tags").find("td");
+							var fromColSpan = tagRows.prop("colspan");
+							
+							$([table.find("th." + k), table.find("td." + k)]).each(function(k, v)
+							{
+								var elem = $(this);
+								
+								if (elem.hasClass("hidden"))
+									tagRows.prop("colspan", fromColSpan + 1);
+								else
+									tagRows.prop("colspan", fromColSpan - 1);
+								
+								elem.toggleClass("hidden");
+							});
+						}
+					}
+					
+					return false;
+				});
+		}));
+		
+		control.mouseenter(function()
+		{
+			control.addClass("open");
+			dropDown.show();
+			
+			return false;
+		})
+		.mouseleave(function()
+		{
+			control.removeClass("open");
+			dropDown.hide();
+			
+			return false;
+		})
+		.appendTo(h1);
+	};
+	var loadAdminButtons = function()
+	{
+		$("#unpostButton").click(function()
+		{
+			return window.confirm("本当に作品を削除してよろしいですか？");
+		});
+	};
+	var loadSubjectPager = function()
+	{
+		var form = $(".pagerContainer.subjectPager form");
+		
+		form.find("button").remove();
+		form.find("select").change(function()
 		{
 			location.href = form.prop("action") + $(this).val();
 		});
-	},
-	loadDropDown: function(useTitle, useName, usePageCount, useReadCount, useSize, useEvaluationCount, useCommentCount, usePoints, useRate, useSummary, defaultStyle)
+	};
+	var showSummary = function()
 	{
-		if ($.browser.msie &&
-			$.browser.version < 8)
-			return;
-		
-		var h1 = $("header+h1:first");
-		var entries = (function()
+		var tbody = entries.find("tbody");
+		var toggle = function(e)
 		{
-			var elem = null;
+			var row = $(e.target).parents("tr");
 			
-			return function() { return elem ? elem : elem = $("#entries")[0]; };
-		})();
-		var lastSort =
-		{
-			label: "投稿日時",
-			value: "dateTime",
-			selector: function(x, y)
-			{
-				var arr = $.map([x, y], function(_) { return _.find(".dateTime").find(".value").text() - 0; });
-				
-				return arr[0] - arr[1];
-			}
+			(row.hasClass("tags") ? row : row.next("tr.tags")).find("p").toggleClass("hidden");
 		};
-		var ascending = false;
-		var dropDown = $("<ul />")
-			.append($.map
-			([
-				!useTitle ? null :
-				{
-					label: "作品名",
-					value: "title",
-					selector: function(x, y)
-					{
-						var arr = $.map([x, y], function(_) { return $("h2>a", _).text(); });
-						
-						return arr[0] == arr.sort()[0] ? -1 : 1;
-					}
-				},
-				!useName ? null :
-				{
-					label: "作者",
-					value: "name",
-					selector: function(x, y)
-					{
-						var arr = $.map([x, y], function(_) { return $(".name", _).text(); });
-						
-						return arr[0] == arr.sort()[0] ? -1 : 1;
-					}
-				},
-				!usePageCount ? null :
-				{
-					label: "ページ",
-					value: "pageCount"
-				},
-				!useReadCount ? null :
-				{
-					label: "閲覧",
-					value: "readCount"
-				},
-				!useSize ? null :
-				{
-					label: "サイズ",
-					value: "size",
-					selector: function(x, y)
-					{
-						return $(".size", x).text().replace(/KB$/, "") - $(".size", y).text().replace(/KB$/, "");
-					}
-				},
-				!useEvaluationCount ? null :
-				{
-					label: "評価",
-					value: "evaluationCount",
-					selector: function(x, y)
-					{
-						var a = $(".evaluationCount", x).text();
-						var b = $(".evaluationCount", y).text();
-						var allEval = a.replace(/^[0-9]+\//, "") - b.replace(/^[0-9]+\//, "");
-						
-						return allEval != 0 ? allEval : a.indexOf("/") == -1 ? 0 : a.replace(/\/[0-9]+$/, "") - b.replace(/\/[0-9]+$/, "");
-					}
-				},
-				!useCommentCount ? null :
-				{
-					label: "コメント",
-					value: "commentCount"
-				},
-				!usePoints ? null :
-				{
-					label: "POINT",
-					value: "points"
-				},
-				!useRate ? null :
-				{
-					label: "Rate",
-					value: "rate"
-				},
-				lastSort,
-				{
-					label: "更新日時",
-					value: "lastUpdate",
-					selector: function(x, y)
-					{
-						var arr = $.map([x, y], function(_) { return _.find(".lastUpdate").find(".value").text() - 0; });
-						
-						return arr[0] - arr[1];
-					}
-				}
-			],
-			function(_)
-			{
-				if (_ != null)
-				{
-					var item = $("<li />")
-						.text(_.label)
-						.click(function()
-						{
-							if (lastSort == _)
-								ascending = !ascending;
-							
-							lastSort = _;
-							megalopolis.index.sort(control, ascending, _.selector
-								? _.selector
-								: function(x, y) { return $("." + _.value, x).text() - $("." + _.value, y).text(); });
-							label.text(_.label);
-							
-							return false;
-						});
-					
-					$(function()
-					{
-						$("#entries")
-							.find("th." + _.value)
-							.click(function()
-							{
-								item.click();
-								
-								return false;
-							})
-							.addClass("clickable");
-					});
-					
-					return item[0];
-				}
-			}))
-			.hide();
-		var label = $("<span />")
-			.text("投稿日時");
-		var button = $("<div />")
-			.addClass("button");
-		var control = $("<div />")
-			.addClass("dropDown")
-			.append(label)
-			.append(button)
-			.append(dropDown)
-			.appendTo(h1)
-			.mouseenter(function()
-			{
-				control.addClass("open");
-				dropDown.show();
-				
-				return false;
-			})
-			.mouseleave(function()
-			{
-				control.removeClass("open");
-				dropDown.hide();
-				
-				return false;
-			})
-			.click(function()
-			{
-				ascending = !ascending;
-				megalopolis.index.sort(control, ascending, lastSort.selector
-					? lastSort.selector
-					: function(x, y) { return $("." + lastSort.value, x).text() - $("." + lastSort.value, y).text(); });
-				
-				return false;
-			});
 		
-		var styleMap =
-		[
-			{
-				name: "二列表示",
-				value: "double"
-			},
-			{
-				name: "テーブル",
-				value: "single"
-			}
-		];
-		var currentStyleValue = megalopolis.mainCookie("ListType");
-		var currentStyle = $.grep(styleMap, function(_) { return _.value == currentStyleValue });
-		
-		currentStyle = currentStyle.length ? currentStyle[0] : styleMap[defaultStyle];
-		
-		var visibilityCookie = $.grep([megalopolis.mainCookie("ListVisibility"), "readCount,size,commentCount,evaluationCount,points,rate,dateTime"], function(_) { return _; })[0].split(",");
-		var styleControl = $("<div />")
-			.addClass("dropDown")
-			.append($("<span />").text(currentStyle.name))
-			.append($("<ul />")
-				.append($.map
-				(
-					styleMap,
-					function(_)
-					{
-						return $("<li />")
-							.addClass("listType")
-							.addClass(_ == currentStyle ? "selected" : null)
-							.text(_.name)
-							.append($("<div />").addClass("button"))
-							.click(function()
-							{
-								megalopolis.mainCookie("ListType", _.value);
-								location.reload();
-							})[0];
-					}
-				))
-				.append($.map
-				(
-					[
-						!usePageCount ? null :
-						{
-							label: "ページ",
-							value: "pageCount"
-						},
-						!useReadCount ? null :
-						{
-							label: "閲覧",
-							value: "readCount"
-						},
-						!useSize ? null :
-						{
-							label: "サイズ",
-							value: "size"
-						},
-						!useEvaluationCount ? null :
-						{
-							label: "評価",
-							value: "evaluationCount"
-						},
-						!useCommentCount ? null :
-						{
-							label: "コメント",
-							value: "commentCount"
-						},
-						!usePoints ? null :
-						{
-							label: "POINT",
-							value: "points"
-						},
-						!useRate ? null :
-						{
-							label: "Rate",
-							value: "rate"
-						},
-						{
-							label: "投稿日時",
-							value: "dateTime"
-						},
-						{
-							label: "更新日時",
-							value: "lastUpdate"
-						},
-						!useSummary || currentStyleValue != "single" ? null :
-						{
-							label: "概要",
-							value: "summary"
-						}
-					],
-					function(_)
-					{
-						if (_ != null)
-							return $("<li />")
-								.addClass("listVisibility")
-								.addClass($.inArray(_.value, visibilityCookie) != -1 ? "selected" : null)
-								.text(_.label)
-								.append($("<div />").addClass("button"))
-								.click(function()
-								{
-									var elem = $(this);
-									var idx = $.inArray(_.value, visibilityCookie);
-									var table = $("table", entries());
-									
-									elem.toggleClass("selected");
-									
-									if (_.value == "summary")
-									{
-										if (!elem.hasClass("selected"))
-											table.find(".summary").addClass("hidden");
-										else
-											table.find(".summary").removeClass("hidden");
-									}
-									else
-									{
-										var tagRows = table.find("tr.tags").find("td");
-										var fromColSpan = tagRows.prop("colspan");
-										var articles = $("article", entries());
-										
-										articles.find("dd." + _.value).each(function(k, v)
-										{
-											$([$(v), $(v).prev("dt")]).toggleClass("hidden");
-										});
-										articles.find("dl").each(function(k, v)
-										{
-											var elems = $("dt", v);
-											var firstVisible = elems.not(".hidden").first();
-											
-											elems.removeClass("firstChild");
-											firstVisible.addClass("firstChild");
-										});
-										articles.find("time").each(function(k, v)
-										{
-											var e = $(v);
-											
-											if (e.hasClass(_.value))
-												e.toggleClass("hidden");
-										});
-										
-										$([table.find("th." + _.value), table.find("td." + _.value)]).each(function(k, v)
-										{
-											var elem = $(this);
-											
-											if (elem.hasClass("hidden"))
-												tagRows.prop("colspan", fromColSpan + 1);
-											else
-												tagRows.prop("colspan", fromColSpan - 1);
-											
-											elem.toggleClass("hidden");
-										});
-									}
-									
-									if (idx != -1)
-										delete visibilityCookie[idx];
-									else
-										visibilityCookie.push(_.value);
-									
-									megalopolis.mainCookie("ListVisibility", visibilityCookie.join(",").replace(/,{2,}/g, ","));
-									
-									return false;
-								})[0];
-					}
-				))
-				.hide())
-			.mouseenter(function()
-			{
-				styleControl.addClass("open");
-				$("ul", styleControl).show();
-				
-				return false;
-			})
-			.mouseleave(function()
-			{
-				styleControl.removeClass("open");
-				$("ul", styleControl).hide();
-				
-				return false;
-			})
-			.appendTo(h1);
-	},
-	sort: function(control, ascending, selector)
-	{
-		if (ascending)
-			control.addClass("ascending");
-		else
-			control.removeClass("ascending");
-		
-		var div = $("#entries");
-		var tbody = div.find("table").find("tbody");
-		
-		div.append($("article", div).sort(function(x, y)
+		tbody.find(".summaryButton").click(function(e)
 		{
-			return ascending ? selector($(x), $(y)) : selector($(y), $(x));
-		}));
-		
-		var list = $.map(tbody.find("tr.article").map(function()
-		{
-			return $(this).next("tr.tags").andSelf();
-		}).sort(function(x, y)
-		{
-			return ascending ? selector($(x[0]), $(y[0])) : selector($(y[0]), $(x[0]));
-		}), function(_)
-		{
-			return [_[0], _[1]];
+			toggle(e);
+			
+			return false;
 		});
-		
-		tbody.append(list);
-	},
-	showSummary: function()
-	{
-		var tbody = $("#entries").find("table").find("tbody");
-		
 		tbody.click(function(e)
 		{
 			var tagName = e.target.tagName.toLowerCase();
 			
 			if (tagName != "a" &&
-				tagName != "input" ||
-				e.target.className == "summaryButton")
+				tagName != "input")
 			{
-				var row = $(e.target).parents("tr");
-				var summary = (row.hasClass("tags") ? row : row.next("tr.tags")).find("p");
+				toggle(e);
 				
-				summary.toggleClass("hidden");
+				return false;
 			}
 		});
+	};
+	
+	if (listType == "single")
+		showSummary();
+	
+	loadSubjectPager();
+	
+	if (entries.length)
+	{
+		loadSortDropDown();
+		loadVisibilityDropDown();
 	}
-};
-
-$(function()
-{
-	$("#moveButton").click(function()
-	{
-		return window.confirm("本当に作品を移動してよろしいですか？");
-	});
-	$("#unpostButton").click(function()
-	{
-		return window.confirm("本当に作品を削除してよろしいですか？");
-	});
+	
+	loadAdminButtons();
 });

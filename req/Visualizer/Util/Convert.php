@@ -8,12 +8,13 @@ Visualizer::doctype();
 	<? Visualizer::head() ?>
 	<link href="<?+Visualizer::actionHref("style", "convert.css") ?>" rel="stylesheet" />
 	<title>Megalith 形式のログの変換 - <?+$c->title ?></title>
+	<script src="<?+Visualizer::actionHref("script", "Util", "Convert.js") ?>"></script>
 </head>
 <body>
 	<? Visualizer::header("Megalith 形式のログの変換") ?>
 	<section class="convert" id="convert">
 		<?if (is_null($d)): ?>
-			<form action="" method="get" id="form">
+			<form action="<?+Visualizer::actionHref("util", "convert") ?>" method="get" id="form">
 				<p>
 					ボタンをクリックし、変換を開始します。<br />
 					ログが多い場合は、変換に時間がかかります。ご了承ください。
@@ -38,11 +39,6 @@ Visualizer::doctype();
 			</div>
 		<?endif ?>
 	</section>
-	<script src="<?+Visualizer::actionHref("script", "Util", "Convert.js") ?>"></script>
-	<script>
-		megalopolis.convert.action = '<?+Visualizer::actionHref("util", "convert.json") ?>';
-		$("#form").submit(megalopolis.convert.submit);
-	</script>
 	<? Visualizer::footer() ?>
 </body>
 </html>

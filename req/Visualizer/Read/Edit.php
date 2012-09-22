@@ -55,42 +55,30 @@ Visualizer::doctype();
 			<?endif ?>
 			<hr />
 			<?if ($c->foregroundEnabled): ?>
-				<label for="foreground">文字色</label><input type="color" name="foreground" id="foreground" onchange="megalopolis.edit.updateForeground()" value="<?+$h->thread->foreground ?>" />
-				<?if ($c->foregroundMap): ?>
-					<script>
-						megalopolis.edit.foregroundPalette([<?=implode(", ", array_map(create_function('$_', 'return "\'" . Visualizer::escapeOutput($_) . "\'";'), $c->foregroundMap)) ?>]);
-					</script>
-				<?else: ?>
+				<label for="foreground">文字色</label>
+				<input type="color" name="foreground" id="foreground" value="<?+$h->thread->foreground ?>"<?if ($c->foregroundMap) echo ' data-map="' . implode(" ", array_map(array("Visualizer", "escapeOutput"), $c->foregroundMap)) . '"'; ?> />
+				<?if (!$c->foregroundMap): ?>
 					<br />
 				<?endif ?>
 			<?endif ?>
 			<?if ($c->backgroundEnabled): ?>
-				<label for="background">背景色</label><input type="color" name="background" id="background" onchange="megalopolis.edit.updateBackground()" value="<?+$h->thread->background ?>" />
-				<?if ($c->backgroundMap): ?>
-					<script>
-						megalopolis.edit.backgroundPalette([<?=implode(", ", array_map(create_function('$_', 'return "\'" . Visualizer::escapeOutput($_) . "\'";'), $c->backgroundMap)) ?>]);
-					</script>
-				<?else: ?>
+				<label for="background">背景色</label>
+				<input type="color" name="background" id="background" value="<?+$h->thread->background ?>"<?if ($c->backgroundMap) echo ' data-map="' . implode(" ", array_map(array("Visualizer", "escapeOutput"), $c->backgroundMap)) . '"'; ?> />
+				<?if (!$c->backgroundMap): ?>
 					<br />
 				<?endif ?>
 			<?endif ?>
 			<?if ($c->backgroundImageEnabled): ?>
-				<label for="backgroundImage">背景画像</label><input type="text" name="backgroundImage" id="backgroundImage" onchange="megalopolis.edit.updateBackgroundImage()" value="<?+$h->thread->backgroundImage ?>" />
-				<?if ($c->backgroundImageMap): ?>
-					<script>
-						megalopolis.edit.backgroundImagePalette([<?=implode(", ", array_map(create_function('$_', 'return "\'" . Visualizer::escapeOutput($_) . "\'";'), $c->backgroundImageMap)) ?>]);
-					</script>
-				<?else: ?>
+				<label for="backgroundImage">背景画像</label>
+				<input type="text" name="backgroundImage" id="backgroundImage" value="<?+$h->thread->backgroundImage ?>"<?if ($c->backgroundImageMap) echo ' data-map="' . implode(" ", array_map(array("Visualizer", "escapeOutput"), $c->backgroundImageMap)) . '"'; ?> />
+				<?if (!$c->backgroundImageMap): ?>
 					<br />
 				<?endif ?>
 			<?endif ?>
 			<?if ($c->borderEnabled): ?>
-				<label for="border">枠色</label><input type="color" name="border" id="border" onchange="megalopolis.edit.updateBorder()" value="<?+$h->thread->border ?>" />
-				<?if ($c->borderMap): ?>
-					<script>
-						megalopolis.edit.borderPalette([<?=implode(", ", array_map(create_function('$_', 'return "\'" . Visualizer::escapeOutput($_) . "\'";'), $c->borderMap)) ?>]);
-					</script>
-				<?else: ?>
+				<label for="border">枠色</label>
+				<input type="color" name="border" id="border" value="<?+$h->thread->border ?>"<?if ($c->borderMap) echo ' data-map="' . implode(" ", array_map(array("Visualizer", "escapeOutput"), $c->borderMap)) . '"'; ?> />
+				<?if (!$c->borderMap): ?>
 					<br />
 				<?endif ?>
 			<?endif ?>

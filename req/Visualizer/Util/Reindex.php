@@ -8,12 +8,13 @@ Visualizer::doctype();
 	<? Visualizer::head() ?>
 	<link href="<?+Visualizer::actionHref("style", "convert.css") ?>" rel="stylesheet" />
 	<title>検索インデックスの再生成 - <?+$c->title ?></title>
+	<script src="<?+Visualizer::actionHref("script", "Util", "Reindex.js") ?>"></script>
 </head>
 <body>
 	<? Visualizer::header("検索インデックスの再生成") ?>
 	<section class="convert" id="convert">
 		<?if (!is_numeric($d)): ?>
-			<form action="" method="get" id="form">
+			<form action="<?+Visualizer::actionHref("util", "reindex") ?>" method="get" id="form">
 				<p>
 					ボタンをクリックし、検索インデックスの再生成を開始します。<br />
 					作品が多い場合は、再生成に時間がかかります。ご了承ください。
@@ -36,11 +37,6 @@ Visualizer::doctype();
 			</div>
 		<?endif ?>
 	</section>
-	<script src="<?+Visualizer::actionHref("script", "Util", "Reindex.js") ?>"></script>
-	<script>
-		megalopolis.reindex.action = '<?+Visualizer::actionHref("util", "reindex.json") ?>';
-		$("#form").submit(megalopolis.reindex.submit);
-	</script>
 	<? Visualizer::footer() ?>
 </body>
 </html>

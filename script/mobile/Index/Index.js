@@ -77,7 +77,13 @@ megalopolis.index =
 	},
 	renderSettings: function()
 	{
-		$("#verticalSwitch").val(megalopolis.mainCookie("MobileVertical") || "yes").slider("refresh");
+		$("#verticalSwitch")
+			.val(megalopolis.mainCookie("MobileVertical") || "yes")
+			.change(function()
+			{
+				megalopolis.index.settingsChanged();
+			})
+			.slider("refresh");
 	},
 	settingsChanged: function()
 	{
@@ -93,4 +99,12 @@ $(document).bind("pageinit", function(e)
 		megalopolis.index.setSort();
 	else if (page.id == "config")
 		megalopolis.index.renderSettings();
+	else if (page.id == "sort")
+		$("li a", page).click(function()
+		{
+			megalopolis.index.setSort($(this).data("column"));
+			history.back();
+			
+			return false;
+		});
 });
