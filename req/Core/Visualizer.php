@@ -643,6 +643,9 @@ class Visualizer
 					
 					error_reporting(E_ALL);
 				}
+				else if ($k == "src" || $k == "href")
+					if (preg_match('/javascript:|data:/', $v))
+						$i->$k = null;
 			}
 			
 			self::ensureHtmlTagEnd($i);
