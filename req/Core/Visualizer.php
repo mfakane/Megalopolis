@@ -555,11 +555,10 @@ class Visualizer
 	private static function ensureHtml($str, $stripExcept = null)
 	{
 		$rt = str_get_html($str);
+		$disallowed = array_flip(Configuration::$instance->disallowedTags);
+		$allowed = array_flip(Configuration::$instance->allowedTags);
+		self::replaceTags($rt, $disallowed, $allowed);
 		self::ensureHtmlTagEnd($rt);
-		
-		foreach (Configuration::$instance->disallowedTags as $i)
-			foreach ($rt->find($i) as $j)
-				$j->outertext = " :REPLACED: ";
 		
 		$str = $rt->save();
 		$rt->clear();
@@ -568,10 +567,21 @@ class Visualizer
 		if (!is_array($stripExcept))
 			$stripExcept = Configuration::$instance->allowedTags;
 			
-		if (is_array($stripExcept))
+		if ($stripExcept)
 			$str = strip_tags($str, "<" . implode("><", $stripExcept) . ">");
 		
 		return $str;
+	}
+	
+	private static function replaceTags($rt, array $disallowed, array $allowed)
+	{
+		foreach ($rt->find("*") as $i)
+		{
+			if (isset($disallowed[$i->tag]) || !isset($allowed[$i->tag]))
+				$i->outertext = " :REPLACED: ";
+			else
+				self::replaceTags($i, $disallowed, $allowed);
+		}
 	}
 	
 	private static function ensureHtmlTagEnd($rt)
@@ -598,7 +608,7 @@ class Visualizer
 		
 		foreach ($rt->find("*") as $i)
 		{
-			if (Util::isEmpty($i->outertext))
+			if (Util::isEmpty($i->outertext) || $i->outertext == " :REPLACED: ")
 				continue;
 			
 			foreach ($i->attr as $k => $v)
