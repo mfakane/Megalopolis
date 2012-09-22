@@ -483,6 +483,35 @@ class Visualizer
 	/**
 	 * @param string $s
 	 */
+	static function linkedName($s)
+	{
+		if (empty($s))
+			self::converted(Configuration::$instance->defaultName);
+		else
+		{
+			?>
+			<a href="<?php echo self::actionHref("author", $s . (strpos($s, ".") !== false ? ".html" : null)) ?>">
+				<?php self::converted($s) ?>
+			</a>
+			<?php
+		}
+	}
+	
+	/**
+	 * @param string $s
+	 */
+	static function linkedTag($s)
+	{
+		?>
+		<a href="<?php echo self::actionHref("tag", $s . (strpos($s, ".") !== false ? ".html" : null)) ?>">
+			<?php self::converted($s) ?>
+		</a>
+		<?php
+	}
+	
+	/**
+	 * @param string $s
+	 */
 	static function convertedSummary($s)
 	{
 		echo self::escapeSummary($s);

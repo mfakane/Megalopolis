@@ -168,11 +168,7 @@ function entries($entries, $isAdmin, $listType = null)
 						<?php endif ?>
 						<?php if ($isAdmin || $c->showName[Configuration::ON_SUBJECT]): ?>
 							<span class="name">
-								<?php if (Util::isEmpty($i->name)): ?>
-									<?php Visualizer::convertedName($i->name) ?>
-								<?php else: ?>
-									<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("author", $i->name))) ?>"><?php Visualizer::convertedName($i->name) ?></a>
-								<?php endif ?>
+								<? Visualizer::linkedName($i->name) ?>
 							</span>
 						<?php endif ?>
 						<?php if ($isAdmin): ?>
@@ -201,7 +197,7 @@ function entries($entries, $isAdmin, $listType = null)
 							<ul class="tags">
 								<?php foreach ($i->tags as $j): ?>
 									<li>
-										<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("tag", $j))) ?>"><?php Visualizer::converted($j) ?></a>
+										<? Visualizer::linkedTag($j) ?>
 									</li>
 								<?php endforeach ?>
 							</ul>
@@ -304,11 +300,7 @@ function entries($entries, $isAdmin, $listType = null)
 							<?php endif ?>
 							<?php if ($isAdmin || $c->showName[Configuration::ON_SUBJECT]): ?>
 								<td class="name">
-									<?php if (Util::isEmpty($i->name)): ?>
-										<?php Visualizer::convertedName($i->name) ?>
-									<?php else: ?>
-										<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("author", $i->name))) ?>"><?php Visualizer::convertedName($i->name) ?></a>
-									<?php endif ?>
+									<?php Visualizer::linkedName($i->name) ?>
 								</td>
 							<?php endif ?>
 							<td class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>" data-unixtime="<?php Visualizer::converted($i->dateTime) ?>">
@@ -335,7 +327,7 @@ function entries($entries, $isAdmin, $listType = null)
 										<?php if (($c->showTags[Configuration::ON_SUBJECT] || $isAdmin) && $i->tags): ?>
 											<?php foreach ($i->tags as $j): ?>
 												<li>
-													<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("tag", $j))) ?>"><?php Visualizer::converted($j) ?></a>
+													<?php Visualizer::linkedTag($j) ?>
 												</li>
 											<?php endforeach ?>
 										<?php endif ?>

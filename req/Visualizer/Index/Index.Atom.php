@@ -24,7 +24,7 @@ else
 				<?endif ?>
 				<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
 					<author>
-						<name><?+$i->name ?></name>
+						<name><? Visualizer::convertedName($i->name) ?></name>
 						<?if (!Util::isEmpty($i->mail)): ?>
 							<email><?+$i->mail ?></email>
 						<?endif ?>
@@ -41,7 +41,7 @@ else
 				<?endif ?>
 				<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>
 					<?foreach ($i->tags as $j): ?>
-						<category term="<?+$j ?>" scheme="<?+Visualizer::absoluteHref("tag", $j) ?>" />
+						<category term="<?+$j ?>" scheme="<?+Visualizer::absoluteHref("tag", $j . (strpos($j, ".") !== false ? ".html" : null)) ?>" />
 					<?endforeach ?>
 				<?endif ?>
 			</entry>

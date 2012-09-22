@@ -28,14 +28,14 @@ else
 					<link><?+Visualizer::absoluteHref($i->subject, $i->id) ?></link>
 					<pubDate><?+date("r", $i->dateTime) ?></pubDate>
 					<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
-						<author><?+$i->name ?></author>
+						<author><? Visualizer::convertedName($i->name) ?></author>
 					<?endif ?>
 					<?if ($c->useSummary && $c->showSummary[Configuration::ON_SUBJECT]): ?>
 						<description><? Visualizer::convertedSummary($i->summary) ?></description>
 					<?endif ?>
 					<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>
 						<?foreach ($i->tags as $j): ?>
-							<category domain="<?+Visualizer::absoluteHref("tag", $j) ?>"><?+$j ?></category>
+							<category domain="<?+Visualizer::absoluteHref("tag", $j . (strpos($j, ".") !== false ? ".html" : null)) ?>"><?+$j ?></category>
 						<?endforeach ?>
 					<?endif ?>
 				</item>

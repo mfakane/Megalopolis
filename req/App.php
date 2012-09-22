@@ -181,11 +181,11 @@ class App
 		if ($pathInfo && empty($pathInfo[0]))
 			array_shift($pathInfo);
 
-		if ($pathInfo && mb_strstr($pathInfo[count($pathInfo) - 1], "."))
+		if ($pathInfo && ($idx = mb_strrpos($pathInfo[count($pathInfo) - 1], ".")) !== false)
 		{
 			$last = &$pathInfo[count($pathInfo) - 1];
-			self::$handlerType = mb_substr(mb_strstr($last, "."), 1);
-			$last = mb_substr($last, 0, -mb_strlen(self::$handlerType) - 1);
+			self::$handlerType = mb_substr($last, $idx + 1);
+			$last = mb_substr($last, 0, $idx);
 		}
 		
 		self::load(HANDLER_DIR . "Index");

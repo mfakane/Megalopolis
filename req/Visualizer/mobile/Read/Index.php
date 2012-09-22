@@ -201,11 +201,7 @@ Visualizer::doctype();
 					<?if ($c->showName[Configuration::ON_ENTRY]): ?>
 						<li>
 							<h3>名前</h3>
-							<?if (Util::isEmpty($h->entry->name)): ?>
-								<? Visualizer::convertedName($h->entry->name) ?>
-							<?else: ?>
-								<a href="<?+Visualizer::absoluteHref("author", $h->entry->name) ?>"><? Visualizer::convertedName($h->entry->name) ?></a>
-							<?endif ?>
+							<? Visualizer::linkedName($h->entry->name) ?>
 						</li>
 					<?endif ?>
 					<li>
@@ -240,7 +236,7 @@ Visualizer::doctype();
 					<ul data-role="listview" data-inset="true">
 						<?foreach ($h->entry->tags as $i): ?>
 							<li>
-								<a href="<?+Visualizer::absoluteHref("tag", $i) ?>"><?+$i ?></a>
+								<? Visualizer::linkedTag($i) ?>
 							</li>
 						<?endforeach ?>
 					</ul>

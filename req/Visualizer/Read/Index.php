@@ -126,7 +126,7 @@ Visualizer::doctype();
 			<ul>
 				<?foreach ($h->entry->tags as $i): ?>
 					<li>
-						<a href="<?+Visualizer::actionHref("tag", $i) ?>"><?+$i ?></a>
+						<? Visualizer::linkedTag($i) ?>
 					</li>
 				<?endforeach ?>
 			</ul>
@@ -149,8 +149,8 @@ Visualizer::doctype();
 					</h1>
 					<?if ($c->showName[Configuration::ON_ENTRY]): ?>
 						<address>
-							<?if (App::$actionName == "index" && !Util::isEmpty($h->entry->name)): ?>
-								<a href="<?+Visualizer::actionHref("author", $h->entry->name) ?>"><? Visualizer::convertedName($h->entry->name) ?></a>
+							<?if (App::$actionName == "index"): ?>
+								<? Visualizer::linkedName($h->entry->name) ?>
 							<?else: ?>
 								<? Visualizer::convertedName($h->entry->name) ?>
 							<?endif ?>
@@ -174,8 +174,8 @@ Visualizer::doctype();
 						</div>
 						<?if ($isAdmin || $c->showName[Configuration::ON_ENTRY]): ?>
 							<address>
-								<?if (App::$actionName == "index" && !Util::isEmpty($h->entry->name)): ?>
-									<a href="<?+Visualizer::actionHref("author", $h->entry->name) ?>"><? Visualizer::convertedName($h->entry->name) ?></a>
+								<?if (App::$actionName == "index"): ?>
+									<? Visualizer::linkedName($h->entry->name) ?>
 								<?else: ?>
 									<? Visualizer::convertedName($h->entry->name) ?>
 								<?endif ?>

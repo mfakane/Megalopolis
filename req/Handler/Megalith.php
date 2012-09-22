@@ -146,9 +146,10 @@ class MegalithHandler extends Handler
 	 */
 	function _com($_name = null)
 	{
-		$name = Util::escapeInput($_name);
+		$path = explode(".", Util::escapeInput($_name), 2);
+		$name = $path[0];
 		
-		if (App::$handlerType == "res.dat")
+		if (App::$handlerType == "dat" && count($path) == 2 && $path[1] == "res")
 		{
 			$db = App::openDB();
 			
@@ -201,9 +202,10 @@ class MegalithHandler extends Handler
 	 */
 	function aft($_name = null)
 	{
-		$name = Util::escapeInput($_name);
+		$path = explode(".", Util::escapeInput($_name), 2);
+		$name = $path[0];
 		
-		if (App::$handlerType == "aft.dat")
+		if (App::$handlerType == "dat" && count($path) == 2 && $path[1] == "aft")
 		{
 			$db = App::openDB();
 			
