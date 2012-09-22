@@ -147,6 +147,7 @@ class Configuration
 		"samp",
 		"small",
 		"span",
+		"split",
 		"strike",
 		"strong",
 		"sub",
