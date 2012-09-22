@@ -63,7 +63,7 @@ class SQLiteSearchIndex extends SearchIndex
 		$queryArguments = array();
 		
 		foreach ($query as $i)
-			if ($words = $this->getWords(array("endOnIncompletedGram" => true), $i))
+			if ($words = $this->getWords(array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($i) > $this->gramLength), $i))
 			{
 				$currentWord = array();
 				

@@ -58,7 +58,7 @@ class ClassicSearchIndex extends SearchIndex
 		if (!$query)
 			return array();
 		
-		if (!($query = call_user_func_array(array($this, "getWords"), $query)))
+		if (!($query = call_user_func_array(array($this, "getWords"), array_merge(array(array("noIncompletedGram" => true)), $query))))
 			return array();
 		
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf

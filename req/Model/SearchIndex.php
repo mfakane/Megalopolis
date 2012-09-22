@@ -151,12 +151,16 @@ abstract class SearchIndex
 		$gram = $this->gramLength;
 		$gramMax = Configuration::$instance->maximumSearchIndexLength;
 		$endOnIncompletedGram = false;
+		$noIncompletedGram = false;
 		
 		foreach (func_get_args() as $i)
 			if (is_array($i))
 			{
 				if (isset($i["endOnIncompletedGram"]))
 					$endOnIncompletedGram = $i["endOnIncompletedGram"];
+				
+				if (isset($i["noIncompletedGram"]))
+					$noIncompletedGram = $i["noIncompletedGram"];
 			}
 			else if (!Util::isEmpty($i))
 				foreach (mb_split('[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F' . self::$endchars . ']', $gramMax == -1 ? mb_strtolower($i) : mb_substr(mb_strtolower($i), 0, $gramMax)) as $j)
@@ -164,6 +168,9 @@ abstract class SearchIndex
 						for ($k = 0; $k < $l; $k++)
 							if (!in_array($s = mb_substr($j, $k, $gram), $rt))
 							{
+								if ($noIncompletedGram && mb_strlen($s) < $gram)
+									break;
+								
 								$rt[] = $s;
 								
 								if ($endOnIncompletedGram && mb_strlen($s) < $gram)
