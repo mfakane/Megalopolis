@@ -1,4 +1,46 @@
-﻿2012-09-20 COAH96KoxU <queue glasscore.net>
+﻿2012-09-22 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 23
+	* req/Visualizer/simple/Read/Index.php: 携帯表示時ページ分割を改行のタイミングまでずらすように
+	* req/Core/Util.php: 入力時の改行文字を統一
+	* req/Core/Visualizer.php: href および src へのチェックを追加
+	* req/Core/Visualizer.php: 許可タグの処理順を変更
+	* req/Handler/Index.php,
+	  req/Model/ThreadEntry.php: 検索結果がない場合の余計な処理を削減
+	* req/Model/SearchIndex.php,
+	  req/Model/SearchIndex/Classic.php,
+	  req/Model/SearchIndex/MySQL.php,
+	  req/Model/SearchIndex/SQLite.php: 検索ワードが gram 長を超える場合末尾の未完了 gram を検索に使用しないよう修正
+	* req/Core/Visualizer.php,
+	  req/Visualizer/Index/Index.php,
+	  req/Visualizer/Index/Search.php,
+	  req/Visualizer/Read/Edit.php,
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/Template/Index.php,
+	  req/Visualizer/Util/Convert.php,
+	  req/Visualizer/Util/Convert/Tags.php,
+	  req/Visualizer/Util/Reindex.php,
+	  req/Visualizer/Util/Track.php,
+	  req/Visualizer/mobile/Index/Index.php,
+	  req/Visualizer/mobile/Read/Index.php,
+	  req/Visualizer/mobile/Template/Index.php,
+	  script/Index/Index.js,
+	  script/Read/Edit.js,
+	  script/Read/Index.js,
+	  script/Util/Convert.js,
+	  script/Util/Convert/Tags.js,
+	  script/Util/Reindex.js,
+	  script/base.js,
+	  script/mobile/Index/Index.js,
+	  script/mobile/Read/Index.js,
+	  script/mobile/base.js: インラインスクリプトを外部スクリプトファイルへ移動
+	* req/Core/Configuration.php,
+	  req/Core/Visualizer.php: 許可タグ制の追加
+	* script/mobile/Read/Index.js,
+	  style/mobile/mobile.css: iPhone 表示で縦書き時本文が縦スクロールできるのを修正
+	* req/Handler/Index.php: 携帯表示および iPhone 表示にてタグ検索が機能しないのを修正
+
+2012-09-20 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 22
 	* req/Visualizer/mobile/Index/Index.php,
