@@ -1024,28 +1024,36 @@ class ThreadEntry
 		if (isset($query["tag"]) && $query["tag"] && Configuration::$instance->showTags[Configuration::ON_SUBJECT])
 			$ids = SearchIndex::search($idb, $query["tag"], array("tag"), $ids);
 		
-		$where = array
-		(
-			!is_null($ids) ? App::THREAD_ENTRY_TABLE . ".id in (" . ($ids ? implode(", ", $ids) : -1) . ")" : null,
-			isset($query["eval"]) && $query["eval"] ? "evaluationCount between {$query['eval'][0]} and {$query['eval'][1]}" : null,
-			isset($query["points"]) && $query["points"] ? "points between {$query['points'][0]} and {$query['points'][1]}" : null,
-			isset($query["dateTime"]) && $query["dateTime"] ? "dateTime between {$query['dateTime'][0]} and {$query['dateTime'][1]}" : null
-		);
-		$whereString = "where " . implode(" and ", array_filter($where));
-		Util::executeStatement($st = Util::ensureStatement($db, $db->prepare(sprintf
-		('
-			select count(1) from %s
-			left join %s on %1$s.id = %2$s.id
-			%s',
-			App::THREAD_ENTRY_TABLE,
-			App::THREAD_EVALUATION_TABLE,
-			$whereString
-		))));
-		$count = $st->fetch();
+		if (is_array($ids) && !$ids)
+			$count = array(0);
+		else
+		{
+			$where = array
+			(
+				!is_null($ids) ? App::THREAD_ENTRY_TABLE . ".id in (" . ($ids ? implode(", ", $ids) : -1) . ")" : null,
+				isset($query["eval"]) && $query["eval"] ? "evaluationCount between {$query['eval'][0]} and {$query['eval'][1]}" : null,
+				isset($query["points"]) && $query["points"] ? "points between {$query['points'][0]} and {$query['points'][1]}" : null,
+				isset($query["dateTime"]) && $query["dateTime"] ? "dateTime between {$query['dateTime'][0]} and {$query['dateTime'][1]}" : null
+			);
+			$whereString = "where " . implode(" and ", array_filter($where));
+			Util::executeStatement($st = Util::ensureStatement($db, $db->prepare(sprintf
+			('
+				select count(1) from %s
+				left join %s on %1$s.id = %2$s.id
+				%s',
+				App::THREAD_ENTRY_TABLE,
+				App::THREAD_EVALUATION_TABLE,
+				$whereString
+			))));
+			$count = $st->fetch();
+		}
 		
 		if ($option == self::SEARCH_RANDOM)
 		{
-			$rt = self::query($db, $whereString, array(), array(App::THREAD_ENTRY_TABLE . ".id"));
+			if (is_array($ids) && !$ids)
+				return null;
+			else
+				$rt = self::query($db, $whereString, array(), array(App::THREAD_ENTRY_TABLE . ".id"));
 			
 			if (Configuration::$instance->convertOnDemand &&
 				is_dir("Megalith/sub"))
@@ -1057,7 +1065,10 @@ class ThreadEntry
 		}
 		else
 		{
-			$rt = self::query($db, "{$whereString} order by {$sort} " . ($option == self::SEARCH_DESCENDING ? "desc" : "asc") . ($limit ? " limit {$limit} offset {$offset}" : null));
+			if (is_array($ids) && !$ids)
+				$rt = array();
+			else
+				$rt = self::query($db, "{$whereString} order by {$sort} " . ($option == self::SEARCH_DESCENDING ? "desc" : "asc") . ($limit ? " limit {$limit} offset {$offset}" : null));
 			
 			if (Configuration::$instance->convertOnDemand &&
 				is_dir("Megalith/sub"))

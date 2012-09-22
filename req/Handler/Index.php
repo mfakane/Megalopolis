@@ -254,7 +254,8 @@ class IndexHandler extends Handler
 			{
 				$rt = ThreadEntry::search($db, $idb, $query, 0, 0, ThreadEntry::SEARCH_RANDOM);
 				
-				return Visualizer::redirect("{$rt->subject}/{$rt->id}");
+				if ($rt)
+					return Visualizer::redirect("{$rt->subject}/{$rt->id}");
 			}
 			
 			$rt = ThreadEntry::search($db, $idb, $query, ($this->page - 1) * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, $sort[0], $sort[1]);
