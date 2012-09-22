@@ -22,6 +22,18 @@ $paging = 8000;
 $maxPage = ceil(mb_strlen($h->thread->body) / $paging);
 $commentPaging = 25;
 $maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
+
+$length = $paging;
+$offset = $h->page * $paging - $paging;
+
+if ($h->page > 1 && ($idx = mb_strrpos(mb_substr($h->thread->body, $offset - $paging, $length), "\r\n")) !== false)
+{
+	$offset -= $paging - $idx - 2;
+	$length += $paging - $idx - 2;
+}
+
+if ($h->page < $maxPage && ($idx = mb_strrpos(mb_substr($h->thread->body, $offset, $length), "\r\n")) !== false)
+	$length = $idx;
 ?>
 <html lang="ja">
 <head>
@@ -67,7 +79,7 @@ $maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
 			</div>
 		<?endif ?>
 		<div class="content">
-			<? Visualizer::convertedBody($h->thread, null, $h->page * $paging - $paging, $paging) ?>
+			<? Visualizer::convertedBody($h->thread, null, $offset, $length) ?>
 		</div>
 		<?if ($h->page == $maxPage): ?>
 			<div class="afterword">
