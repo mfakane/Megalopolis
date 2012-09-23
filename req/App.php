@@ -141,6 +141,7 @@ class App
 		catch (Exception $ex)
 		{
 			Visualizer::statusCode(is_a($ex, "ApplicationException") ? $ex->httpCode : 500);
+			Visualizer::noCache();
 			Visualizer::$data = $ex;
 			
 			if (self::$handlerType == "json" || strstr(Util::getPathInfo(), ".json") == ".json")
