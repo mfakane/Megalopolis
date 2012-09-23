@@ -7,6 +7,7 @@ Visualizer::doctype();
 <html lang="ja">
 <head>
 	<? Visualizer::head() ?>
+	<meta name="robots" content="noindex,nofollow,noarchive" />
 	<title>管理用ツール - <?+$c->title ?></title>
 </head>
 <body>

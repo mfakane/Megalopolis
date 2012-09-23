@@ -21,6 +21,7 @@ App::load(VISUALIZER_DIR . "Template/Index");
 		<link href="<?+Visualizer::actionHrefArray(array(0)) ?>.rss" rel="alternate" type="application/rss+xml" title="<?+$c->title ?> 最新作品集 RSS 2.0" />
 		<link href="<?+Visualizer::actionHrefArray(array(0)) ?>.atom" rel="alternate" type="application/atom+xml" title="<?+$c->title ?> 最新作品集 Atom" />
 		<link href="<?+Visualizer::actionHrefArray(array($h->subject)) ?>.json" rel="alternate" type="application/json" />
+		<link href="<?+Visualizer::actionHrefArray(array($h->subject)) ?>" rel="canonical" />
 	<?else: ?>
 		<link href="<?+Visualizer::actionHrefArray(array(App::$actionName, $d)) ?>.rss" rel="alternate" type="application/rss+xml" title="RSS 2.0" />
 		<link href="<?+Visualizer::actionHrefArray(array(App::$actionName, $d)) ?>.atom" rel="alternate" type="application/atom+xml" title="Atom" />

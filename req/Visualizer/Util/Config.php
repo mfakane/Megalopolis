@@ -7,6 +7,7 @@ Visualizer::doctype();
 <html lang="ja">
 <head>
 	<? Visualizer::head() ?>
+	<meta name="robots" content="noindex,noarchive" />
 	<title>設定情報 - <?+$c->title ?></title>
 </head>
 <body>

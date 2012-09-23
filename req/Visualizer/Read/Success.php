@@ -23,6 +23,7 @@ switch (App::$actionName)
 <html lang="ja">
 <head>
 	<? Visualizer::head() ?>
+	<meta name="robots" content="noindex,nofollow,noarchive" />
 	<title><?+$c->title ?></title>
 </head>
 <body>

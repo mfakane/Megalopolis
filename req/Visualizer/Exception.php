@@ -5,6 +5,7 @@ $c = &Configuration::$instance;
 <html lang="ja">
 <head>
 	<? Visualizer::head() ?>
+	<meta name="robots" content="noindex,nofollow,noarchive" />
 	<title>
 		エラー
 	</title>
