@@ -572,7 +572,7 @@ $(function()
 				},
 				{
 					title: "文字方向の切り替え",
-					image: writingMode == 0 && megalopolis.mainCookie("Vertical") == "yes" || vertical.writingMode == 2 ? "horizontalIcon.png" : "verticalIcon.png",
+					image: writingMode == 0 && megalopolis.mainCookie("Vertical") == "yes" || writingMode == 2 ? "horizontalIcon.png" : "verticalIcon.png",
 					separator: true,
 					click: function(sender)
 					{
@@ -630,8 +630,8 @@ $(function()
 		
 		$(window).resize(resizeAction);
 		
-		if (vertical.writingMode == 0 && megalopolis.mainCookie("Vertical") == "yes" || vertical.writingMode == 2)
-			toggleVertical(true, vertical.writingMode == 2 ? true : undefined);
+		if (writingMode == 0 && megalopolis.mainCookie("Vertical") == "yes" || writingMode == 2)
+			toggleVertical(true, writingMode == 2 ? true : undefined);
 	};
 	
 	loadAdminButtons();
