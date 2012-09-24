@@ -950,7 +950,11 @@ class Visualizer
 		$csp = "default-src 'self'; img-src *; script-src 'self' code.jquery.com platform.twitter.com; style-src 'self' code.jquery.com 'unsafe-inline'; frame-src platform.twitter.com";
 		
 		header("X-Content-Security-Policy: {$csp}");
-		header("X-WebKit-CSP: {$csp}");
+		
+		if (Util::getBrowserType() == Util::BROWSER_TYPE_WEBKIT &&
+			strpos($ua = $_SERVER["HTTP_USER_AGENT"], "Safari") !== false &&
+			!preg_match('/Version\/[1-5]\./', $ua))
+			header("X-WebKit-CSP: {$csp}");
 	}
 }
 

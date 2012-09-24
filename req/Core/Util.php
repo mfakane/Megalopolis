@@ -48,6 +48,9 @@ class Util
 		if ($browserType)
 			return $browserType;
 		
+		if (!isset($_SERVER["HTTP_USER_AGENT"]))
+			return $browserType = self::BROWSER_TYPE_UNKNOWN;
+		
 		$ua = $_SERVER["HTTP_USER_AGENT"];
 		
 		foreach (array
