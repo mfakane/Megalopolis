@@ -12,7 +12,6 @@ Visualizer::doctype();
 	<meta name="author" content="<?+$h->entry->name ?>" />
 	<meta name="description" content="<?+$h->entry->summary ?>" />
 	<meta name="keywords" content="<?+implode(",", $h->entry->tags) ?>" />
-	<link rel="home" href="<?+Visualizer::actionHref() ?>" />
 	<?if (App::$actionName == "index"): ?>
 		<link rel="contents" href="<?+Visualizer::actionHref($h->subject) ?>" />
 		<?if ($h->entry->pageCount > 1): ?>

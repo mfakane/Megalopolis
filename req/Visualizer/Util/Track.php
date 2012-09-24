@@ -17,7 +17,6 @@ $pagerHref = Visualizer::actionHref("util", "track", array
 <html lang="ja">
 <head>
 	<? Visualizer::head() ?>
-	<link rel="home" href="<?+Visualizer::actionHrefArray(array()) ?>" />
 	<link rel="search" href="<?+Visualizer::actionHrefArray(array("search")) ?>" />
 	<?if ($d["entries"]): ?>
 		<link rel="first" href="<?+$pagerHref . "1" ?>" />

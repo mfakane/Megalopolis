@@ -69,14 +69,17 @@ var megalopolis =
 		}
 		else
 		{
+			var href = $("link[rel='home']").attr("href");
+			var path = href.substr(href.indexOf("/", 7)).replace(/\/$/, "");
+			
 			if (value === null)
-				document.cookie = name + "=; expires=" + new Date(1970, 1, 1).toUTCString() + "; path=/";
+				document.cookie = name + "=; expires=" + new Date(1970, 1, 1).toUTCString() + "; path=" + path;
 			else
 			{
 				var date = new Date();
 				
-				date.setTime(date.getTime() + 60 * 60 * 24 * 7 * 1000);
-				document.cookie = name + "=" + encodeURIComponent(value) + "; expires="  + date.toUTCString() + "; path=/";
+				date.setTime(date.getTime() + 60 * 60 * 24 * 30 * 1000);
+				document.cookie = name + "=" + encodeURIComponent(value) + "; expires="  + date.toUTCString() + "; path=" + path;
 			}
 			
 			return value;

@@ -21,7 +21,7 @@ class Auth
 			ini_set("session.cookie_httponly", 1);
 			
 			session_cache_limiter(false);
-			session_set_cookie_params(0);
+			session_set_cookie_params(0, dirname(Util::getPhpSelf()));
 			session_name("MEGALOPOLIS_" . basename(dirname(dirname(dirname(__FILE__)))));
 			session_start();
 			
@@ -63,7 +63,7 @@ class Auth
 			return;
 		
 		if (isset($_COOKIE[session_name()]))
-			setcookie(session_name(), "", time() - 42000, "/");
+			setcookie(session_name(), "", time() - 42000, dirname(Util::getPhpSelf()));
 		
 		self::unsetSession();
 		session_destroy();

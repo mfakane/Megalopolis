@@ -71,7 +71,6 @@ class Visualizer
 			<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width" />
 			<meta name="format-detection" content="telephone=no" />
 			<meta name="apple-mobile-web-app-capable" content="yes" />
-			<link href="<?php self::converted(self::absoluteHref()) ?>" rel="home" />
 			<link href="<?php self::converted(self::actionHref("style", "splash.png")) ?>" rel="apple-touch-startup-image" type="image/png" />
 			<link href="<?php self::converted(self::actionHref("style", "iosIcon.png")) ?>" rel="apple-touch-icon" type="image/png" />
 			<link href="http://code.jquery.com/mobile/1.2.0-beta.1/jquery.mobile-1.2.0-beta.1.min.css" rel="stylesheet" />
@@ -93,6 +92,7 @@ class Visualizer
 			<?php endif ?>
 			<script src="<?php self::converted(self::actionHref("script", "base.js")) ?>"></script>
 		<?php endif ?>
+		<link href="<?php self::converted(self::absoluteHref()) ?>" rel="home" />
 		<?php
 		
 		if (!$isMobile && !$isSimple)
