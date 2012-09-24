@@ -19,6 +19,8 @@ class Auth
 			ini_set("session.use_only_cookies", 1);
 			ini_set("session.use_trans_sid", 0);
 			ini_set("session.cookie_httponly", 1);
+			ini_set("session.gc_probability", 1);
+			ini_set("session.gc_divisor", 100);
 			
 			session_cache_limiter(false);
 			session_set_cookie_params(0, dirname(Util::getPhpSelf()));
@@ -94,11 +96,18 @@ class Auth
 	 */
 	static function ensureToken($key = "token", $throw = true)
 	{
-		if (!isset($_POST[$key]) ||
-			!isset($_SESSION[self::SESSION_TOKEN]) ||
-			$_POST[$key] != $_SESSION[self::SESSION_TOKEN])
+		$ex = null;
+		
+		if (!isset($_POST[$key]))
+			$ex = "遷移情報が無効です";
+		else if (!isset($_SESSION[self::SESSION_TOKEN]))
+			$ex = "セッションが無効です";
+		else if ($_POST[$key] != $_SESSION[self::SESSION_TOKEN])
+			$ex = "リクエストが無効です";
+		
+		if ($ex)
 			if ($throw)
-				throw new ApplicationException("不正なリクエストです", 403);
+				throw new ApplicationException($ex, 403);
 			else
 				return false;
 		
