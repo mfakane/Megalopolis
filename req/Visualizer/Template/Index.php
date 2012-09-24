@@ -168,7 +168,7 @@ function entries($entries, $isAdmin, $listType = null)
 						<?php endif ?>
 						<?php if ($isAdmin || $c->showName[Configuration::ON_SUBJECT]): ?>
 							<span class="name">
-								<? Visualizer::linkedName($i->name) ?>
+								<?php Visualizer::linkedName($i->name) ?>
 							</span>
 						<?php endif ?>
 						<?php if ($isAdmin): ?>
@@ -197,7 +197,7 @@ function entries($entries, $isAdmin, $listType = null)
 							<ul class="tags">
 								<?php foreach ($i->tags as $j): ?>
 									<li>
-										<? Visualizer::linkedTag($j) ?>
+										<?php Visualizer::linkedTag($j) ?>
 									</li>
 								<?php endforeach ?>
 							</ul>
