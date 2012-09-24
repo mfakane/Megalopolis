@@ -2,7 +2,7 @@
 class App
 {
 	const NAME = "Megalopolis";
-	const VERSION = 23;
+	const VERSION = 24;
 	const MEGALITH_VERSION = 50;
 	
 	const META_TABLE = "meta";

@@ -1,4 +1,40 @@
-﻿2012-09-22 COAH96KoxU <queue glasscore.net>
+﻿2012-09-24 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 24
+	* req/Core/Util.php,
+	  req/Core/Visualizer.php: Safari 5 で CSP が正常に解釈されない件に対する対応
+	* req/Core/Auth.php: セッション周りの調整
+	* req/Core/Auth.php,
+	  req/Core/Cookie.php,
+	  req/Core/Visualizer.php,
+	  req/Visualizer/Index/Index.php,
+	  req/Visualizer/Index/Search.php,
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/Util/Track.php,
+	  script/base.js: Cookie 範囲を設置ディレクトリ以下に変更
+	* req/Visualizer/Template/Index.php: ショートタグ無効環境において名前が出力されないのを修正
+	* req/Core/Configuration.php: 許可タグに html5.js のタグを追加
+	* script/Read/Index.js: 既定の方向が反映されないのを修正
+	* req/App.php: エラー時に明示的にキャッシュ不可ヘッダ追加
+	* req/Visualizer/Auth.php,
+	  req/Visualizer/Exception.php,
+	  req/Visualizer/Index/Index.php,
+	  req/Visualizer/Index/Search.php,
+	  req/Visualizer/Read/Success.php,
+	  req/Visualizer/Util/Config.php,
+	  req/Visualizer/Util/Index.php: 検索エンジン用タグの追加
+	* req/Core/Configuration.php: 許可タグにルビタグを追加
+	* req/Core/Configuration.php: split 疑似タグが禁止タグとして置き換えられるのを修正
+	* req/App.php,
+	  req/Core/Visualizer.php,
+	  req/Handler/Megalith.php,
+	  req/Visualizer/Index/Index.Atom.php,
+	  req/Visualizer/Index/Index.Rss.php,
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/Template/Index.php,
+	  req/Visualizer/mobile/Read/Index.php: ドットが含まれるタグおよび作者名に対応
+
+2012-09-22 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 23
 	* req/Visualizer/simple/Read/Index.php: 携帯表示時ページ分割を改行のタイミングまでずらすように
