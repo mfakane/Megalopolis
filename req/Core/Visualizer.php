@@ -650,30 +650,23 @@ class Visualizer
 				
 				if ($k == "style")
 				{
-					error_reporting(E_ALL ^ E_NOTICE);
-					$css = new cssparser();
-					$css->ParseStr('c {' . preg_replace_callback('/\\\([0-9A-Fa-f]{1,6})/i', create_function('$_', '$a = intval($_[1], 16); return $a >= 32 && $a <= 126 ? chr($a) : $_[0];'), $v) . "}");
+					$str = preg_replace('@/\*.*\*/@', "", preg_replace_callback('/\\\([0-9A-Fa-f]{1,6})/i', create_function('$_', '$a = intval($_[1], 16); return $a >= 32 && $a <= 126 ? chr($a) : $_[0];'), $v));
 					
-					foreach ($css->css as $selector => $properties)
+					foreach (explode(";", $str) as $j)
 					{
-						$keys = array_filter(array_keys($properties), create_function('$_', 'return preg_match("/b.+havio.+$/i", $_);'));
-					
-						foreach ($keys as $j)
-							unset($properties[$j]);
+						list($k2, $v2) = array_map("trim", explode(":", $j)) + array("", "");
 						
-						$i->$k = "";
-					
-						foreach ($properties as $k2 => $v2)
+						if (preg_match("/b.+havio.+$/i", $k2) ||
+							preg_match('/\b(.+[xｘＸ][pｐＰ][rｒＲ].+[sｓＳ][sｓＳ][iｉＩ][oｏＯ].+|data:|javascript:|vbs:|vbscript:)\b/i', $v2))
 						{
-							$v2 = preg_replace('/\b(.+[xｘＸ][pｐＰ][rｒＲ].+[sｓＳ][sｓＳ][iｉＩ][oｏＯ].+|data:|javascript:)\b/i', "", $v2);
-							$i->$k .= "{$k2}: {$v2};";
+							$i->$k = null;
+							
+							break;
 						}
 					}
-					
-					error_reporting(E_ALL);
 				}
 				else if ($k == "src" || $k == "href")
-					if (preg_match('/javascript:|data:/', $v))
+					if (preg_match('/(javascript|data|vbs|vbscript):/', $v))
 						$i->$k = null;
 			}
 			

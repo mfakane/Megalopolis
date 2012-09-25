@@ -256,7 +256,6 @@ class App
 App::$startTime = microtime(true);
 App::load(array
 (
-	"Library/cssparser",
 	"Library/simple_html_dom",
 	CORE_DIR . "ApplicationException"
 ));
