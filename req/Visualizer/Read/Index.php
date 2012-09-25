@@ -246,7 +246,7 @@ Visualizer::doctype();
 			間違いが無ければ [送信] をクリックし投稿します。修正すべき箇所がある場合は [修正] をクリックし編集画面に戻ります
 		</section>
 	<? else: ?>
-		<div id="links" data-default-evaluator="<?=$c->defaultEvaluator ?>"></div>
+		<div id="links" data-default-evaluator="<?=$c->usePoints() && $c->useComments ? $c->defaultEvaluator : -1 ?>"></div>
 		<?if (!$c->showCommentsOnLastPageOnly || $h->page == $h->entry->pageCount): ?>
 			<?if ($c->usePoints()): ?>
 				<a id="evaluateformHeadding" href="#evaluateform" class="first">簡易評価</a>
