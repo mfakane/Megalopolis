@@ -1,10 +1,10 @@
 <?php
 class Auth
 {
-	const SESSION_PASSWORD = "Auth::password";
-	const SESSION_IS_ADMIN = "Auth::isAdmin";
-	const SESSION_FINGERPRINT = "Auth::fingerprint";
-	const SESSION_TOKEN = "Auth::token";
+	const SESSION_PASSWORD = "Auth_password";
+	const SESSION_IS_ADMIN = "Auth_isAdmin";
+	const SESSION_FINGERPRINT = "Auth_fingerprint";
+	const SESSION_TOKEN = "Auth_token";
 	
 	static $caption = "認証";
 	static $label = "パスワード";
