@@ -18,7 +18,7 @@ class ThreadEntry
 		"pageCount" => "integer",
 		"size" => "real"
 	);
-	static $threadEvaluationSchemaVersion = 3;
+	static $threadEvaluationSchemaVersion = 4;
 	static $threadEvaluationSchema = array
 	(
 		"id" => "bigint primary key not null",
@@ -28,7 +28,7 @@ class ThreadEntry
 		"commentCount" => "integer",
 		"evaluationCount" => "integer",
 		"readCount" => "integer",
-		"responseLastUpdate" => "integer"
+		"responseLastUpdate" => "bigint"
 	);
 	static $threadTagSchemaVersion = 2;
 	static $threadTagSchema = array
@@ -277,7 +277,13 @@ class ThreadEntry
 			}
 			
 			if ($currentThreadEvaluationSchemaVersion < 3)
-				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column responseLastUpdate integer', App::THREAD_EVALUATION_TABLE))), array(), false);
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column responseLastUpdate bigint', App::THREAD_EVALUATION_TABLE))), array(), false);
+			
+			if ($currentThreadEvaluationSchemaVersion < 4)
+				if (Configuration::$instance->dataStore instanceof SQLiteDataStore)
+					Configuration::$instance->dataStore->alterTable($db, self::$threadEvaluationSchema, App::THREAD_EVALUATION_TABLE);
+				else
+					Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s modify column responseLastUpdate bigint', App::THREAD_EVALUATION_TABLE))), array(), false);
 		}
 		
 		if (Util::hasTable($db, App::THREAD_TAG_TABLE))
