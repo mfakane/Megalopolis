@@ -656,7 +656,7 @@ class Visualizer
 					
 					foreach (explode(";", $str) as $j)
 					{
-						list($k2, $v2) = array_map("trim", explode(":", $j)) + array("", "");
+						list($k2, $v2) = array_map("trim", explode(":", $j, 2)) + array("", "");
 						
 						if (preg_match("/b.+havio.+$/i", $k2) ||
 							preg_match('/\b(.+[xｘＸ][pｐＰ][rｒＲ].+[sｓＳ][sｓＳ][iｉＩ][oｏＯ].+|data:|javascript:|vbs:|vbscript:)\b/i', $v2))
