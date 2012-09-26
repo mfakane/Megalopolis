@@ -1,4 +1,14 @@
-﻿2012-09-26 COAH96KoxU <queue glasscore.net>
+﻿2012-09-27 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 26
+	* req/Handler/Read.php: 編集キー必須時新規投稿ができないのを修正
+	* readme.txt: CSS Parser に関する文を削除
+	* req/App.php,
+	  req/Core/Auth.php: セッションをデータベース上に保存するよう変更
+	* req/Model/ThreadEntry.php: 評価更新日を bigint に変更
+	* req/Core/Visualizer.php: 本文に含まれる単独の < をエンティティ化するように
+
+2012-09-26 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 25
 	* req/Core/Auth.php: セッションデータのキー名変更
