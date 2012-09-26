@@ -606,8 +606,10 @@ class Visualizer
 	{
 		foreach ($rt->find("*") as $i)
 		{
-			if (isset($disallowed[$i->tag]) || !isset($allowed[$i->tag]))
+			if (isset($disallowed[$i->tag]))
 				$i->outertext = " :REPLACED: ";
+			else if (!isset($allowed[$i->tag]))
+				$i->outertext = self::escapeOutput($i->outertext);
 			else
 				self::replaceTags($i, $disallowed, $allowed);
 		}
