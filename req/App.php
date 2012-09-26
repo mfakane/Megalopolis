@@ -15,6 +15,7 @@ class App
 	const THREAD_PASSWORD_TABLE = "threadPassword";
 	const COMMENT_TABLE = "comment";
 	const EVALUATION_TABLE = "evaluation";
+	const SESSION_STORE_TABLE = "sessionStore";
 	const INDEX_DATABASE = "search";
 	
 	static $handler;
@@ -269,6 +270,7 @@ App::load(array
 	CORE_DIR . "Cookie",
 	CORE_DIR . "DataStore",
 	CORE_DIR . "Handler",
+	CORE_DIR . "SessionStore",
 	CORE_DIR . "Visualizer",
 	MODEL_DIR . "Board",
 	MODEL_DIR . "Comment",
@@ -283,5 +285,6 @@ App::load(array
 	MODEL_DIR . "Thread"
 ));
 App::load("../config");
+Auth::useSession();
 App::main();
 ?>

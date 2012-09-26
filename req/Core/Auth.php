@@ -19,7 +19,6 @@ class Auth
 			ini_set("session.use_only_cookies", 1);
 			ini_set("session.use_trans_sid", 0);
 			ini_set("session.cookie_httponly", 1);
-			ini_set("session.save_handler", "files");
 			ini_set("session.gc_probability", 1);
 			ini_set("session.gc_divisor", 100);
 			ini_set("session.gc_maxlifetime", 1440);
@@ -27,6 +26,7 @@ class Auth
 			session_cache_limiter(false);
 			session_set_cookie_params(0, dirname(Util::getPhpSelf()));
 			session_name("MEGALOPOLIS_" . basename(dirname(dirname(dirname(__FILE__)))));
+			SessionStore::useSessionStore();
 			session_start();
 			
 			$currentFingerprint = self::createFingerprint();
@@ -242,6 +242,4 @@ class Auth
 		exit;
 	}
 }
-
-Auth::useSession();
 ?>
