@@ -1,7 +1,7 @@
 $(function()
 {
 	var section = $(".edit section+section");
-	var textAreas = $("textarea, input[type='text']", section).width(section.width() - 8);
+	var textAreas = $("textarea, input[type='text']", section).width(section.width() - 6);
 	var setBodyBoxStyle = function(boxName, cssProperty, value, defaultValue)
 	{
 		var t = $("#" + boxName);
@@ -59,7 +59,7 @@ $(function()
 	
 	$(window).resize(function()
 	{
-		textAreas.width(section.width() - 8);
+		textAreas.width(section.width() - 6);
 	});
 	$("#unpostCheck").change(function()
 	{
