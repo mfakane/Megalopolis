@@ -597,7 +597,10 @@ class Visualizer
 			$stripExcept = Configuration::$instance->allowedTags;
 			
 		if ($stripExcept)
+		{
+			$str = preg_replace('@<([^/\sa-zA-Z])@i', '&lt;$1', $str);
 			$str = strip_tags($str, "<" . implode("><", $stripExcept) . ">");
+		}
 		
 		return $str;
 	}
