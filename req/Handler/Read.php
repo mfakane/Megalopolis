@@ -131,7 +131,7 @@ class ReadHandler extends Handler
 			Cookie::setCookie(Cookie::NAME_KEY, self::param("name"));
 			Cookie::setCookie(Cookie::MAIL_KEY, self::param("mail"));
 			Cookie::setCookie(Cookie::LINK_KEY, self::param("link"));
-			Cookie::setCookie(Cookie::PASSWORD_KEY, self::param("password", self::param(Auth::SESSION_PASSWORD)));
+			Cookie::setCookie(Cookie::PASSWORD_KEY, self::param("editPassword", self::param(Auth::SESSION_PASSWORD)));
 			Cookie::sendCookie();
 		}
 		
@@ -586,7 +586,7 @@ class ReadHandler extends Handler
 		if (Configuration::$instance->requireName[Configuration::ON_ENTRY] && Util::isEmpty($entry->name))
 			$rt[] = "名前が入力されていません";
 		
-		if (Configuration::$instance->requirePassword[Configuration::ON_ENTRY] && Util::isEmpty(self::param("password")) && !$isEdit)
+		if (Configuration::$instance->requirePassword[Configuration::ON_ENTRY] && Util::isEmpty(self::param("editPassword")) && !$isEdit)
 			$rt[] = "編集キーが入力されていません";
 		
 		if (count($entry->tags) > Configuration::$instance->maxTags)
