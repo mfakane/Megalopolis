@@ -1,4 +1,18 @@
-﻿2012-09-24 COAH96KoxU <queue glasscore.net>
+﻿2012-09-26 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 25
+	* req/Core/Auth.php: セッションデータのキー名変更
+	* req/Core/Auth.php: save_handler 指定追加
+	* req/Core/Auth.php: セッション Cookie を毎回送信するように
+	* req/Handler/Read.php,
+	  req/Visualizer/Read/Edit.php: 編集キーのパラメータ名の変更
+	* req/Core/Visualizer.php: 許可タグにないタグをエンティティ化して表示するよう変更
+	* script/Read/Edit.js: 編集画面のボックスの幅が 2px 足りないのを修正
+	* req/App.php,
+	  req/Core/Visualizer.php: style 内の除去処理を変更
+	* req/Visualizer/Read/Index.php: 簡易評価非使用時コメント使用時に既定の評価方法が EVAL_BOTH でない場合コメントフォームの見出しがずれるのを修正
+
+2012-09-24 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 24
 	* req/Core/Util.php,
