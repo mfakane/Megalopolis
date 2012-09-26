@@ -303,7 +303,6 @@ Do What The Fuck You Want To Public License, Version 2 (WTFPL) および自ら�
 
 * jQuery http://jquery.com/ および jQuery Mobile http://jquerymobile.com/ を使用しています。
 * Simple HTML Parser http://sourceforge.net/projects/simplehtmldom/ を使用しています。
-* PHP Classes CSS parser を使用しています。
 * 一部の PC 向けに縦書きエンジンとして 竹取 JS http://taketori.org/js.html を使用しています。
 * 携帯向けに ChocolateChip-UI http://www.chocolatechip-ui.com/ のアイコンを使用しています。
 
