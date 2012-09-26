@@ -105,7 +105,6 @@ class SessionStore
 	
 	function apply()
 	{
-		ini_set("session.save_path", "");
 		ini_set("session.serialize_handler", "php");
 		
 		session_set_save_handler
