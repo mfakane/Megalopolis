@@ -49,7 +49,7 @@ Visualizer::doctype();
 			<label for="name">名前</label><input type="text" name="name" id="name" value="<?+$h->entry->name ?>"<?=$c->requireName[Configuration::ON_ENTRY] ? 'required="required"' : null ?> /><br />
 			<label for="mail">メール</label><input type="email" name="mail" id="mail" value="<?+$h->entry->mail ?>" /><br />
 			<label for="link">リンク</label><input type="url" name="link" id="link" value="<?+$h->entry->link ?>" /><br />
-			<label for="password">編集キー</label><input type="password" name="password" id="password" value="<?+App::$actionName == "new" ? Cookie::getCookie(Cookie::PASSWORD_KEY) : null ?>"<?=App::$actionName == "new" && $c->requirePassword[Configuration::ON_ENTRY] ? ' required="required"' : null ?> />
+			<label for="editPassword">編集キー</label><input type="password" name="editPassword" id="editPassword" value="<?+App::$actionName == "new" ? Cookie::getCookie(Cookie::PASSWORD_KEY) : null ?>"<?=App::$actionName == "new" && $c->requirePassword[Configuration::ON_ENTRY] ? ' required="required"' : null ?> />
 			<?if (App::$actionName == "edit"): ?>
 				<p>空欄にしておくと、編集キーを変更しません。</p>
 			<?endif ?>

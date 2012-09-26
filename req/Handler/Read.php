@@ -172,7 +172,7 @@ class ReadHandler extends Handler
 			Cookie::setCookie(Cookie::NAME_KEY, self::param("name"));
 			Cookie::setCookie(Cookie::MAIL_KEY, self::param("mail"));
 			Cookie::setCookie(Cookie::LINK_KEY, self::param("link"));
-			Cookie::setCookie(Cookie::PASSWORD_KEY, self::param("password", self::param(Auth::SESSION_PASSWORD)));
+			Cookie::setCookie(Cookie::PASSWORD_KEY, self::param("editPassword", self::param(Auth::SESSION_PASSWORD)));
 			Cookie::sendCookie();
 		}
 		
@@ -219,8 +219,8 @@ class ReadHandler extends Handler
 		$this->entry = &$this->thread->entry;
 		self::setValues($this->entry, $this->thread);
 		
-		if ($id == 0 || !Util::isEmpty(self::param("password")))
-			$this->thread->hash = Util::hash(self::param("password"));
+		if ($id == 0 || !Util::isEmpty(self::param("editPassword")))
+			$this->thread->hash = Util::hash(self::param("editPassword"));
 		
 		$errors = self::checkValues($this->entry, $this->thread, $id != 0);
 		
