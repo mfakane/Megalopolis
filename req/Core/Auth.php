@@ -21,6 +21,7 @@ class Auth
 			ini_set("session.cookie_httponly", 1);
 			ini_set("session.gc_probability", 1);
 			ini_set("session.gc_divisor", 100);
+			ini_set("session.gc_maxlifetime", 1440);
 			
 			session_cache_limiter(false);
 			session_set_cookie_params(0, dirname(Util::getPhpSelf()));
@@ -53,10 +54,18 @@ class Auth
 		if (self::isSessionEnabled())
 		{
 			session_commit();
+			self::sendCookie();
 			
 			if (self::hasSession())
 				Visualizer::noCache();
 		}
+	}
+	
+	static function sendCookie()
+	{
+		if ($sid = self::getSessionID())
+			if (!in_array("Set-Cookie: " . session_name() . "={$sid}; path=" . dirname(Util::getPhpSelf()) . "; HttpOnly", headers_list()))
+				setcookie(session_name(), $sid, 0, dirname(Util::getPhpSelf()), null, null, true);
 	}
 	
 	static function logout()
