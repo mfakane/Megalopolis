@@ -1,4 +1,23 @@
-﻿2012-09-27 COAH96KoxU <queue glasscore.net>
+﻿2012-09-28 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 27
+	* req/Core/DataStore.php: SQLite 環境下で書き換えなどのタイミングで止まることがあるのを修正
+	* req/App.php,
+	  req/Core/Auth.php,
+	  req/Core/SessionStore.php,
+	  req/Core/Util.php,
+	  req/Core/Visualizer.php,
+	  req/Handler/Read.php,
+	  req/Visualizer/Auth.php,
+	  req/Visualizer/Read/Edit.php,
+	  req/Visualizer/Read/Index.php,
+	  style/alt/style.css,
+	  style/style.css: 作品編集の認証方法を変更
+	* req/Model/ThreadEntry.php: JSON および CSV 出力でサイズの小数点以下が表示されないのを修正
+	* style/style.css: ページに最小幅を追加
+	* req/Core/SessionStore.php: PHP バージョンによっては ini_set session.save_path で警告が出る場合があるため削除
+
+2012-09-27 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 26
 	* req/Handler/Read.php: 編集キー必須時新規投稿ができないのを修正
