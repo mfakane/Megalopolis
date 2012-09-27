@@ -14,7 +14,7 @@ abstract class DataStore
 		unset($this->handles[$this->getDatabaseNameByHandle($db)]);
 	}
 	
-	private function getDatabaseNameByHandle(PDO &$db)
+	protected function getDatabaseNameByHandle(PDO &$db)
 	{
 		return array_search($db, $this->handles, true);
 	}
@@ -235,6 +235,7 @@ abstract class DataStore
 class SQLiteDataStore extends DataStore
 {
 	private $directory;
+	private $handleOpenCount = array();
 	
 	const MODULE_FTS3 = "fts3";
 	const MODULE_FTS4 = "fts4";
@@ -255,6 +256,14 @@ class SQLiteDataStore extends DataStore
 	 */
 	function open($name = "data")
 	{
+		if (!isset($this->handleOpenCount[$name]))
+			$this->handleOpenCount[$name] = 0;
+		
+		$this->handleOpenCount[$name]++;
+		
+		if ($rt = $this->getHandleByName($name))
+			return $rt;
+		
 		$db = new PDO(sprintf("sqlite:%s%s.sqlite", rtrim($this->directory, "/") . "/", $name), null, null);
 		$this->registerHandle($db, $name);
 		
@@ -274,6 +283,12 @@ class SQLiteDataStore extends DataStore
 	 */
 	function close(PDO &$db, $vacuum = false)
 	{
+		$name = $this->getDatabaseNameByHandle($db);
+		
+		if (--$this->handleOpenCount[$name] > 0)
+			return;
+		
+		unset($this->handleOpenCount[$name]);
 		$this->unregisterHandle($db);
 		
 		if ($vacuum)
