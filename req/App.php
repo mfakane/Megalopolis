@@ -104,9 +104,6 @@ class App
 	{
 		try
 		{
-			if (!Configuration::$instance->dataStore)
-				Configuration::$instance->dataStore = new SQLiteDataStore();
-			
 			if ($_POST)
 			{
 				if (!isset($_SERVER["HTTP_REFERER"]) || mb_strpos($_SERVER["HTTP_REFERER"], Util::getAbsoluteUrl()) != 0)
@@ -286,6 +283,10 @@ App::load(array
 	MODEL_DIR . "Thread"
 ));
 App::load("../config");
+
+if (!Configuration::$instance->dataStore)
+	Configuration::$instance->dataStore = new SQLiteDataStore();
+
 Auth::useSession();
 App::main();
 ?>
