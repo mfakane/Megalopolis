@@ -136,9 +136,14 @@ Visualizer::doctype();
 			<?+$h->page ?> ページ目のプレビューです
 		</p>
 	<?endif ?>
-	<? Visualizer::pager($h->page, $h->entry->pageCount, 10, array(App::$actionName != "index"
-		? (App::$actionName == "new" ? Visualizer::actionHref(App::$actionName) . "/" : Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName, array("p" => "")))
-		: Visualizer::actionHref($h->subject, $h->entry->id) . "/", "#body")) ?>
+	<?if (App::$actionName != "index" && $h->entry->pageCount > 1): ?>
+		<form class="pagerContainer" action="<?+App::$actionName == "new" ? Visualizer::actionHref(App::$actionName) : Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName) ?>" method="post">
+			<? Visualizer::submitPager($h->page, $h->entry->pageCount, 10, "p") ?>
+			<? Visualizer::delegateParameters($_POST ? $_POST : $_SESSION, array("p")) ?>
+		</form>
+	<?else: ?>
+		<? Visualizer::pager($h->page, $h->entry->pageCount, 10, array(Visualizer::actionHref($h->subject, $h->entry->id) . "/", "#body")) ?>
+	<?endif ?>
 	<section id="body" data-style-path="<?+Visualizer::$basePath ?>style/<?+$c->skin && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null ?>" data-writing-mode="<?=intval($h->thread->writingMode) ?>" data-force-taketori="<?=$h->forceTaketori ? "true" : "false" ?>">
 		<div id="verticalWrapper">
 			<div id="contentWrapper">
@@ -212,9 +217,14 @@ Visualizer::doctype();
 			</div>
 		</div>
 	</section>
-	<? Visualizer::pager($h->page, $h->entry->pageCount, 10, array(App::$actionName != "index"
-		? (App::$actionName == "new" ? Visualizer::actionHref(App::$actionName) . "/" : Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName, array("p" => "")))
-		: Visualizer::actionHref($h->subject, $h->entry->id) . "/", "#body")) ?>
+	<?if (App::$actionName != "index" && $h->entry->pageCount > 1): ?>
+		<form class="pagerContainer" action="<?+App::$actionName == "new" ? Visualizer::actionHref(App::$actionName) : Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName) ?>" method="post">
+			<? Visualizer::submitPager($h->page, $h->entry->pageCount, 10, "p") ?>
+			<? Visualizer::delegateParameters($_POST ? $_POST : $_SESSION, array("p")) ?>
+		</form>
+	<?else: ?>
+		<? Visualizer::pager($h->page, $h->entry->pageCount, 10, array(Visualizer::actionHref($h->subject, $h->entry->id) . "/", "#body")) ?>
+	<?endif ?>
 	<?if ($isEdit): ?>
 		<section class="notify info">
 			<ul class="buttons">
@@ -226,7 +236,7 @@ Visualizer::doctype();
 							<button type="submit">
 								<img src="<?+Visualizer::actionHref("style", "backButtonIcon.png") ?>" />修正
 							</button>
-							<? ReadHandler::printHiddenParams() ?>
+							<? Visualizer::delegateParameters($_POST ? $_POST : $_SESSION, array("preview", "p")) ?>
 						</div>
 					</form>
 				</li>
@@ -238,7 +248,7 @@ Visualizer::doctype();
 							<button type="submit">
 								送信<img src="<?+Visualizer::actionHref("style", "sendButtonIcon.png") ?>" class="last" />
 							</button>
-							<? ReadHandler::printHiddenParams() ?>
+							<? Visualizer::delegateParameters($_POST ? $_POST : $_SESSION, array("preview", "p")) ?>
 						</div>
 					</form>
 				</li>

@@ -130,6 +130,7 @@ Visualizer::doctype();
 					<button type="submit">
 						<img src="<?+Visualizer::actionHref("style", "sendButtonIcon.png") ?>" />確認
 					</button>
+					<input type="hidden" name="password" value="<?+ReadHandler::param("password") ?>" />
 					<input type="hidden" name="preview" value="true" />
 				</li>
 			</ul>

@@ -86,7 +86,7 @@ class SessionStore
 		(
 			$this->sessionName,
 			$sessionId
-		));
+		), false);
 		
 		return true;
 	}
@@ -98,7 +98,7 @@ class SessionStore
 			delete from %s where lastUpdate <= %d',
 			App::SESSION_STORE_TABLE,
 			time() - $lifetime
-		))));
+		))), null, false);
 		
 		return true;
 	}

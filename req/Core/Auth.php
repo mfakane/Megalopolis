@@ -108,7 +108,9 @@ class Auth
 	{
 		$ex = null;
 		
-		if (!isset($_POST[$key]))
+		if (!isset($_COOKIE[session_name()]))
+			$ex = "セッション ID がセットされていません";
+		else if (!isset($_POST[$key]))
 			$ex = "遷移情報が無効です";
 		else if (!isset($_SESSION[self::SESSION_TOKEN]))
 			$ex = "セッションが無効です";

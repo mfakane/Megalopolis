@@ -23,6 +23,7 @@ $d = &Visualizer::$data;
 				<img src="<?+Visualizer::actionHref("style", "sendButtonIcon.png") ?>" />送信
 			</button>
 			<input type="hidden" name="token" value="<?+$_SESSION[Auth::SESSION_TOKEN] ?>">
+			<? Visualizer::delegateParameters($_POST, array("password", "token")) ?>
 		</section>
 	</form>
 	<?if (Auth::$details): ?>

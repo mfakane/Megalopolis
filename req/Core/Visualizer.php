@@ -335,6 +335,58 @@ class Visualizer
 		<?php endif ?>
 		<?php
 	}
+
+	static function submitPager($current, $max, $range, $pageParam)
+	{
+		if ($max < 2)
+			return;
+		
+		$start = max(min($current - floor($range / 2), $max - $range + 1), 1);
+		$end = min(max($current - ceil($range / 2), 0) + $range, $max);
+		$isSimple = self::isSimple();
+		
+		?>
+		<ul class="pager">
+			<?php if ($current > 1 || !$isSimple): ?>
+				<?php if ($max > $range): ?>
+					<li class="nav">
+						<form
+						<input type="submit" value="&lt;&lt; 最初" />
+						<button name="<?php echo $pageParam ?>" value="1"<?php if ($current == 1) echo ' class="loopback"'; ?>>
+							&lt;&lt; 最初
+						</button>
+					</li>
+				<?php endif ?>
+				<li class="nav">
+					<button name="<?php echo $pageParam ?>" value="<?php echo max($current - 1, 1) ?>"<?php if ($current == 1) echo ' class="loopback"'; ?>>
+						&lt; 前
+					</button>
+				</li>
+			<?php endif ?>
+			<?php foreach (range(max(min($current - floor($range / 2), $max - $range + 1), 1), $end, 1) as $i): ?>
+				<li>
+					<button name="<?php echo $pageParam ?>" value="<?php echo $i ?>"<?php if ($i == $current) echo ' class="active loopback"'; ?>>
+						<?php self::converted($i) ?>
+					</button>
+				</li>
+			<?php endforeach ?>
+			<?php if ($current < $max || !$isSimple): ?>
+				<li class="nav<?php if ($max <= $range) echo ' last' ?>">
+					<button name="<?php echo $pageParam ?>" value="<?php echo min($current + 1, $max)?>"<?php if ($current == $max) echo ' class="loopback"'; ?>>
+						次 &gt;
+					</button>
+				</li>
+				<?php if ($max > $range): ?>
+					<li class="nav last">
+						<button name="<?php echo $pageParam ?>" value="<?php echo $max ?>"<?php if ($current == $max) echo ' class="loopback"'; ?>>
+							最後 &gt;&gt;
+						</button>
+					</li>
+				<?php endif ?>
+			<?php endif ?>
+		</ul>
+		<?php
+	}
 	
 	/**
 	 * @param string $url [optional]
@@ -752,6 +804,20 @@ class Visualizer
 			
 			$i->outertext = $outertext;
 		}
+	}
+	
+	static function delegateParameters(array $params, array $except = array())
+	{
+		echo '<input type="hidden" name="encoded" value="true" />';
+		
+		if ($except)
+			echo '<input type="hidden" name="encodedExcept" value="' . Visualizer::escapeOutput(implode(",", $except)) . '" />';
+		
+		$except = array_flip($except) + array("encoded" => true, "encodedExcept" => true);
+		
+		foreach ($params as $k => $v)
+			if (!isset($except[$k]) && strpos($k, "Auth_") === false)
+				echo '<input type="hidden" name="' . Visualizer::escapeOutput($k) . '" value="' . Visualizer::escapeOutput(Util::encodeForOutput(Util::escapeInput($v))) . '" />';
 	}
 	
 	/**

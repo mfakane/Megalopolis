@@ -453,6 +453,37 @@ class Util
 		return $input;
 	}
 	
+	static function unencodeInputs()
+	{
+		if (isset($_POST["encoded"]))
+		{
+			if ($_POST["encoded"] == "true")
+			{
+				$except = isset($_POST["encodedExcept"]) ? array_flip(explode(",", self::escapeInput($_POST["encodedExcept"]))) : array();
+				$except += array("encoded" => true, "encodedExcept" => true);
+			
+				foreach ($_POST as $k => $v)
+					if (!isset($except[$k]))
+						if (($_POST[$k] = base64_decode($v, true)) === false)
+							throw new ApplicationException("パラメータ {$name} のデコードに失敗しました", 404);
+			}
+			
+			unset($_POST["encoded"]);
+			
+			if (isset($_POST["encodedExcept"]))
+				unset($_POST["encodedExcept"]);
+		}
+	}
+	
+	/**
+	 * @param string $s
+	 * @return string
+	 */
+	static function encodeForOutput($s)
+	{
+		return base64_encode($s);
+	}
+	
 	/**
 	 * @param string $pattern
 	 * @param string $string

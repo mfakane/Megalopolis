@@ -189,7 +189,7 @@ h2
 	color: #480000;
 }
 
-.pager li a[href="#"], .pager li a[href=""]
+.pager li a[href="#"], .pager li a[href=""], .pager li button.loopback
 {
 	border-color: #480000;
 	background: #480000;

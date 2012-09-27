@@ -137,6 +137,7 @@ class App
 			}
 
 			self::rewriteHtaccess();
+			Util::unencodeInputs();
 			self::resolve(Util::getPathInfo());
 		}
 		catch (Exception $ex)

@@ -1749,36 +1749,51 @@ body.index>h1, body.read>h1
 	padding: 0px;
 }
 
-.pager li a
+.pager li a, .pager li form
+{
+	display: block;
+}
+
+.pager li a, .pager li button
 {
 	display: block;
 	margin: 0px;
 	padding: 0px 5px 0px 5px;
 	border: #999999 1px solid;
+	border-radius: 0px;
+	color: #0000ff;
 	min-width: 14px;
 	height: 24px;
 	background: #efefef;
 	line-height: 24px;
 	text-align: center;
+	text-shadow: none;
+	box-shadow: none;
 }
 
-.pager li a:hover
+.pager li button
+{
+	min-width: 26px;
+	height: 26px;
+}
+
+.pager li a:hover, .pager li button:hover
 {
 	background: #ffffff;
 	text-decoration: none;
 }
 
-.pager li:first-child a
+.pager li:first-child a, .pager li:first-child button
 {
 	border-radius: 4px 0px 0px 4px;
 }
 
-.pager li.last a
+.pager li.last a, .pager li.last button
 {
 	border-radius: 0px 4px 4px 0px;
 }
 
-.pager li a[href="#"], .pager li a[href=""]
+.pager li a[href="#"], .pager li a[href=""], .pager li button.loopback
 {
 	border-color: #005019;
 	color: #ffffff;
@@ -1786,7 +1801,7 @@ body.index>h1, body.read>h1
 	font-weight: bold;
 }
 
-.pager li.nav a[href="#"], .pager li.nav a[href=""]
+.pager li.nav a[href="#"], .pager li.nav a[href=""], .pager li.nav button.loopback
 {
 	border-color: #999999;
 	color: #999999;

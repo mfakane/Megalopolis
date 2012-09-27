@@ -163,7 +163,7 @@ class ReadHandler extends Handler
 		Auth::$label = "編集キー";
 		
 		if (!Auth::hasSession(true) &&
-			!($type = Util::hashEquals(Configuration::$instance->adminHash, $login = Auth::login())) &&
+			!($type = Util::hashEquals(Configuration::$instance->adminHash, $login = Auth::login(false, false))) &&
 			!($type = Util::hashEquals($this->thread->hash, $login)))
 			Auth::loginError("編集キーが一致しません");
 		
@@ -205,13 +205,25 @@ class ReadHandler extends Handler
 			$idb->beginTransaction();
 		
 		if ($vacuum = $id == 0)
+		{
 			$this->thread = new Thread($db);
+			
+			if (Configuration::$instance->adminOnly)
+			{
+				Auth::$caption = "管理者ログイン";
+				Auth::$label = "管理者パスワード";
+				Auth::$details = '<p class="notify info">管理者のみ新規投稿が可能です。続行するにはパスワードを入力してください</p>';
+				
+				if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+					Auth::loginError("パスワードが一致しません");
+			}
+		}
 		else
 		{
 			$this->thread = self::loadThread($db, $id);
 			
 			if (!Auth::hasSession(true) &&
-				!($type = Util::hashEquals(Configuration::$instance->adminHash, $login = Auth::login())) &&
+				!($type = Util::hashEquals(Configuration::$instance->adminHash, $login = Auth::login(false, false))) &&
 				!($type = Util::hashEquals($this->thread->hash, $login)))
 				Auth::loginError("編集キーが一致しません");
 		}
@@ -705,16 +717,12 @@ class ReadHandler extends Handler
 		if (isset($_POST[$name]))
 		{
 			$rt = Util::escapeInput(is_array($_POST[$name]) ? $_POST[$name][count($_POST[$name]) - 1] : $_POST[$name], $stripLinebreaks);
-
-			if (isset($_POST["encoded"]) &&
-				$_POST["encoded"] == "true")
-				if (($rt = base64_decode($rt, true)) === false)
-					throw new ApplicationException("パラメータ {$name} のデコードに失敗しました", 404);
-				else
-					$rt = Util::escapeInput($rt, $stripLinebreaks);
 			
 			if ($name != "preview" &&
-				$name != "encoded")
+				$name != "encoded" &&
+				$name != "preview" &&
+				$name != "p" &&
+				strpos($name, "Auth") === false)
 				$_SESSION[$name] = $rt;
 			
 			return $rt;
@@ -725,18 +733,6 @@ class ReadHandler extends Handler
 			return Util::escapeInput($_GET[$name], $stripLinebreaks);
 		else
 			return $default;
-	}
-	
-	static function printHiddenParams()
-	{
-		echo '<input type="hidden" name="encoded" value="true" />', "\r\n";
-		
-		foreach ($_POST ? $_POST : $_SESSION as $k => $v)
-			if ($k != "preview" &&
-				$k != "encoded" &&
-				$k != Auth::SESSION_IS_ADMIN &&
-				$k != Auth::SESSION_PASSWORD)
-			echo '<input type="hidden" name="', Visualizer::escapeOutput($k), '" value="', Visualizer::escapeOutput(base64_encode(Util::escapeInput($v))), '" />', "\r\n";
 	}
 }
 ?>
