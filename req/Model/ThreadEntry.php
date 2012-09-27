@@ -148,7 +148,7 @@ class ThreadEntry
 			"dateTime" => intval($this->dateTime),
 			"lastUpdate" => $this->responseLastUpdate,
 			"pageCount" => $c->showPages[Configuration::ON_ENTRY] ? intval($this->pageCount) : null,
-			"size" => $c->showSize[Configuration::ON_ENTRY] ? intval($this->size) : null,
+			"size" => $c->showSize[Configuration::ON_ENTRY] ? floatval($this->size) : null,
 			"points" => $c->showPoint[Configuration::ON_ENTRY] ? intval($this->points) : null,
 			"responseCount" => $c->showComment[Configuration::ON_ENTRY] ? intval($this->responseCount) : null,
 			"commentCount" => $c->showComment[Configuration::ON_ENTRY] ? intval($this->commentCount) : null,
