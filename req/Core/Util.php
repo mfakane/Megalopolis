@@ -852,7 +852,7 @@ class Util
 	static function convertAndSaveToThread(PDO $db, PDO $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly = false, $allowSaveCommentsOnly = false, ThreadEntry $entry = null)
 	{
 		$save = false;
-		$thread = self::convertAndSaveToThreadInternal($db, $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly, $allowSaveCommentsOnly, &$save, $entry);
+		$thread = self::convertAndSaveToThreadInternal($db, $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly, $allowSaveCommentsOnly, $save, $entry);
 		
 		if ($thread && $save)
 		{
