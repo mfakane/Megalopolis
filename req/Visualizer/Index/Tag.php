@@ -49,7 +49,11 @@ Visualizer::doctype();
 						<ul>
 							<?foreach ($vals as $k => $v): ?>
 								<li>
-									<a href="<?+Visualizer::actionHref(App::$actionName, $k) ?>"><?+$k ?><span class="count"><?+$v ?></span></a>
+									<?if (App::$actionName == "author"): ?>
+										<? Visualizer::linkedName($k, '<span class="count">' . $v . '</span>') ?>
+									<?else: ?>
+										<? Visualizer::linkedTag($k, '<span class="count">' . $v . '</span>') ?>
+									<?endif ?>
 								</li>
 							<?endforeach ?>
 						</ul>

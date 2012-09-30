@@ -423,11 +423,12 @@ class IndexHandler extends Handler
 			return Visualizer::redirect();
 	}
 	
-	function author($_name = null, $_page = 1)
+	function author()
 	{
-		$isNameList = is_null($_name) || intval($_name) > 0;
-		$name = Util::escapeInput($_name);
-		$page = max(intval($isNameList ? $_name : $_page) - 1, 0);
+		$args = func_get_args();
+		$page = $args && ctype_digit($args[count($args) - 1]) ? max(intval(array_pop($args)) - 1, 0) : 0;
+		$isNameList = !$args;
+		$name = $isNameList ? null : Util::escapeInput(implode("/", $args));
 		
 		if (!Auth::hasSession(true))
 			if (!Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
@@ -452,8 +453,9 @@ class IndexHandler extends Handler
 				return Visualizer::redirect("author" . ($arr ? "/" . array_rand($arr) : ""));
 			}
 			
-			if ($_page == "random")
+			if (strstr($name, "/random") == "/random")
 			{
+				$name = substr($name, 0, -strlen("/random"));
 				$this->entries = ThreadEntry::getEntriesByName($db, $name);
 				
 				if ($this->entries)
@@ -519,11 +521,12 @@ class IndexHandler extends Handler
 		}
 	}
 	
-	function tag($_tag = null, $_page = 1)
+	function tag()
 	{
-		$isTagList = is_null($_tag) || intval($_tag) > 0;
-		$tag = $isTagList ? null : Util::escapeInput($_tag);
-		$page = max(intval($isTagList ? $_tag : $_page) - 1, 0);
+		$args = func_get_args();
+		$page = $args && ctype_digit($args[count($args) - 1]) ? max(intval(array_pop($args)) - 1, 0) : 0;
+		$isTagList = !$args;
+		$tag = $isTagList ? null : Util::escapeInput(implode("/", $args));
 		
 		if (!Auth::hasSession(true) && !Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
 			throw new ApplicationException("作品の閲覧は許可されていません", 403);
@@ -545,8 +548,9 @@ class IndexHandler extends Handler
 				return Visualizer::redirect("tag" . ($arr ? "/" . array_rand($arr) : ""));
 			}
 			
-			if ($_page == "random")
+			if (strstr($tag, "/random") == "/random")
 			{
+				$tag = substr($tag, 0, -strlen("/random"));
 				$this->entries = ThreadEntry::getEntriesByTag($db, $tag);
 				
 				if ($this->entries)

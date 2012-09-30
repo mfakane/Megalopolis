@@ -423,12 +423,12 @@ class Visualizer
 				$href .= strpos(Util::getSuffix(), "?") !== false ? "&" : "?";
 				
 				foreach ($i as $k => $v)
-					$href .= (isset($encodeTable[$k]) ? $encodeTable[$k] : $encodeTable[$k] = urlencode($k)) . "=" . (isset($encodeTable[$v]) ? $encodeTable[$v] : $encodeTable[$v] = urlencode($v)) . "&";
+					$href .= (isset($encodeTable[$k]) ? $encodeTable[$k] : $encodeTable[$k] = str_ireplace("%2F", "%252F", urlencode($k))) . "=" . (isset($encodeTable[$v]) ? $encodeTable[$v] : $encodeTable[$v] = urlencode($v)) . "&";
 				
 				$href = rtrim($href, "&");
 			}
 			else
-				$href .= "/" . (isset($encodeTable[$i]) ? $encodeTable[$i] : $encodeTable[$i] = urlencode($i));
+				$href .= "/" . (isset($encodeTable[$i]) ? $encodeTable[$i] : $encodeTable[$i] = str_ireplace("%2F", "%252F", urlencode($i)));
 		
 		return trim($href, "/");
 	}
@@ -535,15 +535,16 @@ class Visualizer
 	/**
 	 * @param string $s
 	 */
-	static function linkedName($s)
+	static function linkedName($s, $additional = "")
 	{
 		if (empty($s))
 			self::converted(Configuration::$instance->defaultName);
 		else
 		{
 			?>
-			<a href="<?php echo self::actionHref("author", $s . (strpos($s, ".") !== false ? ".html" : null)) ?>">
+			<a href="<?php echo self::actionHref("author", $s . (($last = strrchr($s, "/")) !== false && ctype_digit(substr($last, 1)) ? "/1" : null) . (strpos($s, ".") !== false ? ".html" : null)) ?>">
 				<?php self::converted($s) ?>
+				<?php echo $additional ?>
 			</a>
 			<?php
 		}
@@ -552,11 +553,12 @@ class Visualizer
 	/**
 	 * @param string $s
 	 */
-	static function linkedTag($s)
+	static function linkedTag($s, $additional = "")
 	{
 		?>
-		<a href="<?php echo self::actionHref("tag", $s . (strpos($s, ".") !== false ? ".html" : null)) ?>">
+		<a href="<?php echo self::actionHref("tag", $s . (($last = strrchr($s, "/")) !== false && ctype_digit(substr($last, 1)) ? "/1" : null) . (strpos($s, ".") !== false ? ".html" : null)) ?>">
 			<?php self::converted($s) ?>
+			<?php echo $additional ?>
 		</a>
 		<?php
 	}
@@ -1022,8 +1024,5 @@ class Visualizer
 	}
 }
 
-Visualizer::$basePath = str_repeat("../", mb_substr_count(Util::getPathInfo(), "/"));
-
-if (Util::isEmpty(Visualizer::$basePath))
-	Visualizer::$basePath = "./";
+Visualizer::$basePath = rtrim(dirname(Util::getPhpSelf()), "/") . "/";
 ?>
