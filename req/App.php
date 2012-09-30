@@ -178,7 +178,7 @@ class App
 	{
 		$pathInfo = explode("/", trim($pathInfo, "/"));
 		
-		if ($pathInfo && empty($pathInfo[0]))
+		if ($pathInfo && Util::isEmpty($pathInfo[0]))
 			array_shift($pathInfo);
 
 		if ($pathInfo && ($idx = mb_strrpos($pathInfo[count($pathInfo) - 1], ".")) !== false)
