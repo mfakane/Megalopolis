@@ -106,7 +106,8 @@ class App
 		{
 			if ($_POST)
 			{
-				if (!isset($_SERVER["HTTP_REFERER"]) || mb_strpos($_SERVER["HTTP_REFERER"], Util::getAbsoluteUrl()) != 0)
+				if (Util::getBrowserType() != Util::BROWSER_TYPE_MOBILE &&
+					(!isset($_SERVER["HTTP_REFERER"]) || mb_strpos($_SERVER["HTTP_REFERER"], Util::getAbsoluteUrl()) != 0))
 					throw new ApplicationException("不正な送信元です", 403);
 				
 				if ((Configuration::$instance->useBBQ & Configuration::BBQ_WRITE) &&
