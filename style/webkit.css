@@ -30,6 +30,12 @@ body>header form input[name="query"]::-webkit-input-placeholder
 	margin-bottom: 0px;
 }
 
+.read #body .taketori-ttb span.cjk
+{
+	width: 1.1em;
+	text-align: center;
+}
+
 .read #body.vertical #afterword
 {
 	margin: -8px 64px -8px 0px;

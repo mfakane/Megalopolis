@@ -458,6 +458,9 @@ $(function()
 						vertical.taketori.toggleAll();
 					else if (!$.browser.msie && (vertical.forceTaketori || $.browser.mozilla || !megalopolis.isWebKit() && navigator.platform.indexOf("Win") == -1))
 					{
+						if (megalopolis.isWebKit() && navigator.platform.indexOf("Win") != -1)
+							Taketori.prototype.isWritingModeReady = false;
+						
 						vertical.taketori = new Taketori()
 							.set
 							({
