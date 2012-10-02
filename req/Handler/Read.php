@@ -60,7 +60,7 @@ class ReadHandler extends Handler
 		Cookie::setCookie(Cookie::VIEW_HISTORY_KEY, implode(",", $history));
 		Cookie::sendCookie();
 		
-		if (Util::isCachedByBrowser($this->thread->entry->getLatestLastUpdate(), $page . Cookie::getCookie(Cookie::MOBILE_VERTICAL_KEY)))
+		if (Util::isCachedByBrowser($this->thread->entry->getLatestLastUpdate(), $page . Cookie::getCookie(Cookie::MOBILE_VERTICAL_KEY) . $this->entry->readCount))
 			return Visualizer::notModified();
 		
 		$this->forceTaketori = preg_match('/<\s*font|font:\s*|font-family:\s*/i', $this->thread->body);
