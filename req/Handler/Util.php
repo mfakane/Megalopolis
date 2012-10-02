@@ -693,9 +693,9 @@ class UtilHandler extends Handler
 					array("作品上分類タグ表示", $c->showTags[Configuration::ON_ENTRY]),
 				
 				"showSummaryOnSubject" =>
-					array("一覧上分類タグ表示", $c->showTags[Configuration::ON_SUBJECT]),
+					array("一覧上概要表示", $c->showSummary[Configuration::ON_SUBJECT]),
 				"showSummaryOnEntry" =>
-					array("作品上分類タグ表示", $c->showTags[Configuration::ON_ENTRY]),
+					array("作品上概要表示", $c->showSummary[Configuration::ON_ENTRY]),
 				
 				"showPointOnSubject" =>
 					array("一覧上点数表示", $c->showPoint[Configuration::ON_SUBJECT]),
