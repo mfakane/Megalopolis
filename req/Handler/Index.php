@@ -73,10 +73,11 @@ class IndexHandler extends Handler
 		else if ($subject > Board::getLatestSubject($db))
 			throw new ApplicationException("指定された番号 {$subject} の作品集は存在しません", 404);
 		
+		$this->entries = ThreadEntry::getEntriesBySubject($db, $subject);
+		
 		if (!($this->lastUpdate = Board::getLastUpdate($db, $subject)))
 			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLatestLastUpdate();'), $this->entries) + array(0));
 		
-		$this->entries = ThreadEntry::getEntriesBySubject($db, $subject);
 		$this->subject = $subject;
 		$this->subjectCount = Board::getLatestSubject($db);
 		$this->entryCount = Board::getEntryCount($db, $idb);
