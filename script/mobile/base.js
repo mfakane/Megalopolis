@@ -42,19 +42,3 @@ $(document)
 				document.body.scrollTop = 1;
 		}, 1);
 	});
-
-if (window.applicationCache)
-{
-	var cache = window.applicationCache;
-
-	cache.addEventListener("updateready", function()
-	{
-		try
-		{
-			cache.swapCache();
-		}
-		catch(ex)
-		{
-		}
-	});
-}

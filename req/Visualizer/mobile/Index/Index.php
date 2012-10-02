@@ -44,7 +44,7 @@ else
 Visualizer::doctype();
 App::load(VISUALIZER_DIR . "mobile/Template/Index");
 ?>
-<html lang="ja" manifest="<?+Visualizer::actionHref("manifest") ?>">
+<html lang="ja">
 <head>
 	<? Visualizer::head() ?>
 	<?if (App::$actionName == "index"): ?>

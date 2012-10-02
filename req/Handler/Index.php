@@ -676,32 +676,6 @@ class IndexHandler extends Handler
 		return Visualizer::redirect(isset($_GET["redir"]) ? $_GET["redir"] : "");
 	}
 	
-	function manifest()
-	{
-		header("Content-Type: text/cache-manifest");
-		
-		echo implode("\r\n", array
-		(
-			"CACHE MANIFEST",
-			"# rev " . Util::getIncludedFilesLastModified(),
-			"http://code.jquery.com/jquery-1.8.1.min.js",
-			"http://code.jquery.com/mobile/1.2.0-beta.1/jquery.mobile-1.2.0-beta.1.min.js",
-			"http://code.jquery.com/mobile/1.2.0-beta.1/jquery.mobile-1.2.0-beta.1.min.css",
-			"http://code.jquery.com/mobile/1.2.0-beta.1/images/ajax-loader.gif",
-			implode("\r\n", glob("style/mobile/*")),
-			"script/base.js",
-			"script/mobile/base.js",
-			"script/mobile/Index/Index.js",
-			"script/mobile/Read/Index.js",
-			"",
-			"NETWORK:",
-			"*",
-			"/",
-		));
-		
-		return null;
-	}
-	
 	function notice($_name = "")
 	{
 		$name = Util::escapeInput($_name);
