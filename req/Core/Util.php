@@ -209,13 +209,13 @@ class Util
 		if ($lastModified)
 			header("Last-Modified: " . gmdate("D, d M Y H:i:s T", $lastModified));
 		
-		header("ETag: " . $eTag);
+		header("ETag: W/\"" . $eTag . "\"");
 		header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
 		header("Cache-Control: private, max-age=0, pre-check=0, must-revalidate");
 		
 		return !Auth::hasSession()
 			&& (!$lastModified || isset($_SERVER["HTTP_IF_MODIFIED_SINCE"]) && strtotime($_SERVER["HTTP_IF_MODIFIED_SINCE"]) >= $lastModified)
-			&& (isset($_SERVER["HTTP_IF_NONE_MATCH"]) && $_SERVER["HTTP_IF_NONE_MATCH"] == $eTag);
+			&& (isset($_SERVER["HTTP_IF_NONE_MATCH"]) && (trim(substr($_SERVER["HTTP_IF_NONE_MATCH"], strpos($_SERVER["HTTP_IF_NONE_MATCH"], "W/") === 0 ? 2 : 0), '"')) == $eTag);
 	}
 	
 	static function getIncludedFilesLastModified()
