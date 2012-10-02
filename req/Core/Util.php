@@ -201,6 +201,7 @@ class Util
 		(
 			App::VERSION,
 			self::getIncludedFilesLastModified(),
+			$lastModified,
 			isset($_COOKIE[Visualizer::MODE_COOKIE_NAME]) ? $_COOKIE[Visualizer::MODE_COOKIE_NAME] : "auto",
 			$eTagSeed
 		)));
