@@ -696,6 +696,11 @@ class UtilHandler extends Handler
 					array("一覧上概要表示", $c->showSummary[Configuration::ON_SUBJECT]),
 				"showSummaryOnEntry" =>
 					array("作品上概要表示", $c->showSummary[Configuration::ON_ENTRY]),
+					
+				"showReadCountOnSubject" =>
+					array("一覧上閲覧数表示", $c->showReadCount[Configuration::ON_SUBJECT]),
+				"showReadCountOnEntry" =>
+					array("作品上閲覧数表示", $c->showReadCount[Configuration::ON_ENTRY]),
 				
 				"showPointOnSubject" =>
 					array("一覧上点数表示", $c->showPoint[Configuration::ON_SUBJECT]),
