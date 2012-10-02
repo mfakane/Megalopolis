@@ -414,7 +414,9 @@ class IndexHandler extends Handler
 	function random()
 	{
 		$db = App::openDB();
-		$entry = ThreadEntry::getRandomEntry($db);
+		$idb = App::openDB(App::INDEX_DATABASE);
+		$entry = ThreadEntry::getRandomEntry($db, $idb);
+		App::closeDB($idb);
 		App::closeDB($db);
 		
 		if ($entry)

@@ -840,14 +840,26 @@ class ThreadEntry
 	/**
 	 * @return ThreadEntry
 	 */
-	static function getRandomEntry(PDO $db)
+	static function getRandomEntry(PDO $db, PDO $idb)
 	{
-		$st = Util::ensureStatement($db, $db->prepare(sprintf
-		('
-			select id from %s',
-			App::THREAD_ENTRY_TABLE
-		)));
-		Util::executeStatement($st);
+		$count = SearchIndex::$instance->getEntryCount($idb);
+		
+		if ($count != -1)
+			$st = $db->prepare(sprintf
+			('
+				select id from %s
+				limit %d, 1',
+				App::THREAD_ENTRY_TABLE,
+				mt_rand(0, $count - 1)
+			));
+		else
+			$st = $db->prepare(sprintf
+			('
+				select id from %s',
+				App::THREAD_ENTRY_TABLE
+			));
+		
+		Util::executeStatement(Util::ensureStatement($db, $st));
 		$rt = $st->fetchAll(PDO::FETCH_COLUMN);
 		
 		if (Configuration::$instance->convertOnDemand &&
