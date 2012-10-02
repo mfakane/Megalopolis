@@ -73,21 +73,19 @@ class IndexHandler extends Handler
 		else if ($subject > Board::getLatestSubject($db))
 			throw new ApplicationException("指定された番号 {$subject} の作品集は存在しません", 404);
 		
-		$this->lastUpdate = Board::getLastUpdate($db, $subject);
-		
-		if ($this->lastUpdate && Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY)))
-			return Visualizer::notModified();
+		if (!($this->lastUpdate = Board::getLastUpdate($db, $subject)))
+			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLatestLastUpdate();'), $this->entries) + array(0));
 		
 		$this->entries = ThreadEntry::getEntriesBySubject($db, $subject);
 		$this->subject = $subject;
 		$this->subjectCount = Board::getLatestSubject($db);
 		$this->entryCount = Board::getEntryCount($db, $idb);
 		
-		if (!$this->lastUpdate)
+		if ($this->lastUpdate)
 		{
-			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLatestLastUpdate();'), $this->entries) + array(0));
-		
-			if ($this->lastUpdate && Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY)))
+			$hash = implode(",", array_map(create_function('$_', 'return $_->id . ":" . (time() - $_->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n");'), $this->entries));
+			
+			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY) . $hash))
 				return Visualizer::notModified();
 		}
 		
@@ -471,6 +469,13 @@ class IndexHandler extends Handler
 			
 			$this->entryCount = null;
 			$this->entries = ThreadEntry::getEntriesByName($db, $name, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $this->entryCount);
+
+			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLatestLastUpdate();'), $this->entries) + array(0));
+			$hash = implode(",", array_map(create_function('$_', 'return $_->id . ":" . (time() - $_->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n");'), $this->entries));
+			
+			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY) . $hash))
+				return Visualizer::notModified();
+			
 			$pageCount = ceil((is_null($this->entryCount) ? ThreadEntry::getEntryCountByName($db, $name) : $this->entryCount) / Configuration::$instance->searchPaging);
 			$this->subject = 0;
 			$this->subjectCount = Board::getLatestSubject($db);
@@ -566,6 +571,13 @@ class IndexHandler extends Handler
 			
 			$this->entryCount = null;
 			$this->entries = ThreadEntry::getEntriesByTag($db, $tag, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $this->entryCount);
+			
+			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLatestLastUpdate();'), $this->entries) + array(0));
+			$hash = implode(",", array_map(create_function('$_', 'return $_->id . ":" . (time() - $_->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n");'), $this->entries));
+			
+			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY) . $hash))
+				return Visualizer::notModified();
+			
 			$pageCount = ceil((is_null($this->entryCount) ? ThreadEntry::getEntryCountByTag($db, $tag) : $this->entryCount) / Configuration::$instance->searchPaging);
 			$this->subject = 0;
 			$this->subjectCount = Board::getLatestSubject($db);
