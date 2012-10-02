@@ -437,7 +437,7 @@ class Visualizer
 	{
 		$args = func_get_args();
 		
-		return self::$basePath . call_user_func_array(array("self", "currentHref"), $args);
+		return self::actionHrefArray($args);
 	}
 	
 	static function actionHrefArray($args = null)
@@ -445,7 +445,11 @@ class Visualizer
 		if (is_null($args))
 			return self::$basePath;
 		else
-			return self::$basePath . self::currentHrefArray($args);
+		{
+			$href = self::currentHrefArray($args);
+			
+			return self::$basePath . (is_file($href) ? "" : Util::getSuffix()) . $href;
+		}
 	}
 	
 	static function currentHref()
@@ -457,9 +461,7 @@ class Visualizer
 	
 	static function currentHrefArray($args)
 	{
-		$href = self::href($args);
-		
-		return (is_file($href) ? "" : Util::getSuffix()) . rtrim($href, "?");
+		return rtrim(self::href($args), "?");
 	}
 	
 	static function absoluteHref()
@@ -1024,5 +1026,5 @@ class Visualizer
 	}
 }
 
-Visualizer::$basePath = rtrim(dirname(Util::getPhpSelf()), "/") . "/";
+Visualizer::$basePath = rtrim(dirname(mb_strstr(Util::getPhpSelf(), Util::INDEX_FILE_NAME, true) . Util::INDEX_FILE_NAME), "/") . "/";
 ?>

@@ -95,8 +95,8 @@ App::load(VISUALIZER_DIR . "Template/Index");
 	<?if (App::$actionName == "index" && $h->subjectCount > 1): ?>
 		<div class="pagerContainer subjectPager">
 			<span>作品集: </span>
-			<? Visualizer::pager($h->subject, $h->subjectCount, 5, Visualizer::actionHrefArray(), true, false, false) ?>
-			<form action="<?+Visualizer::actionHrefArray() ?>" method="get">
+			<? Visualizer::pager($h->subject, $h->subjectCount, 5, Visualizer::actionHrefArray(array()), true, false, false) ?>
+			<form action="<?+Visualizer::actionHrefArray(array()) ?>" method="get">
 				<select name="log">
 					<?for ($i = $h->subjectCount; $i > 0; $i--): ?>
 						<option<?if ($h->subject == $i) echo ' selected="selected"' ?>><?+$i ?></option>
