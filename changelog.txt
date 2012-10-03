@@ -1,4 +1,35 @@
-﻿2012-09-28 COAH96KoxU <queue glasscore.net>
+﻿2012-10-03 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 28
+	* script/Read/Index.js,
+	  style/webkit.css: WebKit で taketori 使用時フォント指定時の文字方向の違いを修正
+	* req/Core/Visualizer.php,
+	  req/Visualizer/Index/Index.php: PATH_INFO 形式で動作しないのを修正
+	* req/Handler/Read.php: 携帯表示にてコメントまたは評価時に完了通知ページへ遷移するように
+	* req/Core/Util.php: ETag を弱い ETag に変更
+	* req/Handler/Read.php: 作品ページの ETag を閲覧数増加によって更新されるよう変更
+	* req/Handler/Index.php: NEW/UP 表示状態が変化してもキャッシュが使用されるのを修正
+	* req/Handler/Util.php: updatePeriod を設定情報に追加
+	* req/Handler/Util.php: 設定情報に閲覧数表示情報を追加
+	* req/Handler/Util.php: 設定情報の概要表示が間違っているのを修正
+	* req/Core/Util.php: Last-Modified 更新時に ETag も更新するように
+	* req/Handler/Index.php,
+	  req/Model/ThreadEntry.php: 作品総数が利用可能な場合おまかせ表示のランダム選択処理を DB 側でするよう変更
+	* req/Handler/Index.php,
+	  req/Visualizer/mobile/Index/Index.php,
+	  req/Visualizer/mobile/Index/Recent.php,
+	  req/Visualizer/mobile/Read/Index.php,
+	  script/mobile/base.js: iPhone 表示からキャッシュマニフェストを削除
+	* req/App.php: 携帯端末からの送信の場合リファラをチェックしないよう変更
+	* req/App.php: 先頭の URL 引数が 0 の場合無視されるのを修正
+	* req/Core/Visualizer.php,
+	  req/Handler/Index.php,
+	  req/Visualizer/Index/Tag.php: / が含まれる名前およびタグに対応
+	* req/Core/Util.php: allow_call_time_pass_reference = Off の時エラーが出るのを修正
+	* readme.txt: 今更ながらライセンス文の名前を修正
+	* req/App.php: 設定値でデータストアが設定されていない場合起動せずエラーが出るのを修正
+
+2012-09-28 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 27
 	* req/Core/DataStore.php: SQLite 環境下で書き換えなどのタイミングで止まることがあるのを修正
