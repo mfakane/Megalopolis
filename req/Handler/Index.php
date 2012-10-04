@@ -98,7 +98,7 @@ class IndexHandler extends Handler
 			case "json":
 				return Visualizer::json(array
 				(
-					"entries" => array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->entries)),
+					"entries" => array_values(array_map(create_function('$_', 'return $_->toArray(Configuration::ON_SUBJECT);'), $this->entries)),
 					"subject" => $this->subject,
 					"subjectCount" => $this->subjectCount
 				));
@@ -139,8 +139,8 @@ class IndexHandler extends Handler
 			case "json":
 				return Visualizer::json(array
 				(
-					"view" => array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->entries["view"])),
-					"evaluation" => array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->entries["evaluation"])),
+					"view" => array_values(array_map(create_function('$_', 'return $_->toArray(Configuration::ON_SUBJECT);'), $this->entries["view"])),
+					"evaluation" => array_values(array_map(create_function('$_', 'return $_->toArray(Configuration::ON_SUBJECT);'), $this->entries["evaluation"])),
 				));
 			default:
 				return Visualizer::visualize();
@@ -325,7 +325,7 @@ class IndexHandler extends Handler
 			case "json":
 				return Visualizer::json(array
 				(
-					"entries" => array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->entries)),
+					"entries" => array_values(array_map(create_function('$_', 'return $_->toArray(Configuration::ON_SUBJECT);'), $this->entries)),
 					"page" => $this->page,
 					"pageCount" => $this->pageCount
 				));
@@ -508,7 +508,7 @@ class IndexHandler extends Handler
 					return Visualizer::json(array
 					(
 						"name" => $name,
-						"entries" => array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->entries)),
+						"entries" => array_values(array_map(create_function('$_', 'return $_->toArray(Configuration::ON_SUBJECT);'), $this->entries)),
 						"page" => $this->page,
 						"pageCount" => $this->pageCount
 					));
@@ -610,7 +610,7 @@ class IndexHandler extends Handler
 					return Visualizer::json(array
 					(
 						"tag" => $tag,
-						"entries" => array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->entries)),
+						"entries" => array_values(array_map(create_function('$_', 'return $_->toArray(Configuration::ON_SUBJECT);'), $this->entries)),
 						"page" => $this->page,
 						"pageCount" => $this->pageCount
 					));
@@ -654,7 +654,7 @@ class IndexHandler extends Handler
 		
 		foreach ($entries as $i)
 		{
-			$arr = $i->toArray();
+			$arr = $i->toArray(Configuration::ON_SUBJECT);
 			$arr["dateTime"] = Visualizer::formatDateTime($arr["dateTime"]);
 			$arr["lastUpdate"] = Visualizer::formatDateTime($arr["lastUpdate"]);
 			$rt[] = array_intersect_key($arr, $visibility);

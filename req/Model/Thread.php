@@ -90,8 +90,8 @@ class Thread
 			"backgroundImage" => $this->backgroundImage,
 			"border" => $this->border,
 			"writingMode" => intval($this->writingMode),
-			"nonCommentEvaluation" => array_reduce($this->nonCommentEvaluations, create_function('$x, $y', 'return $x + $y->point;'), 0),
-			"comments" => array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->comments))
+			"nonCommentEvaluation" => Configuration::$instance->showPoint[Configuration::ON_ENTRY] ? array_reduce($this->nonCommentEvaluations, create_function('$x, $y', 'return $x + $y->point;'), 0) : null,
+			"comments" => Configuration::$instance->showComment[Configuration::ON_ENTRY] ? array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->comments)) : null
 		);
 	}
 	

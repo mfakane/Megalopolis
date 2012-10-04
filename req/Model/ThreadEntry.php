@@ -132,7 +132,7 @@ class ThreadEntry
 	/**
 	 * @return array
 	 */
-	function toArray()
+	function toArray($on = Configuration::ON_ENTRY)
 	{
 		$c = &Configuration::$instance;
 		
@@ -140,20 +140,20 @@ class ThreadEntry
 		(
 			"id" => intval($this->id),
 			"subject" => intval($this->subject),
-			"title" => $this->title,
-			"name" => $c->showName[Configuration::ON_ENTRY] ? $this->name : null,
-			"summary" => $c->useSummary && $c->showSummary[Configuration::ON_ENTRY] ? $this->summary : null,
-			"link" => $c->showName[Configuration::ON_ENTRY] ? $this->link : null,
-			"mail" => $c->showName[Configuration::ON_ENTRY] ? $this->mail : null,
+			"title" => $c->showTitle[Configuration::ON_SUBJECT] ? $this->title : null,
+			"name" => $c->showName[$on] ? $this->name : null,
+			"summary" => $c->useSummary && $c->showSummary[$on] ? $this->summary : null,
+			"link" => $c->showName[$on] ? $this->link : null,
+			"mail" => $c->showName[$on] ? $this->mail : null,
 			"dateTime" => intval($this->dateTime),
 			"lastUpdate" => $this->responseLastUpdate,
-			"pageCount" => $c->showPages[Configuration::ON_ENTRY] ? intval($this->pageCount) : null,
-			"size" => $c->showSize[Configuration::ON_ENTRY] ? floatval($this->size) : null,
-			"points" => $c->showPoint[Configuration::ON_ENTRY] ? intval($this->points) : null,
-			"responseCount" => $c->showComment[Configuration::ON_ENTRY] ? intval($this->responseCount) : null,
-			"commentCount" => $c->showComment[Configuration::ON_ENTRY] ? intval($this->commentCount) : null,
-			"evaluationCount" => $c->showPoint[Configuration::ON_ENTRY] ? intval($this->evaluationCount) : null,
-			"readCount" => $c->showReadCount[Configuration::ON_ENTRY] ? intval($this->readCount) : null
+			"pageCount" => $c->showPages[$on] ? intval($this->pageCount) : null,
+			"size" => $c->showSize[$on] ? floatval($this->size) : null,
+			"points" => $c->showPoint[$on] ? intval($this->points) : null,
+			"responseCount" => $c->showComment[$on] ? intval($this->responseCount) : null,
+			"commentCount" => $c->showComment[$on] ? intval($this->commentCount) : null,
+			"evaluationCount" => $c->showPoint[$on] ? intval($this->evaluationCount) : null,
+			"readCount" => $c->showReadCount[$on] ? intval($this->readCount) : null
 		);
 	}
 	

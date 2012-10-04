@@ -46,14 +46,16 @@ class Comment
 	 */
 	function toArray()
 	{
+		$c = &Configuration::$instance;
+		
 		return array
 		(
 			"id" => intval($this->id),
-			"name" => $this->name,
-			"mail" => $this->mail,
+			"name" => $c->showName[Configuration::ON_COMMENT] ? $this->name : null,
+			"mail" => $c->showName[Configuration::ON_COMMENT] ? $this->mail : null,
 			"body" => $this->body,
 			"dateTime" => intval($this->dateTime),
-			"evaluation" => $this->evaluation ? intval($this->evaluation->point) : null,
+			"evaluation" => $c->showPoint[Configuration::ON_COMMENT] && $this->evaluation ? intval($this->evaluation->point) : null,
 		);
 	}
 	
