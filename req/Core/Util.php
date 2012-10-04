@@ -447,7 +447,7 @@ class Util
 		if ($stripLinebreaks)
 			$input = strtr($input, array("\r" => "", "\n" => ""));
 		else
-			$input = strtr(strtr($input, array("\r\n" => "\n", "\r" => "\n")), "\n", "\r\n");
+			$input = strtr(strtr($input, array("\r\n" => "\n", "\r" => "\n")), array("\n" => "\r\n"));
 		
 		$input = mb_convert_encoding($input, "UTF-8");
 		
