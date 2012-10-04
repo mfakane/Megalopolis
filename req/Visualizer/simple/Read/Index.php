@@ -209,7 +209,7 @@ if ($h->page < $maxPage && ($idx = mb_strrpos(mb_substr($h->thread->body, $offse
 				</li>
 			<?endif ?>
 			<li>
-				[3]<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id, "c") ?>" accesskey="3">コメント</a>
+				[3]<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id, "c") ?>" accesskey="3">コメント一覧</a>
 			</li>
 			<li>
 				[4]<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id, "p") ?>" accesskey="4">コメントする</a>
@@ -233,7 +233,7 @@ if ($h->page < $maxPage && ($idx = mb_strrpos(mb_substr($h->thread->body, $offse
 			</li>
 		<?else: ?>
 			<li>
-				[3]<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id, "c") ?>" accesskey="3">コメント</a>
+				[3]<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id, "c") ?>" accesskey="3">コメント一覧</a>
 			</li>
 			<li>
 				[4]<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id) ?>" accesskey="4">本文</a>
