@@ -1,4 +1,10 @@
-﻿2012-10-03 COAH96KoxU <queue glasscore.net>
+﻿2012-10-04 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 29
+	* req/App.php: Ctype 関数がない時は自前定義するように
+	* req/Visualizer/simple/Read/Index.php: 携帯表示で作品ページのコメントページへのリンク文字列を変更
+
+2012-10-03 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 28
 	* script/Read/Index.js,
