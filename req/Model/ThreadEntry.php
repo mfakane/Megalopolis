@@ -153,7 +153,8 @@ class ThreadEntry
 			"responseCount" => $c->showComment[$on] ? intval($this->responseCount) : null,
 			"commentCount" => $c->showComment[$on] ? intval($this->commentCount) : null,
 			"evaluationCount" => $c->showPoint[$on] ? intval($this->evaluationCount) : null,
-			"readCount" => $c->showReadCount[$on] ? intval($this->readCount) : null
+			"readCount" => $c->showReadCount[$on] ? intval($this->readCount) : null,
+			"tags" => $c->showTags[$on] ? $this->tags : null,
 		);
 	}
 	
