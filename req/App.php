@@ -52,6 +52,14 @@ class App
 					return $str;
 				}
 			}
+			
+			if (!function_exists("ctype_digit"))
+			{
+				function ctype_digit($str)
+				{
+					return preg_match('/^[0-9]+$/', $str);
+				}
+			}
 		}
 		else if (!$cond)
 			throw new ApplicationException("Precondition {$desc} failed.");
