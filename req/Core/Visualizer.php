@@ -843,6 +843,7 @@ class Visualizer
 		$minute = 60;
 		$hour = $minute * 60;
 		$day = $hour * 24;
+		$year = $day * 365;
 		$diff = $now - $time;
 		
 		if ($diff < -$day)
@@ -861,8 +862,10 @@ class Visualizer
 			return floor($diff / $hour) . " 時間前";
 		else if ($diff < $day * 3)
 			return floor($diff / $day) . " 日前 " . date("H:i", $time);
-		else
+		else if ($diff < $year)
 			return date("m/d H:i", $time);
+		else
+			return date("y/m/d H:i", $time);
 	}
 
 	/**
