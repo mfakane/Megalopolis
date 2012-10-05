@@ -181,7 +181,11 @@ class ReadHandler extends Handler
 		
 		if (!is_null($_page) ||
 			$_POST && self::param("preview", null, true) == "true" && !Visualizer::$data)
+		{
+			$this->forceTaketori = preg_match('/<\s*font|font:\s*|font-family:\s*/i', $this->thread->body);
+			
 			return Visualizer::visualize("Read/Index");
+		}
 		
 		if (isset($type) && $type != Util::HASH_TYPE_LATEST)
 			Visualizer::$data[] = "サーバに保存されている編集キーの形式が古いため、編集キーを再度入力するか変更することを推奨します。";
