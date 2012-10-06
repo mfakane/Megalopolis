@@ -429,6 +429,45 @@ $(function()
 				else
 					wrapper.width("auto").height("auto").css("right", "");
 		};
+		var createScrollbar = function(parent)
+		{
+			var intervalId = null;
+			var scrollbar = $('<div class="scrollbar"><div class="lbutton"></div><div class="rbutton"></div></div>').appendTo(parent).hide();
+			var thumb = $('<div class="thumb"></div>').appendTo(scrollbar);
+			
+			setInterval(function()
+			{
+				if (!vertical.isVertical)
+				{
+					scrollbar.hide();
+					
+					return;
+				}
+				
+				var elem = parent.find(".taketori-col");
+				
+				if (elem.length)
+				{
+					var scrollHeight = elem[0].scrollHeight;
+					var scrollPercentage = elem.scrollTop() / scrollHeight;
+					var thumbPercentage = elem.innerHeight() / scrollHeight;
+					
+					if (thumbPercentage >= 1)
+					{
+						scrollbar.hide();
+						
+						return;
+					}
+					
+					var scrollbarWidth = scrollbar.width();
+					
+					scrollbar.show();
+					thumb
+						.css("right", scrollbarWidth * scrollPercentage + 16 + "px")
+						.width(scrollbarWidth * thumbPercentage);
+				}
+			}, 50);
+		};
 		var toggleVertical = function(onLoad, setVertical)
 		{
 			if (setVertical == undefined)
@@ -459,7 +498,10 @@ $(function()
 					else if (!$.browser.msie && (vertical.forceTaketori || $.browser.mozilla || !megalopolis.isWebKit() && navigator.platform.indexOf("Win") == -1))
 					{
 						if (megalopolis.isWebKit() && navigator.platform.indexOf("Win") != -1)
+						{
 							Taketori.prototype.isWritingModeReady = false;
+							createScrollbar($("#verticalWrapper"));
+						}
 						
 						vertical.taketori = new Taketori()
 							.set
