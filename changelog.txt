@@ -1,4 +1,18 @@
-﻿2012-10-04 COAH96KoxU <queue glasscore.net>
+﻿2012-10-07 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 30
+	* script/Read/Index.js,
+	  style/webkit.css: WebKit において taketori 使用時不可視のスクロールバーの代わりにダミースクロールバーを表示するように
+	* req/Handler/Read.php: taketori 強制使用時にプレビューで taketori が使用されないのを修正
+	* req/Core/Visualizer.php: 携帯表示および iPhone 表示の短い日付に年を追加
+	* req/Core/Util.php: 改行文字が CRLF ではなく CR に統一されていたのを修正
+	* req/Model/ThreadEntry.php: JSON 出力の作品情報に分類タグを追加
+	* req/Handler/Index.php,
+	  req/Model/Comment.php,
+	  req/Model/Thread.php,
+	  req/Model/ThreadEntry.php: JSON 出力にて表示設定が反映されない箇所があるのを修正
+
+2012-10-04 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 29
 	* req/App.php: Ctype 関数がない時は自前定義するように
