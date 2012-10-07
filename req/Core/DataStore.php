@@ -443,7 +443,6 @@ class MySQLDataStore extends DataStore
 			array
 			(
 				PDO::MYSQL_ATTR_INIT_COMMAND => "set names utf8",
-				PDO::ATTR_PERSISTENT => true,
 			)
 		);
 		$this->registerHandle($db, $name);
