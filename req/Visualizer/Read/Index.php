@@ -70,7 +70,7 @@ Visualizer::doctype();
 		</dd>
 		<dt>最終更新</dt>
 		<dd>
-			<time pubdate="pubdate" datetime="<?+date("c", $h->entry->getLatestLastUpdate()) ?>">
+			<time datetime="<?+date("c", $h->entry->getLatestLastUpdate()) ?>">
 				<?+Visualizer::formatDateTime($h->entry->getLatestLastUpdate()) ?>
 			</time>
 		</dd>

@@ -154,7 +154,7 @@ function entries($entries, $isAdmin, $listType = null)
 						<time class="lastUpdate<?php echo isset($visibility["lastUpdate"]) ? null : " hidden" ?>" datetime="<?php Visualizer::converted(date("c", $i->getLatestLastUpdate())) ?>" data-unixtime="<?php Visualizer::converted($i->getLatestLastUpdate()) ?>">
 							<?php Visualizer::converted(Visualizer::formatDateTime($i->getLatestLastUpdate())) ?>
 						</time>
-						<time class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>" pubdate="pubdate" datetime="<?php Visualizer::converted(date("c", $i->dateTime)) ?>" data-unixtime="<?php Visualizer::converted($i->dateTime) ?>">
+						<time class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>" datetime="<?php Visualizer::converted(date("c", $i->dateTime)) ?>" data-unixtime="<?php Visualizer::converted($i->dateTime) ?>">
 							<?php Visualizer::converted(Visualizer::formatDateTime($i->dateTime)) ?>
 						</time>
 						<?php if (time() - $i->dateTime < $c->updatePeriod * 24 * 60 * 60): ?>
