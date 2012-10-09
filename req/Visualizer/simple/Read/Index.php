@@ -196,7 +196,8 @@ if ($h->page < $maxPage && ($idx = mb_strrpos(mb_substr($h->thread->body, $offse
 			</p>
 		<?endif ?>
 	<?endif ?>
-	<ul class="menu" id="menu">
+	<ul class="menu">
+		<a id="menu" name="menu">メニュー</a>
 		<?if ($m == "i"): ?>
 			<?if ($h->page < $maxPage): ?>
 				<li>

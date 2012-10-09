@@ -147,7 +147,8 @@ Visualizer::doctype();
 		<?endif ?>
 	</ul>
 	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode) : array()) + array("p" => ""))) ?>
-	<ul id="menu" class="menu">
+	<ul class="menu">
+		<a id="menu" name="menu">メニュー</a>
 		<? $i = 0 ?>
 		<?foreach (array
 		(

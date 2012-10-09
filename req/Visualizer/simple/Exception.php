@@ -13,6 +13,7 @@ $c = &Configuration::$instance;
 		<?+Visualizer::$data->getMessage() ?>
 	</p>
 	<ul class="menu">
+		<a id="menu" name="menu">メニュー</a>
 		<li>
 			[0]<a href="<?+Visualizer::actionHref() ?>" accesskey="0">トップページへ戻る</a>
 		</li>

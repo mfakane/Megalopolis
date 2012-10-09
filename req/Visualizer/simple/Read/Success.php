@@ -31,7 +31,8 @@ switch (App::$actionName)
 			<?+$verb ?>しました
 		</p>
 	</div>
-	<ul class="menu" id="menu">
+	<ul class="menu">
+		<a id="menu" name="menu">メニュー</a>
 		<li>
 			[3]<a href="<?+Visualizer::actionHref($h->entry->subject, $h->entry->id, "c") ?>" accesskey="3">コメントを見る</a>
 		</li>
