@@ -110,6 +110,7 @@ class Configuration
 		"article",
 		"aside",
 		"b",
+		"basefont",
 		"bdo",
 		"big",
 		"blockquote",
@@ -221,7 +222,6 @@ class Configuration
 		// obsolete
 		"acronym",
 		"applet",
-		"basefont",
 		"bgsound",
 		"blink",
 		"comment",
