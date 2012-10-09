@@ -19,8 +19,6 @@ $pagerHref = Visualizer::actionHref("util", "track", array
 	<? Visualizer::head() ?>
 	<link rel="search" href="<?+Visualizer::actionHrefArray(array("search")) ?>" />
 	<?if ($d["entries"]): ?>
-		<link rel="first" href="<?+$pagerHref . "1" ?>" />
-		<link rel="last" href="<?+$pagerHref . $d["pageCount"] ?>" />
 		<?if ($d["page"] > 1): ?>
 			<link rel="prev" href="<?+$pagerHref . ($d["page"] - 1) ?>" />
 		<?endif ?>

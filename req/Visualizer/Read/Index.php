@@ -15,8 +15,6 @@ Visualizer::doctype();
 	<?if (App::$actionName == "index"): ?>
 		<link rel="contents" href="<?+Visualizer::actionHref($h->subject) ?>" />
 		<?if ($h->entry->pageCount > 1): ?>
-			<link rel="first" href="<?+Visualizer::actionHref($h->subject, $h->entry->id) ?>" />
-			<link rel="last" href="<?+Visualizer::actionHref($h->subject, $h->entry->id, $h->entry->pageCount) ?>" />
 			<?if ($h->page > 1): ?>
 				<link rel="prev" href="<?+Visualizer::actionHref($h->subject, $h->entry->id, $h->page - 1) ?>" />
 			<?endif ?>

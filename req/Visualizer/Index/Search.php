@@ -27,8 +27,6 @@ $pagerHref = Visualizer::actionHref("search", array
 	<meta name="robots" content="noindex,noarchive" />
 	<link rel="search" href="<?+Visualizer::actionHrefArray(array("search")) ?>" />
 	<?if ($h->entries): ?>
-		<link rel="first" href="<?+$pagerHref . "1" ?>" />
-		<link rel="last" href="<?+$pagerHref . $h->pageCount ?>" />
 		<?if ($h->page > 1): ?>
 			<link rel="prev" href="<?+$pagerHref . ($h->page - 1) ?>" />
 		<?endif ?>

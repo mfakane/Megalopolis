@@ -28,8 +28,6 @@ App::load(VISUALIZER_DIR . "Template/Index");
 	<?endif ?>
 	<link rel="search" href="<?+Visualizer::actionHrefArray(array("search")) ?>" />
 	<?if ($h->subjectCount): ?>
-		<link rel="first" href="<?+Visualizer::actionHrefArray(array($h->subjectCount)) ?>" />
-		<link rel="last" href="<?+Visualizer::actionHrefArray(array(1)) ?>" />
 		<?if ($h->subject < $h->subjectCount): ?>
 			<link rel="prev" href="<?+Visualizer::actionHrefArray(array($h->subject + 1)) ?>" />
 		<?endif ?>
