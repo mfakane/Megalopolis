@@ -86,9 +86,9 @@ Visualizer::doctype();
 				<hr />
 			<?endif ?>
 			<label for="writingMode">既定の方向</label>
-			<ul id="writingMode">
+			<ul>
 				<li>
-					<label><input type="radio" name="writingMode" value="<?+Thread::WRITING_MODE_NOT_SPECIFIED ?>"<?if ($h->thread->writingMode == Thread::WRITING_MODE_NOT_SPECIFIED): ?> checked="checked"<?endif ?> />指定しない</label>
+					<label><input type="radio" id="writingMode" name="writingMode" value="<?+Thread::WRITING_MODE_NOT_SPECIFIED ?>"<?if ($h->thread->writingMode == Thread::WRITING_MODE_NOT_SPECIFIED): ?> checked="checked"<?endif ?> />指定しない</label>
 				</li>
 				<li>
 					<label><input type="radio" name="writingMode" value="<?+Thread::WRITING_MODE_HORIZONTAL ?>"<?if ($h->thread->writingMode == Thread::WRITING_MODE_HORIZONTAL): ?> checked="checked"<?endif ?> />横書き</label>
