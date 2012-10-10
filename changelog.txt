@@ -1,4 +1,30 @@
-﻿2012-10-07 COAH96KoxU <queue glasscore.net>
+﻿2012-10-11 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 31
+	* req/Visualizer/Read/Edit.php: label のために id を修正
+	* req/Core/Visualizer.php,
+	  req/Visualizer/Auth.php,
+	  req/Visualizer/Index/Index.php,
+	  req/Visualizer/Index/Search.php,
+	  req/Visualizer/Read/Edit.php,
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/Util/Track.php: img に alt 属性を追加
+	* req/Visualizer/Index/Index.php,
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/Template/Index.php: time 要素から pubdate 属性を削除
+	* req/Visualizer/Index/Index.php,
+	  req/Visualizer/Index/Search.php,
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/Util/Track.php: rel が first または last の link タグ削除
+	* req/Core/Configuration.php: basefont タグを許可
+	* req/Core/Visualizer.php: X-UA-Compatible をヘッダで送信するよう変更
+	* req/Visualizer/simple/Exception.php,
+	  req/Visualizer/simple/Index/Index.php,
+	  req/Visualizer/simple/Read/Index.php,
+	  req/Visualizer/simple/Read/Success.php: メニューのアンカーを name に変更
+	* req/Core/DataStore.php: MySQL にて持続的接続を使用しないよう変更
+
+2012-10-07 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 30
 	* script/Read/Index.js,
