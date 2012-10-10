@@ -78,12 +78,12 @@ $pagerHref = Visualizer::actionHref("search", array
 			<ul class="buttons">
 				<li>
 					<button type="submit">
-						<img src="<?+Visualizer::actionHref("style", "searchButtonIcon.png") ?>" />検索
+						<img src="<?+Visualizer::actionHref("style", "searchButtonIcon.png") ?>" alt="" />検索
 					</button>
 				</li>
 				<li>
 					<button type="submit" name="random" value="true">
-						<img src="<?+Visualizer::actionHref("style", "refreshButtonIcon.png") ?>" />おまかせ表示
+						<img src="<?+Visualizer::actionHref("style", "refreshButtonIcon.png") ?>" alt="" />おまかせ表示
 					</button>
 				</li>
 			</ul>
@@ -103,7 +103,7 @@ $pagerHref = Visualizer::actionHref("search", array
 						<ul class="buttons">
 							<li>
 								<button type="submit" class="unpost" name="admin" value="unpost" id="unpostButton">
-									<img src="<?+Visualizer::actionHref("style", "deleteButtonIcon.png") ?>" />選択した作品を削除
+									<img src="<?+Visualizer::actionHref("style", "deleteButtonIcon.png") ?>" alt="" />選択した作品を削除
 								</button>
 							</li>
 						</ul>

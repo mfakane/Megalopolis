@@ -147,7 +147,7 @@ App::load(VISUALIZER_DIR . "Template/Index");
 						<ul class="buttons">
 							<li>
 								<button type="submit" class="unpost" name="admin" value="unpost" id="unpostButton">
-									<img src="<?+Visualizer::actionHrefArray(array("style", "deleteButtonIcon.png")) ?>" />選択した作品を削除
+									<img src="<?+Visualizer::actionHrefArray(array("style", "deleteButtonIcon.png")) ?>" alt="" />選択した作品を削除
 								</button>
 							</li>
 						</ul>

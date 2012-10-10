@@ -128,7 +128,7 @@ Visualizer::doctype();
 			<ul class="buttons">
 				<li>
 					<button type="submit">
-						<img src="<?+Visualizer::actionHref("style", "sendButtonIcon.png") ?>" />確認
+						<img src="<?+Visualizer::actionHref("style", "sendButtonIcon.png") ?>" alt="" />確認
 					</button>
 					<input type="hidden" name="password" value="<?+ReadHandler::param("password") ?>" />
 					<input type="hidden" name="preview" value="true" />
@@ -144,7 +144,7 @@ Visualizer::doctype();
 				<ul class="buttons">
 					<li>
 						<button type="submit" id="unpostSubmit">
-							<img src="<?+Visualizer::actionHref("style", "deleteButtonIcon.png") ?>" />削除
+							<img src="<?+Visualizer::actionHref("style", "deleteButtonIcon.png") ?>" alt="" />削除
 						</button>
 					</li>
 				</ul>

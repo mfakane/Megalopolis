@@ -173,7 +173,7 @@ class Visualizer
 						?>
 						<li>
 							<a href="<?php self::converted(self::$basePath . Util::getSuffix() . $k) ?>">
-								<?php if (!is_null($icon)): ?><img src='<?php self::converted(self::$basePath . "style/" . $icon) ?>' width='16' height='16' /><?php endif ?><?php self::converted($name) ?>
+								<?php if (!is_null($icon)): ?><img src='<?php self::converted(self::$basePath . "style/" . $icon) ?>' width='16' height='16' alt='' /><?php endif ?><?php self::converted($name) ?>
 							</a>
 						</li>
 					<?php endforeach ?>

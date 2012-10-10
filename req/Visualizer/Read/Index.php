@@ -232,7 +232,7 @@ Visualizer::doctype();
 						: Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName))) ?>" method="post">
 						<div>
 							<button type="submit">
-								<img src="<?+Visualizer::actionHref("style", "backButtonIcon.png") ?>" />修正
+								<img src="<?+Visualizer::actionHref("style", "backButtonIcon.png") ?>" alt="" />修正
 							</button>
 							<? Visualizer::delegateParameters($_POST ? $_POST : $_SESSION, array("preview", "p")) ?>
 						</div>
@@ -244,7 +244,7 @@ Visualizer::doctype();
 						: Visualizer::actionHref($h->subject, $h->entry->id, "post"))) ?>" method="post">
 						<div>
 							<button type="submit">
-								送信<img src="<?+Visualizer::actionHref("style", "sendButtonIcon.png") ?>" class="last" />
+								送信<img src="<?+Visualizer::actionHref("style", "sendButtonIcon.png") ?>" class="last" alt="" />
 							</button>
 							<? Visualizer::delegateParameters($_POST ? $_POST : $_SESSION, array("preview", "p")) ?>
 						</div>
@@ -332,7 +332,7 @@ Visualizer::doctype();
 						<ul class="buttons">
 							<li>
 								<button type="submit">
-									<img src="<?+Visualizer::actionHref("style", "writeButtonIcon.png") ?>" />送信
+									<img src="<?+Visualizer::actionHref("style", "writeButtonIcon.png") ?>" alt="" />送信
 								</button>
 							</li>
 						</ul>
@@ -446,12 +446,12 @@ Visualizer::doctype();
 							<ul class="buttons">
 								<li>
 									<button type="submit" class="unpost" name="admin" value="unevaluate" id="unevaluateButton">
-										<img src="<?+Visualizer::actionHref("style", "deleteButtonIcon.png") ?>" />選択した評価を削除
+										<img src="<?+Visualizer::actionHref("style", "deleteButtonIcon.png") ?>" alt="" />選択した評価を削除
 									</button>
 								</li>
 								<li>
 									<button type="submit" class="unpost" name="admin" value="uncomment" id="uncommentButton">
-										<img src="<?+Visualizer::actionHref("style", "deleteButtonIcon.png") ?>" />選択したコメントを削除
+										<img src="<?+Visualizer::actionHref("style", "deleteButtonIcon.png") ?>" alt="" />選択したコメントを削除
 									</button>
 								</li>
 							</ul>
