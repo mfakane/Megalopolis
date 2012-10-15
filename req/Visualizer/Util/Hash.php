@@ -14,7 +14,7 @@ Visualizer::doctype();
 		<section>
 			<input type="text"  name="raw" value="<?+$d ? $d["raw"] : null ?>" /><br />
 			<button type="submit">
-				<img src="<?+Visualizer::actionHref("style", "sendButtonIcon.png") ?>" />算出
+				<img src="<?+Visualizer::actionHref("style", "sendButtonIcon.png") ?>" alt="" />算出
 			</button>
 		</section>
 		<?if ($d): ?>

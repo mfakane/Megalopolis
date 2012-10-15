@@ -64,6 +64,28 @@ $config->denyWrite = array
 	// "docomo:*",			// キャリア:契約者固有 ID
 );
 
+// 閲覧に対するホスト規制の例外 (文字列一覧)
+// この一覧にあるものと IP アドレスまたはリモートホストが一致すると上の規制リストおよび BBQ に含まれていても閲覧可能になります。
+// ワイルドカード (*, ?, [] など) も使用可能です
+$config->allowRead = array
+(
+	// 例:
+	// "192.168.*",			// IP アドレス
+	// "*.example.com",		// リモートホスト
+);
+
+// 送信に対するホスト規制の例外 (文字列一覧)
+// この一覧にあるものと IP アドレスまたはリモートホスト、契約者固有 ID が一致すると上の規制リストおよび BBQ に含まれていても送信可能になります。
+// 契約者固有 ID は docomo, kddi, softbank, emobile に対応しています。
+// ワイルドカード (*, ?, [] など) も使用可能です
+$config->allowWrite = array
+(
+	// 例:
+	// "192.168.*",			// IP アドレス
+	// "*.example.com",		// リモートホスト
+	// "docomo:*",			// キャリア:契約者固有 ID
+);
+
 // 契約者固有 ID を通知しない携帯端末からの送信を拒否するか (true/false)
 // 契約者固有 ID は docomo, kddi, softbank, emobile に対応しています
 $config->denyWriteFromMobileWithoutID = false;

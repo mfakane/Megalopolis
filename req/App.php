@@ -90,7 +90,7 @@ class App
 			&& gethostbyname(implode(".", array_reverse(explode(".", $_SERVER["REMOTE_ADDR"]))) . ".niku.2ch.net") == "127.0.0.2";
 	}
 	
-	private static function isDenied($arr)
+	private static function matchesAddress($arr)
 	{
 		$addr = $_SERVER["REMOTE_ADDR"];
 		$host = Util::getRemoteHost();
@@ -114,32 +114,38 @@ class App
 		{
 			if ($_POST)
 			{
-				if (Util::getBrowserType() != Util::BROWSER_TYPE_MOBILE &&
-					(!isset($_SERVER["HTTP_REFERER"]) || mb_strpos($_SERVER["HTTP_REFERER"], Util::getAbsoluteUrl()) != 0))
-					throw new ApplicationException("不正な送信元です", 403);
-				
-				if ((Configuration::$instance->useBBQ & Configuration::BBQ_WRITE) &&
-					self::isBBQed())
-					throw new ApplicationException("公開プロキシを使用した送信は規制されています", 403);
-				
-				if (Configuration::$instance->denyWrite &&
-					self::isDenied(Configuration::$instance->denyWrite))
-					throw new ApplicationException("あなたのホストからの送信は規制されています", 403);
-				
-				if (Configuration::$instance->denyWriteFromMobileWithoutID &&
-					Util::canGetMobileUniqueID() &&
-					Util::getMobileUniqueID() == null)
-					throw new ApplicationException(Util::getMobileUniqueIDName() . "の送信設定を有効にしてください", 403);
+				if (!Configuration::$instance->allowWrite || !self::matchesAddress(Configuration::$instance->allowWrite))
+				{
+					if (Util::getBrowserType() != Util::BROWSER_TYPE_MOBILE &&
+						(!isset($_SERVER["HTTP_REFERER"]) || mb_strpos($_SERVER["HTTP_REFERER"], Util::getAbsoluteUrl()) != 0))
+						throw new ApplicationException("不正な送信元です", 403);
+					
+					if ((Configuration::$instance->useBBQ & Configuration::BBQ_WRITE) &&
+						self::isBBQed())
+						throw new ApplicationException("公開プロキシを使用した送信は規制されています", 403);
+					
+					if (Configuration::$instance->denyWrite &&
+						self::matchesAddress(Configuration::$instance->denyWrite))
+						throw new ApplicationException("あなたのホストからの送信は規制されています", 403);
+					
+					if (Configuration::$instance->denyWriteFromMobileWithoutID &&
+						Util::canGetMobileUniqueID() &&
+						Util::getMobileUniqueID() == null)
+						throw new ApplicationException(Util::getMobileUniqueIDName() . "の送信設定を有効にしてください", 403);
+				}
 			}
 			else
 			{
-				if ((Configuration::$instance->useBBQ & Configuration::BBQ_READ) &&
-					self::isBBQed())
-					throw new ApplicationException("公開プロキシを使用した閲覧は規制されています", 403);
-				
-				if (Configuration::$instance->denyRead &&
-					self::isDenied(Configuration::$instance->denyRead))
-					throw new ApplicationException("あなたのホストからの閲覧は規制されています", 403);
+				if (!Configuration::$instance->allowRead || !self::matchesAddress(Configuration::$instance->allowRead))
+				{
+					if ((Configuration::$instance->useBBQ & Configuration::BBQ_READ) &&
+						self::isBBQed())
+						throw new ApplicationException("公開プロキシを使用した閲覧は規制されています", 403);
+					
+					if (Configuration::$instance->denyRead &&
+						self::matchesAddress(Configuration::$instance->denyRead))
+						throw new ApplicationException("あなたのホストからの閲覧は規制されています", 403);
+				}
 			}
 
 			self::rewriteHtaccess();
