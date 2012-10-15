@@ -51,6 +51,7 @@ class Configuration
 	 * @var DataStore
 	 */
 	public $dataStore;
+	public $storeSessionIntoDataStore = true;
 	
 	public $useComments = true;
 	public $pointMap = array();

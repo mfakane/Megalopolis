@@ -132,6 +132,11 @@ $config->dataStore = new SQLiteDataStore();
 // - new MySQLDataStore("データベース名", array("ホスト名", 3306), "ユーザ名", "パスワード");
 // - new MySQLDataStore("データベース名", "UNIX ソケットパス", "ユーザ名", "パスワード");
 
+// セッションをデータストアに保存するか (true/false)
+// true の場合、データベースにセッションを保存し管理します。
+// false の場合、PHP の通常のセッションの設定を使用します。
+$config->storeSessionIntoDataStore = true;
+
 /*
  * 評価に関する設定
  */

@@ -26,7 +26,10 @@ class Auth
 			session_cache_limiter(false);
 			session_set_cookie_params(0, dirname(Util::getPhpSelf()));
 			session_name("MEGALOPOLIS_" . basename(dirname(dirname(dirname(__FILE__)))));
-			SessionStore::useSessionStore();
+			
+			if (Configuration::$instance->storeSessionIntoDataStore)
+				SessionStore::useSessionStore();
+			
 			session_start();
 			
 			$currentFingerprint = self::createFingerprint();
