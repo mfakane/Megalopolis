@@ -72,7 +72,7 @@ class SQLiteSearchIndex extends SearchIndex
 				$prefix = "-";
 			}
 			
-			if ($words = $this->getWords(array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($i) > $this->gramLength), $i))
+			if ($words = $this->getWords(array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($i) >= $this->gramLength), $i))
 			{
 				$currentWord = array();
 				
