@@ -126,23 +126,55 @@ App::load(VISUALIZER_DIR . "mobile/Template/Index");
 			</footer>
 		</form>
 	<?elseif ($m == "l"): ?>
-		<div id="subjects" data-role="page" class="index fulllist">
-			<header data-role="header" data-backbtn="false">
-				<h1>作品集</h1>
-				<a href="<?+Visualizer::actionHref($h->subject) ?>" class="ui-btn-right">戻る</a>
-			</header>
-			<div data-role="content">
-				<ul data-role="listview">
-					<?foreach (range($h->subjectCount, 1, -1) as $i): ?>
-						<li>
-							<a href="<?+Visualizer::actionHref($i) ?>">
-								<h2><?+$i == $h->subjectCount ? "最新作品集" : "作品集 {$i}"?></h2>
-							</a>
-						</li>
-					<?endforeach ?>
-				</ul>
+		<?if (isset($_GET["begin"]) && isset($_GET["end"])): ?>
+			<?php
+			$begin = intval($_GET["begin"]);
+			$end = intval($_GET["end"]);
+			list($begin, $end) = array(max($begin, $end), min($begin, $end));
+			?>
+			<div id="subjects" data-role="page" class="index fulllist" data-backbtn="false">
+				<header data-role="header">
+					<h1><?+$begin ?>～<?+$end ?></h1>
+					<a href="#" data-rel="back">戻る</a>
+				</header>
+				<div data-role="content">
+					<ul data-role="listview">
+						<?for ($i = $begin; $i >= $end; $i--): ?>
+							<li>
+								<a href="<?+Visualizer::actionHref($i) ?>">
+									<h2>作品集 <?+$i?></h2>
+								</a>
+							</li>
+						<?endfor ?>
+					</ul>
+				</div>
 			</div>
-		</div>
+		<?else: ?>
+			<div id="subjects" data-role="page" class="index fulllist">
+				<header data-role="header" data-backbtn="false">
+					<h1>作品集</h1>
+					<a href="<?+Visualizer::actionHref($h->subject) ?>" class="ui-btn-right">戻る</a>
+				</header>
+				<div data-role="content">
+					<ul data-role="listview">
+						<?for ($i = $h->subjectCount; $i > max($h->subjectCount - 5, 0); $i--): ?>
+							<li>
+								<a href="<?+Visualizer::actionHref($i) ?>">
+									<h2><?+$i == $h->subjectCount ? "最新作品集" : "作品集 {$i}"?></h2>
+								</a>
+							</li>
+						<?endfor ?>
+						<?for ($i = $h->subjectCount - 5; $i > 0; $i -= 20): ?>
+							<li>
+								<a href="<?+Visualizer::actionHref("l", array("begin" => $i, "end" => max($i - 19, 1))) ?>">
+									<h2><?+"作品集 " . $i . "～" . max($i - 19, 1) ?></h2>
+								</a>
+							</li>
+						<?endfor ?>
+					</ul>
+				</div>
+			</div>
+		<?endif ?>
 	<?elseif ($m == "m"): ?>
 		<div id="more" data-role="page" class="index fulllist">
 			<header data-role="header" data-backbtn="false">
