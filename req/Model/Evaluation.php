@@ -78,9 +78,9 @@ class Evaluation
 		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf
 		('
 			delete from %s
-			where id = ?',
+			where entryID = ? and id = ?',
 			App::EVALUATION_TABLE
-		))), array($this->id));
+		))), array($this->entryID, $this->id));
 
 		$this->loaded = false;
 	}

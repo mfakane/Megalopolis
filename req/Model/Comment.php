@@ -122,9 +122,9 @@ class Comment
 		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf
 		('
 			delete from %s
-			where id = ?',
+			where entryID = ? and id = ?',
 			App::COMMENT_TABLE
-		))), array($this->id));
+		))), array($this->entryID, $this->id));
 		
 		if ($this->evaluation)
 			$this->evaluation->delete($db);
