@@ -58,7 +58,33 @@ class ClassicSearchIndex extends SearchIndex
 		if (!$query)
 			return array();
 		
-		if (!($query = call_user_func_array(array($this, "getWords"), array_merge(array(array("noIncompletedGram" => true)), $query))))
+		$not = array();
+		
+		foreach ($query as $k => $v)
+			if (strpos($v, "-") === 0)
+			{
+				unset($query[$k]);
+				$not[] = substr($v, 1);
+			}
+		
+		$rt = $this->searchThreadInternal($idb, $query, $type, $ids);
+		
+		if ($not)
+			foreach ($this->searchThreadInternal($idb, $not, $type, $ids) as $i)
+				if (($idx = array_search($i, $rt)) !== false)
+					unset($rt[$idx]);
+		
+		return $rt;
+	}
+	
+	private function searchThreadInternal(PDO $idb, array $query, array $type = null, array $ids = null)
+	{
+		$words = array();
+		
+		foreach ($query as $i)
+			$words = array_merge($words, $this->getWords(array("noIncompletedGram" => true), $i));
+		
+		if (!$words)
 			return array();
 		
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf

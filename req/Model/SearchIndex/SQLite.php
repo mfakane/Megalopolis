@@ -63,6 +63,15 @@ class SQLiteSearchIndex extends SearchIndex
 		$queryArguments = array();
 		
 		foreach ($query as $i)
+		{
+			$prefix = "";
+			
+			if (strpos($i, "-") === 0)
+			{
+				$i = substr($i, 1);
+				$prefix = "-";
+			}
+			
 			if ($words = $this->getWords(array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($i) > $this->gramLength), $i))
 			{
 				$currentWord = array();
@@ -72,14 +81,15 @@ class SQLiteSearchIndex extends SearchIndex
 					$currentLength = mb_strlen($j);
 					
 					if ($currentLength == $this->gramLength)
-						$currentWord[] = $j;
-					else
+						$currentWord[] = $prefix . $j;
+					else if (!$prefix)
 						$currentWord[] = "{$j}*";
 				}
 				
 				if ($currentWord)
 					$queryArguments[] = '"' . implode(" ", $currentWord) . '"';
 			}
+		}
 		
 		if (!($queryArguments = array_filter($queryArguments)))
 			return array();

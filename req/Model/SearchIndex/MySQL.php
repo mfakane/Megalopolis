@@ -57,6 +57,15 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		$queryArguments = array();
 		
 		foreach ($query as $i)
+		{
+			$prefix = "+";
+			
+			if (strpos($i, "-") === 0)
+			{
+				$i = substr($i, 1);
+				$prefix = "-";
+			}
+			
 			if ($words = $this->getWords(array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($i) > $this->gramLength), $i))
 			{
 				$currentWord = array();
@@ -72,19 +81,20 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 					{
 						if ($currentWord)
 						{
-							$queryArguments[] = '+"' . implode(" ", $currentWord) . '"';
+							$queryArguments[] = $prefix . '"' . implode(" ", $currentWord) . '"';
 							$currentWord = array();
 						}
 						
-						$queryArguments[] = "+{$j}" . (Configuration::$instance->mysqlSearchUseHeadMatching ? "*" : str_repeat("_", $this->gramLength - $currentLength));
+						$queryArguments[] = $prefix . $j . (Configuration::$instance->mysqlSearchUseHeadMatching ? "*" : str_repeat("_", $this->gramLength - $currentLength));
 					}
 					
 					$lastLength = $currentLength;
 				}
 				
 				if ($currentWord)
-					$queryArguments[] = '+"' . implode(" ", $currentWord) . '"';
+					$queryArguments[] = $prefix . '"' . implode(" ", $currentWord) . '"';
 			}
+		}
 		
 		if (!($queryArguments = array_filter($queryArguments)))
 			return array();
