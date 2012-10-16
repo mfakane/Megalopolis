@@ -11,6 +11,15 @@ class Meta
 		"value" => "varchar(255)"
 	);
 	
+	private static function query(PDO $db, array $names = array())
+	{
+		$st = Util::ensureStatement($db, $db->prepare("select * from " . App::META_TABLE . ($names ? " where name in (" . implode(", ", array_fill(0, count($names), "?")) . ")" : null)));
+		Util::executeStatement($st, $names);
+		
+		foreach ($st->fetchAll() as $i)
+			self::$meta[$i["name"]] = $i["value"];
+	}
+	
 	/**
 	 * @param string $name
 	 * @param string $defaultValue
@@ -18,15 +27,8 @@ class Meta
 	 */
 	static function get(PDO $db, $name, $defaultValue = null)
 	{
-		if (self::$meta == null)
-		{
-			self::$meta = array();
-			$st = Util::ensureStatement($db, $db->prepare("select * from " . App::META_TABLE));
-			Util::executeStatement($st);
-			
-			foreach ($st->fetchAll() as $i)
-				self::$meta[$i["name"]] = $i["value"];
-		}
+		if (!isset(self::$meta[$name]))
+			self::query($db, array($name));
 		
 		return isset(self::$meta[$name]) ? self::$meta[$name] : $defaultValue;
 	}
@@ -71,6 +73,20 @@ class Meta
 			self::set($db, self::DATA_VERSION, self::DATA_VERSION_VALUE_LATEST);
 			$db->commit();
 		}
+		
+		self::query($db, array
+		(
+			self::DATA_VERSION,
+			App::SUBJECT_TABLE,
+			App::THREAD_ENTRY_TABLE,
+			App::THREAD_EVALUATION_TABLE,
+			App::THREAD_TAG_TABLE,
+			App::THREAD_TABLE,
+			App::THREAD_STYLE_TABLE,
+			App::COMMENT_TABLE,
+			App::EVALUATION_TABLE,
+			App::SESSION_STORE_TABLE,
+		));
 	}
 }
 ?>
