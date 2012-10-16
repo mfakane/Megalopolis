@@ -44,16 +44,16 @@ $(document).bind("pageinit", function(e)
 			$.ajax
 			({
 				type: "POST",
-				url: content.attr("action") + ".json",
+				url: rpost.attr("action") + ".json",
 				dataType: "json",
 				data:
 				{
-					name: content.find("input[name='name']").val(),
-					mail: content.find("input[name='mail']").val(),
-					body: content.find("textarea").val(),
-					password: content.find("input[name='password']").val(),
-					postPassword: content.find("input[name='postPassword']").val(),
-					point: content.find("select[name='point']").val()
+					name: rpost.find("input[name='name']").val(),
+					mail: rpost.find("input[name='mail']").val(),
+					body: rpost.find("textarea").val(),
+					password: rpost.find("input[name='password']").val(),
+					postPassword: rpost.find("input[name='postPassword']").val(),
+					point: rpost.find("select[name='point']").val()
 				},
 				success: function(data)
 				{
