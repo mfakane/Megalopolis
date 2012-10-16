@@ -1,4 +1,26 @@
-﻿2012-10-11 COAH96KoxU <queue glasscore.net>
+﻿2012-10-17 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 32
+	* req/Model/SearchIndex/MySQL.php,
+	  req/Model/SearchIndex/SQLite.php: 検索に未完了 gram を含めない条件を調整
+	* req/Visualizer/mobile/Index/Index.php: iPhone 表示の作品集一覧を一定数ごとにリストを分割するよう変更
+	* req/Core/Visualizer.php: X-UA-Compatible の指定を変更
+	* req/Model/Meta.php: meta テーブルの取得タイミングを変更
+	* script/mobile/Read/Index.js: iPhone 表示にてコメントができないのを修正
+	* req/Model/Comment.php,
+	  req/Model/Evaluation.php: コメントおよび評価の削除を高速化
+	* req/Model/SearchIndex/Classic.php,
+	  req/Model/SearchIndex/MySQL.php,
+	  req/Model/SearchIndex/SQLite.php: NOT 検索の追加
+	* config.php,
+	  req/Core/Auth.php,
+	  req/Core/Configuration.php: セッションをデータベース上に保存するかどうかのオプションを追加
+	* config.php,
+	  req/App.php,
+	  req/Core/Configuration.php,
+	  req/Visualizer/Util/Hash.php: ホスト規制の例外のオプションを追加
+
+2012-10-11 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 31
 	* req/Visualizer/Read/Edit.php: label のために id を修正
