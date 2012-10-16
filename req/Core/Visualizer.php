@@ -1027,7 +1027,7 @@ class Visualizer
 			header("X-WebKit-CSP: {$csp}");
 		
 		if (Util::getBrowserType() == Util::BROWSER_TYPE_MSIE_NEW)
-			header("X-UA-Compatible: IE=edge");
+			header("X-UA-Compatible: IE=8; IE=9");
 	}
 }
 
