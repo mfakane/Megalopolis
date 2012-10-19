@@ -31,11 +31,15 @@ class Configuration
 	
 	public $debug = false;
 	
+	/*
+	 * 全体に関する設定
+	 */
 	public $title = "Megalopolis";
 	public $adminHash = null;
 	public $utilsEnabled = false;
 	public $htaccessAutoConfig = false;
 	public $linkType = self::LINK_AUTO;
+	public $useOutputCompression = true;
 	public $useBBQ = self::BBQ_NONE;
 	public $denyRead = array();
 	public $denyWrite = array();
@@ -46,17 +50,26 @@ class Configuration
 	public $maximumSearchIndexLength = 1024;
 	public $mysqlSearchNgramLength = 4;
 	public $mysqlSearchUseHeadMatching = false;
-
+	
+	/*
+	 * データストアに関する設定
+	 */
 	/**
 	 * @var DataStore
 	 */
 	public $dataStore;
 	public $storeSessionIntoDataStore = true;
 	
+	/*
+	 * 評価に関する設定
+	 */
 	public $useComments = true;
 	public $pointMap = array();
 	public $commentPointMap = array();
 	
+	/*
+	 * 投稿に関する設定
+	 */
 	public $adminOnly = false;
 	public $defaultName = "名前が無い程度の能力";
 	public $requireName = array
@@ -253,6 +266,9 @@ class Configuration
 	public $maxSummaryLines = 0;
 	public $maxSummarySize = 0;
 	
+	/*
+	 * 表示に関する設定
+	 */
 	public $skin = null;
 	public $subjectOrder = self::ORDER_DESCEND;
 	public $rateType = self::RATE_AVERAGE;
@@ -327,6 +343,9 @@ class Configuration
 	public $authorTweetButtonText = null;
 	public $authorTweetButtonHashtags = null;
 	
+	/*
+	 * ログの変換に関する設定
+	 */
 	public $convertDivision = 50;
 	public $convertOnDemand = false;
 	

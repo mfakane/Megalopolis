@@ -35,6 +35,11 @@ $config->htaccessAutoConfig = true;
 // - Configuration::LINK_QUERY		クエリ形式
 $config->linkType = Configuration::LINK_AUTO;
 
+// gzip 転送を許可するか (true/false)
+// true の場合、ブラウザが gzip 転送に対応している場合、出力を gzip 圧縮転送し
+// 転送量を削減します。
+$config->useOutputCompression = true;
+
 // BBQ (http://bbq.uso800.net/) による公開プロキシ規制を使用するか (特定値)
 // - Configuration::BBQ_NONE		使用しない
 // - Configuration::BBQ_READ		閲覧に対して使用する

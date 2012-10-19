@@ -931,12 +931,12 @@ class Visualizer
 		if ($mbencoding)
 			$output = mb_convert_encoding($output, $mbencoding, "UTF8");
 		
-		echo strtr($output, array
+		self::echoWithCompression(strtr($output, array
 		(
 			"<!DOCTYPE html>" => "<!DOCTYPE html>\r\n",
 			"__RENDER_TIME__" => round((microtime(true) - $start) * 1000, 2) . "ms",
 			"__PROCESS_TIME__" => round(($start - App::$startTime) * 1000, 2) . "ms"
-		));
+		)));
 		
 		return true;
 	}
@@ -950,7 +950,7 @@ class Visualizer
 		header("Content-Type: application/json");
 		
 		Auth::commitSession();
-		echo json_encode($obj);
+		self::echoWithCompression(json_encode($obj));
 		
 		return true;
 	}
@@ -1007,9 +1007,25 @@ class Visualizer
 		mb_http_output($mbencoding);
 		self::defaultHeaders();
 		header("Content-Type: text/plain; charset={$encoding}");
-		echo mb_convert_encoding($content, $mbencoding, "UTF-8");
+		self::echoWithCompression(mb_convert_encoding($content, $mbencoding, "UTF-8"));
 		
 		return true;
+	}
+	
+	private static function echoWithCompression($output)
+	{
+		if (Configuration::$instance->useOutputCompression &&
+			!headers_sent() &&
+			isset($_SERVER["HTTP_ACCEPT_ENCODING"]) &&
+			in_array("gzip", array_map("trim", explode(",", $_SERVER["HTTP_ACCEPT_ENCODING"]))) &&
+			extension_loaded("zlib"))
+		{
+			header("Content-Encoding: gzip");
+			
+			$output = gzencode($output);
+		}
+		
+		echo $output;
 	}
 	
 	private static function defaultHeaders()
