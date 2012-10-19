@@ -487,7 +487,7 @@ class ReadHandler extends Handler
 		$error = array();
 		$point = intval(self::param("point"));
 	
-		if ($point != 0 && !in_array($point, Configuration::$instance->pointMap))
+		if (!in_array($point, Configuration::$instance->pointMap))
 			$error[] = "評価が不正です";
 		
 		if (!Util::isEmpty(Configuration::$instance->postPassword))
