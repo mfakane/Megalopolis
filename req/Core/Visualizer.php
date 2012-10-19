@@ -498,6 +498,10 @@ class Visualizer
 				$code .= " Not Modified";
 				
 				break;
+			case 401:
+				$code .= " Unauthorized";
+				
+				break;
 			case 403:
 				$code .= " Forbidden";
 				
