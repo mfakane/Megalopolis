@@ -249,12 +249,12 @@ class MegalithHandler extends Handler
 				case "read":
 					return Visualizer::redirect(intval(self::param("log")) . "/" . intval(self::param("key")));
 				case "update":
-					if (Util::escapeInput(self::param("target", "thread")))
+					if (Util::escapeInput(self::param("target", "thread")) == "thread")
 						return false;
 					else if (Util::escapeInput($_POST["body"]) == "#EMPTY#")
-						return Visualizer::redirect(intval(self::param("log")) . "/" . intval(self::param("key")) . "/evaluate");
+						return App::callHandler("Read", "evaluate", array(intval(self::param("log")), intval(self::param("key"))));
 					else
-						return Visualizer::redirect(intval(self::param("log")) . "/" . intval(self::param("key")) . "/comment");
+						return App::callHandler("Read", "comment", array(intval(self::param("log")), intval(self::param("key"))));
 			}
 		}
 		else if (isset($_GET["log"]))
