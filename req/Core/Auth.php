@@ -242,7 +242,11 @@ class Auth
 		self::createToken();
 		Visualizer::$data = $error;
 		Visualizer::noCache();
-		Visualizer::visualize("Auth");
+		
+		if (App::$handlerType == "json")
+			throw new ApplicationException($error, 401);
+		else
+			Visualizer::visualize("Auth");
 		
 		exit;
 	}
