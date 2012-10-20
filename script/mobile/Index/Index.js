@@ -8,7 +8,7 @@ megalopolis.index =
 	{
 		title: function(x, y) { return megalopolis.index.textSort(x, y); },
 		name: function(x, y) { return megalopolis.index.textSort(x, y); },
-		size: function(x, y) { y.replace("KB", "") - x.replace("KB", "") },
+		size: function(x, y) { return x.replace("KB", "") - y.replace("KB", ""); },
 		evaluationCount: function(x, y)
 		{
 			var allEval = y.replace(/^[0-9]+\//, "") - x.replace(/^[0-9]+\//, "");
