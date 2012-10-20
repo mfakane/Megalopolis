@@ -648,7 +648,7 @@ li.ui-li.ui-btn-hover-c *
 	font-size: 18px;
 }
 
-.horizontal .contentWrapper header, .horizontal .contentWrapper footer
+.horizontal .contentWrapper .summary, .horizontal .contentWrapper footer
 {
 	margin: 8px -8px 8px -8px;
 	padding: 8px;
@@ -667,6 +667,14 @@ li.ui-li.ui-btn-hover-c *
 	margin-right: 4px;
 	font-size: 80%;
 	font-style: normal;
+}
+
+.vertical .contentWrapper .summary
+{
+	margin-left: 64px;
+	padding-left: 64px;
+	border-left: #666666 solid 1px;
+	color: #666666;
 }
 
 .vertical .contentWrapper footer
