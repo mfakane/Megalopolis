@@ -1,4 +1,19 @@
-﻿2012-10-17 COAH96KoxU <queue glasscore.net>
+﻿2012-10-21 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 33
+	* store/notice/sample.txt: サンプルテキストの中身を使い方テキストに変更
+	* script/mobile/Index/Index.js: iPhone 表示でサイズ順にソートできないのを修正
+	* req/Visualizer/mobile/Read/Index.php,
+	  style/mobile/mobile.css: iPhone 表示にて概要の表示を調整
+	* req/Core/Visualizer.php: 401 出力時のステータスに Unauthorized の文字を追加
+	* req/Core/Auth.php: JSON 出力で認証に失敗した際 401 を出すように変更
+	* req/Handler/Read.php: 点数表に 0 がない場合でも簡易評価が 0 点を許可するのを修正
+	* req/Handler/Megalith.php: Megalith 互換ハンドラで評価およびコメントができないのを修正
+	* config.php,
+	  req/Core/Configuration.php,
+	  req/Core/Visualizer.php: 圧縮転送のオプションを追加
+
+2012-10-17 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 32
 	* req/Model/SearchIndex/MySQL.php,
