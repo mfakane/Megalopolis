@@ -11,9 +11,11 @@ class Auth
 	static $details = null;
 	private static $isAdmin = false;
 	
-	static function useSession()
+	static function useSession($begin = false)
 	{
-		if (!self::isSessionEnabled())
+		$sessionName = "MEGALOPOLIS_" . basename(dirname(dirname(dirname(__FILE__))));
+		
+		if (!self::isSessionEnabled() && ($begin || isset($_COOKIE[$sessionName])))
 		{
 			ini_set("session.use_cookies", 1);
 			ini_set("session.use_only_cookies", 1);
@@ -25,7 +27,7 @@ class Auth
 			
 			session_cache_limiter(false);
 			session_set_cookie_params(0, dirname(Util::getPhpSelf()));
-			session_name("MEGALOPOLIS_" . basename(dirname(dirname(dirname(__FILE__)))));
+			session_name($sessionName);
 			
 			if (Configuration::$instance->storeSessionIntoDataStore)
 				SessionStore::useSessionStore();
@@ -58,18 +60,10 @@ class Auth
 		if (self::isSessionEnabled())
 		{
 			session_commit();
-			self::sendCookie();
 			
 			if (self::hasSession())
 				Visualizer::noCache();
 		}
-	}
-	
-	static function sendCookie()
-	{
-		if ($sid = self::getSessionID())
-			if (!in_array("Set-Cookie: " . session_name() . "={$sid}; path=" . dirname(Util::getPhpSelf()) . "; HttpOnly", headers_list()))
-				setcookie(session_name(), $sid, 0, dirname(Util::getPhpSelf()), null, null, true);
 	}
 	
 	static function logout()
@@ -213,6 +207,8 @@ class Auth
 	 */
 	static function login($admin = false, $ensureToken = true)
 	{
+		self::useSession(true);
+		
 		if (self::hasSession($admin))
 			return $_SESSION[self::SESSION_PASSWORD];
 		else if (isset($_POST["password"]))
