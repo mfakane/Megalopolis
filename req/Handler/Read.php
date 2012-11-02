@@ -288,12 +288,10 @@ class ReadHandler extends Handler
 		Auth::$label = "編集キー";
 		Auth::$details = "<div class='notify warning'>本当に {$this->entry->title} を削除してよろしいですか？続行する場合は編集キーを入力します</div>";
 		
-		if (!Util::hashEquals($this->thread->hash, $login = Auth::login()) &&
+		if (!Auth::hasSession(true) &&
+			!Util::hashEquals($this->thread->hash, $login = Auth::login(false, false)) &&
 			!Util::hashEquals(Configuration::$instance->adminHash, $login))
 			Auth::loginError("編集キーが一致しません");
-		
-		if (!Auth::ensureToken("token", false))
-			return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}/edit");
 		
 		$db->beginTransaction();
 		

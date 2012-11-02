@@ -140,7 +140,7 @@ Visualizer::doctype();
 		<form action="<?+Util::withMobileUniqueIDRequestSuffix("unpost") ?>" method="post" id="unpostForm">
 			<section>
 				<h2>作品の削除</h2>
-				<label><input type="checkbox" name="token" id="unpostCheck" value="<?+$_SESSION[Auth::SESSION_TOKEN] ?>" />作品を削除する</label>
+				<label><input type="checkbox" name="password" id="unpostCheck" value="<?+ReadHandler::param("password") ?>" />作品を削除する</label>
 				<ul class="buttons">
 					<li>
 						<button type="submit" id="unpostSubmit">
