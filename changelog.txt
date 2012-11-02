@@ -1,4 +1,11 @@
-﻿2012-10-21 COAH96KoxU <queue glasscore.net>
+﻿2012-11-03 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 34
+	* req/Handler/Read.php,
+	  req/Visualizer/Read/Edit.php: 作品削除の認証方法を変更
+	* req/Core/Auth.php: セッションを必要なときのみ使用するよう変更
+
+2012-10-21 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 33
 	* store/notice/sample.txt: サンプルテキストの中身を使い方テキストに変更
