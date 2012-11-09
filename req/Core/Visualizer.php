@@ -881,6 +881,8 @@ class Visualizer
 	 */ 
 	static function visualize($path = null, $status = null, $contentType = null, $encoding = null, $mbencoding = null)
 	{
+		static $nestLevel = 0;
+		
 		Auth::commitSession();
 		
 		if ($path == null)
@@ -926,21 +928,33 @@ class Visualizer
 		$content = preg_replace(array_keys($table), array_values($table), file_get_contents($path));
 		
 		$start = microtime(true);
+		
+		$nestLevel++;
 		ob_start();
 		eval("?" . ">" . $content);
 		$output = ob_get_contents();
 		ob_end_clean();
-		$output = mb_ereg_replace('[\t \r\n]+?<', '<', mb_ereg_replace('>[\t \r\n]+', '>', $output));
-
-		if ($mbencoding)
-			$output = mb_convert_encoding($output, $mbencoding, "UTF8");
+		$nestLevel--;
 		
-		self::echoWithCompression(strtr($output, array
-		(
-			"<!DOCTYPE html>" => "<!DOCTYPE html>\r\n",
-			"__RENDER_TIME__" => round((microtime(true) - $start) * 1000, 2) . "ms",
-			"__PROCESS_TIME__" => round(($start - App::$startTime) * 1000, 2) . "ms"
-		)));
+		if ($nestLevel == 0)
+		{
+			$output = mb_ereg_replace('[\t \r\n]+?<', '<', mb_ereg_replace('>[\t \r\n]+', '>', $output));
+
+			if ($mbencoding)
+				$output = mb_convert_encoding($output, $mbencoding, "UTF8");
+			
+			$output = strtr($output, array
+			(
+				"<!DOCTYPE html>" => "<!DOCTYPE html>\r\n",
+				"__RENDER_TIME__" => round((microtime(true) - $start) * 1000, 2) . "ms",
+				"__PROCESS_TIME__" => round(($start - App::$startTime) * 1000, 2) . "ms"
+			));
+		}
+		
+		if ($nestLevel == 0)
+			self::echoWithCompression($output);
+		else
+			echo $output;
 		
 		return true;
 	}
