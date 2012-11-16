@@ -9,9 +9,15 @@ Visualizer::doctype();
 <html lang="ja">
 <head>
 	<? Visualizer::head() ?>
-	<meta name="author" content="<?+$h->entry->name ?>" />
-	<meta name="description" content="<?+$h->entry->summary ?>" />
-	<meta name="keywords" content="<?+implode(",", $h->entry->tags) ?>" />
+	<?if ($c->showName[Configuration::ON_ENTRY]): ?>
+		<meta name="author" content="<?+$h->entry->name ?>" />
+	<?endif ?>
+	<?if (!Util::isEmpty($h->entry->summary) && $c->useSummary && $c->showSummary[Configuration::ON_ENTRY]): ?>
+		<meta name="description" content="<?+$h->entry->summary ?>" />
+	<?endif ?>
+	<?if ($h->entry->tags && $c->showTags[Configuration::ON_ENTRY]): ?>
+		<meta name="keywords" content="<?+implode(",", $h->entry->tags) ?>" />
+	<?endif ?>
 	<?if (App::$actionName == "index"): ?>
 		<link rel="contents" href="<?+Visualizer::actionHref($h->subject) ?>" />
 		<?if ($h->entry->pageCount > 1): ?>
