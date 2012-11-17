@@ -198,7 +198,8 @@ class Configuration
 	);
 	public $disallowedTags = array
 	(
-		"html",
+		"html" => "div",
+		"body" => "div",
 		
 		// head
 		"base",

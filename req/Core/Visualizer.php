@@ -643,9 +643,10 @@ class Visualizer
 	private static function ensureHtml($str, $stripExcept = null)
 	{
 		$rt = str_get_html($str);
-		$disallowed = array_flip(Configuration::$instance->disallowedTags);
+		$disallowed = Configuration::$instance->disallowedTags;
 		$allowed = array_flip(Configuration::$instance->allowedTags);
-		self::replaceTags($rt, $disallowed, $allowed);
+		$disallowedMap = array_flip(array_map(create_function('$x, $y', 'return is_int($x) ? $y : $x;'), array_keys($disallowed), array_values($disallowed)));
+		self::replaceTags($rt, $disallowed, $disallowedMap, $allowed);
 		self::ensureHtmlTagEnd($rt);
 		
 		$str = $rt->save();
@@ -664,16 +665,24 @@ class Visualizer
 		return $str;
 	}
 	
-	private static function replaceTags($rt, array $disallowed, array $allowed)
+	private static function replaceTags($rt, array $disallowed, array $disallowedMap, array $allowed)
 	{
 		foreach ($rt->find("*") as $i)
 		{
-			if (isset($disallowed[$i->tag]))
-				$i->outertext = " :REPLACED: ";
-			else if (!isset($allowed[$i->tag]))
+			if (isset($disallowedMap[$i->tag]))
+				if (isset($disallowed[$i->tag]))
+					$i->tag = $disallowed[$i->tag];
+				else
+				{
+					$i->outertext = " :REPLACED: ";
+					
+					continue;
+				}
+			
+			if (!isset($allowed[$i->tag]))
 				$i->outertext = self::escapeOutput($i->outertext);
 			else
-				self::replaceTags($i, $disallowed, $allowed);
+				self::replaceTags($i, $disallowed, $disallowedMap, $allowed);
 		}
 	}
 	
