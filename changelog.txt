@@ -1,5 +1,14 @@
 ﻿2012-11-09 COAH96KoxU <queue glasscore.net>
 
+	* req/App.php: release 36
+	* req/Core/Configuration.php,
+	  req/Core/Visualizer.php: html および body タグを div に置き換えるように
+	* script/Read/Index.js,
+	  style/webkit.css: Chrome の対応に伴い WebKit での縦書き表示を writing-mode と text-orientation のみ使用するよう変更
+	* req/Visualizer/Read/Index.php: 作品のメタタグが表示設定にかかわらず出力されていたのを修正
+
+2012-11-09 COAH96KoxU <queue glasscore.net>
+
 	* req/App.php: release 35
 	* req/Core/Visualizer.php: 携帯表示および iPhone 向け表示で検索画面が化けるのを修正
 
