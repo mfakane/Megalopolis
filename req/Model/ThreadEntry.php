@@ -38,6 +38,13 @@ class ThreadEntry
 		"tag" => "varchar(255) primary key not null",
 		"position" => "tinyint"
 	);
+	static $authorSchemaVersion = 2;
+	static $authorSchema = array
+	(
+		"name" => "varchar(255) primary key not null",
+		
+		"threadCount" => "integer",
+	);
 	
 	const SEARCH_RANDOM = 0;
 	const SEARCH_ASCENDING = 1;
@@ -304,6 +311,60 @@ class ThreadEntry
 		Meta::set($db, App::THREAD_ENTRY_TABLE, strval(self::$threadEntrySchemaVersion));
 		Meta::set($db, App::THREAD_EVALUATION_TABLE, strval(self::$threadEvaluationSchemaVersion));
 		Meta::set($db, App::THREAD_TAG_TABLE, strval(self::$threadTagSchemaVersion));
+		Meta::set($db, App::AUTHOR_TABLE, strval(self::$authorSchemaVersion));
+		
+		if (!Util::hasTable($db, App::AUTHOR_TABLE) ||
+			intval(Meta::get($db, App::AUTHOR_TABLE, "1")) < 2)
+		{
+			if (!Util::hasTable($db, App::AUTHOR_TABLE))
+			{
+				Util::createTableIfNotExists($db, self::$authorSchema, App::AUTHOR_TABLE, array
+				(
+					App::AUTHOR_TABLE . "ThreadCountIndex" => array("threadCount desc")
+				));
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('
+					insert into %s
+					select name, count(id) as threadCount from %s
+					where name != ""
+					group by name', App::AUTHOR_TABLE, App::THREAD_ENTRY_TABLE))), array(), false);
+			}
+			
+			foreach (array('
+				create trigger %1$sInsertTrigger after insert on %2$s for each row
+				begin
+					replace into %1$s
+					select name, count(id) as threadCount from %2$s
+					where name = new.name
+					group by name;
+				end', '
+				create trigger %1$sUpdateTrigger after update on %2$s for each row
+				begin
+					update %1$s
+					set threadCount = threadCount - 1
+					where name = old.name;
+					
+					delete from %1$s where name = old.name and threadCount = 0;
+					
+					replace into %1$s
+					select name, count(id) as threadCount from %2$s
+					where name = new.name
+					group by name;
+				end', '
+				create trigger %1$sDeleteTrigger after delete on %2$s for each row
+				begin
+					update %1$s
+					set threadCount = threadCount - 1
+					where name = old.name;
+					
+					delete from %1$s where name = old.name and threadCount = 0;
+				end') as $i)
+			{
+				$i = sprintf($i, App::AUTHOR_TABLE, App::THREAD_ENTRY_TABLE);
+				$sl = explode(" ", $i);
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare('drop trigger if exists ' . $sl[2]), array(), false));
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare($i), array(), false));
+			}
+		}
 	}
 	
 	/**
@@ -722,12 +783,10 @@ class ThreadEntry
 	{
 		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
-			select name, count(id) from %s
-			where name != ""
-			group by name
-			order by count(id) %s
+			select name, threadCount from %s
+			order by threadCount %s
 			%s',
-			App::THREAD_ENTRY_TABLE,
+			App::AUTHOR_TABLE,
 			$order == Board::ORDER_ASCEND ? "asc" : "desc",
 			is_null($limit) ? "" : "limit {$limit} offset {$offset}"
 		)));

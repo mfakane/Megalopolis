@@ -267,6 +267,8 @@ class SQLiteDataStore extends DataStore
 		$db = new PDO(sprintf("sqlite:%s%s.sqlite", rtrim($this->directory, "/") . "/", $name), null, null);
 		$this->registerHandle($db, $name);
 		
+		Util::executeStatement(Util::ensureStatement($db, $db->prepare('pragma recursive_triggers = true;')));
+		
 		if ($name == App::INDEX_DATABASE)
 			SearchIndex::ensureTable($db);
 		else
