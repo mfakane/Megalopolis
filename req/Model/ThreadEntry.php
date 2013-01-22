@@ -45,6 +45,13 @@ class ThreadEntry
 		
 		"threadCount" => "integer",
 	);
+	static $tagSchemaVersion = 2;
+	static $tagSchema = array
+	(
+		"tag" => "varchar(255) primary key not null",
+		
+		"threadCount" => "integer",
+	);
 	
 	const SEARCH_RANDOM = 0;
 	const SEARCH_ASCENDING = 1;
@@ -311,7 +318,6 @@ class ThreadEntry
 		Meta::set($db, App::THREAD_ENTRY_TABLE, strval(self::$threadEntrySchemaVersion));
 		Meta::set($db, App::THREAD_EVALUATION_TABLE, strval(self::$threadEvaluationSchemaVersion));
 		Meta::set($db, App::THREAD_TAG_TABLE, strval(self::$threadTagSchemaVersion));
-		Meta::set($db, App::AUTHOR_TABLE, strval(self::$authorSchemaVersion));
 		
 		if (!Util::hasTable($db, App::AUTHOR_TABLE) ||
 			intval(Meta::get($db, App::AUTHOR_TABLE, "1")) < 2)
@@ -326,7 +332,7 @@ class ThreadEntry
 					insert into %s
 					select name, count(id) as threadCount from %s
 					where name != ""
-					group by name', App::AUTHOR_TABLE, App::THREAD_ENTRY_TABLE))), array(), false);
+					group by name', App::AUTHOR_TABLE, App::THREAD_ENTRY_TABLE))), array());
 			}
 			
 			foreach (array('
@@ -365,6 +371,62 @@ class ThreadEntry
 				Util::executeStatement(Util::ensureStatement($db, $db->prepare($i), array(), false));
 			}
 		}
+		
+		Meta::set($db, App::AUTHOR_TABLE, strval(self::$authorSchemaVersion));
+		
+		if (!Util::hasTable($db, App::TAG_TABLE) ||
+			intval(Meta::get($db, App::TAG_TABLE, "1")) < 2)
+		{
+			if (!Util::hasTable($db, App::TAG_TABLE))
+			{
+				Util::createTableIfNotExists($db, self::$tagSchema, App::TAG_TABLE, array
+				(
+					App::TAG_TABLE . "ThreadCountIndex" => array("threadCount desc")
+				));
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('
+					insert into %s
+					select tag, count(id) as threadCount from %s
+					group by tag', App::TAG_TABLE, App::THREAD_TAG_TABLE))), array());
+			}
+			
+			foreach (array('
+				create trigger %1$sInsertTrigger after insert on %2$s for each row
+				begin
+					replace into %1$s
+					select tag, count(id) as threadCount from %2$s
+					where tag = new.tag
+					group by tag;
+				end', '
+				create trigger %1$sUpdateTrigger after update on %2$s for each row
+				begin
+					update %1$s
+					set threadCount = threadCount - 1
+					where tag = old.tag;
+					
+					delete from %1$s where tag = old.tag and threadCount = 0;
+					
+					replace into %1$s
+					select tag, count(id) as threadCount from %2$s
+					where tag = new.tag
+					group by tag;
+				end', '
+				create trigger %1$sDeleteTrigger after delete on %2$s for each row
+				begin
+					update %1$s
+					set threadCount = threadCount - 1
+					where tag = old.tag;
+					
+					delete from %1$s where tag = old.tag and threadCount = 0;
+				end') as $i)
+			{
+				$i = sprintf($i, App::TAG_TABLE, App::THREAD_TAG_TABLE);
+				$sl = explode(" ", $i);
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare('drop trigger if exists ' . $sl[2]), array(), false));
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare($i), array(), false));
+			}
+		}
+		
+		Meta::set($db, App::TAG_TABLE, strval(self::$tagSchemaVersion));
 	}
 	
 	/**
@@ -748,8 +810,8 @@ class ThreadEntry
 	{
 		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
-			select count(distinct name) from %s',
-			App::THREAD_ENTRY_TABLE
+			select count(name) from %s',
+			App::AUTHOR_TABLE
 		)));
 		Util::executeStatement($st);
 		$rt = $st->fetchAll(PDO::FETCH_COLUMN);
@@ -764,8 +826,8 @@ class ThreadEntry
 	{
 		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
-			select count(distinct tag) from %s',
-			App::THREAD_TAG_TABLE
+			select count(tag) from %s',
+			App::TAG_TABLE
 		)));
 		Util::executeStatement($st);
 		$rt = $st->fetchAll(PDO::FETCH_COLUMN);
@@ -819,11 +881,10 @@ class ThreadEntry
 	{
 		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
-			select tag, count(id) from %s
-			group by tag
-			order by count(id) %s
+			select tag, threadCount from %s
+			order by threadCount %s
 			%s',
-			App::THREAD_TAG_TABLE,
+			App::TAG_TABLE,
 			$order == Board::ORDER_ASCEND ? "asc" : "desc",
 			is_null($limit) ? "" : "limit {$limit} offset {$offset}"
 		)));

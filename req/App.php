@@ -16,6 +16,7 @@ class App
 	const COMMENT_TABLE = "comment";
 	const EVALUATION_TABLE = "evaluation";
 	const AUTHOR_TABLE = "author";
+	const TAG_TABLE = "tags";
 	const SESSION_STORE_TABLE = "sessionStore";
 	const INDEX_DATABASE = "search";
 
