@@ -1,4 +1,13 @@
-﻿2012-11-09 COAH96KoxU <queue glasscore.net>
+﻿2013-01-24 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 37
+	* req/App.php,
+	  req/Model/ThreadEntry.php: タグ一覧の表示を高速化
+	* req/App.php,
+	  req/Core/DataStore.php,
+	  req/Model/ThreadEntry.php: 作者一覧の表示の高速化
+
+2012-11-09 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 36
 	* req/Core/Configuration.php,
