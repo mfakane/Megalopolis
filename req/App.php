@@ -44,6 +44,7 @@ class App
 			mb_internal_encoding("UTF-8");
 			mb_http_output("UTF-8");
 			mb_regex_encoding("UTF-8");
+			ignore_user_abort(true);
 
 			if (!function_exists("lcfirst"))
 			{

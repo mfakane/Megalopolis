@@ -893,5 +893,35 @@ class Util
 	{
 		return isset($str[$length - 1]);
 	}
+	
+	/**
+	 * @param string $name
+	 * @param int $lifetime [optional]
+	 * @return resource
+	 */
+	static function acquireWriteLock($name = "default", $lifetime = 60)
+	{
+		$path = rtrim(DATA_DIR, "/") . "/" . $name . ".lock";
+		
+		while (!@mkdir($path))
+		{
+			if (time() - filemtime($path) > $lifetime)
+				break;
+			
+			usleep(50 * 1000);
+		}
+		
+		touch($path);
+		
+		return $path;
+	}
+	
+	/**
+	 * @param resource $p
+	 */
+	static function releaseLock($p)
+	{
+		rmdir($p);
+	}
 }
 ?>

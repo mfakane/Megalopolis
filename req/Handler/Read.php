@@ -352,6 +352,7 @@ class ReadHandler extends Handler
 			else if ($postPassword != Configuration::$instance->postPassword)
 				$error[] = "投稿キーが一致しません";	
 		
+		$lock = Util::acquireWriteLock();
 		$this->thread = self::loadThread($db, $id);
 		$this->entry = &$this->thread->entry;
 		
@@ -391,6 +392,7 @@ class ReadHandler extends Handler
 		if ($error)
 		{
 			App::closeDB($db);
+			Util::releaseLock($lock);
 			Visualizer::$data = $error;
 			header("HTTP/1.1 400 Bad Request");
 			
@@ -404,6 +406,12 @@ class ReadHandler extends Handler
 		}
 		else
 		{
+			$db->beginTransaction();
+			$comment = $this->thread->comment($db, $name, $mail, $body, $password, $point);
+			$db->commit();
+			App::closeDB($db);
+			Util::releaseLock($lock);
+			
 			$history = array_filter(explode(",", Cookie::getCookie(Cookie::EVALUATION_HISTORY_KEY, "")));
 			
 			if (($idx = array_search($id, $history)) !== false)
@@ -413,10 +421,6 @@ class ReadHandler extends Handler
 			Cookie::setCookie(Cookie::EVALUATION_HISTORY_KEY, implode(",", array_slice($history, 0, Configuration::$instance->maxHistory)));
 			Cookie::sendCookie();
 			
-			$db->beginTransaction();
-			$comment = $this->thread->comment($db, $name, $mail, $body, $password, $point);
-			$db->commit();
-			App::closeDB($db);
 			
 			if (App::$handlerType == "json")
 			{
@@ -494,6 +498,7 @@ class ReadHandler extends Handler
 			else if (self::param("postPassword") != Configuration::$instance->postPassword)
 				$error[] = "投稿キーが一致しません";	
 		
+		$lock = Util::acquireWriteLock();
 		$this->thread = self::loadThread($db, $id);
 		$this->entry = &$this->thread->entry;
 			
@@ -503,6 +508,7 @@ class ReadHandler extends Handler
 		if ($error)
 		{
 			App::closeDB($db);
+			Util::releaseLock($lock);
 			Visualizer::$data = $error;
 			header("HTTP/1.1 400 Bad Request");
 			
@@ -516,6 +522,12 @@ class ReadHandler extends Handler
 		}
 		else
 		{
+			$db->beginTransaction();
+			$eval = $this->thread->evaluate($db, $point);
+			$db->commit();
+			App::closeDB($db);
+			Util::releaseLock($lock);
+			
 			$history = array_filter(explode(",", Cookie::getCookie(Cookie::EVALUATION_HISTORY_KEY, "")));
 			
 			if (($idx = array_search($id, $history)) !== false)
@@ -524,11 +536,6 @@ class ReadHandler extends Handler
 			array_unshift($history, $id);
 			Cookie::setCookie(Cookie::EVALUATION_HISTORY_KEY, implode(",", array_slice($history, 0, Configuration::$instance->maxHistory)));
 			Cookie::sendCookie();
-			
-			$db->beginTransaction();
-			$eval = $this->thread->evaluate($db, $point);
-			$db->commit();
-			App::closeDB($db);
 			
 			if (App::$handlerType == "json")
 				return Visualizer::json(array
