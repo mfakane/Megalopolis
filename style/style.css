@@ -4,7 +4,7 @@ html
 	padding: 0px;
 	background: #ccddcc url("background.png") repeat-x scroll top left;
 	font-family: sans-serif;
-	line-height: 1.25em;
+	line-height: 1.25;
 }
 
 body
@@ -755,7 +755,7 @@ body>ul
 .taglist
 {
 	padding: 16px;
-	line-height: 200%;
+	line-height: 2;
 }
 
 .taglist dl
@@ -1399,7 +1399,7 @@ body.index>h1, body.read>h1
 	margin: 32px;
 	padding: 16px;
 	padding-bottom: 8px;
-	line-height: 130%;
+	line-height: 1.3;
 	overflow: hidden;
 	line-break: strict;
 	word-break: normal;
@@ -1408,7 +1408,7 @@ body.index>h1, body.read>h1
 
 .read #body #contentWrapper
 {
-	line-height: 180%;
+	line-height: 1.8;
 }
 
 .read #body h1
