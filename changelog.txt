@@ -1,4 +1,16 @@
-﻿2013-01-24 COAH96KoxU <queue glasscore.net>
+﻿2013-09-04 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 39
+	* req/Handler/Read.php: 新規作品集作成時の vacuum をしないように
+	* style/style.css: 行間指定の単位を変更
+
+2013-05-14 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 38
+	* req/Core/Util.php,
+	  req/Handler/Read.php: コメントと評価にロックを追加
+
+2013-01-24 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 37
 	* req/App.php,
