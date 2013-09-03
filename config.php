@@ -530,6 +530,11 @@ $config->convertDivision = 100;
 // Megalith/ 以下にある Megalith 形式のログを使用するかどうかを指定します
 $config->convertOnDemand = false;
 
+// Megalith ログの評価数をコメント数として取り込むかどうか (true/false)
+// Megalith で得点制を使っておらず評価数のすべてがコメントであることが確定しており、
+// convertOnDemand = true 時にコメント数が 0 と表示されてしまうときなどにお使いください
+$config->importCompositeEvalsAsCommentCount = false;
+
 // 設定終了
 unset($config);
 ?>

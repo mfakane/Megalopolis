@@ -658,7 +658,12 @@ class Util
 		$entry->dateTime = $entry->id;
 		$entry->pageCount = 1;
 		$evals = explode("/", $eval);
-		$entry->evaluationCount = intval(array_pop($evals));
+		
+		if (Configuration::$instance->importCompositeEvalsAsCommentCount)
+			$entry->commentCount = intval(array_pop($evals));
+		else
+			$entry->evaluationCount = intval(array_pop($evals));
+		
 		$entry->points = intval($points);
 		$entry->rate = floatval($rate);
 		unset

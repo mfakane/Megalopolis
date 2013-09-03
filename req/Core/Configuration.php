@@ -351,6 +351,7 @@ class Configuration
 	 */
 	public $convertDivision = 50;
 	public $convertOnDemand = false;
+	public $importCompositeEvalsAsCommentCount = false;
 	
 	function usePoints()
 	{
