@@ -103,7 +103,9 @@ class Visualizer
 					<meta name="msapplication-task" content="name=新規投稿;action-uri=<?php self::converted(self::absoluteHref("new")) ?>;icon-uri=<?php self::converted(self::absoluteHref("style", "addTaskIcon.png")) ?>" />
 				<?php endif ?>
 				<meta name="msapplication-task" content="name=おまかせ表示;action-uri=<?php self::converted(self::absoluteHref("random")) ?>;icon-uri=<?php self::converted(self::absoluteHref("style", "refreshTaskIcon.png")) ?>" />
-				<meta name="msapplication-task" content="name=詳細検索;action-uri=<?php self::converted(self::absoluteHref("search")) ?>;icon-uri=<?php self::converted(self::absoluteHref("style", "searchTaskIcon.png")) ?>" />
+				<?php if (Configuration::$instance->useSearch): ?>
+					<meta name="msapplication-task" content="name=詳細検索;action-uri=<?php self::converted(self::absoluteHref("search")) ?>;icon-uri=<?php self::converted(self::absoluteHref("style", "searchTaskIcon.png")) ?>" />
+				<?php endif ?>
 				<!--[if lt IE 9]>
 				<script src="<?php self::converted(self::actionHref("script", "html5.js")) ?>"></script>
 				<![endif]-->
@@ -147,7 +149,7 @@ class Visualizer
 			<a href="<?php self::converted(self::$basePath) ?>">
 				<?php self::converted(Configuration::$instance->title) ?>
 			</a>
-			<?php if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT] || Auth::hasSession(true)): ?>
+			<?php if ((Configuration::$instance->showTitle[Configuration::ON_SUBJECT] && Configuration::$instance->useSearch) || Auth::hasSession(true)): ?>
 				<form action="<?php self::converted(self::actionHref("search")) ?>" method="get">
 					<div>
 						<input type="search" name="query" placeholder="検索" />

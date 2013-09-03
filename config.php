@@ -95,6 +95,9 @@ $config->allowWrite = array
 // 契約者固有 ID は docomo, kddi, softbank, emobile に対応しています
 $config->denyWriteFromMobileWithoutID = false;
 
+// 検索を許可するか (true/false)
+$config->useSearch = true;
+
 // 本文も検索の対象として登録するか (true/false)
 // 投稿時に本文も検索インデックスに登録するかどうかを指定します。
 // 投稿に時間がかかったり、ログ変換に失敗したりするようであれば false にすることを推奨します。

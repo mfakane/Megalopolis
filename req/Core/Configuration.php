@@ -46,6 +46,7 @@ class Configuration
 	public $allowRead = array();
 	public $allowWrite = array();
 	public $denyWriteFromMobileWithoutID = false;
+	public $useSearch = true;
 	public $registerBodyToSearchIndex = true;
 	public $maximumSearchIndexLength = 1024;
 	public $mysqlSearchNgramLength = 4;
