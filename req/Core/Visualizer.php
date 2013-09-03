@@ -149,11 +149,16 @@ class Visualizer
 			<a href="<?php self::converted(self::$basePath) ?>">
 				<?php self::converted(Configuration::$instance->title) ?>
 			</a>
-			<?php if ((Configuration::$instance->showTitle[Configuration::ON_SUBJECT] && Configuration::$instance->useSearch) || Auth::hasSession(true)): ?>
-				<form action="<?php self::converted(self::actionHref("search")) ?>" method="get">
+			<?php if ((Configuration::$instance->showTitle[Configuration::ON_SUBJECT] && Configuration::$instance->useSearch) || Configuration::$instance->customSearch || Auth::hasSession(true)): ?>
+				<form action="<?php self::converted(Configuration::$instance->customSearch ? Configuration::$instance->customSearch[0] : self::actionHref("search")) ?>" method="get">
 					<div>
-						<input type="search" name="query" placeholder="検索" />
+						<input type="search" name="<?php self::converted(Configuration::$instance->customSearch ? Configuration::$instance->customSearch[1] : "query") ?>" placeholder="検索" />
 						<input type="submit" value="検索" />
+						<?php
+						if (isset(Configuration::$instance->customSearch[2]))
+							foreach (Configuration::$instance->customSearch[2] as $k => $v)
+								echo '<input type="hidden" name="', self::converted($k), '" value="', self::converted($v), '" />';
+						?>
 						<?php
 						if (App::$actionName == "tag" && !is_array(Visualizer::$data))
 							echo '<input type="hidden" name="tags" value="', Visualizer::$data, '" />';

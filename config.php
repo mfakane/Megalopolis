@@ -98,6 +98,13 @@ $config->denyWriteFromMobileWithoutID = false;
 // 検索を許可するか (true/false)
 $config->useSearch = true;
 
+// 検索ボックスのカスタムの検索先 (特定値)
+// - null																	標準の検索を使用します。
+// - array("http://localhost/", "query")									http://localhost/ というアドレスに、query というパラメータで検索文字列を渡します。
+// - array("http://localhost/", "query", array("a" => "b", "c" => "d"))		http://localhost/?a=b&c=d というアドレスに、query というパラメータで検索文字列を渡します。
+// カスタムの検索をセットする場合、useSearch で標準の検索を許可しない場合においても検索欄が出現します。
+$config->customSearch = null;
+
 // 本文も検索の対象として登録するか (true/false)
 // 投稿時に本文も検索インデックスに登録するかどうかを指定します。
 // 投稿に時間がかかったり、ログ変換に失敗したりするようであれば false にすることを推奨します。
