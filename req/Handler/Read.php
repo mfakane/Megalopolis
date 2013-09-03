@@ -208,7 +208,7 @@ class ReadHandler extends Handler
 		if ($db !== $idb)
 			$idb->beginTransaction();
 		
-		if ($vacuum = $id == 0)
+		if ($id == 0)
 		{
 			$this->thread = new Thread($db);
 			
@@ -252,8 +252,8 @@ class ReadHandler extends Handler
 		
 		$db->commit();
 		
-		App::closeDB($idb, true);
-		App::closeDB($db, $vacuum && !ThreadEntry::getEntriesBySubject($db, $this->entry->subject));
+		App::closeDB($idb);
+		App::closeDB($db);
 		
 		if (!Auth::hasSession(true))
 			Auth::logout();
