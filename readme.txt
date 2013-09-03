@@ -151,6 +151,7 @@ MySQL にデータベースを作成し、レコードやテーブルが操作�
 ポート番号は通常 3306 です。UNIX ソケットパスは通常 /tmp/mysql.sock です。
 ホスト名にローカルホストを指定する場合、localhost よりも 127.0.0.1 と指定したほうが接続が速い場合があります。
 
+
 Megalith からの移行
 ===================
 
@@ -283,15 +284,6 @@ changelog.txt をご覧ください。
 Do What The Fuck You Want To Public License, Version 2 (WTFPL) および自らの責任において
 自由に複製、改変、再配布、などが可能です。WTFPL についての詳細は次の URL か、
 以下の条文を参照してください。http://sam.zoy.org/wtfpl/
-
-            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
-                    Version 2, December 2004 
-
- Copyright (C) 2011 COAH96KoxU <queue@glasscore.net>
-
- Everyone is permitted to copy and distribute verbatim or modified 
- copies of this license document, and changing it is allowed as long 
- as the name is changed. 
 
             DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION 
