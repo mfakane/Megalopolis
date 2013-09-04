@@ -910,13 +910,13 @@ class Util
 		
 		while (!@mkdir($path))
 		{
-			if (time() - filemtime($path) > $lifetime)
+			$mtime = @filemtime($path . "/.");
+			
+			if (!$mtime || time() - $mtime > $lifetime)
 				break;
 			
 			usleep(50 * 1000);
 		}
-		
-		touch($path);
 		
 		return $path;
 	}
