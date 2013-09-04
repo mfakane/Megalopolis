@@ -1,4 +1,9 @@
-﻿2013-09-04 COAH96KoxU <queue glasscore.net>
+﻿2013-09-05 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 41
+	* req/Core/Util.php: ロック待機周りの挙動がおかしいのを修正
+
+2013-09-04 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 40
 	* config.php,
