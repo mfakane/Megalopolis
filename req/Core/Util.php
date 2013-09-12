@@ -90,6 +90,8 @@ class Util
 			if (mb_strstr($ua, $k))
 				if ($k == self::BROWSER_TYPE_ANDROID && mb_strstr($ua, self::BROWSER_TYPE_MOBILE))
 					return $browserType = self::BROWSER_TYPE_ANDROIDMOBILE;
+				else if ($k == self::BROWSER_TYPE_IPHONE && !mb_strstr($ua, "Safari"))
+					return $browserType = self::BROWSER_TYPE_MOBILE;
 				else
 					return $browserType = $v;
 		
