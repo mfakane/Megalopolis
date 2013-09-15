@@ -1,4 +1,9 @@
-﻿2013-09-12 COAH96KoxU <queue glasscore.net>
+﻿2013-09-15 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 43
+	* req/App.php: 保存先ディレクトリが書き込み可能かどうかのチェックを追加
+
+2013-09-12 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 42
 	* req/Core/Util.php: UserAgent 判定において iPhone の条件に Safari であることを追加
