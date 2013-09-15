@@ -115,6 +115,9 @@ class App
 	{
 		try
 		{
+			if (!is_writable(DATA_DIR))
+				throw new ApplicationException(DATA_DIR . " が書き込み可能ではありません");
+			
 			if ($_POST)
 			{
 				if (!Configuration::$instance->allowWrite || !self::matchesAddress(Configuration::$instance->allowWrite))
