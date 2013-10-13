@@ -912,6 +912,7 @@ class Util
 		
 		while (!@mkdir($path))
 		{
+			clearstatcache();
 			$mtime = @filemtime($path . "/.");
 			
 			if (!$mtime || time() - $mtime > $lifetime)
