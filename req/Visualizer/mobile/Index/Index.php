@@ -81,50 +81,50 @@ App::load(VISUALIZER_DIR . "mobile/Template/Index");
 			</footer>
 		</div>
 	<?elseif ($m == "s"): ?>
-		<form id="search" data-role="page" class="index fulllist" action="<?+Visualizer::actionHref("search") ?>" data-transition="none">
-			<header data-role="header" data-backbtn="false">
-				<h1>検索</h1>
-				<a href="#sort" class="ui-btn-right" data-transition="slideup">並べ替え</a>
-				<div class="searchcontainer">
-					<input type="search" placeholder="全体を検索" name="query" value="<?+$search ?>" />
-				</div>
-				<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
+		<?if ($c->showTitle[Configuration::ON_SUBJECT] && $c->useSearch): ?>
+			<form id="search" data-role="page" class="index fulllist" action="<?+Visualizer::actionHref("search") ?>" data-transition="none">
+				<header data-role="header" data-backbtn="false">
+					<h1>検索</h1>
+					<a href="#sort" class="ui-btn-right" data-transition="slideup">並べ替え</a>
+					<div class="searchcontainer">
+						<input type="search" placeholder="全体を検索" name="query" value="<?+$search ?>" />
+					</div>
 					<div data-role="navbar">
 						<fieldset data-role="controlgroup" data-type="horizontal" class="items<?=(2 + $c->showName[Configuration::ON_SUBJECT] + $c->showTags[Configuration::ON_SUBJECT]) ?>">
-						     	<input type="radio" name="mode" id="modeQuery" value="query"<?=$searchMode == "query" ? ' checked="checked"' : null ?> />
-						     	<label for="modeQuery">全文</label>
-						     	<input type="radio" name="mode" id="modeTitle" value="title"<?=$searchMode == "title" ? ' checked="checked"' : null ?> />
-						     	<label for="modeTitle">作品名</label>
-						     	<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
-							     	<input type="radio" name="mode" id="modeName" value="name"<?=$searchMode == "name" ? ' checked="checked"' : null ?> />
-							     	<label for="modeName">作者名</label>
-						     	<?endif ?>
+							<input type="radio" name="mode" id="modeQuery" value="query"<?=$searchMode == "query" ? ' checked="checked"' : null ?> />
+							<label for="modeQuery">全文</label>
+							<input type="radio" name="mode" id="modeTitle" value="title"<?=$searchMode == "title" ? ' checked="checked"' : null ?> />
+							<label for="modeTitle">作品名</label>
+							<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
+								<input type="radio" name="mode" id="modeName" value="name"<?=$searchMode == "name" ? ' checked="checked"' : null ?> />
+								<label for="modeName">作者名</label>
+							<?endif ?>
 								<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>
-							     	<input type="radio" name="mode" id="modeTag" value="tag"<?=$searchMode == "tag" ? ' checked="checked"' : null ?> />
-							     	<label for="modeTag">分類タグ</label>
-						     	<?endif ?>
+								<input type="radio" name="mode" id="modeTag" value="tag"<?=$searchMode == "tag" ? ' checked="checked"' : null ?> />
+								<label for="modeTag">分類タグ</label>
+							<?endif ?>
 						</fieldset>
 					</div>
-				<?endif ?>
-			</header>
-			<div data-role="content">
-				<ul data-role="listview" class="entries">
-					<?if (!Util::isEmpty($search)) entries($h->entries, $c) ?>
-					<?if ($h->page < $h->pageCount): ?>
-						<li class="nextpage">
-							<a href="<?+Visualizer::actionHref("search", array("query" => IndexHandler::param("query"), "p" => $h->page + 1)) ?>">
-								次のページ
-							</a>
-						</li>
-					<?endif ?>
-				</ul>
-			</div>
-			<footer data-role="footer" data-position="fixed">
-				<div data-role="navbar">
-					<? makeMenu($basePath, "s") ?>
+				</header>
+				<div data-role="content">
+					<ul data-role="listview" class="entries">
+						<?if (!Util::isEmpty($search)) entries($h->entries, $c) ?>
+						<?if ($h->page < $h->pageCount): ?>
+							<li class="nextpage">
+								<a href="<?+Visualizer::actionHref("search", array("query" => IndexHandler::param("query"), "p" => $h->page + 1)) ?>">
+									次のページ
+								</a>
+							</li>
+						<?endif ?>
+					</ul>
 				</div>
-			</footer>
-		</form>
+				<footer data-role="footer" data-position="fixed">
+					<div data-role="navbar">
+						<? makeMenu($basePath, "s") ?>
+					</div>
+				</footer>
+			</form>
+		<?endif ?> 
 	<?elseif ($m == "l"): ?>
 		<?if (isset($_GET["begin"]) && isset($_GET["end"])): ?>
 			<?php

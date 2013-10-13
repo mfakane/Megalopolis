@@ -6,11 +6,14 @@ function makeMenu($basePath, $current)
 	foreach (array
 	(
 		"h" => "作品一覧, home",
-		"s" => "検索, search",
+		"s" => Configuration::$instance->showTitle[Configuration::ON_SUBJECT] && Configuration::$instance->useSearch ? "検索, search" : null,
 		"recent" => "履歴, history",
 		"m" => "その他, more"
 	) as $k => $v)
 	{
+		if (!$v)
+			continue;
+		
 		list($n, $i) = explode(", ", $v);
 	?>
 		<li>

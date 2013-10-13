@@ -95,7 +95,7 @@ Visualizer::doctype();
 		<?+$title ?>
 	</h1>
 	<?+$c->title ?>&nbsp;<a href="#menu">メニューへ</a>
-	<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
+	<?if ($c->showTitle[Configuration::ON_SUBJECT] && $c->useSearch): ?>
 		<form class="search" action="<?+Visualizer::actionHref("search") ?>">
 			<input type="text" name="query" value="<?+$search ?>" size="18" /><input type="submit" value="検索" /><br />
 			<label><input type="radio" name="mode" value="query"<?=$searchMode == "query" ? ' checked="checked"' : null ?> />全文</label>
@@ -107,6 +107,17 @@ Visualizer::doctype();
 				<label><input type="radio" name="mode" value="tag"<?=$searchMode == "tag" ? ' checked="checked"' : null ?> />分類タグ</label>
 			<?endif ?>
 		</form>
+	<?elseif (Configuration::$instance->customSearch): ?>
+		<form class="search" action="<?+Visualizer::actionHref("search") ?>">
+			<input type="text" name="<?+Configuration::$instance->customSearch[1] ?>" value="<?+$search ?>" size="18" /><input type="submit" value="検索" />
+			<?php
+			if (isset(Configuration::$instance->customSearch[2]))
+				foreach (Configuration::$instance->customSearch[2] as $k => $v)
+					echo '<input type="hidden" name="', Visualizer::converted($k), '" value="', Visualizer::converted($v), '" />';
+			?>
+		</form>
+	<?else: ?>
+		<br />
 	<?endif ?>
 	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode) : array()) + array("p" => ""))) ?>
 	<?+App::$actionName == "search" ? $d["count"] : (App::$actionName == "index" ? count($h->entries) : $h->entryCount) ?>件中<?+$offset + 1 ?>～<?+$offset + min($paging, count($h->entries)) ?>件
