@@ -1,4 +1,12 @@
-﻿2013-09-15 COAH96KoxU <queue glasscore.net>
+﻿2013-10-16 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 44
+	* req/Visualizer/mobile/Index/Index.php,
+	  req/Visualizer/mobile/Template/Index.php,
+	  req/Visualizer/simple/Index/Index.php: 検索を使用するかどうかの設定が携帯表示に反映されないのを修正
+	* req/Core/Util.php: ロックファイルのタイムアウト検出でステータスキャッシュをクリアしてないのを修正
+
+2013-09-15 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 43
 	* req/App.php: 保存先ディレクトリが書き込み可能かどうかのチェックを追加
