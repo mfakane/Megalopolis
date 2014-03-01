@@ -552,8 +552,10 @@ class Visualizer
 			self::converted(Configuration::$instance->defaultName);
 		else
 		{
+			$endsWithDigit = ctype_digit($s) || ($last = strrchr($s, "/")) !== false && ctype_digit(substr($last, 1));
+			$endsWithExtension = !$endsWithDigit && strpos($s, ".") !== false;
 			?>
-			<a href="<?php echo self::actionHref("author", $s . (($last = strrchr($s, "/")) !== false && ctype_digit(substr($last, 1)) ? "/1" : null) . (strpos($s, ".") !== false ? ".html" : null)) ?>">
+			<a href="<?php echo self::actionHref("author", $s . ($endsWithExtension ? ".html" : null), $endsWithDigit ? "1" : null) ?>">
 				<?php self::converted($s) ?>
 				<?php echo $additional ?>
 			</a>
@@ -566,8 +568,10 @@ class Visualizer
 	 */
 	static function linkedTag($s, $additional = "")
 	{
+		$endsWithDigit = ctype_digit($s) || ($last = strrchr($s, "/")) !== false && ctype_digit(substr($last, 1));
+		$endsWithExtension = !$endsWithDigit && strpos($s, ".") !== false;
 		?>
-		<a href="<?php echo self::actionHref("tag", $s . (($last = strrchr($s, "/")) !== false && ctype_digit(substr($last, 1)) ? "/1" : null) . (strpos($s, ".") !== false ? ".html" : null)) ?>">
+		<a href="<?php echo self::actionHref("tag", $s . ($endsWithExtension ? ".html" : null), $endsWithDigit ? "1" : null) ?>">
 			<?php self::converted($s) ?>
 			<?php echo $additional ?>
 		</a>
