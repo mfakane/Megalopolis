@@ -1,4 +1,9 @@
-﻿2013-10-16 COAH96KoxU <queue glasscore.net>
+﻿2014-03-02 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 45
+	* req/Core/Visualizer.php: 名前やタグが数字だけの場合正常な個別一覧ページにリンクされないのを修正
+
+2013-10-16 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 44
 	* req/Visualizer/mobile/Index/Index.php,
