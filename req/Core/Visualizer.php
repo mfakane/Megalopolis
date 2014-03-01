@@ -356,7 +356,6 @@ class Visualizer
 			<?php if ($current > 1 || !$isSimple): ?>
 				<?php if ($max > $range): ?>
 					<li class="nav">
-						<form
 						<input type="submit" value="&lt;&lt; 最初" />
 						<button name="<?php echo $pageParam ?>" value="1"<?php if ($current == 1) echo ' class="loopback"'; ?>>
 							&lt;&lt; 最初
