@@ -515,7 +515,7 @@ class Util
 		if (!$encoding)
 			$encoding = mb_internal_encoding();
 		
-		$result = preg_replace("/&#x([\\dA-F]+);?/ie", "'&#'. intval('\\1', 16) . ';'", $str);
+		$result = preg_replace_callback("/&#x([\\dA-F]+);?/i", create_function('$matches', 'return "&#". intval($matches[1], 16) . ";";'), $str);
 		$result = preg_replace("/(&#\\d+);?/", "\\1;", $result);
 		$convmap = array(0x000020, 0x000020, 0, 0xffffff,
 						  0x000028, 0x000029, 0, 0xffffff,
