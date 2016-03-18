@@ -56,7 +56,7 @@ class SessionStore
 		if (count($rt))
 			return $rt[0]["data"];
 		else
-			return null;
+			return "";
 	}
 	
 	function write($sessionId, $data)
