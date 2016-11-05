@@ -1,4 +1,10 @@
-﻿2014-03-02 COAH96KoxU <queue glasscore.net>
+﻿2016-09-05 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 46
+	* req/Core/Util.php: e オプションつき preg_replace の廃止に伴い preg_replace_callback へ変更
+	* req/Core/SessionStore.php: セッションが読み込めないエラーが出ることがあるのを修正
+
+2014-03-02 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 45
 	* req/Core/Visualizer.php: 名前やタグが数字だけの場合正常な個別一覧ページにリンクされないのを修正
