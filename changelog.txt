@@ -1,4 +1,9 @@
-﻿2016-09-05 COAH96KoxU <queue glasscore.net>
+﻿2019-01-02 COAH96KoxU <queue glasscore.net>
+
+	* req/App.php: release 47
+	* req/Visualizer/mobile/Index/Index.php: mobile 表示で全文検索以外で次のページが参照できないのを修正
+
+2016-09-05 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 46
 	* req/Core/Util.php: e オプションつき preg_replace の廃止に伴い preg_replace_callback へ変更
