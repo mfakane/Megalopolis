@@ -301,4 +301,4 @@ Do What The Fuck You Want To Public License, Version 2 (WTFPL) および自ら�
 連絡先
 ------
 
-* 製作: COAH96KoxU <queue@glasscore.net> http://9.dotpp.net/
+* 製作: COAH96KoxU <queue@glasscore.net> http://github.com/mfakane/Megalopolis
