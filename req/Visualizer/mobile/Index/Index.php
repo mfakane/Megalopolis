@@ -111,7 +111,7 @@ App::load(VISUALIZER_DIR . "mobile/Template/Index");
 						<?if (!Util::isEmpty($search)) entries($h->entries, $c) ?>
 						<?if ($h->page < $h->pageCount): ?>
 							<li class="nextpage">
-								<a href="<?+Visualizer::actionHref("search", array("query" => IndexHandler::param("query"), "p" => $h->page + 1)) ?>">
+								<a href="<?+Visualizer::actionHref("search", array("query" => $search, "mode" => $searchMode, "p" => $h->page + 1)) ?>">
 									次のページ
 								</a>
 							</li>
