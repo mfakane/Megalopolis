@@ -358,7 +358,7 @@ Visualizer::doctype();
 					<?if (($h->thread->nonCommentEvaluations || $c->pointMap) && $c->showPoint[Configuration::ON_COMMENT]): ?>
 						<?if ($isAdmin): ?>
 							<?if ($h->thread->nonCommentEvaluations): ?>
-								<?foreach (array_filter($arr, create_function('$_', 'return $_ instanceof Evaluation;')) as $k => $i): ?>
+								<?foreach (array_filter($arr, function($_) { return $_ instanceof Evaluation; }) as $k => $i): ?>
 									<dt class="evaluation">
 										<input type="checkbox" name="id[]" value="<?+$i->id ?>" />
 										<?+$k + 1 ?>.
@@ -385,7 +385,7 @@ Visualizer::doctype();
 							<dt class="evaluation">
 								0.
 								<?if ($h->thread->nonCommentEvaluations): ?>
-									<? $p = array_reduce($h->thread->nonCommentEvaluations, create_function('$x, $y', 'return $x + $y->point;'), 0) ?>
+									<? $p = array_reduce($h->thread->nonCommentEvaluations, function($x, $y) { return $x + $y->point; }, 0) ?>
 									<?if ($p < 0): ?>
 										<span class="point minus"><?+$p ?></span>点
 									<?else: ?>
@@ -399,7 +399,7 @@ Visualizer::doctype();
 						<?endif ?>
 					<?endif ?>
 					<?if ($h->thread->comments): ?>
-						<?foreach (array_filter($arr, create_function('$_', 'return $_ instanceof Comment;')) as $k => $i): ?>
+						<?foreach (array_filter($arr, function($_) { return $_ instanceof Comment; }) as $k => $i): ?>
 							<dt id="comment<?+$k + 1 ?>">
 								<?if ($isAdmin): ?>
 									<input type="checkbox" name="id[]" value="<?+$i->id ?>" />

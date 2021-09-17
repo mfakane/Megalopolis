@@ -19,7 +19,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		));
 		
 		foreach ($words as $k => $v)
-			$words[$k] = array_map(create_function('$_', 'return ($len = mb_strlen($_)) >= ' . $this->gramLength . ' ? $_ : $_ . str_repeat("_", ' . $this->gramLength . ' - $len);'), $v);
+			$words[$k] = array_map(function($_) { return ($len = mb_strlen($_)) >= ' . $this->gramLength . ' ? $_ : $_ . str_repeat("_", ' . $this->gramLength . ' - $len); }, $v);
 		
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
@@ -33,10 +33,10 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 			self::INDEX_TABLE,
 			implode(", ", array_keys($words)),
 			$thread->id,
-			implode(", ", array_map(create_function('$_', 'return ":{$_}";'), array_keys($words))),
-			implode(", ", array_map(create_function('$_', 'return "{$_} = values({$_})";'), array_keys($words)))
+			implode(", ", array_map(function($_) { return ":{$_}"; }, array_keys($words))),
+			implode(", ", array_map(function($_) { return "{$_} = values({$_})"; }, array_keys($words)))
 		)));
-		Util::executeStatement($st, array_map(create_function('$_', 'return implode(" ", $_);'), $words));
+		Util::executeStatement($st, array_map(function($_) { return implode(" ", $_); }, $words));
 	}
 	
 	function attachIndex(PDO $idb)
@@ -103,8 +103,8 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
 			select docid from
-			(' . implode(" union ", array_map(create_function('$_', 'return "select docid from %2\$s where match({$_}) against(? in boolean mode)";'), $targetColumns)) . ') as search %s',
-			is_array($ids) ? "where docid in (" . ($ids ? implode(", ", $ids) : -1) . ")" : null,
+			(' . implode(" union ", array_map(function($_) { return "select docid from %2\$s where match({$_}) against(? in boolean mode)"; }, $targetColumns)) . ') as search %s',
+			is_array($ids) ? "where docid in (" . ($ids ? implode(", ", $ids) : -1) . ")" : "",
 			self::INDEX_TABLE
 		)));
 		Util::executeStatement($st, array_fill(0, count($targetColumns), implode(" ", $queryArguments)));

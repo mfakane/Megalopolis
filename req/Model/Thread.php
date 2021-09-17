@@ -90,8 +90,8 @@ class Thread
 			"backgroundImage" => $this->backgroundImage,
 			"border" => $this->border,
 			"writingMode" => intval($this->writingMode),
-			"nonCommentEvaluation" => Configuration::$instance->showPoint[Configuration::ON_ENTRY] ? array_reduce($this->nonCommentEvaluations, create_function('$x, $y', 'return $x + $y->point;'), 0) : null,
-			"comments" => Configuration::$instance->showComment[Configuration::ON_ENTRY] ? array_values(array_map(create_function('$_', 'return $_->toArray();'), $this->comments)) : null
+			"nonCommentEvaluation" => Configuration::$instance->showPoint[Configuration::ON_ENTRY] ? array_reduce($this->nonCommentEvaluations, function($x, $y) { return $x + $y->point; }, 0) : null,
+			"comments" => Configuration::$instance->showComment[Configuration::ON_ENTRY] ? array_values(array_map(function($_) { return $_->toArray(); }, $this->comments)) : null
 		);
 	}
 	
@@ -222,7 +222,7 @@ class Thread
 	 */
 	function getCommentByID(PDO $db, $id)
 	{
-		$rt = array_filter($this->comments, create_function('$_', 'return $_->id == ' . $id . ';'));
+		$rt = array_filter($this->comments, function($_) { return $_->id == ' . $id . '; });
 		
 		if ($rt)
 			return array_pop($rt);
@@ -236,7 +236,7 @@ class Thread
 	 */
 	function getEvaluationByID(PDO $db, $id)
 	{
-		$rt = array_filter($this->nonCommentEvaluations, create_function('$_', 'return $_->id == ' . $id . ';'));
+		$rt = array_filter($this->nonCommentEvaluations, function($_) { return $_->id == ' . $id . '; });
 		
 		if ($rt)
 			return array_pop($rt);
@@ -265,7 +265,7 @@ class Thread
 			$rt->updatePropertyLink();
 			$rt->evaluations = Evaluation::getEvaluationsFromEntryID($db, $rt->id);
 			$rt->comments = Comment::getCommentsFromEntryID($db, $rt->id, $rt->evaluations);
-			$resEval = array_map(create_function('$_', 'return $_->evaluation ? $_->evaluation->id : 0;'), $rt->comments);
+			$resEval = array_map(function($_) { return $_->evaluation ? $_->evaluation->id : 0; }, $rt->comments);
 			$rt->nonCommentEvaluations = array();
 			
 			foreach ($rt->evaluations as $i)

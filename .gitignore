@@ -1,0 +1,3 @@
+vendor/
+store/*.sqlite
+.htaccess

@@ -86,7 +86,7 @@ class UtilHandler extends Handler
 					case "unpost":
 						ThreadEntry::deleteDirect($db, $idb, $ids);
 					
-						foreach (array_unique(array_map(create_function('$_', 'return $_->subject;'), array_intersect_key(Visualizer::$data["entries"], array_flip($ids)))) as $i)
+						foreach (array_unique(array_map(function($_) { return $_->subject; }, array_intersect_key(Visualizer::$data["entries"], array_flip($ids)))) as $i)
 							Board::setLastUpdate($db, $i);
 						
 						foreach ($ids as $i)
@@ -290,7 +290,7 @@ class UtilHandler extends Handler
 					unset($set);
 				}
 				
-				$subjectRange = array_map(create_function('$k, $v', 'return ($k + 1) . "-{$v[\'start\']}-{$v[\'end\']}";'), array_keys($subjectRange), array_values($subjectRange));
+				$subjectRange = array_map(function($k, $v) { return ($k + 1) . "-{$v['start']}-{$v['end']}"; }, array_keys($subjectRange), array_values($subjectRange));
 				$subjectRange[] = "end";
 				
 				if (App::$handlerType == "json")
@@ -341,7 +341,7 @@ class UtilHandler extends Handler
 						($id = intval(mb_substr($i->getFilename(), 0, -4))) >= $start &&
 						($end == 0 || $id < $end))
 					{
-						$datLines = is_file($dat = "{$dir}dat/{$id}.dat") ? array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), Util::readLines($dat)) : null;
+						$datLines = is_file($dat = "{$dir}dat/{$id}.dat") ? array_map(function($_) { return mb_convert_encoding($_, "UTF-8", "Windows-31J"); }, Util::readLines($dat)) : null;
 						$entry = null;
 						
 						if ($datLines)
@@ -523,7 +523,7 @@ class UtilHandler extends Handler
 				
 				if (is_file($subjectFile))
 				{
-					$sub = array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), Util::readLines($subjectFile));
+					$sub = array_map(function($_) { return mb_convert_encoding($_, "UTF-8", "Windows-31J"); }, Util::readLines($subjectFile));
 					$datCount = count($sub);
 					
 					foreach (array_slice($sub, $offset, $buffer) as $i)

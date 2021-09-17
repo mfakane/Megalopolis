@@ -191,7 +191,7 @@ class ThreadEntry
 		$this->commentCount = count($thread->comments);
 		$this->responseCount = $nonCommentEvaluationCount + $this->commentCount;
 		$this->commentedEvaluationCount = $this->evaluationCount - $nonCommentEvaluationCount;
-		$this->points = array_reduce($thread->evaluations, create_function('$x, $y', 'return $x + $y->point;'), 0);
+		$this->points = array_reduce($thread->evaluations, function($x, $y) { return $x + $y->point; }, 0);
 		$this->calculateRate();
 	}
 	
@@ -486,7 +486,7 @@ class ThreadEntry
 			$rt[$i["id"]][$i["tag"]] = intval($i["position"]);
 		}
 		
-		return array_map(create_function('$_', 'asort($_); return array_keys($_);'), $rt);
+		return array_map(function($_) { asort($_); return array_keys($_); }, $rt);
 	}
 	
 	private static function getAllMegalithEntryIDs($latest)
@@ -504,9 +504,9 @@ class ThreadEntry
 						".txt" => ""
 					)));
 				
-				foreach (array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), Util::readLines($i)) as $j)
-					if (strstr($id, "<>"))
-						$rt[] = intval(array_shift(explode("<>", $j)));
+				foreach (array_map(function($_) { return mb_convert_encoding($_, "UTF-8", "Windows-31J"); }, Util::readLines($i)) as $j)
+					if ($id = strstr($j, "<>", true))
+						$rt[] = intval($id);
 			}
 		
 		return $rt;
@@ -527,7 +527,7 @@ class ThreadEntry
 						".txt" => ""
 					)));
 				
-				foreach (array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), Util::readLines($i)) as $j)
+				foreach (array_map(function($_) { return mb_convert_encoding($_, "UTF-8", "Windows-31J"); }, Util::readLines($i)) as $j)
 				{
 					$entry = Util::convertLineToThreadEntry($j);
 					
@@ -552,7 +552,7 @@ class ThreadEntry
 		{
 			$matches = true;
 			
-			if ($matches && isset($query["title"]) && $query["title"])
+			if (isset($query["title"]) && $query["title"])
 				foreach ($query["title"] as $j)
 					$matches = $matches && mb_strpos($i->title, $j) !== false;
 			
@@ -569,13 +569,13 @@ class ThreadEntry
 			}
 			
 			if ($matches && isset($query["eval"]) && $query["eval"])
-				$matches = $matches && $i->evaluationCount >= $query["eval"][0] && $i->evaluationCount <= $query["eval"][1];
+				$matches = $i->evaluationCount >= $query["eval"][0] && $i->evaluationCount <= $query["eval"][1];
 			
 			if ($matches && isset($query["points"]) && $query["points"])
-				$matches = $matches && $i->points >= $query["points"][0] && $i->points <= $query["points"][1];
+				$matches = $i->points >= $query["points"][0] && $i->points <= $query["points"][1];
 			
 			if ($matches && isset($query["dateTime"]) && $query["dateTime"])
-				$matches = $matches && $i->dateTime >= $query["dateTime"][0] && $i->dateTime <= $query["dateTime"][1];
+				$matches = $i->dateTime >= $query["dateTime"][0] && $i->dateTime <= $query["dateTime"][1];
 			
 			$body = $matches && is_file($aft = "Megalith/dat/{$i->id}.dat") ? mb_convert_encoding(implode("\r\n", Util::readLines($aft)), "UTF-8", "Windows-31J") : "";
 			$afterword = $matches && is_file($aft = "Megalith/aft/{$i->id}.aft.dat") ? mb_convert_encoding(implode("\r\n", Util::readLines($aft)), "UTF-8", "Windows-31J") : "";
@@ -655,7 +655,7 @@ class ThreadEntry
 		$tags = self::queryTags($db, sprintf
 		('
 			where id in (%s)',
-			implode(", ", array_map(create_function('$_', 'return $_->id;'), $rt))
+			implode(", ", array_map(function($_) { return $_->id; }, $rt))
 		));
 		
 		if (Configuration::$instance->convertOnDemand)
@@ -726,7 +726,7 @@ class ThreadEntry
 		$tags = self::queryTags($db, sprintf
 		('
 			where id in (%s)',
-			implode(", ", array_map(create_function('$_', 'return $_->id;'), $rt))
+			implode(", ", array_map(function($_) { return $_->id; }, $rt))
 		));
 		
 		if (Configuration::$instance->convertOnDemand &&
@@ -854,7 +854,7 @@ class ThreadEntry
 		)));
 		Util::executeStatement($st);
 		$rt = $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
-		$rt = array_map(create_function('$_', 'return $_[0];'), $rt);
+		$rt = array_map(function($_) { return $_[0]; }, $rt);
 		
 		if (Configuration::$instance->convertOnDemand &&
 			is_dir("Megalith/sub"))
@@ -865,7 +865,7 @@ class ThreadEntry
 				else
 					$rt[$i->name] = 1;
 			
-			uasort($rt, create_function('$x, $y', 'return $y - $x;'));
+			uasort($rt, function($x, $y) { return $y - $x; });
 		}
 		
 		return $rt;
@@ -890,7 +890,7 @@ class ThreadEntry
 		)));
 		Util::executeStatement($st);
 		$rt = $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP);
-		$rt = array_map(create_function('$_', 'return $_[0];'), $rt);
+		$rt = array_map(function($_) { return $_[0]; }, $rt);
 		
 		if (Configuration::$instance->convertOnDemand &&
 			is_dir("Megalith/sub"))
@@ -902,7 +902,7 @@ class ThreadEntry
 					else
 						$rt[$j] = 1;
 			
-			uasort($rt, create_function('$x, $y', 'return $y - $x;'));
+			uasort($rt, function($x, $y) { return $y - $x; });
 		}
 		
 		return $rt;
@@ -1110,7 +1110,7 @@ class ThreadEntry
 						if (Util::wildcard($host, $i->host))
 							$rt[$i->id] = $i;
 						else if (is_file("Megalith/com/{$i->id}"))
-							foreach (Util::convertLinesToCommentsAndEvaluations($i->id, array_map(create_function('$_', 'return mb_convert_encoding($_, "UTF-8", "Windows-31J");'), Util::readLines("Megalith/com/{$i->id}"))) as $j)
+							foreach (Util::convertLinesToCommentsAndEvaluations($i->id, array_map(function($_) { return mb_convert_encoding($_, "UTF-8", "Windows-31J"); }, Util::readLines("Megalith/com/{$i->id}"))) as $j)
 								if (Util::wildcard($host, $j->host))
 									$rt[$i->id] = $i;
 					}
@@ -1242,7 +1242,7 @@ class ThreadEntry
 		$tags = self::queryTags($db, sprintf
 		('
 			where id in (%s)',
-			implode(", ", array_map(create_function('$_', 'return $_->id;'), $rt))
+			implode(", ", array_map(function($_) { return $_->id; }, $rt))
 		));
 		
 		foreach ($rt as $i)

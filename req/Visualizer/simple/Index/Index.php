@@ -52,31 +52,31 @@ if (isset($_GET["s"]))
 	switch ($column = Util::escapeInput($_GET["s"]))
 	{
 		case "title":
-			usort($h->entries, create_function('$x, $y', 'return strnatcmp($x->title, $y->title);'));
+			usort($h->entries, function($x, $y) { return strnatcmp($x->title, $y->title); });
 			
 			break;
 		case "name":
-			usort($h->entries, create_function('$x, $y', 'return strnatcmp($x->name, $y->name);'));
+			usort($h->entries, function($x, $y) { return strnatcmp($x->name, $y->name); });
 			
 			break;
 		case "commentCount":
-			usort($h->entries, create_function('$x, $y', 'return $y->commentCount - $x->commentCount;'));
+			usort($h->entries, function($x, $y) { return $y->commentCount - $x->commentCount; });
 			
 			break;
 		case "points":
-			usort($h->entries, create_function('$x, $y', 'return $y->points - $x->points;'));
+			usort($h->entries, function($x, $y) { return $y->points - $x->points; });
 			
 			break;
 		case "rate":
-			usort($h->entries, create_function('$x, $y', 'return $y->rate - $x->rate;'));
+			usort($h->entries, function($x, $y) { return $y->rate - $x->rate; });
 			
 			break;
 		case "size":
-			usort($h->entries, create_function('$x, $y', 'return $y->size - $x->size;'));
+			usort($h->entries, function($x, $y) { return $y->size - $x->size; });
 			
 			break;
 		case "dateTime":
-			usort($h->entries, create_function('$x, $y', 'return $y->dateTime - $x->dateTime;'));
+			usort($h->entries, function($x, $y) { return $y->dateTime - $x->dateTime; });
 			
 			break;
 	}

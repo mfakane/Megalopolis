@@ -38,9 +38,9 @@ class SQLiteSearchIndex extends SearchIndex
 			self::INDEX_TABLE,
 			implode(", ", array_keys($words)),
 			$thread->id,
-			implode(", ", array_map(create_function('$_', 'return ":{$_}";'), array_keys($words)))
+			implode(", ", array_map(function($_) { return ":{$_}"; }, array_keys($words)))
 		)));
-		Util::executeStatement($st, array_map(create_function('$_', 'return implode(" ", $_);'), $words));
+		Util::executeStatement($st, array_map(function($_) { return implode(" ", $_); }, $words));
 	}
 	
 	function unregisterThread(PDO $idb, array $ids)
@@ -98,8 +98,8 @@ class SQLiteSearchIndex extends SearchIndex
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
 			select docid from
-			(' . implode(" union ", array_map(create_function('$_', 'return "select docid from %2\$s where {$_} match ?";'), $targetColumns)) . ') %s',
-			is_array($ids) ? "where docid in (" . ($ids ? implode(", ", $ids) : -1) . ")" : null,
+			(' . implode(" union ", array_map(function($_) { return "select docid from %2\$s where {$_} match ?"; }, $targetColumns)) . ') %s',
+			is_array($ids) ? "where docid in (" . ($ids ? implode(", ", $ids) : -1) . ")" : "",
 			self::INDEX_TABLE
 		)));
 		

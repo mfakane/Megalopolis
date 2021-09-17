@@ -93,8 +93,8 @@ class ClassicSearchIndex extends SearchIndex
 			where word in (%s) %s %s',
 			self::INDEX_TABLE,
 			implode(", ", array_fill(0, count($query), "?")),
-			$type ? "and type in (" . implode(",", array_map(create_function('$_', 'return "\'{$_}\'";'), $type)) . ")" : null,
-			is_array($ids) ? "and id in (" . implode(",", $ids) . ")" : null
+			$type ? "and type in (" . implode(",", array_map(function($_) { return "'{$_}'"; }, $type)) . ")" : "",
+			is_array($ids) ? "and id in (" . implode(",", $ids) . ")" : ""
 		)));
 		Util::executeStatement($st, $query);
 		$rt = array();

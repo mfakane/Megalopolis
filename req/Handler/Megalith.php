@@ -26,7 +26,7 @@ class MegalithHandler extends Handler
 				if (Util::isCachedByBrowser(Board::getLastUpdate($db, $latest), $latest))
 					return Visualizer::notModified();
 				
-				$content = implode("\n", array_map(create_function('$_', 'return "subject{$_}.txt";'), array_merge(array(""), $latest > 1 ? range(1, $latest - 1) : array())));
+				$content = implode("\n", array_map(function($_) { return "subject{$_}.txt"; }, array_merge(array(""), $latest > 1 ? range(1, $latest - 1) : array())));
 			}
 			else
 			{
@@ -40,12 +40,12 @@ class MegalithHandler extends Handler
 				if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
 				{
 					$entries = ThreadEntry::getEntriesBySubject($db, $subject);
-					$lastUpdate = max(array_map(create_function('$_', 'return $_->getLatestLastUpdate();'), $entries) + array(0));
+					$lastUpdate = max(array_map(function($_) { return $_->getLatestLastUpdate(); }, $entries) + array(0));
 				
 					if (Util::isCachedByBrowser($lastUpdate))
 						return Visualizer::notModified();
 					
-					$content = implode("\n", array_reverse(array_map(create_function('$_', 'return implode("<>", array_map("htmlspecialchars", array
+					$content = implode("\n", array_reverse(array_map(function($_) { return implode("<>", array_map("htmlspecialchars", array
 					(
 						"{$_->id}.dat",
 						$_->title,
@@ -62,7 +62,7 @@ class MegalithHandler extends Handler
 						"",
 						Configuration::$instance->showTags[Configuration::ON_SUBJECT] ? implode(" ", $_->tags) : "",
 						Configuration::$instance->showSize[Configuration::ON_SUBJECT] ? $_->size : ""
-					)));'), $entries)));
+					))); }, $entries)));
 				}
 				else
 					$content = "";
@@ -162,7 +162,7 @@ class MegalithHandler extends Handler
 			if (Configuration::$instance->showComment[Configuration::ON_ENTRY])
 				$content = array_merge
 				(
-					array_map(create_function('$_', 'return implode("<>", array
+					array_map(function($_) { return implode("<>", array
 					(
 						"#EMPTY#",
 						"",
@@ -172,8 +172,8 @@ class MegalithHandler extends Handler
 						"",
 						"",
 						"no"
-					));'), $thread->nonCommentEvaluations),
-					array_map(create_function('$_', 'return strtr(implode("<>", array_map("htmlspecialchars", array
+					)); }, $thread->nonCommentEvaluations),
+					array_map(function($_) { return strtr(implode("<>", array_map("htmlspecialchars", array
 					(
 						$_->body,
 						(Util::isEmpty($_->name) ? Configuration::$instance->defaultName : $_->name),
@@ -183,7 +183,7 @@ class MegalithHandler extends Handler
 						"",
 						"",
 						"no"
-					))), array("\r\n" => "<br />", "\r" => "<br />", "\n" => "<br />"));'), $thread->comments)
+					))), array("\r\n" => "<br />", "\r" => "<br />", "\n" => "<br />")); }, $thread->comments)
 				);
 			else
 				$content = array();

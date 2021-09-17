@@ -76,7 +76,7 @@ class IndexHandler extends Handler
 		$this->entries = ThreadEntry::getEntriesBySubject($db, $subject);
 		
 		if (!($this->lastUpdate = Board::getLastUpdate($db, $subject)))
-			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLatestLastUpdate();'), $this->entries) + array(0));
+			$this->lastUpdate = max(array_map(function($_) { return $_->getLatestLastUpdate(); }, $this->entries) + array(0));
 		
 		$this->subject = $subject;
 		$this->subjectCount = Board::getLatestSubject($db);
@@ -84,7 +84,7 @@ class IndexHandler extends Handler
 		
 		if ($this->lastUpdate)
 		{
-			$hash = implode(",", array_map(create_function('$_', 'return $_->id . ":" . (time() - $_->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n");'), $this->entries));
+			$hash = implode(",", array_map(function($_) { return $_->id . ":" . (time() - $_->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"); }, $this->entries));
 			
 			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY) . $hash))
 				return Visualizer::notModified();
@@ -98,7 +98,7 @@ class IndexHandler extends Handler
 			case "json":
 				return Visualizer::json(array
 				(
-					"entries" => array_values(array_map(create_function('$_', 'return $_->toArray(Configuration::ON_SUBJECT);'), $this->entries)),
+					"entries" => array_values(array_map(function($_) { return $_->toArray(Configuration::ON_SUBJECT); }, $this->entries)),
 					"subject" => $this->subject,
 					"subjectCount" => $this->subjectCount
 				));
@@ -139,8 +139,8 @@ class IndexHandler extends Handler
 			case "json":
 				return Visualizer::json(array
 				(
-					"view" => array_values(array_map(create_function('$_', 'return $_->toArray(Configuration::ON_SUBJECT);'), $this->entries["view"])),
-					"evaluation" => array_values(array_map(create_function('$_', 'return $_->toArray(Configuration::ON_SUBJECT);'), $this->entries["evaluation"])),
+					"view" => array_values(array_map(function($_) { return $_->toArray(Configuration::ON_SUBJECT); }, $this->entries["view"])),
+					"evaluation" => array_values(array_map(function($_) { return $_->toArray(Configuration::ON_SUBJECT); }, $this->entries["evaluation"])),
 				));
 			default:
 				return Visualizer::visualize();
@@ -287,7 +287,7 @@ class IndexHandler extends Handler
 				case "unpost":
 					ThreadEntry::deleteDirect($db, $idb, $ids);
 					
-					foreach (array_unique(array_map(create_function('$_', 'return $_->subject;'), array_intersect_key($this->entries, array_flip($ids)))) as $i)
+					foreach (array_unique(array_map(function($_) { return $_->subject; }, array_intersect_key($this->entries, array_flip($ids)))) as $i)
 						Board::setLastUpdate($db, $i);
 					
 					foreach ($ids as $i)
@@ -328,7 +328,7 @@ class IndexHandler extends Handler
 			case "json":
 				return Visualizer::json(array
 				(
-					"entries" => array_values(array_map(create_function('$_', 'return $_->toArray(Configuration::ON_SUBJECT);'), $this->entries)),
+					"entries" => array_values(array_map(function($_) { return $_->toArray(Configuration::ON_SUBJECT); }, $this->entries)),
 					"page" => $this->page,
 					"pageCount" => $this->pageCount
 				));
@@ -474,8 +474,8 @@ class IndexHandler extends Handler
 			$this->entryCount = null;
 			$this->entries = ThreadEntry::getEntriesByName($db, $name, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $this->entryCount);
 
-			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLatestLastUpdate();'), $this->entries) + array(0));
-			$hash = implode(",", array_map(create_function('$_', 'return $_->id . ":" . (time() - $_->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n");'), $this->entries));
+			$this->lastUpdate = max(array_map(function($_) { return $_->getLatestLastUpdate(); }, $this->entries) + array(0));
+			$hash = implode(",", array_map(function($_) { return $_->id . ":" . (time() - $_->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"); }, $this->entries));
 			
 			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY) . $hash))
 				return Visualizer::notModified();
@@ -511,7 +511,7 @@ class IndexHandler extends Handler
 					return Visualizer::json(array
 					(
 						"name" => $name,
-						"entries" => array_values(array_map(create_function('$_', 'return $_->toArray(Configuration::ON_SUBJECT);'), $this->entries)),
+						"entries" => array_values(array_map(function($_) { return $_->toArray(Configuration::ON_SUBJECT); }, $this->entries)),
 						"page" => $this->page,
 						"pageCount" => $this->pageCount
 					));
@@ -576,8 +576,8 @@ class IndexHandler extends Handler
 			$this->entryCount = null;
 			$this->entries = ThreadEntry::getEntriesByTag($db, $tag, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $this->entryCount);
 			
-			$this->lastUpdate = max(array_map(create_function('$_', 'return $_->getLatestLastUpdate();'), $this->entries) + array(0));
-			$hash = implode(",", array_map(create_function('$_', 'return $_->id . ":" . (time() - $_->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n");'), $this->entries));
+			$this->lastUpdate = max(array_map(function($_) { return $_->getLatestLastUpdate(); }, $this->entries) + array(0));
+			$hash = implode(",", array_map(function($_) { return $_->id . ":" . (time() - $_->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"); }, $this->entries));
 			
 			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY) . $hash))
 				return Visualizer::notModified();
@@ -613,7 +613,7 @@ class IndexHandler extends Handler
 					return Visualizer::json(array
 					(
 						"tag" => $tag,
-						"entries" => array_values(array_map(create_function('$_', 'return $_->toArray(Configuration::ON_SUBJECT);'), $this->entries)),
+						"entries" => array_values(array_map(function($_) { return $_->toArray(Configuration::ON_SUBJECT); }, $this->entries)),
 						"page" => $this->page,
 						"pageCount" => $this->pageCount
 					));

@@ -36,7 +36,7 @@ class ReadHandler extends Handler
 		if (!Auth::hasToken())
 			Auth::createToken();
 		
-		$db = App::openDB("data", false);
+		$db = App::openDB("data");
 		$this->thread = self::loadThread($db, $id);
 		$this->subject = $this->thread->subject;
 		$this->entry = &$this->thread->entry;
@@ -356,7 +356,7 @@ class ReadHandler extends Handler
 		$this->thread = self::loadThread($db, $id);
 		$this->entry = &$this->thread->entry;
 		
-		if ($point && array_filter($this->thread->evaluations, create_function('$_', 'return $_->host == $_SERVER["REMOTE_ADDR"] || $_->host == Util::getRemoteHost();')))
+		if ($point && array_filter($this->thread->evaluations, function($_) { return $_->host == $_SERVER["REMOTE_ADDR"] || $_->host == Util::getRemoteHost(); }))
 			$error[] = "多重評価はできません";
 		
 		if (!Auth::hasSession(true) || !Configuration::$instance->ignoreDisallowedWordsWhenAdmin)
@@ -502,7 +502,7 @@ class ReadHandler extends Handler
 		$this->thread = self::loadThread($db, $id);
 		$this->entry = &$this->thread->entry;
 			
-		if (array_filter($this->thread->evaluations, create_function('$_', 'return $_->host == $_SERVER["REMOTE_ADDR"] || $_->host == Util::getRemoteHost();')))
+		if (array_filter($this->thread->evaluations, function($_) { return $_->host == $_SERVER["REMOTE_ADDR"] || $_->host == Util::getRemoteHost(); }))
 			$error[] = "多重評価はできません";
 		
 		if ($error)
@@ -613,7 +613,7 @@ class ReadHandler extends Handler
 		if (count($entry->tags) > Configuration::$instance->maxTags)
 			$rt[] = "分類タグは " . Configuration::$instance->maxTags . " 個以内でなければなりません";
 		
-		if ($m = array_filter($entry->tags, create_function('$_', 'return preg_match("/^([0-9]+|random)$/i", $_);')))
+		if ($m = array_filter($entry->tags, function($_) { return preg_match("/^([0-9]+|random)$/i", $_); }))
 			$rt[] = "次の分類タグは使用できません: " . implode(", ", $m);
 		
 		if (!Util::isEmpty(Configuration::$instance->postPassword))

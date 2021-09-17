@@ -468,7 +468,7 @@ class Util
 				foreach ($_POST as $k => $v)
 					if (!isset($except[$k]))
 						if (($_POST[$k] = base64_decode($v, true)) === false)
-							throw new ApplicationException("パラメータ {$name} のデコードに失敗しました", 404);
+							throw new ApplicationException("パラメータ {$k} のデコードに失敗しました", 404);
 			}
 			
 			unset($_POST["encoded"]);
@@ -515,7 +515,7 @@ class Util
 		if (!$encoding)
 			$encoding = mb_internal_encoding();
 		
-		$result = preg_replace_callback("/&#x([\\dA-F]+);?/i", create_function('$matches', 'return "&#". intval($matches[1], 16) . ";";'), $str);
+		$result = preg_replace_callback("/&#x([\\dA-F]+);?/i", function($matches) { return "&#". intval($matches[1], 16) . ";"; }, $str);
 		$result = preg_replace("/(&#\\d+);?/", "\\1;", $result);
 		$convmap = array(0x000020, 0x000020, 0, 0xffffff,
 						  0x000028, 0x000029, 0, 0xffffff,
@@ -627,7 +627,7 @@ class Util
 	static function convertLineToThreadEntry($line, ThreadEntry $entry = null)
 	{
 		if (!is_array($line))
-			$line = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", $line));
+			$line = array_map(function($_) { return html_entity_decode($_, ENT_QUOTES); }, explode("<>", $line));
 		
 		if (count($line) < 12)
 			return null;
@@ -684,7 +684,7 @@ class Util
 		return $entry;
 	}
 	
-	private static function convertAndSaveToThreadInternal(PDO $db, PDO $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly = false, $allowSaveCommentsOnly = false, &$save, ThreadEntry $entry = null)
+	private static function convertAndSaveToThreadInternal(PDO $db, PDO $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly, $allowSaveCommentsOnly, &$save, ThreadEntry $entry)
 	{
 		if (!is_array($dat) && !is_file($dat))
 			return null;
@@ -703,7 +703,7 @@ class Util
 		
 		$thread = new Thread();
 		
-		$line = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", array_shift($data))) + array_fill(0, is_array($dat) ? 16 : 15, null);
+		$line = array_map(function($_) { return html_entity_decode($_, ENT_QUOTES); }, explode("<>", array_shift($data))) + array_fill(0, is_array($dat) ? 16 : 15, null);
 		
 		if (!is_array($dat))
 			array_unshift($line, basename($dat));
@@ -791,7 +791,7 @@ class Util
 		
 		foreach ($lines as $i)
 		{
-			$i = array_map(create_function('$_', 'return html_entity_decode($_, ENT_QUOTES);'), explode("<>", trim($i)));
+			$i = array_map(function($_) { return html_entity_decode($_, ENT_QUOTES); }, explode("<>", trim($i)));
 			
 			if (count($i) < 7)
 				continue;

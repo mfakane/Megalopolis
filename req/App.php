@@ -35,7 +35,7 @@ class App
 	{
 		if ($desc == null)
 		{
-			self::precondition(version_compare(PHP_VERSION, "5.2.5", ">="), "PHP 5.2.5");
+			self::precondition(version_compare(PHP_VERSION, "8.0.0", ">="), "PHP 8.0.0");
 			self::precondition(extension_loaded("mbstring"), "mbstring");
 			self::precondition(extension_loaded("pdo"), "PDO");
 			self::precondition(in_array(Util::HASH_ALGORITHM, hash_algos()), "hash_algos() " . Util::HASH_ALGORITHM);
@@ -70,17 +70,6 @@ class App
 			throw new ApplicationException("Precondition {$desc} failed.");
 	}
 
-	static function stripMagicQuotesSlashes()
-	{
-		if (get_magic_quotes_gpc())
-		{
-			$_GET = self::stripSlashesRecursive($_GET);
-			$_POST = self::stripSlashesRecursive($_POST);
-			$_REQUEST = self::stripSlashesRecursive($_REQUEST);
-			$_COOKIE = self::stripSlashesRecursive($_COOKIE);
-		}
-	}
-
 	private static function stripSlashesRecursive($arg)
 	{
 		if (is_array($arg))
@@ -104,11 +93,6 @@ class App
 				return true;
 
 		return false;
-	}
-
-	private static function sCRYed()
-	{
-		// ススススクライド
 	}
 
 	static function main()
@@ -264,7 +248,6 @@ App::$startTime = microtime(true);
 App::load(array("Library/simple_html_dom", CORE_DIR . "ApplicationException"));
 App::load(CORE_DIR . "Util");
 App::precondition();
-App::stripMagicQuotesSlashes();
 App::load(array(CORE_DIR . "Auth", CORE_DIR . "Configuration", CORE_DIR . "Cookie", CORE_DIR . "DataStore", CORE_DIR . "Handler", CORE_DIR . "SessionStore", CORE_DIR . "Visualizer", MODEL_DIR . "Board", MODEL_DIR . "Comment", MODEL_DIR . "Evaluation", MODEL_DIR . "Meta", MODEL_DIR . "SearchIndex", MODEL_DIR . "SearchIndex/Classic", MODEL_DIR . "SearchIndex/SQLite", MODEL_DIR . "SearchIndex/MySQL", MODEL_DIR . "Statistics", MODEL_DIR . "ThreadEntry", MODEL_DIR . "Thread"));
 App::load("../config");
 

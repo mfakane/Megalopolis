@@ -409,7 +409,7 @@ class Visualizer
 		));
 		
 		?>
-		<a href="https://twitter.com/share?<?php self::converted(implode("&", array_map(create_function('$k, $v', 'return rawurlencode($k) . "=" . rawurlencode($v);'), array_keys($params), array_values($params)))) ?>" class="twitter-share-button" data-lang="ja" target="_blank">Tweet</a>
+		<a href="https://twitter.com/share?<?php self::converted(implode("&", array_map(function($k, $v) { return rawurlencode($k) . "=" . rawurlencode($v); }, array_keys($params), array_values($params)))) ?>" class="twitter-share-button" data-lang="ja" target="_blank">Tweet</a>
 		<script src="http://platform.twitter.com/widgets.js"></script>
 		<?php
 	}
@@ -655,7 +655,7 @@ class Visualizer
 		$rt = str_get_html($str);
 		$disallowed = Configuration::$instance->disallowedTags;
 		$allowed = array_flip(Configuration::$instance->allowedTags);
-		$disallowedMap = array_flip(array_map(create_function('$x, $y', 'return is_int($x) ? $y : $x;'), array_keys($disallowed), array_values($disallowed)));
+		$disallowedMap = array_flip(array_map(function($x, $y) { return is_int($x) ? $y : $x; }, array_keys($disallowed), array_values($disallowed)));
 		self::replaceTags($rt, $disallowed, $disallowedMap, $allowed);
 		self::ensureHtmlTagEnd($rt);
 		
@@ -733,7 +733,7 @@ class Visualizer
 				
 				if ($k == "style")
 				{
-					$str = preg_replace('@/\*.*\*/@', "", preg_replace_callback('/\\\([0-9A-Fa-f]{1,6})/i', create_function('$_', '$a = intval($_[1], 16); return $a >= 32 && $a <= 126 ? chr($a) : $_[0];'), $v));
+					$str = preg_replace('@/\*.*\*/@', "", preg_replace_callback('/\\\([0-9A-Fa-f]{1,6})/i', function($_) { $a = intval($_[1], 16); return $a >= 32 && $a <= 126 ? chr($a) : $_[0]; }, $v));
 					
 					foreach (explode(";", $str) as $j)
 					{
@@ -1004,7 +1004,7 @@ class Visualizer
 		mb_http_output("Windows-31J");
 		
 		foreach ($obj as $i)
-			fputcsv($s, array_map(create_function('$_', 'return mb_convert_encoding($_, "Windows-31J", "UTF-8");'), $i));
+			fputcsv($s, array_map(function($_) { return mb_convert_encoding($_, "Windows-31J", "UTF-8"); }, $i));
 		
 		fclose($s);
 		
