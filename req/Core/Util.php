@@ -38,10 +38,7 @@ class Util
 	const MOBILE_TYPE_WILLCOM = "willcom";
 	const MOBILE_TYPE_EMNET = "emobile";
 	
-	/**
-	 * @return string
-	 */
-	static function getBrowserType()
+	static function getBrowserType(): string
 	{
 		static $browserType;
 		
@@ -98,10 +95,7 @@ class Util
 		return $browserType = self::BROWSER_TYPE_UNKNOWN;
 	}
 	
-	/**
-	 * @return string
-	 */
-	static function getMobileType()
+	static function getMobileType(): string
 	{
 		static $mobileType;
 		
@@ -124,19 +118,12 @@ class Util
 		return $mobileType = self::MOBILE_TYPE_UNKNOWN;
 	}
 	
-	/**
-	 * @param string $url [optional]
-	 * @return string
-	 */
-	static function withMobileUniqueIDRequestSuffix($path = "")
+	static function withMobileUniqueIDRequestSuffix(string $path = ""): string
 	{
-		return $path . (self::getMobileType() == self::MOBILE_TYPE_IMODE ? (strpos($path, "?") !== false ? "&guid=ON" : "?guid=ON") : null);
+		return $path . (self::getMobileType() == self::MOBILE_TYPE_IMODE ? (strpos($path, "?") !== false ? "&guid=ON" : "?guid=ON") : "");
 	}
 	
-	/**
-	 * @return string
-	 */
-	static function getMobileUniqueIDName()
+	static function getMobileUniqueIDName(): string
 	{
 		$type = self::getMobileType();
 		$names = array
@@ -153,18 +140,12 @@ class Util
 			return "契約者固有 ID";
 	}
 	
-	/**
-	 * @return bool
-	 */
-	static function canGetMobileUniqueID()
+	static function canGetMobileUniqueID(): bool
 	{
 		return !in_array(self::getMobileType(), array(self::MOBILE_TYPE_UNKNOWN, self::MOBILE_TYPE_WILLCOM));
 	}
 	
-	/**
-	 * @return string
-	 */
-	static function getMobileUniqueID()
+	static function getMobileUniqueID(): ?string
 	{
 		$header = array
 		(
@@ -181,10 +162,7 @@ class Util
 			return null;
 	}
 	
-	/**
-	 * @return string
-	 */
-	static function getRemoteHost()
+	static function getRemoteHost(): string
 	{
 		if (self::canGetMobileUniqueID() && $id = self::getMobileUniqueID())
 			return $id;
@@ -192,12 +170,7 @@ class Util
 		return isset($_SERVER["REMOTE_HOST"]) && $_SERVER["REMOTE_HOST"] ? $_SERVER["REMOTE_HOST"] : gethostbyaddr($_SERVER["REMOTE_ADDR"]);
 	}
 	
-	/**
-	 * @param int $lastModified [optional]
-	 * @param string $eTagSeed [optional]
-	 * @return bool
-	 */
-	static function isCachedByBrowser($lastModified = null, $eTagSeed = null)
+	static function isCachedByBrowser(?int $lastModified = null, ?string $eTagSeed = null): bool
 	{
 		$eTag = md5(implode("_", array
 		(
@@ -220,15 +193,12 @@ class Util
 			&& (isset($_SERVER["HTTP_IF_NONE_MATCH"]) && (trim(substr($_SERVER["HTTP_IF_NONE_MATCH"], strpos($_SERVER["HTTP_IF_NONE_MATCH"], "W/") === 0 ? 2 : 0), '"')) == $eTag);
 	}
 	
-	static function getIncludedFilesLastModified()
+	static function getIncludedFilesLastModified(): int
 	{
 		return max(array_map('filemtime', get_included_files()));
 	}
 	
-	/**
-	 * @return string
-	 */
-	static function getAbsoluteUrl($path = "")
+	static function getAbsoluteUrl(string $path = ""): string
 	{
 		static $absoluteUrls = array();
 		
@@ -252,7 +222,7 @@ class Util
 		return $absoluteUrls[$path] = "http://" . (isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] :  $_SERVER["SERVER_NAME"] . ($_SERVER["SERVER_PORT"] == 80 ? null : ":" . $_SERVER["SERVER_PORT"])) . $script . $path;
 	}
 	
-	static function getSuffix()
+	static function getSuffix(): string
 	{
 		static $suffix;
 		
@@ -274,20 +244,14 @@ class Util
 		return $suffix;
 	}
 	
-	/**
-	 * @return string
-	 */
-	static function getPhpSelf()
+	static function getPhpSelf(): string
 	{
 		static $phpSelf;
 		
 		return $phpSelf ? $phpSelf : $phpSelf = self::escapeInput($_SERVER["PHP_SELF"]);
 	}
 	
-	/**
-	 * @return string
-	 */
-	static function getPathInfo()
+	static function getPathInfo(): string
 	{
 		static $pathInfo;
 		
@@ -308,89 +272,54 @@ class Util
 			return $pathInfo = mb_substr(mb_strstr(self::escapeInput($_SERVER["PHP_SELF"]), self::INDEX_FILE_NAME), mb_strlen(self::INDEX_FILE_NAME));
 	}
 	
-	/**
-	 * @param string $tags
-	 * @return array
-	 */
-	static function splitTags($tags)
+	/** @return string[] */
+	static function splitTags(string $tags): array
 	{
 		return array_unique(preg_split("/ +/", mb_convert_kana(trim($tags), "s"), -1, PREG_SPLIT_NO_EMPTY));
 	}
 	
-	/**
-	 * @param PDOStatement $st
-	 * @return PDOStatement
-	 */
-	static function ensureStatement(PDO $db, $st)
+	static function ensureStatement(PDO $db, PDOStatement $st): PDOStatement
 	{
 		return Configuration::$instance->dataStore->ensureStatement($db, $st);
 	}
 	
-	/**
-	 * @param bool $throw [optional]
-	 * @return bool
-	 */
-	static function executeStatement(PDOStatement $st, array $params = null, $throw = true)
+	static function executeStatement(PDOStatement $st, ?array $params = null, bool $throw = true): bool
 	{
 		return Configuration::$instance->dataStore->executeStatement($st, $params, $throw);
 	}
 	
-	/**
-	 * @param string $name
-	 */
-	static function createTableIfNotExists(PDO $db, array $schema, $name, array $index = null)
+	static function createTableIfNotExists(PDO $db, array $schema, string $name, ?array $index = null): bool
 	{
 		return Configuration::$instance->dataStore->createTableIfNotExists($db, $schema, $name, $index);
 	}
 	
-	/**
-	 * @param string $name
-	 * @param string $indexSuffix [optional]
-	 */
-	static function createFullTextTableIfNotExists(PDO $db, array $schema, $name, $indexSuffix = "Index")
+	static function createFullTextTableIfNotExists(PDO $db, array $schema, string $name, string $indexSuffix = "Index"): bool
 	{
 		return Configuration::$instance->dataStore->createFullTextTableIfNotExists($db, $schema, $name, $indexSuffix);
 	}
 	
-	/**
-	 * @param mixed $obj
-	 * @param string $name
-	 */
-	static function saveToTable(PDO $db, $obj, array $schema, $name)
+	static function saveToTable(PDO $db, mixed $obj, array $schema, string $name): void
 	{
-		return Configuration::$instance->dataStore->saveToTable($db, $obj, $schema, $name);
+		Configuration::$instance->dataStore->saveToTable($db, $obj, $schema, $name);
 	}
 	
-	/**
-	 * @param string $name
-	 */
-	static function hasTable(PDO $db, $name)
+	static function hasTable(PDO $db, string $name)
 	{
 		return Configuration::$instance->dataStore->hasTable($db, $name);
 	}
 	
-	/**
-	 * @param mixed $obj
-	 */
-	static function bindValues(PDOStatement $st, $obj, array $schema)
+	static function bindValues(PDOStatement $st, mixed $obj, array $schema)
 	{
 		return Configuration::$instance->dataStore->bindValues($st, $obj, $schema);
 	}
 	
-	/**
-	 * @param string $raw
-	 * @param int $version [optional]
-	 * @param string $salt [optional]
-	 * @param int $stretch [optional]
-	 * @return string
-	 */
-	static function hash($raw, $version = 1, $salt = null, $stretch = null)
+	static function hash(string $raw, int $version = 1, ?string $salt = null, ?int $stretch = null): string
 	{
 		switch ($version)
 		{
 			case 1:
 				if (!$salt)
-					$salt = mb_substr(hash(self::HASH_ALGORITHM, mt_rand()), 4, 16);
+					$salt = mb_substr(hash(self::HASH_ALGORITHM, (string)mt_rand()), 4, 16);
 				
 				if (!$stretch)
 					$stretch = mt_rand(10, 1000);
@@ -409,12 +338,7 @@ class Util
 		}
 	}
 
-	/**
-	 * @param string $hash
-	 * @param string $raw
-	 * @return bool|string
-	 */
-	static function hashEquals($hash, $raw)
+	static function hashEquals(string $hash, string $raw): bool|string
 	{
 		try
 		{
@@ -435,11 +359,7 @@ class Util
 		}
 	}
 	
-	/**
-	 * @param string $input
-	 * @return string
-	 */
-	static function escapeInput($input, $stripLinebreaks = false)
+	static function escapeInput(string $input, bool $stripLinebreaks = false): string
 	{
 		$input = mb_convert_encoding($input, "UTF-8", "UTF-8,Windows-31J,eucJP-win");
 		$input = self::escapeAmpersand($input);
@@ -456,7 +376,7 @@ class Util
 		return $input;
 	}
 	
-	static function unencodeInputs()
+	static function unencodeInputs(): void
 	{
 		if (isset($_POST["encoded"]))
 		{
@@ -478,21 +398,12 @@ class Util
 		}
 	}
 	
-	/**
-	 * @param string $s
-	 * @return string
-	 */
-	static function encodeForOutput($s)
+	static function encodeForOutput(string $s): string
 	{
 		return base64_encode($s);
 	}
 	
-	/**
-	 * @param string $pattern
-	 * @param string $string
-	 * @return bool
-	 */
-	static function wildcard($pattern, $string)
+	static function wildcard(string $pattern, string $string): int|false
 	{
 		return preg_match("/^" . strtr(preg_quote($pattern, "/"), array
 		(
@@ -505,17 +416,14 @@ class Util
 		)) . "$/i", $string);
 	}
 	
-	private static function escapeControlChars($input)
+	private static function escapeControlChars(string $input): string
 	{
 		return preg_replace('@[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]@', " ", $input);
 	}
 	
-	private static function decodeNumericEntity($str, $encoding = null)
+	private static function decodeNumericEntity(string $str, ?string $encoding = null): string
 	{
-		if (!$encoding)
-			$encoding = mb_internal_encoding();
-		
-		$result = preg_replace_callback("/&#x([\\dA-F]+);?/i", function($matches) { return "&#". intval($matches[1], 16) . ";"; }, $str);
+		$result = preg_replace_callback("/&#x([\\dA-F]+);?/i", function(array $matches) { return "&#". intval($matches[1], 16) . ";"; }, $str);
 		$result = preg_replace("/(&#\\d+);?/", "\\1;", $result);
 		$convmap = array(0x000020, 0x000020, 0, 0xffffff,
 						  0x000028, 0x000029, 0, 0xffffff,
@@ -524,11 +432,11 @@ class Util
 						  0x00005c, 0x00005c, 0, 0xffffff,
 						  0x000061, 0x00007a, 0, 0xffffff);
 		$result = mb_decode_numericentity($result, $convmap, $encoding);
-		
+
 		return $result;
 	}
 	
-	private static function escapeAmpersand($str, $is_xhtml = true)
+	private static function escapeAmpersand(string $str, bool $is_xhtml = true): string
 	{
 		$entities = array('AElig', 'Aacute', 'Acirc', 'Agrave', 'Alpha',
 						  'Aring', 'Atilde', 'Auml', 'Beta', 'Ccedil',
@@ -582,11 +490,8 @@ class Util
 						  'weierp', 'xi', 'yacute', 'yen', 'yuml',
 						  'zeta', 'zwj', 'zwnj');
 	
-		if (!$is_xhtml)
-		{
-			$index = array_search('apos', $entities);
+		if (!$is_xhtml && ($index = array_search('apos', $entities)) !== false)
 			array_splice($entities, $index, 1);
-		}
 		
 		$result = strtr($str, array("&" => "&amp;"));
 		$result = preg_replace("/&amp;#(\\d+|x[\\da-f]+)(;?)/i", "&#\\1\\2", $result);
@@ -595,12 +500,13 @@ class Util
 		return $result;
 	}
 	
-	static function trimLineBreak($s)
+	static function trimLineBreak(string $s): string
 	{
 		return rtrim($s, "\r\n");
 	}
 	
-	static function readLines($file, $option = 0)
+	/** @return string[] */
+	static function readLines(string $file, bool $skipEmptyLines = false): array
 	{
 		$rt = array();
 		$fp = fopen($file, "r");
@@ -609,7 +515,7 @@ class Util
 		{
 			$l = self::trimLineBreak(fgets($fp));
 			
-			if (($option & FILE_SKIP_EMPTY_LINES) && self::isEmpty($l))
+			if ($skipEmptyLines && self::isEmpty($l))
 				continue;
 			
 			$rt[] = $l;
@@ -621,10 +527,9 @@ class Util
 	}
 	
 	/**
-	 * @param string $line
-	 * @return ThreadEntry
+	 * @param string|string[] $line
 	 */
-	static function convertLineToThreadEntry($line, ThreadEntry $entry = null)
+	static function convertLineToThreadEntry(string|array $line, ?ThreadEntry $entry = null): ?ThreadEntry
 	{
 		if (!is_array($line))
 			$line = array_map(function($_) { return html_entity_decode($_, ENT_QUOTES); }, explode("<>", $line));

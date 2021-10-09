@@ -6,33 +6,27 @@ class Auth
 	const SESSION_FINGERPRINT = "Auth_fingerprint";
 	const SESSION_TOKEN = "Auth_token";
 	
-	static $caption = "認証";
-	static $label = "パスワード";
-	static $details = null;
-	private static $isAdmin = false;
+	static string $caption = "認証";
+	static string $label = "パスワード";
+	static ?string $details = null;
+	private static bool $isAdmin = false;
 	
-	static function useSession($begin = false)
+	static function useSession(bool $beginNew = false): void
 	{
 		$sessionName = "MEGALOPOLIS_" . basename(dirname(dirname(dirname(__FILE__))));
 		
-		if (!self::isSessionEnabled() && ($begin || isset($_COOKIE[$sessionName])))
+		if (!self::isSessionEnabled() && ($beginNew || isset($_COOKIE[$sessionName])))
 		{
-			ini_set("session.use_cookies", 1);
-			ini_set("session.use_only_cookies", 1);
-			ini_set("session.use_trans_sid", 0);
-			ini_set("session.cookie_httponly", 1);
-			ini_set("session.gc_probability", 1);
-			ini_set("session.gc_divisor", 100);
-			ini_set("session.gc_maxlifetime", 1440);
-			
-			session_cache_limiter(false);
-			session_set_cookie_params(0, dirname(Util::getPhpSelf()));
+			session_set_cookie_params(0, dirname(Util::getPhpSelf()), httponly: true);
 			session_name($sessionName);
 			
 			if (Configuration::$instance->storeSessionIntoDataStore)
 				SessionStore::useSessionStore();
 			
-			session_start();
+			if (!session_start()) {
+				self::logout();
+				return;
+			}
 			
 			$currentFingerprint = self::createFingerprint();
 			
@@ -43,7 +37,7 @@ class Auth
 		}
 	}
 	
-	private static function createFingerprint()
+	private static function createFingerprint(): string
 	{
 		return hash(Util::HASH_ALGORITHM, implode(", ", array
 		(
@@ -55,7 +49,7 @@ class Auth
 		)));
 	}
 	
-	static function commitSession()
+	static function commitSession(): void
 	{
 		if (self::isSessionEnabled())
 		{
@@ -66,7 +60,7 @@ class Auth
 		}
 	}
 	
-	static function logout()
+	static function logout(): void
 	{
 		if (!self::isSessionEnabled())
 			return;
@@ -79,29 +73,24 @@ class Auth
 		self::$isAdmin = false;
 	}
 	
-	static function hasToken()
+	static function hasToken(): bool
 	{
 		return isset($_SESSION[self::SESSION_TOKEN])
 			&& !empty($_SESSION[self::SESSION_TOKEN]);
 	}
 	
-	static function createToken()
+	static function createToken(): string
 	{
 		return $_SESSION[self::SESSION_TOKEN] = hash(Util::HASH_ALGORITHM, mt_rand() . self::createFingerprint());
 	}
 	
-	static function clearToken()
+	static function clearToken(): void
 	{
 		if (isset($_SESSION[self::SESSION_TOKEN]))
 			unset($_SESSION[self::SESSION_TOKEN]);
 	}
 	
-	/**
-	 * @param string $key [optional]
-	 * @param bool $throw [optional]
-	 * @return bool
-	 */
-	static function ensureToken($key = "token", $throw = true)
+	static function ensureToken(string $key = "token", bool $throw = true): bool
 	{
 		$ex = null;
 		
@@ -123,7 +112,7 @@ class Auth
 		return true;
 	}
 	
-	static function unsetSession()
+	static function unsetSession(): void
 	{
 		if (self::isSessionEnabled())
 		{
@@ -133,7 +122,7 @@ class Auth
 		}
 	}
 	
-	static function resetSession($deleteOld = true)
+	static function resetSession(bool $deleteOld = true): void
 	{
 		if (self::isSessionEnabled())
 			session_regenerate_id($deleteOld);
@@ -141,37 +130,31 @@ class Auth
 		self::$isAdmin = false;
 	}
 	
-	/**
-	 * @return bool
-	 */
-	static function isSessionEnabled()
+	static function isSessionEnabled(): bool
 	{
 		return session_id() != "";
 	}
 	
-	/**
-	 * @return string
-	 */
-	static function getSessionID()
+	static function getSessionID(): ?string
 	{
 		return self::isSessionEnabled() ? session_id() : null;
 	}
 	
-	/**
-	 * @param bool $hasAdminOnly
-	 * @return bool
-	 */
-	static function hasSession($hasAdminOnly = false)
+	static function hasSession(bool $hasAdminOnly = false): bool
 	{
 		if ($hasAdminOnly && self::$isAdmin)
 			return self::$isAdmin;
 		else
 			return self::isSessionEnabled()
 				&& isset($_SESSION[self::SESSION_PASSWORD])
-				&& (!$hasAdminOnly || isset($_SESSION[self::SESSION_IS_ADMIN]) && (self::$isAdmin = $_SESSION[self::SESSION_IS_ADMIN] && Util::hashEquals(Configuration::$instance->adminHash, $_SESSION[self::SESSION_PASSWORD])));
+				&& (!$hasAdminOnly
+					|| self::$isAdmin = isset($_SESSION[self::SESSION_IS_ADMIN])
+						&& $_SESSION[self::SESSION_IS_ADMIN]
+						&& !empty(Configuration::$instance->adminHash)
+						&& Util::hashEquals(Configuration::$instance->adminHash, $_SESSION[self::SESSION_PASSWORD]));
 	}
 	
-	static function cleanSession($clearToken = true)
+	static function cleanSession(bool $clearToken = true): void
 	{
 		if (!self::isSessionEnabled())
 			return;
@@ -183,12 +166,7 @@ class Auth
 		self::$isAdmin = false;
 	}
 	
-	/**
-	 * @param string $key [optional]
-	 * @param bool $throw [optional]
-	 * @return bool
-	 */
-	static function ensureSessionID($key = "sessionID", $throw = true)
+	static function ensureSessionID(string $key = "sessionID", bool $throw = true): bool
 	{
 		if (!isset($_POST[$key]) ||
 			$_POST[$key] != self::getSessionID())
@@ -200,12 +178,7 @@ class Auth
 		return true;
 	}
 	
-	/**
-	 * @param bool $hasAdminOnly [optional]
-	 * @param bool $ensureToken [optional]
-	 * @return string
-	 */
-	static function login($admin = false, $ensureToken = true)
+	static function login(bool $admin = false, bool $ensureToken = true): string|false
 	{
 		self::useSession(true);
 		
@@ -224,13 +197,13 @@ class Auth
 			return $_SESSION[self::SESSION_PASSWORD] = $_POST["password"];
 		}
 		else
+		{
 			self::loginError();
+			return false;
+		}
 	}
 	
-	/**
-	 * @param string $error [optional]
-	 */
-	static function loginError($error = null)
+	static function loginError(string $error = ""): void
 	{
 		self::cleanSession();
 		unset($_SESSION[self::SESSION_PASSWORD]);

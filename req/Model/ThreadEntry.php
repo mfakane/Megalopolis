@@ -2,6 +2,7 @@
 class ThreadEntry
 {
 	static $threadEntrySchemaVersion = 3;
+
 	static $threadEntrySchema = array
 	(
 		"id" => "bigint primary key not null",
@@ -120,11 +121,7 @@ class ThreadEntry
 		return max($this->lastUpdate, $this->responseLastUpdate);
 	}
 	
-	/**
-	 * @param int $id
-	 * @return ThreadEntry
-	 */
-	static function load(PDO $db, $id)
+	static function load(PDO $db, int $id): ?ThreadEntry
 	{	
 		$rt = self::query($db, sprintf
 		('
