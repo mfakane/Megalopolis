@@ -195,7 +195,7 @@ class Util
 	
 	static function getIncludedFilesLastModified(): int
 	{
-		return max(array_map('filemtime', get_included_files()));
+		return array_reduce(array_map(fn(string $_): int => filemtime($_), get_included_files()), fn(int $x, int $y): int => max($x, $y), 0);
 	}
 	
 	static function getAbsoluteUrl(string $path = ""): string
@@ -266,7 +266,7 @@ class Util
 			
 			return $pathInfo;
 		}
-		else if ($rt = self::escapeInput(getenv("PATH_INFO")))
+		else if ($rt = self::escapeInput((string)getenv("PATH_INFO")))
 			return $pathInfo = $rt;
 		else
 			return $pathInfo = mb_substr(mb_strstr(self::escapeInput($_SERVER["PHP_SELF"]), self::INDEX_FILE_NAME), mb_strlen(self::INDEX_FILE_NAME));
@@ -278,39 +278,39 @@ class Util
 		return array_unique(preg_split("/ +/", mb_convert_kana(trim($tags), "s"), -1, PREG_SPLIT_NO_EMPTY));
 	}
 	
-	static function ensureStatement(PDO $db, PDOStatement $st): PDOStatement
+	static function ensureStatement(PDO $db, PDOStatement $st): ?PDOStatement
 	{
-		return Configuration::$instance->dataStore->ensureStatement($db, $st);
+		return Configuration::$instance->dataStore?->ensureStatement($db, $st);
 	}
 	
-	static function executeStatement(PDOStatement $st, ?array $params = null, bool $throw = true): bool
+	static function executeStatement(?PDOStatement $st, ?array $params = null, bool $throw = true): bool
 	{
-		return Configuration::$instance->dataStore->executeStatement($st, $params, $throw);
+		return Configuration::$instance->dataStore?->executeStatement($st, $params, $throw) ?? false;
 	}
 	
 	static function createTableIfNotExists(PDO $db, array $schema, string $name, ?array $index = null): bool
 	{
-		return Configuration::$instance->dataStore->createTableIfNotExists($db, $schema, $name, $index);
+		return Configuration::$instance->dataStore?->createTableIfNotExists($db, $schema, $name, $index) ?? false;
 	}
 	
 	static function createFullTextTableIfNotExists(PDO $db, array $schema, string $name, string $indexSuffix = "Index"): bool
 	{
-		return Configuration::$instance->dataStore->createFullTextTableIfNotExists($db, $schema, $name, $indexSuffix);
+		return Configuration::$instance->dataStore?->createFullTextTableIfNotExists($db, $schema, $name, $indexSuffix) ?? false;
 	}
 	
 	static function saveToTable(PDO $db, mixed $obj, array $schema, string $name): void
 	{
-		Configuration::$instance->dataStore->saveToTable($db, $obj, $schema, $name);
+		Configuration::$instance->dataStore?->saveToTable($db, $obj, $schema, $name);
 	}
 	
-	static function hasTable(PDO $db, string $name)
+	static function hasTable(PDO $db, string $name): bool
 	{
-		return Configuration::$instance->dataStore->hasTable($db, $name);
+		return Configuration::$instance->dataStore?->hasTable($db, $name) ?? false;
 	}
 	
-	static function bindValues(PDOStatement $st, mixed $obj, array $schema)
+	static function bindValues(PDOStatement $st, mixed $obj, array $schema): void
 	{
-		return Configuration::$instance->dataStore->bindValues($st, $obj, $schema);
+		Configuration::$instance->dataStore?->bindValues($st, $obj, $schema);
 	}
 	
 	static function hash(string $raw, int $version = 1, ?string $salt = null, ?int $stretch = null): string
@@ -423,7 +423,7 @@ class Util
 	
 	private static function decodeNumericEntity(string $str, ?string $encoding = null): string
 	{
-		$result = preg_replace_callback("/&#x([\\dA-F]+);?/i", function(array $matches) { return "&#". intval($matches[1], 16) . ";"; }, $str);
+		$result = preg_replace_callback("/&#x([\\dA-F]+);?/i", fn(array $matches) => "&#". intval($matches[1], 16) . ";", $str);
 		$result = preg_replace("/(&#\\d+);?/", "\\1;", $result);
 		$convmap = array(0x000020, 0x000020, 0, 0xffffff,
 						  0x000028, 0x000029, 0, 0xffffff,
@@ -527,12 +527,12 @@ class Util
 	}
 	
 	/**
-	 * @param string|string[] $line
+	 * @param string|(?string)[] $line
 	 */
 	static function convertLineToThreadEntry(string|array $line, ?ThreadEntry $entry = null): ?ThreadEntry
 	{
 		if (!is_array($line))
-			$line = array_map(function($_) { return html_entity_decode($_, ENT_QUOTES); }, explode("<>", $line));
+			$line = array_map(fn($_) => html_entity_decode($_, ENT_QUOTES), explode("<>", $line));
 		
 		if (count($line) < 12)
 			return null;
@@ -558,10 +558,13 @@ class Util
 			$tags
 		) = $line + array_fill(0, 14, null);
 		
+		if ($id === null || $lastUpdate === null || $eval === null)
+			return null;
+
 		$entry->id = intval(strtr($id, array(".dat" => "")));
 		$d = date_parse($lastUpdate);
 		$entry->lastUpdate = mktime($d["hour"], $d["minute"], $d["second"], $d["month"], $d["day"], $d["year"]);
-		$entry->tags = Util::splitTags($tags);
+		$entry->tags = Util::splitTags($tags ?? "");
 		$entry->dateTime = $entry->id;
 		$entry->pageCount = 1;
 		$evals = explode("/", $eval);
@@ -589,7 +592,10 @@ class Util
 		return $entry;
 	}
 	
-	private static function convertAndSaveToThreadInternal(PDO $db, PDO $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly, $allowSaveCommentsOnly, &$save, ThreadEntry $entry)
+	/**
+	 * @param string|string[] $dat
+	 */
+	private static function convertAndSaveToThreadInternal(PDO $db, PDO $idb, string $subject, string|array $dat, string $com, string $aft, bool $whenContainsWin31JOnly, bool $allowSaveCommentsOnly, bool &$save, ?ThreadEntry $entry): ?Thread
 	{
 		if (!is_array($dat) && !is_file($dat))
 			return null;
@@ -608,7 +614,8 @@ class Util
 		
 		$thread = new Thread();
 		
-		$line = array_map(function($_) { return html_entity_decode($_, ENT_QUOTES); }, explode("<>", array_shift($data))) + array_fill(0, is_array($dat) ? 16 : 15, null);
+		/** @var (?string)[] */
+		$line = array_map(fn($_) => html_entity_decode($_, ENT_QUOTES), explode("<>", array_shift($data))) + array_fill(0, is_array($dat) ? 16 : 15, null);
 		
 		if (!is_array($dat))
 			array_unshift($line, basename($dat));
@@ -627,7 +634,7 @@ class Util
 		$thread->convertLineBreak = is_null($line[11]) || $line[11] == "yes";
 		$thread->hash = array_shift($data);
 		
-		if (preg_match('/^\#|^rgb/', $line[9]))
+		if (preg_match('/^\#|^rgb/', $line[9] ?? ""))
 			$thread->background = $line[9];
 		else
 			$thread->backgroundImage = $line[9];
@@ -690,13 +697,13 @@ class Util
 		return $thread;
 	}
 
-	static function convertLinesToCommentsAndEvaluations($entryID, array $lines)
+	static function convertLinesToCommentsAndEvaluations(int $entryID, array $lines)
 	{
 		$rt = array();
 		
 		foreach ($lines as $i)
 		{
-			$i = array_map(function($_) { return html_entity_decode($_, ENT_QUOTES); }, explode("<>", trim($i)));
+			$i = array_map(fn($_) => html_entity_decode($_, ENT_QUOTES), explode("<>", trim($i)));
 			
 			if (count($i) < 7)
 				continue;

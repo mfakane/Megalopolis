@@ -14,9 +14,10 @@ class Cookie
 	const VIEW_HISTORY_KEY = "ViewHistory";
 	const EVALUATION_HISTORY_KEY = "EvaluationHistory";
 	
-	static $data = null;
+	/** @var string[]|null */
+	static ?array $data = null;
 	
-	private static function checkCookie()
+	private static function checkCookie(): void
 	{
 		if (self::$data)
 			return;
@@ -34,19 +35,19 @@ class Cookie
 				}
 	}
 	
-	static function sendCookie()
+	static function sendCookie(): void
 	{
 		if (self::$data)
 			setcookie
 			(
 				self::COOKIE_NAME,
-				"<" . implode("<", array_map(function($k, $v) { return urlencode($k) . ">" . urlencode($v); }, array_keys(self::$data), array_values(self::$data))),
+				"<" . implode("<", array_map(fn($k, $v) => urlencode($k) . ">" . urlencode($v), array_keys(self::$data), array_values(self::$data))),
 				time() + 60 * 60 * 24 * 30,
 				dirname(Util::getPhpSelf())
 			);
 	}
 	
-	static function getCookie($key, $defaultValue = null)
+	static function getCookie(string $key, ?string $defaultValue = null): ?string
 	{
 		self::checkCookie();
 		
@@ -56,7 +57,7 @@ class Cookie
 			return $defaultValue;
 	}
 	
-	static function setCookie($key, $value)
+	static function setCookie(string $key, string $value): void
 	{
 		self::checkCookie();
 		self::$data[$key] = $value;

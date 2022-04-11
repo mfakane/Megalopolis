@@ -1,7 +1,7 @@
 <?php
 class Evaluation
 {
-	static $evaluationSchema = array
+	static array $evaluationSchema = array
 	(
 		"entryID" => "bigint primary key not null",
 		"id" => "bigint primary key not null",
@@ -11,13 +11,13 @@ class Evaluation
 		"dateTime" => "bigint",
 	);
 	
-	public $entryID = 0;
-	public $id = 0;
-	public $point = 0;
-	public $host = null;
-	public $dateTime = 0;
+	public int $entryID = 0;
+	public int $id = 0;
+	public int $point = 0;
+	public ?string $host = null;
+	public int $dateTime = 0;
 	
-	public $loaded = false;
+	public bool $loaded = false;
 	
 	function __construct(PDO $db = null)
 	{

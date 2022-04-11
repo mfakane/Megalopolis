@@ -6,8 +6,8 @@ class Thread
 	const WRITING_MODE_HORIZONTAL = 1;
 	const WRITING_MODE_VERTICAL = 2;
 	
-	static $threadSchemaVersion = 2;
-	static $threadSchema = array
+	static int $threadSchemaVersion = 2;
+	static array $threadSchema = array
 	(
 		"id" => "bigint primary key not null",
 		"subject" => "integer not null",
@@ -15,8 +15,8 @@ class Thread
 		"body" => "mediumtext",
 		"afterword" => "mediumtext"
 	);
-	static $threadStyleSchemaVersion = 3;
-	static $threadStyleSchema = array
+	static int $threadStyleSchemaVersion = 3;
+	static array $threadStyleSchema = array
 	(
 		"id" => "bigint primary key not null",
 
@@ -27,38 +27,38 @@ class Thread
 		"border" => "varchar(127)",
 		"writingMode" => "tinyint"
 	);
-	static $threadPasswordSchema = array
+	static array $threadPasswordSchema = array
 	(
 		"id" => "bigint primary key not null",
 	
 		"hash" => "varchar(512)"
 	);
 	
-	/**
-	 * @var ThreadEntry
-	 */
-	public $entry = null;
+	public ?ThreadEntry $entry = null;
 	
-	public $id = 0;
-	public $subject = 0;
+	public ?int $id = 0;
+	public ?int $subject = 0;
 	
-	public $body = null;
-	public $afterword = null;
+	public ?string $body = null;
+	public ?string $afterword = null;
 	
-	public $convertLineBreak = true;
-	public $foreground = null;
-	public $background = null;
-	public $backgroundImage = null;
-	public $border = null;
+	public ?bool $convertLineBreak = true;
+	public ?string $foreground = null;
+	public ?string $background = null;
+	public ?string $backgroundImage = null;
+	public ?string $border = null;
 	public $writingMode = self::WRITING_MODE_NOT_SPECIFIED;
 	
-	public $hash = null;
+	public ?string $hash = null;
 	
-	public $comments = array();
-	public $evaluations = array();
-	public $nonCommentEvaluations = array();
+	/** @var Comment[] */
+	public array $comments = array();
+	/** @var Evaluation[] */
+	public array $evaluations = array();
+	/** @var Evaluation[] */
+	public array $nonCommentEvaluations = array();
 	
-	public $loaded = false;
+	public bool $loaded = false;
 	
 	function __construct(PDO $db = null)
 	{
@@ -67,9 +67,9 @@ class Thread
 	}
 	
 	/**
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	function toArray()
+	function toArray(): array
 	{
 		$formattedBody = array();
 		
@@ -95,33 +95,37 @@ class Thread
 		);
 	}
 	
-	function pageCount()
+	function pageCount(): int
 	{
+		if ($this->body === null) return 1;
+
 		$matches = array();
-		
+
 		return preg_match_all(self::REGEX_SPLIT_PAGE, $this->body, $matches) + 1;
 	}
 	
-	function page($page)
+	function page(int $page): ?string
 	{
+		if ($this->body === null) return null;
+
 		$rt = preg_split(self::REGEX_SPLIT_PAGE, $this->body);
 		
 		return isset($rt[$page - 1]) ? $rt[$page - 1] : null;
 	}
 	
-	function updatePropertyLink()
+	function updatePropertyLink(): void
 	{
+		if ($this->entry === null) throw new ApplicationException("Thread entry not set");
+
 		$this->id = &$this->entry->id;
 		$this->subject = &$this->entry->subject;
 	}
 	
-	/**
-	 * @param int $point
-	 * @param bool $saveThread [optional]
-	 * @return Evaluation
-	 */
-	function evaluate(PDO $db, $point, $saveThread = true)
+	function evaluate(PDO $db, int $point, bool $saveThread = true): Evaluation
 	{
+		if ($this->id === null) throw new ApplicationException("Thread id not set");
+		if ($this->entry === null) throw new ApplicationException("Thread entry not set");
+
 		$eval = new Evaluation($db);
 		$eval->entryID = $this->id;
 		$eval->point = $point;
@@ -137,15 +141,17 @@ class Thread
 		return $eval;
 	}
 	
-	function unevaluate(PDO $db, Evaluation $eval)
+	function unevaluate(PDO $db, Evaluation $eval): void
 	{
+		if ($this->entry === null) throw new ApplicationException("Thread entry not set");
+
 		unset($this->evaluations[$eval->id]);
 		unset($this->nonCommentEvaluations[$eval->id]);
 		
 		$eval->delete($db);
 		
 		foreach ($this->comments as $i)
-			if ($i->evaluation && $i->evaluation->id == $eval->id)
+			if ($i->evaluation && $i->evaluation->id === $eval->id)
 			{
 				$i->evaluation = null;
 				$i->save($db);
@@ -156,17 +162,11 @@ class Thread
 		$this->save($db);
 	}
 	
-	/**
-	 * @param string $name
-	 * @param string $mail
-	 * @param string $body
-	 * @param string $password
-	 * @param int $point
-	 * @param bool $saveThread [optional]
-	 * @return Comment
-	 */
-	function comment(PDO $db, $name, $mail, $body, $password, $point, $saveThread = true)
+	function comment(PDO $db, string $name, string $mail, string $body, string $password, int $point, bool $saveThread = true): Comment
 	{
+		if ($this->id === null) throw new ApplicationException("Thread id not set");
+		if ($this->entry === null) throw new ApplicationException("Thread entry not set");
+
 		$comment = new Comment($db);
 		$comment->entryID = $this->id;
 		$comment->name = $name;
@@ -197,8 +197,10 @@ class Thread
 		return $comment;
 	}
 	
-	function uncomment(PDO $db, Comment $comment)
+	function uncomment(PDO $db, Comment $comment): void
 	{
+		if ($this->entry === null) throw new ApplicationException("Thread entry not set");
+
 		unset($this->comments[$comment->id]);
 		
 		if ($comment->evaluation)
@@ -210,19 +212,17 @@ class Thread
 		$this->save($db);
 	}
 	
-	function delete(PDO $db, PDO $idb)
+	function delete(PDO $db, PDO $idb): void
 	{
+		if ($this->entry === null) throw new ApplicationException("Thread entry not set");
+
 		$this->entry->delete($db, $idb);
 		$this->loaded = false;
 	}
 	
-	/**
-	 * @param int $id
-	 * @return Comment
-	 */
-	function getCommentByID(PDO $db, $id)
+	function getCommentByID(PDO $db, int $id): ?Comment
 	{
-		$rt = array_filter($this->comments, function($_) { return $_->id == ' . $id . '; });
+		$rt = array_filter($this->comments, fn(Comment $_) => $_->id === $id);
 		
 		if ($rt)
 			return array_pop($rt);
@@ -230,13 +230,9 @@ class Thread
 			return null;
 	}
 	
-	/**
-	 * @param int $id
-	 * @return Evaluation
-	 */
-	function getEvaluationByID(PDO $db, $id)
+	function getEvaluationByID(PDO $db, int $id): ?Evaluation
 	{
-		$rt = array_filter($this->nonCommentEvaluations, function($_) { return $_->id == ' . $id . '; });
+		$rt = array_filter($this->nonCommentEvaluations, fn(Evaluation $_) => $_->id === $id);
 		
 		if ($rt)
 			return array_pop($rt);
@@ -244,11 +240,7 @@ class Thread
 			return null;
 	}
 	
-	/**
-	 * @param int $id
-	 * @return Thread
-	 */
-	static function load(PDO $db, $id)
+	static function load(PDO $db, int $id): ?Thread
 	{
 		$rt = self::query($db, sprintf
 		('
@@ -265,7 +257,7 @@ class Thread
 			$rt->updatePropertyLink();
 			$rt->evaluations = Evaluation::getEvaluationsFromEntryID($db, $rt->id);
 			$rt->comments = Comment::getCommentsFromEntryID($db, $rt->id, $rt->evaluations);
-			$resEval = array_map(function($_) { return $_->evaluation ? $_->evaluation->id : 0; }, $rt->comments);
+			$resEval = array_map(fn(Comment $_) => $_->evaluation?->id, $rt->comments);
 			$rt->nonCommentEvaluations = array();
 			
 			foreach ($rt->evaluations as $i)
@@ -278,7 +270,7 @@ class Thread
 			return null;
 	}
 	
-	static function loadWithMegalith(PDO $db, PDO $idb, $id)
+	static function loadWithMegalith(PDO $db, PDO $idb, int $id): ?Thread
 	{
 		if (!($rt = Thread::load($db, $id)))
 			if (Configuration::$instance->convertOnDemand &&
@@ -314,8 +306,10 @@ class Thread
 		return $rt;
 	}
 	
-	function save(PDO $db, $setSubjectLastUpdate = true)
+	function save(PDO $db, bool $setSubjectLastUpdate = true): void
 	{
+		if ($this->entry === null) throw new ApplicationException("Thread entry not set");
+
 		$this->entry->save($db, $setSubjectLastUpdate);
 		Util::saveToTable($db, $this, self::$threadSchema, App::THREAD_TABLE);
 		Util::saveToTable($db, $this, self::$threadStyleSchema, App::THREAD_STYLE_TABLE);
@@ -323,7 +317,7 @@ class Thread
 		$this->loaded = true;
 	}
 	
-	static function ensureTable(PDO $db)
+	static function ensureTable(PDO $db): void
 	{
 		$db->beginTransaction();
 		
@@ -359,10 +353,9 @@ class Thread
 	}
 	
 	/**
-	 * @param string $options [optional]
-	 * @return array of Thread
+	 * @return Thread[]
 	 */
-	private static function query(PDO $db, $options)
+	private static function query(PDO $db, string $options): array
 	{
 		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
@@ -377,22 +370,19 @@ class Thread
 		)));
 		Util::executeStatement($st);
 		
-		return array_map(array("self", "initializeFromQuery"), $st->fetchAll(PDO::FETCH_CLASS, "Thread"));
-	}
-	
-	private static function initializeFromQuery($instance)
-	{
-		$instance->convertLineBreak = (bool)$instance->convertLineBreak;
-		
-		return $instance;
+		if ($st === null) return array();
+
+		return array_map(function (Thread $instance): Thread
+		{
+			$instance->convertLineBreak = (bool)$instance->convertLineBreak;
+			return $instance;
+		}, $st->fetchAll(PDO::FETCH_CLASS, "Thread"));
 	}
 	
 	/**
-	 * @param int $subject
-	 * @param int $order [optional]
-	 * @return array of Thread
+	 * @return Thread[]
 	 */
-	static function getThreadsBySubject(PDO $db, $subject, $order = Board::ORDER_DESCEND)
+	static function getThreadsBySubject(PDO $db, int $subject, int $order = Board::ORDER_DESCEND): array
 	{
 		$entries = ThreadEntry::getEntriesBySubject($db, $subject, $order);
 		
@@ -406,7 +396,7 @@ class Thread
 		)) as $i)
 		{
 			foreach ($entries as $j)
-				if ($j->id == $i->id)
+				if ($j->id === $i->id)
 				{
 					$i->entry = $j;
 					

@@ -369,7 +369,7 @@ class Configuration
 		self::ON_ENTRY => true,
 	);
 	/** @var bool[]|null */
-	public array|null $showTweetButton = null;
+	public ?array $showTweetButton = null;
 	public ?string $entryTweetButtonText = null;
 	public ?string $entryTweetButtonHashtags = null;
 	public ?string $tagTweetButtonText = null;

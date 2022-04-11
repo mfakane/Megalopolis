@@ -194,9 +194,9 @@ class UtilHandler extends Handler
 				
 				$idb->beginTransaction();
 				
-				$rt = SearchIndex::$instance->registerSubject($db, $idb, $current, $offset, $buffer);
-				$count += $rt[0];
-				$nextOffset = $rt[1] <= 0 ? 0 : $offset += $buffer;
+				$rt = SearchIndex::ensureTable($idb)->registerSubject($db, $idb, $current, $offset, $buffer);
+				$count += $rt["processed"];
+				$nextOffset = $rt["remaining"] <= 0 ? 0 : $offset += $buffer;
 				$next = $nextOffset == 0 ? $current + 1 : $current;
 				
 				$idb->commit();
@@ -207,8 +207,8 @@ class UtilHandler extends Handler
 				if (App::$handlerType == "json")
 					return Visualizer::json(array
 					(
-						"remainingChildren" => $rt[1],
-						"allChildren" => $rt[2],
+						"remainingChildren" => $rt["remaining"],
+						"allChildren" => $rt["count"],
 						"nextOffset" => $nextOffset,
 						"current" => $current,
 						"next" => $next > $maxSubject ? null : $next,

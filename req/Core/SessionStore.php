@@ -1,7 +1,7 @@
 <?php
 class SessionStore
 {
-	static $sessionStoreSchema = array
+	static array $sessionStoreSchema = array
 	(
 		"name" => "varchar(255) primary key not null",
 		"id" => "varchar(255) primary key not null",
@@ -9,20 +9,17 @@ class SessionStore
 		"data" => "text",
 	);
 	
-	/**
-	 * @var SessionStore
-	 */
-	static $instance;
-	private $db;
-	private $sessionName;
+	static SessionStore $instance;
+	private ?PDO $db = null;
+	private ?string $sessionName = null;
 	
-	static function useSessionStore()
+	static function useSessionStore(): void
 	{
 		self::$instance = new SessionStore();
 		self::$instance->apply();
 	}
 	
-	function open($savePath, $sessionName)
+	function open(string $savePath, string $sessionName): bool
 	{
 		$this->db = App::openDB();
 		$this->sessionName = $sessionName;
@@ -35,15 +32,19 @@ class SessionStore
 		return true;
 	}
 	
-	function close()
+	function close(): bool
 	{
-		App::closeDB($this->db);
+		if ($this->db)
+			App::closeDB($this->db);
 		
 		return true;
 	}
 	
-	function read($sessionId)
+	function read(string $sessionId): string
 	{
+		if (!$this->db)
+			return "";
+
 		$st = Util::ensureStatement($this->db, $this->db->prepare(sprintf
 		('
 			select * from %s
@@ -59,8 +60,11 @@ class SessionStore
 			return "";
 	}
 	
-	function write($sessionId, $data)
+	function write(string $sessionId, string $data): bool
 	{
+		if (!$this->db)
+			return false;
+
 		Util::executeStatement(Util::ensureStatement($this->db, $this->db->prepare(sprintf
 		('
 			replace into %s(name, id, lastUpdate, data) values(?, ?, ?, ?)',
@@ -76,8 +80,11 @@ class SessionStore
 		return true;
 	}
 	
-	function destroy($sessionId)
+	function destroy(string $sessionId): bool
 	{
+		if (!$this->db)
+			return false;
+
 		Util::executeStatement(Util::ensureStatement($this->db, $this->db->prepare(sprintf
 		('
 			delete from %s where name = ? and id = ?',
@@ -91,19 +98,22 @@ class SessionStore
 		return true;
 	}
 	
-	function gc($lifetime)
+	function gc(string $lifetime): bool
 	{
+		if (!$this->db)
+			return false;
+
 		Util::executeStatement(Util::ensureStatement($this->db, $this->db->prepare(sprintf
 		('
 			delete from %s where lastUpdate <= %d',
 			App::SESSION_STORE_TABLE,
-			time() - $lifetime
+			time() - (int)$lifetime
 		))), null, false);
 		
 		return true;
 	}
 	
-	function apply()
+	function apply(): void
 	{
 		ini_set("session.serialize_handler", "php");
 		

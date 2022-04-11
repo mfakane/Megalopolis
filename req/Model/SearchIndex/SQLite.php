@@ -2,7 +2,7 @@
 class SQLiteSearchIndex extends SearchIndex
 {
 	const INDEX_TABLE = "searchIndex2";
-	static $searchIndexSchema = array
+	static array $searchIndexSchema = array
 	(
 		"docid" => "bigint primary key not null",
 		"title" => "varchar(2048) fulltext",
@@ -13,8 +13,11 @@ class SQLiteSearchIndex extends SearchIndex
 		"tag" => "varchar(2048) fulltext"
 	);
 	
-	function registerThread(PDO $idb, Thread $thread, $removeExisting)
+	function registerThread(PDO $idb, Thread $thread, bool $removeExisting): void
 	{
+		if (!isset($thread->id, $thread->entry))
+			return;
+
 		if ($removeExisting)
 			self::unregister($idb, $thread->id);
 		
@@ -43,7 +46,7 @@ class SQLiteSearchIndex extends SearchIndex
 		Util::executeStatement($st, array_map(function($_) { return implode(" ", $_); }, $words));
 	}
 	
-	function unregisterThread(PDO $idb, array $ids)
+	function unregisterThread(PDO $idb, array $ids): void
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
@@ -55,7 +58,7 @@ class SQLiteSearchIndex extends SearchIndex
 		Util::executeStatement($st);
 	}
 	
-	function searchThread(PDO $idb, array $query, array $type = null, array $ids = null)
+	function searchThread(PDO $idb, array $query, ?array $type = null, ?array $ids = null): array
 	{
 		if (!$query)
 			return array();
@@ -105,21 +108,17 @@ class SQLiteSearchIndex extends SearchIndex
 		
 		Util::executeStatement($st, array_fill(0, count($targetColumns), implode(" ", $queryArguments)));
 		
-		return $st->fetchAll(PDO::FETCH_COLUMN, 0);
+		return $st?->fetchAll(PDO::FETCH_COLUMN, 0) ?? array();
 	}
 	
-	function ensureTableExists(PDO $idb)
+	function ensureTableExists(PDO $idb): void
 	{
 		$idb->beginTransaction();
 		Util::createFullTextTableIfNotExists($idb, self::$searchIndexSchema, self::INDEX_TABLE);
 		$idb->commit();
 	}
 	
-	/**
-	 * @param int $id
-	 * @return array|int
-	 */
-	function getExistingThread(PDO $idb)
+	function getExistingThread(PDO $idb): array
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
@@ -129,7 +128,7 @@ class SQLiteSearchIndex extends SearchIndex
 		)));
 		Util::executeStatement($st);
 		
-		return array_map("intval", $st->fetchAll(PDO::FETCH_COLUMN, 0));
+		return array_map("intval", $st?->fetchAll(PDO::FETCH_COLUMN, 0) ?? array());
 	}
 }
 ?>

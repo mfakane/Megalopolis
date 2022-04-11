@@ -1,61 +1,56 @@
 <?php
 abstract class DataStore
 {
-	private $handles = array();
-	private $tableNames = array();
+	/** @var array<string, PDO> */
+	private array $handles = array();
+	/** @var string[][] */
+	private array $tableNames = array();
 	
-	protected function registerHandle(PDO &$db, $name)
+	protected function registerHandle(PDO &$db, string $name): void
 	{
 		$this->handles[$name] = &$db;
 	}
 	
-	protected function unregisterHandle(PDO &$db)
+	protected function unregisterHandle(PDO &$db): void
 	{
 		unset($this->handles[$this->getDatabaseNameByHandle($db)]);
 	}
 	
-	protected function getDatabaseNameByHandle(PDO &$db)
+	protected function getDatabaseNameByHandle(PDO &$db): string|false
 	{
 		return array_search($db, $this->handles, true);
 	}
 	
-	protected function getHandleByName($name)
+	protected function getHandleByName(string $name): ?PDO
 	{
 		return isset($this->handles[$name]) ? $this->handles[$name] : null;
 	}
 	
-	protected function registerTableByHandle(PDO &$db, $name)
+	protected function registerTableByHandle(PDO &$db, string $name): void
 	{
 		$this->tableNames[$this->getDatabaseNameByHandle($db)][] = $name;
 	}
 	
-	protected function unregisterTableByHandle(PDO &$db, $name)
+	protected function unregisterTableByHandle(PDO &$db, string $name): void
 	{
 		$arr = &$this->tableNames[$this->getDatabaseNameByHandle($db)];
 		
 		unset($arr[array_search($name, $arr)]);
 	}
 	
-	/**
-	 * @param string $database
-	 * @return PDO
-	 */
-	abstract function open($database = "data");
+	abstract function open(string $database = "data"): PDO;
+	
+	abstract function close(PDO &$db, bool $vacuum = false): void;
 	
 	/**
-	 * @param bool $vacuum [optional]
-	 */
-	abstract function close(PDO &$db, $vacuum = false);
-	
-	/**
-	 * @return array|string
+	 * @return string[]
 	 */
 	abstract function getTables(PDO $db);
 	
 	/**
 	 * @param string $name
 	 */
-	function hasTable(PDO $db, $name)
+	function hasTable(PDO $db, $name): bool
 	{
 		$dbname = $this->getDatabaseNameByHandle($db);
 		
@@ -65,11 +60,7 @@ abstract class DataStore
 		return in_array(strtolower($name), $this->tableNames[$dbname]);
 	}
 	
-	/**
-	 * @param PDOStatement $st
-	 * @return PDOStatement
-	 */
-	function ensureStatement(PDO $db, $st, $throw = true)
+	function ensureStatement(PDO $db, ?PDOStatement $st, bool $throw = true): ?PDOStatement
 	{
 		if ($st)
 			return $st;
@@ -83,15 +74,10 @@ abstract class DataStore
 			return null;
 	}
 	
-	/**
-	 * @param bool $throw [optional]
-	 * @return bool
-	 */
-	function executeStatement(PDOStatement $st, array $params = null, $throw = true)
+	function executeStatement(?PDOStatement $st, array $params = null, bool $throw = true): bool
 	{
-		if (!$st)
-			return false;
-		
+		if (!$st) return false;
+
 		foreach(range(1, 5) as $i)
 		{
 			if (is_null($params))
@@ -128,16 +114,13 @@ abstract class DataStore
 			return false;
 	}
 	
-	/**
-	 * @param string $name
-	 */
-	function createTableIfNotExists(PDO $db, array $schema, $name, array $index = null)
+	function createTableIfNotExists(PDO $db, array $schema, string $name, array $index = null): bool
 	{
 		if (!$this->hasTable($db, $name))
 		{
-			$arr = array_map(function($x, $y) { return "{$x} {$y}"; }, array_keys($schema), array_values($schema));
+			$arr = array_map(fn($x, $y) => "{$x} {$y}", array_keys($schema), array_values($schema));
 
-			$this->executeStatement($this->ensureStatement($db, $db->prepare(strtr(sprintf
+			$st =$this->ensureStatement($db, $db->prepare(strtr(sprintf
 			("
 				create table if not exists %s
 				(
@@ -145,39 +128,37 @@ abstract class DataStore
 					primary key(%s)
 				)",
 				$name,
-				implode(", ", array_map(function($_) { return strtr($_, array(" primary key" => "")); }, $arr)),
-				implode(", ", array_map(function($_) { $tmp = explode(" ", $_); return array_shift($tmp); }, array_filter($arr, function($_) { return mb_strstr($_, "primary key"); })))
+				implode(", ", array_map(fn($_) => strtr($_, array(" primary key" => "")), $arr)),
+				implode(", ", array_map(fn($_) => explode(" ", $_)[0], array_filter($arr, fn($_) => mb_strstr($_, "primary key"))))
 			), array(",
-					primary key()" => "")))));
+					primary key()" => ""))));
+
+			$this->executeStatement($st);
 			
 			if (is_array($index))
 				foreach ($index as $k => $v)
-					$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf('create index if not exists %s on %s(%s)', $k, $name, is_array($v) ? implode(", ", $v) : $v))));
+				{
+					$st = $this->ensureStatement($db, $db->prepare(sprintf('create index if not exists %s on %s(%s)', $k, $name, is_array($v) ? implode(", ", $v) : $v)));
+					$this->executeStatement($st);
+				}
 			
 			$this->registerTableByHandle($db, $name);
+
+			return true;
 		}
+
+		return false;
 	}
 	
-	/**
-	 * @param string $name
-	 * @param string $indexSuffix [optional]
-	 */
-	abstract function createFullTextTableIfNotExists(PDO $db, array $schema, $name, $indexSuffix = "Index");
+	abstract function createFullTextTableIfNotExists(PDO $db, array $schema, string $name, string $indexSuffix = "Index"): bool;
 	
-	/**
-	 * @param string $name
-	 */
-	function dropTable(PDO $db, $name)
+	function dropTable(PDO $db, string $name): void
 	{
 		$this->executeStatement($this->ensureStatement($db, $db->prepare('drop table ' . $name)));
 		$this->unregisterTableByHandle($db, $name);
 	}
 	
-	/**
-	 * @param mixed $obj
-	 * @param string $name
-	 */
-	function saveToTable(PDO $db, $obj, array $schema, $name)
+	function saveToTable(PDO $db, mixed $obj, array $schema, string $name): void
 	{
 		$st = $this->ensureStatement($db, $db->prepare(sprintf
 		('
@@ -193,14 +174,12 @@ abstract class DataStore
 			implode(", ", array_keys($schema)),
 			implode(", :", array_keys($schema))
 		)));
+		if (!$st) return;
 		$this->bindValues($st, $obj, $schema);
 		$this->executeStatement($st);
 	}
 	
-	/**
-	 * @param mixed $obj
-	 */
-	function bindValues(PDOStatement $st, $obj, array $schema)
+	function bindValues(PDOStatement $st, mixed $obj, array $schema): void
 	{
 		foreach ($schema as $k => $v)
 		{
@@ -216,12 +195,12 @@ abstract class DataStore
 				$type = PDO::PARAM_NULL;
 			else if (strpos($type, "int") !== false)
 				$type = PDO::PARAM_INT;
-			else if ($type == "bit")
+			else if ($type === "bit")
 				$type = PDO::PARAM_BOOL;
 			else
 				$type = PDO::PARAM_STR;
 			
-			if ($type == PDO::PARAM_BOOL)
+			if ($type === PDO::PARAM_BOOL)
 				if ($value)
 					$st->bindValue(":" . $k, 1, PDO::PARAM_INT);
 				else
@@ -234,42 +213,37 @@ abstract class DataStore
 
 class SQLiteDataStore extends DataStore
 {
-	private $directory;
+	private string $directory;
+
+	/** @var array<string, int> */
 	private $handleOpenCount = array();
 	
 	const MODULE_FTS3 = "fts3";
 	const MODULE_FTS4 = "fts4";
 	
-	/**
-	 * @param string $directory
-	 */
-	function __construct($directory = DATA_DIR)
+	function __construct(string $directory = DATA_DIR)
 	{
 		App::precondition(extension_loaded("pdo_sqlite"), "PDO SQLite");
 		
 		$this->directory = $directory;
 	}
 	
-	/**
-	 * @param string $name
-	 * @return PDO
-	 */
-	function open($name = "data")
+	function open(string $database = "data"): PDO
 	{
-		if (!isset($this->handleOpenCount[$name]))
-			$this->handleOpenCount[$name] = 0;
+		if (!isset($this->handleOpenCount[$database]))
+			$this->handleOpenCount[$database] = 0;
 		
-		$this->handleOpenCount[$name]++;
+		$this->handleOpenCount[$database]++;
 		
-		if ($rt = $this->getHandleByName($name))
+		if ($rt = $this->getHandleByName($database))
 			return $rt;
 		
-		$db = new PDO(sprintf("sqlite:%s%s.sqlite", rtrim($this->directory, "/") . "/", $name), null, null);
-		$this->registerHandle($db, $name);
+		$db = new PDO(sprintf("sqlite:%s%s.sqlite", rtrim($this->directory, "/") . "/", $database), null, null);
+		$this->registerHandle($db, $database);
 		
 		Util::executeStatement(Util::ensureStatement($db, $db->prepare('pragma recursive_triggers = true;')));
 		
-		if ($name == App::INDEX_DATABASE)
+		if ($database == App::INDEX_DATABASE)
 			SearchIndex::ensureTable($db);
 		else
 		{
@@ -280,14 +254,11 @@ class SQLiteDataStore extends DataStore
 		return $db;
 	}
 	
-	/**
-	 * @param bool $vacuum [optional]
-	 */
-	function close(PDO &$db, $vacuum = false)
+	function close(PDO &$db, bool $vacuum = false): void
 	{
 		$name = $this->getDatabaseNameByHandle($db);
 		
-		if (--$this->handleOpenCount[$name] > 0)
+		if (!$name || --$this->handleOpenCount[$name] > 0)
 			return;
 		
 		unset($this->handleOpenCount[$name]);
@@ -295,25 +266,22 @@ class SQLiteDataStore extends DataStore
 		
 		if ($vacuum)
 			$db->exec("vacuum");
-		
-		$db = null;
 	}
 	
 	/**
-	 * @return array|string
+	 * @return string[]
 	 */
 	function getTables(PDO $db)
 	{
 		$st = $this->ensureStatement($db, $db->prepare("select name from sqlite_master where type = 'table'"));
+		if (!$st) return array();
+
 		$this->executeStatement($st, array());
 		
 		return $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
 	}
 	
-	/**
-	 * @param string $name
-	 */
-	function alterTable(PDO $db, array $schema, $name, array $index = null)
+	function alterTable(PDO $db, array $schema, string $name, array $index = null): void
 	{
 		$tempName = "{$name}Temp";
 		$this->createTableIfNotExists($db, $schema, $tempName, $index);
@@ -321,17 +289,13 @@ class SQLiteDataStore extends DataStore
 		$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf('drop table %s', $name))));
 		$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf('alter table %s rename to %s', $tempName, $name))));
 	}
-	
-	/**
-	 * @param string $name
-	 * @param string $indexSuffix [optional]
-	 */
-	function createFullTextTableIfNotExists(PDO $db, array $schema, $name, $indexSuffix = "Index")
+
+	function createFullTextTableIfNotExists(PDO $db, array $schema, string $name, string $indexSuffix = "Index"): bool
 	{
 		if (!$this->hasTable($db, $name))
 		{
-			$module = $this->supportedFullTextSearchModule();
-			$arr = array_map(function($x, $y) { return "{$x} {$y}"; }, array_keys($schema), array_values($schema));
+			$module = $this->supportedFullTextSearchModule() ?? "";
+			$arr = array_map(fn($x, $y) => "{$x} {$y}", array_keys($schema), array_values($schema));
 			
 			$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf
 			("
@@ -341,17 +305,18 @@ class SQLiteDataStore extends DataStore
 				)",
 				$name,
 				$module,
-				implode(", ", array_filter(array_map(function($_) { return strtr($_, array(" fulltext" => "")); }, $arr), function($_) { return strpos($_, "rowid") === false && strpos($_, "docid") === false; }))
+				implode(", ", array_filter(array_map(fn($_) => strtr($_, array(" fulltext" => "")), $arr), fn($_) => strpos($_, "rowid") === false && strpos($_, "docid") === false))
 			))));
 			
 			$this->registerTableByHandle($db, $name);
+
+			return true;
 		}
+
+		return false;
 	}
 	
-	/**
-	 * @return string
-	 */
-	function supportedFullTextSearchModule()
+	function supportedFullTextSearchModule(): ?string
 	{
 		$db = new PDO("sqlite::memory:");
 		$rt = null;
@@ -372,39 +337,18 @@ class SQLiteDataStore extends DataStore
 
 class MySQLDataStore extends DataStore
 {
-	private $openCount = 0;	
-	
+	private int $openCount = 0;
+	private ?string $host = null;
+	private ?int $port = null;
+	private string $databaseName;
+	private ?string $unixSocket = null;
+	private string $userName;
+	private string $password;
+
 	/**
-	 * @var string
+	 * @param string|(string|int)[] $hostAndPortOrUnixSocket
 	 */
-	private $host;
-	/**
-	 * @var int
-	 */
-	private $port;
-	/**
-	 * @var string
-	 */
-	private $databaseName;
-	/**
-	 * @var string
-	 */
-	private $unixSocket;
-	/**
-	 * @var string
-	 */
-	private $userName;
-	/**
-	 * @var string
-	 */
-	private $password;
-	
-	/**
-	 * @param string $databaseName
-	 * @param string $userName
-	 * @param string $password
-	 */
-	function __construct($databaseName, $hostAndPortOrUnixSocket, $userName, $password)
+	function __construct(string $databaseName, $hostAndPortOrUnixSocket, string $userName, string $password)
 	{
 		App::precondition(extension_loaded("pdo_mysql"), "PDO MySQL");
 		
@@ -418,16 +362,12 @@ class MySQLDataStore extends DataStore
 		$this->userName = $userName;
 		$this->password = $password;
 	}
-	
-	/**
-	 * @param string $name
-	 * @return PDO
-	 */
-	function open($name = "data")
+
+	function open(string $database = "data"): PDO
 	{
 		$this->openCount++;
 		
-		if ($name == App::INDEX_DATABASE)
+		if ($database == App::INDEX_DATABASE)
 			if ($rt = $this->getHandleByName("data"))
 				return $rt;
 			else
@@ -447,7 +387,7 @@ class MySQLDataStore extends DataStore
 				PDO::MYSQL_ATTR_INIT_COMMAND => "set names utf8",
 			)
 		);
-		$this->registerHandle($db, $name);
+		$this->registerHandle($db, $database);
 		
 		Meta::ensureTable($db);
 		Board::ensureTable($db);
@@ -456,37 +396,32 @@ class MySQLDataStore extends DataStore
 		return $db;
 	}
 	
-	/**
-	 * @param bool $vacuum [optional]
-	 */
-	function close(PDO &$db, $vacuum = false)
+	function close(PDO &$db, bool $vacuum = false): void
 	{
 		if (--$this->openCount > 0)
 			return;
 		
 		$this->unregisterHandle($db);
-		$db = null;
 	}
 	
 	/**
-	 * @return array|string
+	 * @return string[]
 	 */
 	function getTables(PDO $db)
 	{
 		$st = $this->ensureStatement($db, $db->prepare("show tables"));
+		if (!$st) return array();
+		
 		$this->executeStatement($st, array());
 		
 		return $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
 	}
 	
-	/**
-	 * @param string $name
-	 */
-	function createTableIfNotExists(PDO $db, array $schema, $name, array $index = null)
+	function createTableIfNotExists(PDO $db, array $schema, string $name, array $index = null): bool
 	{
 		if (!$this->hasTable($db, $name))
 		{
-			$arr = array_map(function($x, $y) { return "{$x} {$y}"; }, array_keys($schema), array_values($schema));
+			$arr = array_map(fn($x, $y) => "{$x} {$y}", array_keys($schema), array_values($schema));
 
 			$this->executeStatement($this->ensureStatement($db, $db->prepare(strtr(sprintf
 			("
@@ -497,27 +432,27 @@ class MySQLDataStore extends DataStore
 				)
 				default character set utf8 engine InnoDB",
 				$name,
-				implode(", ", array_map(function($_) { return strtr($_, array(" primary key" => "")); }, $arr)),
-				implode(", ", array_map(function($_) { $tmp = explode(" ", $_); return array_shift($tmp); }, array_filter($arr, function($_) { return mb_strstr($_, "primary key"); }))),
-				is_array($index) ? ", key " . implode(", key ", array_map(function($x, $y) { return "{$x}(" . (is_array($y) ? implode(", ", $y) : $y) . ")"; }, array_keys($index), array_values($index))) : ""
+				implode(", ", array_map(fn($_) => strtr($_, array(" primary key" => "")), $arr)),
+				implode(", ", array_map(fn($_) => explode(" ", $_)[0], array_filter($arr, fn($_) => mb_strstr($_, "primary key")))),
+				is_array($index) ? ", key " . implode(", key ", array_map(fn($x, $y) => "{$x}(" . (is_array($y) ? implode(", ", $y) : $y) . ")", array_keys($index), array_values($index))) : ""
 			), array(",
 					primary key()" => "")))));
 			
 			$this->registerTableByHandle($db, $name);
+
+			return true;
 		}
+
+		return false;
 	}
 	
-	/**
-	 * @param string $name
-	 * @param string $indexSuffix [optional]
-	 */
-	function createFullTextTableIfNotExists(PDO $db, array $schema, $name, $indexSuffix = "Index")
+	function createFullTextTableIfNotExists(PDO $db, array $schema, string $name, string $indexSuffix = "Index"): bool
 	{
 		if (!$this->hasTable($db, $name))
 		{
-			$columns = array_map(function($x, $y) { return "{$x} " . strtr($y, array(" primary key" => "", " fulltext" => "")); }, array_keys($schema), array_values($schema));
-			$primaryKeys = array_keys(array_filter($schema, function($_) { return strpos($_, "primary key") !== false; }));
-			$fullTextIndices = array_keys(array_filter($schema, function($_) { return strpos($_, "fulltext") !== false; }));
+			$columns = array_map(fn($x, $y) => "{$x} " . strtr($y, array(" primary key" => "", " fulltext" => "")), array_keys($schema), array_values($schema));
+			$primaryKeys = array_keys(array_filter($schema, fn($_) => strpos($_, "primary key") !== false));
+			$fullTextIndices = array_keys(array_filter($schema, fn($_) => strpos($_, "fulltext") !== false));
 	
 			$this->executeStatement($this->ensureStatement($db, $db->prepare(strtr(sprintf
 			("
@@ -530,17 +465,21 @@ class MySQLDataStore extends DataStore
 				$name,
 				implode(", ", $columns),
 				implode(", ", $primaryKeys),
-				", fulltext index " . implode(", fulltext index ", array_map(function($x, $y) { return "{$x}{$y}({$x})"; }, $fullTextIndices, array_fill(0, count($fullTextIndices), $indexSuffix)))
+				", fulltext index " . implode(", fulltext index ", array_map(fn($x, $y) => "{$x}{$y}({$x})", $fullTextIndices, array_fill(0, count($fullTextIndices), $indexSuffix)))
 			), array(",
 					primary key()" => "")))));
 			
 			$this->registerTableByHandle($db, $name);
+
+			return true;
 		}
+
+		return false;
 	}
 	
-	function attachFullTextIndex(PDO $db, array $schema, $name, $indexSuffix = "Index")
+	function attachFullTextIndex(PDO $db, array $schema, string $name, string $indexSuffix = "Index"): void
 	{
-		$fullTextIndices = array_keys(array_filter($schema, function($_) { return strpos($_, "fulltext") !== false; }));
+		$fullTextIndices = array_keys(array_filter($schema, fn($_) => strpos($_, "fulltext") !== false));
 		
 		foreach ($fullTextIndices as $i)
 			$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf
@@ -552,9 +491,9 @@ class MySQLDataStore extends DataStore
 			))));
 	}
 
-	function detachFullTextIndex(PDO $db, array $schema, $name, $indexSuffix = "Index")
+	function detachFullTextIndex(PDO $db, array $schema, string $name, string $indexSuffix = "Index"): void
 	{
-		$fullTextIndices = array_keys(array_filter($schema, function($_) { return strpos($_, "fulltext") !== false; }));
+		$fullTextIndices = array_keys(array_filter($schema, fn($_) => strpos($_, "fulltext") !== false));
 		
 		foreach ($fullTextIndices as $i)
 			$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf

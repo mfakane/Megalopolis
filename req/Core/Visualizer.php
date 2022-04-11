@@ -409,7 +409,7 @@ class Visualizer
 		));
 		
 		?>
-		<a href="https://twitter.com/share?<?php self::converted(implode("&", array_map(function($k, $v) { return rawurlencode($k) . "=" . rawurlencode($v); }, array_keys($params), array_values($params)))) ?>" class="twitter-share-button" data-lang="ja" target="_blank">Tweet</a>
+		<a href="https://twitter.com/share?<?php self::converted(implode("&", array_map(fn($k, $v) => rawurlencode($k) . "=" . rawurlencode($v), array_keys($params), array_values($params)))) ?>" class="twitter-share-button" data-lang="ja" target="_blank">Tweet</a>
 		<script src="http://platform.twitter.com/widgets.js"></script>
 		<?php
 	}

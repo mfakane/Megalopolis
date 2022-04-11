@@ -1,7 +1,7 @@
 <?php
 class Comment
 {
-	static $commentSchema = array
+	static array $commentSchema = array
 	(
 		"entryID" => "bigint primary key not null",
 		"id" => "bigint primary key not null",
@@ -15,22 +15,19 @@ class Comment
 		"evaluation" => "bigint"
 	);
 	
-	public $entryID = 0;
-	public $id = 0;
-	public $name = null;
-	public $mail = null;
-	public $body = null;
-	public $host = null;
-	public $dateTime = 0;
+	public int $entryID = 0;
+	public int $id = 0;
+	public ?string $name = null;
+	public ?string $mail = null;
+	public ?string $body = null;
+	public ?string $host = null;
+	public int $dateTime = 0;
 	
-	public $hash = null;
+	public ?string $hash = null;
 	
-	/**
-	 * @var Evaluation
-	 */
-	public $evaluation = null;
+	public ?Evaluation $evaluation = null;
 	
-	public $loaded = false;
+	public bool $loaded = false;
 	
 	function __construct(PDO $db = null)
 	{

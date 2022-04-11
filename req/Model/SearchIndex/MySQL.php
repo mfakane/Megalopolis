@@ -6,8 +6,12 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		$this->gramLength = max(Configuration::$instance->mysqlSearchNgramLength, 2);
 	}
 	
-	function registerThread(PDO $idb, Thread $thread, $removeExisting)
+	function registerThread(PDO $idb, Thread $thread, bool $removeExisting): void
 	{
+		if (!isset($thread->id, $thread->entry))
+			return;
+
+		/** @var array<string, string[]> */
 		$words = array_filter(array
 		(
 			"title" => $this->getWords($thread->entry->title),
@@ -19,7 +23,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		));
 		
 		foreach ($words as $k => $v)
-			$words[$k] = array_map(function($_) { return ($len = mb_strlen($_)) >= ' . $this->gramLength . ' ? $_ : $_ . str_repeat("_", ' . $this->gramLength . ' - $len); }, $v);
+			$words[$k] = array_map(fn($_) => str_pad($_, $this->gramLength, "_"), $v);
 		
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
@@ -39,17 +43,23 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		Util::executeStatement($st, array_map(function($_) { return implode(" ", $_); }, $words));
 	}
 	
-	function attachIndex(PDO $idb)
+	function attachIndex(PDO $idb): void
 	{
+		if (!Configuration::$instance->dataStore instanceof MySQLDataStore)
+			throw new ApplicationException("DataStore is not MySQLDataStore");
+
 		Configuration::$instance->dataStore->attachFullTextIndex($idb, self::$searchIndexSchema, self::INDEX_TABLE);
 	}
 	
-	function detachIndex(PDO $idb)
+	function detachIndex(PDO $idb): void
 	{
+		if (!Configuration::$instance->dataStore instanceof MySQLDataStore)
+			throw new ApplicationException("DataStore is not MySQLDataStore");
+
 		Configuration::$instance->dataStore->detachFullTextIndex($idb, self::$searchIndexSchema, self::INDEX_TABLE);
 	}
 	
-	function searchThread(PDO $idb, array $query, array $type = null, array $ids = null)
+	function searchThread(PDO $idb, array $query, array $type = null, array $ids = null): array
 	{
 		if (!$query)
 			return array();
@@ -99,7 +109,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		if (!($queryArguments = array_filter($queryArguments)))
 			return array();
 		
-		$targetColumns = $type == null ? array_keys(self::$fullTextSearchIndexSchema) : $type;
+		$targetColumns = $type == null ? array_keys(self::$searchIndexSchema) : $type;
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
 			select docid from
@@ -109,10 +119,10 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		)));
 		Util::executeStatement($st, array_fill(0, count($targetColumns), implode(" ", $queryArguments)));
 		
-		return $st->fetchAll(PDO::FETCH_COLUMN, 0);
+		return $st?->fetchAll(PDO::FETCH_COLUMN, 0) ?? array();
 	}
 	
-	function unregisterThread(PDO $idb, array $ids)
+	function unregisterThread(PDO $idb, array $ids): void
 	{
 		$count = count($ids);
 		
@@ -137,7 +147,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 			))));
 	}
 	
-	function getEntryCount(PDO $idb)
+	function getEntryCount(PDO $idb): int
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
@@ -145,7 +155,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 			self::INDEX_TABLE
 		)));
 		Util::executeStatement($st);
-		$rt = $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
+		$rt = $st?->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0) ?? array(0);
 		
 		return intval(array_shift($rt));
 	}
