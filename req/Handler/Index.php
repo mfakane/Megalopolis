@@ -1,20 +1,18 @@
 <?php
 class IndexHandler extends Handler
 {
-	/**
-	 * @var IndexHandler
-	 */
-	static $instance;
+	static IndexHandler $instance;
 	
-	public $subject;
-	public $subjectCount;
-	public $page;
-	public $pageCount;
-	public $entries;
-	public $entryCount;
+	public int $subject = 0;
+	public int $subjectCount = 0;
+	public int $page = 1;
+	public int $pageCount = 0;
+	/** @var array<int, ThreadEntry> */
+	public array $entries;
+	public int $entryCount = 0;
 	public $lastUpdate;
 	
-	function index($_subject = "0", $_id = 0)
+	function index(string $_subject = "0", string $_id = "0"): bool
 	{
 		if (intval($_id))
 		{
@@ -44,13 +42,13 @@ class IndexHandler extends Handler
 			Auth::ensureToken();
 			Auth::createToken();
 			
-			if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+			if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true) ?: ""))
 				Auth::loginError("管理者パスワードが一致しません");
 			
 			$ids = array_map("intval", array_map(array("Util", "escapeInput"), isset($_POST["id"]) ? (is_array($_POST["id"]) ? $_POST["id"] : array($_POST["id"])) : array()));
 			$db->beginTransaction();
 			
-			switch ($mode = Util::escapeInput($_POST["admin"]))
+			switch (Util::escapeInput($_POST["admin"]))
 			{
 				case "unpost":
 					if ($db !== $idb)
@@ -76,7 +74,7 @@ class IndexHandler extends Handler
 		$this->entries = ThreadEntry::getEntriesBySubject($db, $subject);
 		
 		if (!($this->lastUpdate = Board::getLastUpdate($db, $subject)))
-			$this->lastUpdate = max(array_map(function($_) { return $_->getLatestLastUpdate(); }, $this->entries) + array(0));
+			$this->lastUpdate = max(array_map(fn(ThreadEntry $x) => $x->getLatestLastUpdate(), $this->entries) + array(0));
 		
 		$this->subject = $subject;
 		$this->subjectCount = Board::getLatestSubject($db);
@@ -84,9 +82,10 @@ class IndexHandler extends Handler
 		
 		if ($this->lastUpdate)
 		{
-			$hash = implode(",", array_map(function($_) { return $_->id . ":" . (time() - $_->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"); }, $this->entries));
+			$updatePeriodInSeconds = Configuration::$instance->updatePeriod * 24 * 60 * 60;
+			$hash = implode(",", array_map(fn(ThreadEntry $x) => $x->id . ":" . (time() - $x->getLatestLastUpdate() < $updatePeriodInSeconds ? "t" : "n"), $this->entries));
 			
-			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY) . $hash))
+			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY, "") . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "") . $hash))
 				return Visualizer::notModified();
 		}
 		
@@ -139,8 +138,8 @@ class IndexHandler extends Handler
 			case "json":
 				return Visualizer::json(array
 				(
-					"view" => array_values(array_map(function($_) { return $_->toArray(Configuration::ON_SUBJECT); }, $this->entries["view"])),
-					"evaluation" => array_values(array_map(function($_) { return $_->toArray(Configuration::ON_SUBJECT); }, $this->entries["evaluation"])),
+					"view" => array_values(array_map(fn($x) => $x->toArray(Configuration::ON_SUBJECT), $this->entries["view"])),
+					"evaluation" => array_values(array_map(fn($x) => $x->toArray(Configuration::ON_SUBJECT), $this->entries["evaluation"])),
 				));
 			default:
 				return Visualizer::visualize();
@@ -204,24 +203,24 @@ class IndexHandler extends Handler
 		$vals = ThreadEntry::getMaxMinValues($db);
 		$query = array
 		(
-			"query" => Util::splitTags(self::param("query")),
-			"title" => Util::splitTags(self::param("title")),
-			"name" => Util::splitTags(self::param("name")),
-			"tag" => Util::splitTags(self::param("tags", self::param("tag"))),
+			"query" => Util::splitTags(self::param("query", "")),
+			"title" => Util::splitTags(self::param("title", "")),
+			"name" => Util::splitTags(self::param("name", "")),
+			"tag" => Util::splitTags(self::param("tags", self::param("tag", ""))),
 			"eval" => array
 			(
-				!Util::isEmpty(self::param("evalBegin")) ? intval(self::param("evalBegin")) : $vals["minEval"],
-				!Util::isEmpty(self::param("evalEnd")) ? intval(self::param("evalEnd")) : $vals["maxEval"]
+				!Util::isEmpty(self::param("evalBegin", "")) ? intval(self::param("evalBegin")) : $vals["minEval"] ?? 0,
+				!Util::isEmpty(self::param("evalEnd", "")) ? intval(self::param("evalEnd")) : $vals["maxEval"] ?? 0
 			),
 			"points" => array
 			(
-				!Util::isEmpty(self::param("pointsBegin")) ? intval(self::param("pointsBegin")) : $vals["minPoints"],
-				!Util::isEmpty(self::param("pointsBegin")) ? intval(self::param("pointsEnd")) : $vals["maxPoints"]
+				!Util::isEmpty(self::param("pointsBegin", "")) ? intval(self::param("pointsBegin")) : $vals["minPoints"] ?? 0,
+				!Util::isEmpty(self::param("pointsBegin", "")) ? intval(self::param("pointsEnd")) : $vals["maxPoints"] ?? 0
 			),
 			"dateTime" => array
 			(
-				self::param("dateTimeBegin"),
-				self::param("dateTimeEnd")
+				self::param("dateTimeBegin", ""),
+				self::param("dateTimeEnd", "")
 			)
 		);
 		
@@ -231,7 +230,7 @@ class IndexHandler extends Handler
 			$query["dateTime"][0] = mktime(0, 0, 0, intval($d[1]), intval($d[2]), intval($d[0]));
 		}
 		else
-			$query["dateTime"][0] = $vals["minDateTime"];
+			$query["dateTime"][0] = $vals["minDateTime"] ?? 0;
 		
 		if (substr_count($query["dateTime"][1], "-") == 2)
 		{
@@ -239,7 +238,7 @@ class IndexHandler extends Handler
 			$query["dateTime"][1] = mktime(23, 59, 59, intval($d[1]), intval($d[2]), intval($d[0]));
 		}
 		else
-			$query["dateTime"][1] = $vals["maxDateTime"];
+			$query["dateTime"][1] = $vals["maxDateTime"] ?? 0;
 		
 		if ($query["query"] ||
 			$query["title"] ||
@@ -249,8 +248,8 @@ class IndexHandler extends Handler
 			$query["eval"][1] != $vals["maxEval"] ||
 			$query["points"][0] != $vals["minPoints"] ||
 			$query["points"][1] != $vals["maxPoints"] ||
-			date("Y-m-d", $query["dateTime"][0]) != date("Y-m-d", $vals["minDateTime"]) ||
-			date("Y-m-d", $query["dateTime"][1]) != date("Y-m-d", $vals["maxDateTime"]))
+			date("Y-m-d", $query["dateTime"][0]) != date("Y-m-d", $vals["minDateTime"] ?? 0) ||
+			date("Y-m-d", $query["dateTime"][1]) != date("Y-m-d", $vals["maxDateTime"] ?? 0))
 		{
 			if (self::param("random") == "true")
 			{
@@ -261,7 +260,7 @@ class IndexHandler extends Handler
 			}
 			
 			$rt = ThreadEntry::search($db, $idb, $query, ($this->page - 1) * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, $sort[0], $sort[1]);
-			$this->pageCount = ceil($rt["count"] / Configuration::$instance->searchPaging);
+			$this->pageCount = (int)ceil($rt["count"] / Configuration::$instance->searchPaging);
 			$this->entries = $rt["result"];
 		}
 		
@@ -273,7 +272,7 @@ class IndexHandler extends Handler
 			Auth::ensureToken();
 			Auth::createToken();
 			
-			if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+			if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true) ?: ""))
 				Auth::loginError("管理者パスワードが一致しません");
 			
 			$ids = array_map("intval", array_map(array("Util", "escapeInput"), isset($_POST["id"]) ? (is_array($_POST["id"]) ? $_POST["id"] : array($_POST["id"])) : array()));
@@ -286,9 +285,11 @@ class IndexHandler extends Handler
 			{
 				case "unpost":
 					ThreadEntry::deleteDirect($db, $idb, $ids);
-					
-					foreach (array_unique(array_map(function($_) { return $_->subject; }, array_intersect_key($this->entries, array_flip($ids)))) as $i)
-						Board::setLastUpdate($db, $i);
+					/** @var int[] */
+					$subjects = array_map(fn(ThreadEntry $x) => $x->subject, array_intersect_key($this->entries, array_flip($ids)));
+
+					foreach (array_unique($subjects) as $subject)
+						Board::setLastUpdate($db, $subject);
 					
 					foreach ($ids as $i)
 						unset($this->entries[$i]);
@@ -319,8 +320,8 @@ class IndexHandler extends Handler
 			"pointsMax" => $vals["maxPoints"],
 			"dateTimeBegin" => date("Y-m-d", $query["dateTime"][0]),
 			"dateTimeEnd" => date("Y-m-d", $query["dateTime"][1]),
-			"dateTimeMin" => date("Y-m-d", $vals["minDateTime"]),
-			"dateTimeMax" => date("Y-m-d", $vals["maxDateTime"])
+			"dateTimeMin" => date("Y-m-d", $vals["minDateTime"] ?? 0),
+			"dateTimeMax" => date("Y-m-d", $vals["maxDateTime"] ?? 0)
 		);
 		
 		switch (App::$handlerType)
@@ -339,7 +340,13 @@ class IndexHandler extends Handler
 		}
 	}
 	
-	static function param($name, $value = null)
+	/**
+	 * @template T as string|null
+	 * @param T $value
+	 * @return ?string|string[]
+	 * @psalm-return (T is string ? string : ?string|string[])
+	 */
+	static function param(string $name, ?string $value = null): string|array|null
 	{
 		if (isset($_GET[$name]))
 			if (is_array($_GET[$name]))

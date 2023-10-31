@@ -80,6 +80,9 @@ class ThreadEntry
 	public ?int $commentedEvaluationCount = null;
 	public ?int $responseLastUpdate = null;
 	
+	/**
+	 * @var string[]
+	 */
 	public array $tags = array();
 	
 	public bool $loaded = false;
@@ -118,9 +121,9 @@ class ThreadEntry
 		}
 	}
 	
-	function getLatestLastUpdate(): ?int
+	function getLatestLastUpdate(): int
 	{
-		return max($this->lastUpdate, $this->responseLastUpdate);
+		return max($this->lastUpdate, $this->responseLastUpdate ?? 0);
 	}
 	
 	static function load(PDO $db, int $id): ?ThreadEntry
@@ -953,9 +956,9 @@ class ThreadEntry
 	
 	static function getRandomEntry(PDO $db, PDO $idb): ?ThreadEntry
 	{
-		$count = SearchIndex::$instance->getEntryCount($idb);
+		$count = SearchIndex::getEntryCount($idb);
 		
-		if ($count != -1)
+		if ($count !== null)
 			$st = $db->prepare(sprintf
 			('
 				select id from %s
@@ -984,10 +987,20 @@ class ThreadEntry
 	}
 	
 	/**
-	 * @return ?array<string, int>
+	 * @return array{maxDateTime: ?int, minDateTime: ?int, maxEval: ?int, minEval: ?int, maxPoints: ?int, minPoints: ?int}
 	 */
-	static function getMaxMinValues(PDO $db): ?array
+	static function getMaxMinValues(PDO $db): array
 	{
+		$rt = array
+		(
+			"maxDateTime" => null,
+			"minDateTime" => null,
+			"maxEval" => null,
+			"minEval" => null,
+			"maxPoints" => null,
+			"minPoints" => null,
+		);
+
 		if (Configuration::$instance->dataStore instanceof SQLiteDataStore)
 			$st = Util::ensureStatement($db, $db->prepare(sprintf
 			('
@@ -1019,21 +1032,21 @@ class ThreadEntry
 		
 		Util::executeStatement($st);
 		
-		if (!$st) return null;
-
-		$rt = $st->fetch();
+		if ($st)
+			foreach ($st->fetch() as $k => $v)
+				$rt[$k] = (int)$v;
 		
 		if (Configuration::$instance->convertOnDemand &&
 			is_dir("Megalith/sub"))
 			foreach (self::getAllMegalithEntries(0) as $i)
 				$rt = array
 				(
-					"maxDateTime" => max($rt["maxDateTime"], $i->dateTime),
-					"minDateTime" => min($rt["minDateTime"], $i->dateTime),
-					"maxEval" => max($rt["maxEval"], $i->evaluationCount),
-					"minEval" => min($rt["minEval"], $i->evaluationCount),
-					"maxPoints" => max($rt["maxPoints"], $i->points),
-					"minPoints" => min($rt["minPoints"], $i->points),
+					"maxDateTime" => max($rt["maxDateTime"] ?? $i->dateTime, $i->dateTime),
+					"minDateTime" => min($rt["minDateTime"] ?? $i->dateTime, $i->dateTime),
+					"maxEval" => max($rt["maxEval"] ?? $i->evaluationCount, $i->evaluationCount),
+					"minEval" => min($rt["minEval"] ?? $i->evaluationCount, $i->evaluationCount),
+					"maxPoints" => max($rt["maxPoints"] ?? $i->points, $i->points),
+					"minPoints" => min($rt["minPoints"] ?? $i->points, $i->points),
 				);
 		
 		return $rt;
@@ -1094,25 +1107,19 @@ class ThreadEntry
 			}
 		}
 		
-		$tags = self::queryTags($db, sprintf
-		('
-			where id in (%s)',
-			implode(", ", array_keys($rt))
-		));
-		
 		if (Configuration::$instance->convertOnDemand &&
 			is_dir("Megalith/sub"))
 		{
 			foreach (range($subjectRange[0], $subjectRange[1] - $subjectRange[0], 1) as $subject)
-				foreach (self::getMegalithEntriesBySubject($db, $subject) as $i)
-					if (!isset($rt[$i->id]))
+				foreach (self::getMegalithEntriesBySubject($db, $subject) as $entry)
+					if (!isset($rt[$entry->id]))
 					{
-						if ($i->host !== null && Util::wildcard($host, $i->host))
-							$rt[$i->id] = $i;
-						else if (is_file("Megalith/com/{$i->id}"))
-							foreach (Util::convertLinesToCommentsAndEvaluations($i->id, array_map(function($_) { return mb_convert_encoding($_, "UTF-8", "Windows-31J"); }, Util::readLines("Megalith/com/{$i->id}"))) as $j)
-								if (Util::wildcard($host, $j->host))
-									$rt[$i->id] = $i;
+						if ($entry->host !== null && Util::wildcard($host, $entry->host))
+							$rt[$entry->id] = $entry;
+						else if (is_file("Megalith/com/{$entry->id}"))
+							foreach (Util::convertLinesToCommentsAndEvaluations($entry->id, array_map(fn($x) => mb_convert_encoding($x, "UTF-8", "Windows-31J"), Util::readLines("Megalith/com/{$entry->id}"))) as $commentOrEvaluation)
+								if (isset($commentOrEvaluation->host) && Util::wildcard($host, $commentOrEvaluation->host))
+									$rt[$entry->id] = $entry;
 					}
 			
 			krsort($rt);
@@ -1124,7 +1131,10 @@ class ThreadEntry
 	}
 	
 	/**
+	 * @template T as int
+	 * @param T $option
 	 * @return null|array{result: ThreadEntry[], count: int}|ThreadEntry
+	 * @psalm-return ($option is self::SEARCH_RANDOM ? (?ThreadEntry) : array{result: ThreadEntry[], count: int})
 	 */
 	static function search(PDO $db, PDO $idb, array $query, int $offset = 0, ?int $limit = null, int $option = self::SEARCH_DESCENDING, string $sort = "1")
 	{

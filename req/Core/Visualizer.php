@@ -2,17 +2,17 @@
 class Visualizer
 {
 	static $data;
-	static $basePath;
-	static $mode = null;
+	static string $basePath;
+	static ?string $mode = null;
 
 	const MODE_COOKIE_NAME = "VisualizerMode";
 	
-	static function isMobile()
+	static function isMobile(): bool
 	{
 		return Util::getBrowserType() == Util::BROWSER_TYPE_IPHONE;
 	}
 	
-	static function isSimple()
+	static function isSimple(): bool
 	{
 		return in_array(Util::getBrowserType(), array
 		(
@@ -23,12 +23,12 @@ class Visualizer
 		));
 	}
 	
-	static function doctype()
+	static function doctype(): void
 	{
 		echo "<!DOCTYPE html>\r\n";
 	}
 	
-	static function visualizerMode()
+	static function visualizerMode(): string
 	{
 		if (self::$mode)
 			return self::$mode;
@@ -49,7 +49,7 @@ class Visualizer
 			return self::$mode = self::autoVisualizerMode();
 	}
 	
-	private static function autoVisualizerMode()
+	private static function autoVisualizerMode(): string
 	{
 		if (self::isMobile())
 			return "mobile";
@@ -59,7 +59,7 @@ class Visualizer
 			return "normal";
 	}
 	
-	static function head()
+	static function head(): void
 	{
 		$type = Util::getBrowserType();
 		$isMobile = self::visualizerMode() == "mobile";
@@ -134,12 +134,7 @@ class Visualizer
 		echo Configuration::$instance->head;
 	}
 	
-	/**
-	 * @param string $title [optional]
-	 * @param array $menu [optional]
-	 * @param string $subTitle [optional]
-	 */
-	static function header($title = null, array $menu = array(), $subTitle = null)
+	static function header(?string $title = null, array $menu = array(), ?string $subTitle = null): void
 	{
 		$menu = array_reverse($menu, true);
 		$menu[""] = array("ホーム", "homeIcon.png");
@@ -150,14 +145,14 @@ class Visualizer
 				<?php self::converted(Configuration::$instance->title) ?>
 			</a>
 			<?php if ((Configuration::$instance->showTitle[Configuration::ON_SUBJECT] && Configuration::$instance->useSearch) || Configuration::$instance->customSearch || Auth::hasSession(true)): ?>
-				<form action="<?php self::converted(Configuration::$instance->customSearch ? Configuration::$instance->customSearch[0] : self::actionHref("search")) ?>" method="get">
+				<form action="<?php self::converted(isset(Configuration::$instance->customSearch) ? Configuration::$instance->customSearch[0] : self::actionHref("search")) ?>" method="get">
 					<div>
-						<input type="search" name="<?php self::converted(Configuration::$instance->customSearch ? Configuration::$instance->customSearch[1] : "query") ?>" placeholder="検索" />
+						<input type="search" name="<?php self::converted(isset(Configuration::$instance->customSearch) ? Configuration::$instance->customSearch[1] : "query") ?>" placeholder="検索" />
 						<input type="submit" value="検索" />
 						<?php
 						if (isset(Configuration::$instance->customSearch[2]))
 							foreach (Configuration::$instance->customSearch[2] as $k => $v)
-								echo '<input type="hidden" name="', self::converted($k), '" value="', self::converted($v), '" />';
+								echo '<input type="hidden" name="' . self::escapeOutput($k) . '" value="' . self::escapeOutput($v), '" />';
 						?>
 						<?php
 						if (App::$actionName == "tag" && !is_array(Visualizer::$data))
@@ -198,7 +193,7 @@ class Visualizer
 		endif;
 	}
 	
-	static function footer($backgroundColor = null)
+	static function footer(?string $backgroundColor = null): void
 	{
 		$pathInfo = trim(Util::getPathInfo(), "/");
 		$redir = Util::isEmpty($pathInfo) ? null : array("redir" => $pathInfo);
@@ -209,7 +204,7 @@ class Visualizer
 				<?php if (Configuration::$instance->showFooterVersion): ?>
 					<li>
 						<?php self::converted(App::NAME) ?>
-						<?php self::converted(App::VERSION) ?>
+						<?php self::converted((string)App::VERSION) ?>
 					</li>
 				<?php endif ?>
 				<?php foreach (Configuration::$instance->footers as $i): ?>
@@ -243,7 +238,10 @@ class Visualizer
 		<?php	
 	}
 	
-	static function pager($current, $max, $range, $link, $reverse = false, $buttons = true, $container = true)
+	/**
+	 * @param string|string[] $link
+	 */
+	static function pager(int $current, int $max, int $range, $link, bool $reverse = false, bool $buttons = true, bool $container = true): void
 	{
 		if ($max < 2)
 			return;
@@ -300,7 +298,7 @@ class Visualizer
 				<?php foreach (range($reverse ? $end : max(min($current - floor($range / 2), $max - $range + 1), 1), $reverse ? $start : $end, $reverse ? -1 : 1) as $i): ?>
 					<li>
 						<a href="<?php self::converted($i == $current ? $loopback : $prefix . $i . $suffix) ?>"<?php echo $i == $current ? ' class="active"' : null ?>>
-							<?php self::converted($i) ?>
+							<?php self::converted((string)$i) ?>
 						</a>
 					</li>
 				<?php endforeach ?>
@@ -342,7 +340,7 @@ class Visualizer
 		<?php
 	}
 
-	static function submitPager($current, $max, $range, $pageParam)
+	static function submitPager(int $current, int $max, int $range, string $pageParam): void
 	{
 		if ($max < 2)
 			return;
@@ -371,7 +369,7 @@ class Visualizer
 			<?php foreach (range(max(min($current - floor($range / 2), $max - $range + 1), 1), $end, 1) as $i): ?>
 				<li>
 					<button name="<?php echo $pageParam ?>" value="<?php echo $i ?>"<?php if ($i == $current) echo ' class="active loopback"'; ?>>
-						<?php self::converted($i) ?>
+						<?php self::converted((string)$i) ?>
 					</button>
 				</li>
 			<?php endforeach ?>
@@ -394,16 +392,13 @@ class Visualizer
 	}
 	
 	/**
-	 * @param string $url [optional]
-	 * @param string $text [optional]
-	 * @param string $hashtags [optional]
-	 * @param array $keywords [optional]
+	 * @param string[] $keywords
 	 */
-	static function tweetButton($url = "", $text = null, $hashtags = "", array $keywords = array())
+	static function tweetButton(string $url = "", ?string $text = null, string $hashtags = "", array $keywords = array()): void
 	{
 		$params = array_filter(array
 		(
-			"text" => strtr($text, $keywords),
+			"text" => strtr($text ?? "", $keywords),
 			"url" => strtr($url, $keywords),
 			"hashtags" => strtr($hashtags, $keywords),
 		));
@@ -414,7 +409,10 @@ class Visualizer
 		<?php
 	}
 	
-	private static function href($arr)
+	/**
+	 * @param (null|string|array<string, string>)[] $arr
+	 */
+	private static function href(array $arr): string
 	{
 		static $encodeTable = array();
 		
@@ -438,14 +436,14 @@ class Visualizer
 		return trim($href, "/");
 	}
 	
-	static function actionHref()
+	static function actionHref(): string
 	{
 		$args = func_get_args();
 		
 		return self::actionHrefArray($args);
 	}
 	
-	static function actionHrefArray($args = null)
+	static function actionHrefArray(?array $args = null): string
 	{
 		if (is_null($args))
 			return self::$basePath;
@@ -457,42 +455,42 @@ class Visualizer
 		}
 	}
 	
-	static function currentHref()
+	static function currentHref(): string
 	{
 		$args = func_get_args();
 		
 		return self::currentHrefArray($args);
 	}
 	
-	static function currentHrefArray($args)
+	static function currentHrefArray(array $args): string
 	{
 		return rtrim(self::href($args), "?");
 	}
 	
-	static function absoluteHref()
+	static function absoluteHref(): string
 	{
 		return self::absoluteHrefArray(func_get_args());
 	}
 	
-	static function absoluteHrefArray($args)
+	static function absoluteHrefArray(array $args): string
 	{
 		return Util::getAbsoluteUrl(self::href($args));
 	}
 	
-	static function noCache()
+	static function noCache(): void
 	{
 		header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
 		header("Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
 		header("Pragma: no-cache");
 	}
 	
-	static function notModified()
+	static function notModified(): bool
 	{
 		self::statusCode(304);
 		exit;
 	}
 	
-	static function statusCode($code)
+	static function statusCode(int $code): void
 	{
 		switch ($code)
 		{
@@ -525,28 +523,19 @@ class Visualizer
 		header("HTTP/1.1 {$code}");
 		header("Status: {$code}");
 	}
-	
-	/**
-	 * @param string $s
-	 */
-	static function converted($s)
+
+	static function converted(?string $s): void
 	{
-		if (!is_null($s))
+		if (isset($s))
 			echo self::escapeOutput($s);
 	}
 	
-	/**
-	 * @param string $s
-	 */
-	static function convertedName($s)
+	static function convertedName(?string $s): void
 	{
 		self::converted(empty($s) ? Configuration::$instance->defaultName : $s);
 	}
 	
-	/**
-	 * @param string $s
-	 */
-	static function linkedName($s, $additional = "")
+	static function linkedName(?string $s, string $additional = ""): void
 	{
 		if (empty($s))
 			self::converted(Configuration::$instance->defaultName);
@@ -555,7 +544,7 @@ class Visualizer
 			$endsWithDigit = ctype_digit($s) || ($last = strrchr($s, "/")) !== false && ctype_digit(substr($last, 1));
 			$endsWithExtension = !$endsWithDigit && strpos($s, ".") !== false;
 			?>
-			<a href="<?php echo self::actionHref("author", $s . ($endsWithExtension ? ".html" : null), $endsWithDigit ? "1" : null) ?>">
+			<a href="<?php echo self::actionHref("author", $s . ($endsWithExtension ? ".html" : ""), $endsWithDigit ? "1" : null) ?>">
 				<?php self::converted($s) ?>
 				<?php echo $additional ?>
 			</a>
@@ -563,33 +552,24 @@ class Visualizer
 		}
 	}
 	
-	/**
-	 * @param string $s
-	 */
-	static function linkedTag($s, $additional = "")
+	static function linkedTag(string $s, string $additional = ""): void
 	{
 		$endsWithDigit = ctype_digit($s) || ($last = strrchr($s, "/")) !== false && ctype_digit(substr($last, 1));
 		$endsWithExtension = !$endsWithDigit && strpos($s, ".") !== false;
 		?>
-		<a href="<?php echo self::actionHref("tag", $s . ($endsWithExtension ? ".html" : null), $endsWithDigit ? "1" : null) ?>">
+		<a href="<?php echo self::actionHref("tag", $s . ($endsWithExtension ? ".html" : ""), $endsWithDigit ? "1" : null) ?>">
 			<?php self::converted($s) ?>
 			<?php echo $additional ?>
 		</a>
 		<?php
 	}
 	
-	/**
-	 * @param string $s
-	 */
-	static function convertedSummary($s)
+	static function convertedSummary(string $s): void
 	{
 		echo self::escapeSummary($s);
 	}
 	
-	/**
-	 * @param string $s
-	 */
-	static function escapeSummary($s)
+	static function escapeSummary(string $s): string
 	{
 		return preg_replace("/^(https?|ftp)(:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)$/", '<a href="$0">$0</a>', strtr(self::escapeOutput($s), array
 		(
@@ -599,15 +579,15 @@ class Visualizer
 		)));
 	}
 	
-	static function convertedBody(Thread $thread, $page = null, $offset = null, $length = null, $stripExcept = null)
+	static function convertedBody(Thread $thread, ?int $page = null, ?int $offset = null, ?int $length = null, ?array $stripExcept = null): void
 	{
 		echo self::escapeBody($thread, $page, $offset, $length, $stripExcept);
 	}
 	
-	static function escapeBody(Thread $thread, $page = null, $offset = null, $length = null, $stripExcept = null)
+	static function escapeBody(Thread $thread, ?int $page = null, ?int $offset = null, ?int $length = null, ?array $stripExcept = null): string
 	{
 		$content = $page ? $thread->page($page) : $thread->body;
-		$s = self::ensureHtml(!is_null($offset) && $length ? mb_substr($content, $offset, $length) : $content, $stripExcept);
+		$s = self::ensureHtml(isset($offset) && $length && isset($content) ? mb_substr($content, $offset, $length) : $content ?? "", $stripExcept);
 		
 		if ($thread->convertLineBreak)
 			return self::convertLineBreak($s);
@@ -615,14 +595,14 @@ class Visualizer
 			return $s;
 	}
 	
-	static function convertedAfterword(Thread $thread, $stripExcept = null)
+	static function convertedAfterword(Thread $thread, ?array $stripExcept = null): void
 	{
 		echo self::escapeAfterword($thread, $stripExcept);
 	}
 	
-	static function escapeAfterword(Thread $thread, $stripExcept = null)
+	static function escapeAfterword(Thread $thread, ?array $stripExcept = null): string
 	{
-		$s = self::ensureHtml($thread->afterword, $stripExcept);
+		$s = isset($thread->afterword) ? self::ensureHtml($thread->afterword, $stripExcept) : "";
 		
 		if ($thread->convertLineBreak)
 			return self::convertLineBreak($s);
@@ -630,7 +610,7 @@ class Visualizer
 			return $s;
 	}
 	
-	static function convertLineBreak($s)
+	static function convertLineBreak(string $s): string
 	{
 		return strtr($s, array
 		(
@@ -640,17 +620,14 @@ class Visualizer
 		));
 	}
 	
-	/**
-	 * @param string $s
-	 * @return string
-	 */
-	static function escapeOutput($s)
+	static function escapeOutput(?string $s): string
 	{
-		if (!is_null($s))
-			return htmlspecialchars($s, ENT_QUOTES, "UTF-8");
+		return isset($s)
+			? htmlspecialchars($s, ENT_QUOTES, "UTF-8")
+			: "";
 	}
 	
-	private static function ensureHtml($str, $stripExcept = null)
+	private static function ensureHtml(string $str, ?array $stripExcept = null): string
 	{
 		$rt = str_get_html($str);
 		$disallowed = Configuration::$instance->disallowedTags;
@@ -675,7 +652,7 @@ class Visualizer
 		return $str;
 	}
 	
-	private static function replaceTags($rt, array $disallowed, array $disallowedMap, array $allowed)
+	private static function replaceTags($rt, array $disallowed, array $disallowedMap, array $allowed): void
 	{
 		foreach ($rt->find("*") as $i)
 		{
@@ -832,7 +809,7 @@ class Visualizer
 		}
 	}
 	
-	static function delegateParameters(array $params, array $except = array())
+	static function delegateParameters(array $params, array $except = array()): void
 	{
 		echo '<input type="hidden" name="encoded" value="true" />';
 		
@@ -846,20 +823,12 @@ class Visualizer
 				echo '<input type="hidden" name="' . Visualizer::escapeOutput($k) . '" value="' . Visualizer::escapeOutput(Util::encodeForOutput(Util::escapeInput($v))) . '" />';
 	}
 	
-	/**
-	 * @param int $time
-	 * @return string
-	 */
-	static function formatDateTime($time)
+	static function formatDateTime(int $time): string
 	{
 		return date("Y/m/d H:i:s", $time);
 	}
 	
-	/**
-	 * @param int $time
-	 * @return string
-	 */
-	static function formatShortDateTime($time)
+	static function formatShortDateTime(int $time): string
 	{
 		$now = time();
 		$minute = 60;
@@ -890,15 +859,7 @@ class Visualizer
 			return date("y/m/d H:i", $time);
 	}
 
-	/**
-	 * @param string $path
-	 * @param int $status
-	 * @param string $contentType
-	 * @param string $encoding [optional]
-	 * @param string $mbencoding [optional]
-	 * @return mixed
-	 */ 
-	static function visualize($path = null, $status = null, $contentType = null, $encoding = null, $mbencoding = null)
+	static function visualize(?string $path = null, ?int $status = null, ?string $contentType = null, ?string $encoding = null, ?string $mbencoding = null): bool
 	{
 		static $nestLevel = 0;
 		
@@ -957,7 +918,7 @@ class Visualizer
 		
 		if ($nestLevel == 0)
 		{
-			$output = mb_ereg_replace('[\t \r\n]+?<', '<', mb_ereg_replace('>[\t \r\n]+', '>', $output));
+			$output = mb_ereg_replace('[\t \r\n]+?<', '<', mb_ereg_replace('>[\t \r\n]+', '>', $output) ?? "") ?? "";
 
 			if ($mbencoding)
 				$output = mb_convert_encoding($output, $mbencoding, "UTF8");
@@ -974,14 +935,11 @@ class Visualizer
 			self::echoWithCompression($output);
 		else
 			echo $output;
-		
+
 		return true;
 	}
 	
-	/**
-	 * @param mixed $obj
-	 */
-	static function json($obj)
+	static function json(mixed $obj): bool
 	{
 		self::defaultHeaders();
 		header("Content-Type: application/json");
@@ -993,9 +951,9 @@ class Visualizer
 	}
 	
 	/**
-	 * @param mixed $obj
+	 * @param string[][] $obj
 	 */
-	static function csv($obj)
+	static function csv(array $obj): bool
 	{
 		self::defaultHeaders();
 		header("Content-Type: text/csv; charset=Shift_JIS; header=present");
@@ -1004,19 +962,14 @@ class Visualizer
 		mb_http_output("Windows-31J");
 		
 		foreach ($obj as $i)
-			fputcsv($s, array_map(function($_) { return mb_convert_encoding($_, "Windows-31J", "UTF-8"); }, $i));
+			fputcsv($s, array_map(fn($_) => mb_convert_encoding($_, "Windows-31J", "UTF-8"), $i));
 		
 		fclose($s);
 		
 		return true;
 	}
 	
-	/**
-	 * @param string $path
-	 * @param int $status
-	 * @return mixed
-	 */ 
-	static function redirect($path = "", $status = null)
+	static function redirect(string $path = "", ?int $status = null): bool
 	{
 		Auth::commitSession();
 		
@@ -1028,13 +981,7 @@ class Visualizer
 		return true;
 	}
 	
-	/**
-	 * @param string $content
-	 * @param string $encoding
-	 * @param string $mbencoding
-	 * @return mixed
-	 */ 
-	static function text($content, $encoding = "UTF-8", $mbencoding = null)
+	static function text(string $content, string $encoding = "UTF-8", ?string $mbencoding = null): bool
 	{
 		Auth::commitSession();
 		
@@ -1049,7 +996,7 @@ class Visualizer
 		return true;
 	}
 	
-	private static function echoWithCompression($output)
+	private static function echoWithCompression(string $output): void
 	{
 		if (Configuration::$instance->useOutputCompression &&
 			!headers_sent() &&
@@ -1065,7 +1012,7 @@ class Visualizer
 		echo $output;
 	}
 	
-	private static function defaultHeaders()
+	private static function defaultHeaders(): void
 	{
 		header("X-Content-Type-Options: nosniff");
 		header("X-Frame-Options: SAMEORIGIN");

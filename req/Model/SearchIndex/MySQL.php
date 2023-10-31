@@ -8,7 +8,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 	
 	function registerThread(PDO $idb, Thread $thread, bool $removeExisting): void
 	{
-		if (!isset($thread->id, $thread->entry))
+		if (!isset($thread->id))
 			return;
 
 		/** @var array<string, string[]> */
@@ -43,7 +43,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		Util::executeStatement($st, array_map(function($_) { return implode(" ", $_); }, $words));
 	}
 	
-	function attachIndex(PDO $idb): void
+	function attachIndexCore(PDO $idb): void
 	{
 		if (!Configuration::$instance->dataStore instanceof MySQLDataStore)
 			throw new ApplicationException("DataStore is not MySQLDataStore");
@@ -51,7 +51,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		Configuration::$instance->dataStore->attachFullTextIndex($idb, self::$searchIndexSchema, self::INDEX_TABLE);
 	}
 	
-	function detachIndex(PDO $idb): void
+	function detachIndexCore(PDO $idb): void
 	{
 		if (!Configuration::$instance->dataStore instanceof MySQLDataStore)
 			throw new ApplicationException("DataStore is not MySQLDataStore");
@@ -147,7 +147,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 			))));
 	}
 	
-	function getEntryCount(PDO $idb): int
+	function getEntryCountCore(PDO $idb): ?int
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('

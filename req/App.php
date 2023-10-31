@@ -20,18 +20,15 @@ class App
 	const SESSION_STORE_TABLE = "sessionStore";
 	const INDEX_DATABASE = "search";
 
-	static $handler;
-	static $handlerName;
-	static $actionName;
-	static $handlerType = "html";
-	static $pathInfo = array();
-	static $startTime;
+	static ?Handler $handler;
+	static string $handlerName;
+	static string $actionName;
+	static string $handlerType = "html";
+	/** @var string[] */
+	static array $pathInfo = array();
+	static string $startTime;
 
-	/**
-	 * @param bool $cond [optional]
-	 * @param string $desc [optional]
-	 */
-	static function precondition($cond = true, $desc = null)
+	static function precondition(bool $cond = true, ?string $desc = null): void
 	{
 		if ($desc == null)
 		{
@@ -45,45 +42,35 @@ class App
 			mb_http_output("UTF-8");
 			mb_regex_encoding("UTF-8");
 			ignore_user_abort(true);
-
-			if (!function_exists("lcfirst"))
-			{
-				function lcfirst($str)
-				{
-					$str[0] = strtolower($str[0]);
-
-					return $str;
-				}
-
-			}
-
-			if (!function_exists("ctype_digit"))
-			{
-				function ctype_digit($str)
-				{
-					return preg_match('/^[0-9]+$/', $str);
-				}
-
-			}
 		}
 		else if (!$cond)
 			throw new ApplicationException("Precondition {$desc} failed.");
 	}
 
-	private static function stripSlashesRecursive($arg)
+	/**
+	 * @template T as string|string[]|array
+	 * @param T $arg
+	 * @return T
+	 */
+	private static function stripSlashesRecursive(string|array $arg): string|array
 	{
 		if (is_array($arg))
-			return array_map(array("self", "stripSlashesRecursive"), $arg);
-		else
+			return array_map(fn(string|array $x) => self::stripSlashesRecursive($x), $arg);
+		else if (is_string($arg))
 			return stripslashes($arg);
+		else
+			return $arg;
 	}
 
-	private static function isBBQed()
+	private static function isBBQed(): bool
 	{
 		return substr_count($_SERVER["REMOTE_ADDR"], ".") == 3 && gethostbyname(implode(".", array_reverse(explode(".", $_SERVER["REMOTE_ADDR"]))) . ".niku.2ch.net") == "127.0.0.2";
 	}
 
-	private static function matchesAddress($arr)
+	/**
+	 * @param string[] $arr
+	 */
+	private static function matchesAddress($arr): bool
 	{
 		$addr = $_SERVER["REMOTE_ADDR"];
 		$host = Util::getRemoteHost();
@@ -109,7 +96,7 @@ class App
 					if (Util::getBrowserType() != Util::BROWSER_TYPE_MOBILE && (!isset($_SERVER["HTTP_REFERER"]) || mb_strpos($_SERVER["HTTP_REFERER"], Util::getAbsoluteUrl()) != 0))
 						throw new ApplicationException("不正な送信元です", 403);
 
-					if ((Configuration::$instance->useBBQ & Configuration::BBQ_WRITE) && self::isBBQed())
+					if (((int)Configuration::$instance->useBBQ & Configuration::BBQ_WRITE) && self::isBBQed())
 						throw new ApplicationException("公開プロキシを使用した送信は規制されています", 403);
 
 					if (Configuration::$instance->denyWrite && self::matchesAddress(Configuration::$instance->denyWrite))
@@ -123,7 +110,7 @@ class App
 			{
 				if (!Configuration::$instance->allowRead || !self::matchesAddress(Configuration::$instance->allowRead))
 				{
-					if ((Configuration::$instance->useBBQ & Configuration::BBQ_READ) && self::isBBQed())
+					if (((int)Configuration::$instance->useBBQ & Configuration::BBQ_READ) && self::isBBQed())
 						throw new ApplicationException("公開プロキシを使用した閲覧は規制されています", 403);
 
 					if (Configuration::$instance->denyRead && self::matchesAddress(Configuration::$instance->denyRead))
@@ -135,14 +122,25 @@ class App
 			Util::unencodeInputs();
 			self::resolve(Util::getPathInfo());
 		}
-		catch (Exception $ex)
+		catch (ApplicationException $ex)
 		{
-			Visualizer::statusCode(is_a($ex, "ApplicationException") ? $ex->httpCode : 500);
+			Visualizer::statusCode($ex->httpCode);
 			Visualizer::noCache();
 			Visualizer::$data = $ex;
 
 			if (self::$handlerType == "json" || strstr(Util::getPathInfo(), ".json") == ".json")
-				Visualizer::json(array("error" => $ex->getMessage(), "data" => $ex->data));
+			Visualizer::json(array("error" => $ex->getMessage(), "data" => $ex->data));
+			else
+				Visualizer::visualize("Exception");
+		}
+		catch (Exception $ex)
+		{
+			Visualizer::statusCode(500);
+			Visualizer::noCache();
+			Visualizer::$data = $ex;
+
+			if (self::$handlerType == "json" || strstr(Util::getPathInfo(), ".json") == ".json")
+				Visualizer::json(array("error" => $ex->getMessage(), "data" => null));
 			else
 				Visualizer::visualize("Exception");
 		}
@@ -162,10 +160,9 @@ class App
 	}
 
 	/**
-	 * @param string $pathInfo
 	 * @return mixed
 	 */
-	static function resolve($pathInfo)
+	static function resolve(string $pathInfo)
 	{
 		$pathInfo = explode("/", trim($pathInfo, "/"));
 
@@ -198,11 +195,14 @@ class App
 
 		return call_user_func_array($callback, $pathInfo);
 	}
-
-	static function load($name)
+	
+	/**
+	 * @param string[]|string $name
+	 */
+	static function load(array|string $name): void
 	{
 		if (is_array($name))
-			array_walk($name, array("App", "load"));
+			array_walk($name, fn(string $x) => self::load($x));
 		else if (is_file($file = APP_DIR . "{$name}.php"))
 			require $file;
 		else
@@ -210,11 +210,10 @@ class App
 	}
 
 	/**
-	 * @param string $name
-	 * @param string $action
+	 * @param string[] $args
 	 * @return mixed
 	 */
-	static function callHandler($name, $action, array $args)
+	static function callHandler(string $name, string $action, array $args): bool
 	{
 		$handlerName = (App::$handlerName = ucfirst($name)) . "Handler";
 		self::load(HANDLER_DIR . App::$handlerName);
@@ -224,28 +223,19 @@ class App
 		return call_user_func_array(array(self::$handler, $action), $args);
 	}
 
-	/**
-	 * @param string $name
-	 * @return PDO
-	 */
-	static function openDB($name = "data")
+	static function openDB(string $name = "data"): PDO
 	{
-		return Configuration::$instance->dataStore->open($name);
+		return Configuration::$instance->dataStore?->open($name) ?? throw new ApplicationException("データベースが開けません");
 	}
 
-	/**
-	 * @param bool $vacuum [optional]
-	 * @param bool $commitTransaction [optional]
-	 */
-	static function closeDB(PDO &$db, $vacuum = false)
+	static function closeDB(PDO &$db, bool $vacuum = false): void
 	{
-		return Configuration::$instance->dataStore->close($db, $vacuum);
+		Configuration::$instance->dataStore?->close($db, $vacuum);
 	}
 
 }
 
-App::$startTime = microtime(true);
-App::load(array("Library/simple_html_dom", CORE_DIR . "ApplicationException"));
+App::$startTime = (string)microtime(true);
 App::load(CORE_DIR . "Util");
 App::precondition();
 App::load(array(CORE_DIR . "Auth", CORE_DIR . "Configuration", CORE_DIR . "Cookie", CORE_DIR . "DataStore", CORE_DIR . "Handler", CORE_DIR . "SessionStore", CORE_DIR . "Visualizer", MODEL_DIR . "Board", MODEL_DIR . "Comment", MODEL_DIR . "Evaluation", MODEL_DIR . "Meta", MODEL_DIR . "SearchIndex", MODEL_DIR . "SearchIndex/Classic", MODEL_DIR . "SearchIndex/SQLite", MODEL_DIR . "SearchIndex/MySQL", MODEL_DIR . "Statistics", MODEL_DIR . "ThreadEntry", MODEL_DIR . "Thread"));

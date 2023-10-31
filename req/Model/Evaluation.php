@@ -29,10 +29,9 @@ class Evaluation
 	}
 	
 	/**
-	 * @param int $entryID
-	 * @return array of Evaluation
+	 * @return array<int, Evaluation>
 	 */
-	static function getEvaluationsFromEntryID(PDO $db, $entryID)
+	static function getEvaluationsFromEntryID(PDO $db, int $entryID): array
 	{
 		$rt = array();
 		
@@ -50,10 +49,9 @@ class Evaluation
 	}
 	
 	/**
-	 * @param string $options [optional]
-	 * @return array of ThreadEntry
+	 * @return Evaluation[]
 	 */
-	private static function query(PDO $db, $options = "")
+	private static function query(PDO $db, string $options = ""): array
 	{
 		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
@@ -64,16 +62,16 @@ class Evaluation
 		)));
 		Util::executeStatement($st);
 		
-		return $st->fetchAll(PDO::FETCH_CLASS, "Evaluation");
+		return $st?->fetchAll(PDO::FETCH_CLASS, "Evaluation") ?? array();
 	}
 	
-	function save(PDO $db)
+	function save(PDO $db): void
 	{
 		Util::saveToTable($db, $this, self::$evaluationSchema, App::EVALUATION_TABLE);
 		$this->loaded = true;
 	}
 	
-	function delete(PDO $db)
+	function delete(PDO $db): void
 	{
 		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf
 		('
@@ -85,7 +83,7 @@ class Evaluation
 		$this->loaded = false;
 	}
 	
-	static function ensureTable(PDO $db)
+	static function ensureTable(PDO $db): void
 	{
 		$db->beginTransaction();
 		Util::createTableIfNotExists($db, self::$evaluationSchema, App::EVALUATION_TABLE);

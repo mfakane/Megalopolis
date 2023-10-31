@@ -1,10 +1,7 @@
 <?php
 class UtilHandler extends Handler
 {
-	/**
-	 * @var UtilHandler
-	 */
-	static $instance;
+	static UtilHandler $instance;
 	
 	function index()
 	{
@@ -627,7 +624,7 @@ class UtilHandler extends Handler
 				"title" =>
 					array("タイトル", $c->title),
 				"bbq" =>
-					array("BBQ 適用先", implode("", array_slice(array("none", "read", "write", "read, write"), $c->useBBQ, 1))),
+					array("BBQ 適用先", implode("", array_slice(array("none", "read", "write", "read, write"), (int)$c->useBBQ, 1))),
 				"pointEnabled" =>
 					array("簡易評価可否", $c->usePoints()),
 				"pointMap" =>
@@ -665,7 +662,7 @@ class UtilHandler extends Handler
 				"subjectSplitting" =>
 					array("作品集最大件数", $c->subjectSplitting),
 				"rateType" =>
-					array("rate 種別", implode("", array_slice(array("((points + 25) / ((evals + 1) * 50)) * 10", "average"), $c->rateType, 1))),
+					array("rate 種別", implode("", array_slice(array("((points + 25) / ((evals + 1) * 50)) * 10", "average"), (int)$c->rateType, 1))),
 				"updatePeriod" =>
 					array("更新印表示日数", $c->updatePeriod),
 				"minBodySize" =>
@@ -798,7 +795,7 @@ class UtilHandler extends Handler
 		App::closeDB($db);
 	}
 	
-	static function createRandomString($length)
+	static function createRandomString(int $length): string
 	{
 		$rt = "";
 		
@@ -808,10 +805,7 @@ class UtilHandler extends Handler
 		return $rt;
 	}
 	
-	/**
-	 * @param bool $requireAuth [optional]
-	 */
-	private static function ensureTestMode($requireAuth = true)
+	private static function ensureTestMode(bool $requireAuth = true)
 	{
 		if (!Configuration::$instance->utilsEnabled)
 			throw new ApplicationException("Test utilities are disabled", 403);

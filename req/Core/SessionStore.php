@@ -52,9 +52,9 @@ class SessionStore
 			App::SESSION_STORE_TABLE
 		)));
 		Util::executeStatement($st, array($this->sessionName, $sessionId));
-		$rt = $st->fetchAll();
+		$rt = $st?->fetchAll();
 		
-		if (count($rt))
+		if (isset($rt) && count($rt))
 			return $rt[0]["data"];
 		else
 			return "";

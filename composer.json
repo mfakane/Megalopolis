@@ -1,5 +1,8 @@
 {
     "require-dev": {
         "vimeo/psalm": "^4.10"
+    },
+    "require": {
+        "kub-at/php-simple-html-dom-parser": "^1.9"
     }
 }

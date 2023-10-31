@@ -2,9 +2,9 @@
 abstract class DataStore
 {
 	/** @var array<string, PDO> */
-	private array $handles = array();
+	protected array $handles = array();
 	/** @var string[][] */
-	private array $tableNames = array();
+	protected array $tableNames = array();
 	
 	protected function registerHandle(PDO &$db, string $name): void
 	{

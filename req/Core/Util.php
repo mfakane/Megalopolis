@@ -595,7 +595,7 @@ class Util
 	/**
 	 * @param string|string[] $dat
 	 */
-	private static function convertAndSaveToThreadInternal(PDO $db, PDO $idb, string $subject, string|array $dat, string $com, string $aft, bool $whenContainsWin31JOnly, bool $allowSaveCommentsOnly, bool &$save, ?ThreadEntry $entry): ?Thread
+	private static function convertAndSaveToThreadInternal(PDO $db, PDO $idb, ?int $subject, string|array $dat, string $com, string $aft, bool $whenContainsWin31JOnly, bool $allowSaveCommentsOnly, bool &$save, ?ThreadEntry $entry): ?Thread
 	{
 		if (!is_array($dat) && !is_file($dat))
 			return null;
@@ -620,14 +620,13 @@ class Util
 		if (!is_array($dat))
 			array_unshift($line, basename($dat));
 		
-		if ($entry)
-		{
+		if (isset($entry))
 			$thread->entry = $entry;
-			$thread->updatePropertyLink();
-		}
 		else
-			self::convertLineToThreadEntry($line, $thread->entry);
+			$thread->entry = $entry = self::convertLineToThreadEntry($line, $thread->entry) ?? $thread->entry;
 		
+		$thread->updatePropertyLink();
+
 		array_shift($line);
 		$thread->subject = $subject;
 		$thread->foreground = $line[10];
@@ -663,7 +662,7 @@ class Util
 		{
 			$br = array("<br />\r\n" => "\r\n");
 			$thread->body = strtr($thread->body, $br);
-			$thread->afterword = strtr($thread->afterword, $br);
+			$thread->afterword = isset($thread->afterword) ? strtr($thread->afterword, $br) : null;
 		}
 		
 		$thread->entry->size = round(strlen(bin2hex(mb_convert_encoding($thread->body, "SJIS-Win", "UTF-8"))) / 2 / 1024, 2);
@@ -673,7 +672,7 @@ class Util
 			foreach (self::readLines($com) as $rawline)
 			{
 				$i = mb_convert_encoding($rawline, "UTF-8", "Windows-31J");
-				$i = self::convertLinesToCommentsAndEvaluations($thread->id, array($i));
+				$i = self::convertLinesToCommentsAndEvaluations($entry->id, array($i));
 				
 				if (!$i)
 					continue;
@@ -697,7 +696,10 @@ class Util
 		return $thread;
 	}
 
-	static function convertLinesToCommentsAndEvaluations(int $entryID, array $lines)
+	/**
+	 * @return (Comment|Evaluation)[]
+	 */
+	static function convertLinesToCommentsAndEvaluations(int $entryID, array $lines): array
 	{
 		$rt = array();
 		
@@ -733,7 +735,6 @@ class Util
 				$eval->dateTime = $comment->dateTime;
 				$eval->host = $comment->host;
 				$eval->point = $point;
-				$thread->evaluations[] = $eval;
 				
 				if ($comment->body == "#EMPTY#")
 					$rt[] = $eval;
@@ -760,16 +761,7 @@ class Util
 		return $rt;
 	}
 	
-	/**
-	 * @param int $subject
-	 * @param string $dat
-	 * @param string $com
-	 * @param string $aft
-	 * @param bool $whenContainsSJISWinOnly [optional]
-	 * @param bool $allowSaveCommentsOnly [optional]
-	 * @return Thread
-	 */
-	static function convertAndSaveToThread(PDO $db, PDO $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly = false, $allowSaveCommentsOnly = false, ThreadEntry $entry = null)
+	static function convertAndSaveToThread(PDO $db, PDO $idb, ?int $subject, string $dat, string $com, string $aft, bool $whenContainsWin31JOnly = false, bool $allowSaveCommentsOnly = false, ?ThreadEntry $entry = null): ?Thread
 	{
 		$save = false;
 		$thread = self::convertAndSaveToThreadInternal($db, $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly, $allowSaveCommentsOnly, $save, $entry);
@@ -782,43 +774,26 @@ class Util
 			
 			return $thread;
 		}
+
+		return null;
 	}
 
-	/**
-	 * @param string $str
-	 * @return bool
-	 */
-	static function isEmpty($str)
+	static function isEmpty(?string $str): bool
 	{
 		return !isset($str[0]);
 	}
 	
-	/**
-	 * @param string $str
-	 * @param int $length
-	 * @return bool
-	 */
-	static function isLength($str, $length)
+	static function isLength(string $str, int $length): bool
 	{
 		return isset($str[$length - 1]) && !isset($str[$length]);
 	}
 	
-	/**
-	 * @param string $str
-	 * @param int $length
-	 * @return bool
-	 */
-	static function hasLength($str, $length)
+	static function hasLength(string $str, int $length): bool
 	{
 		return isset($str[$length - 1]);
 	}
 	
-	/**
-	 * @param string $name
-	 * @param int $lifetime [optional]
-	 * @return resource
-	 */
-	static function acquireWriteLock($name = "default", $lifetime = 60)
+	static function acquireWriteLock(string $name = "default", int $lifetime = 60): string
 	{
 		$path = rtrim(DATA_DIR, "/") . "/" . $name . ".lock";
 		
@@ -836,10 +811,7 @@ class Util
 		return $path;
 	}
 	
-	/**
-	 * @param resource $p
-	 */
-	static function releaseLock($p)
+	static function releaseLock(string $p): void
 	{
 		rmdir($p);
 	}

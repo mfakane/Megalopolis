@@ -29,17 +29,22 @@ abstract class SearchIndex
 	 */
 	abstract function getExistingThread(PDO $idb): array;
 	
-	function getEntryCount(PDO $idb): int
+	function getEntryCountCore(PDO $idb): ?int
 	{
-		return -1;
+		return null;
 	}
 	
-	function attachIndex(PDO $idb): void
+	function attachIndexCore(PDO $idb): void
 	{
 	}
 	
-	function detachIndex(PDO $idb): void
+	function detachIndexCore(PDO $idb): void
 	{
+	}
+
+	static function getEntryCount(PDO $idb): ?int
+	{
+		return self::ensureTable($idb)->getEntryCountCore($idb);
 	}
 	
 	static function register(PDO $idb, Thread $thread, bool $removeExisting = true): void
@@ -96,7 +101,7 @@ abstract class SearchIndex
 	
 	static function ensureTable(PDO $idb): SearchIndex
 	{
-		if (self::$instance === null)
+		if (!isset(self::$instance))
 			switch (Util::hasTable($idb, ClassicSearchIndex::INDEX_TABLE) ? "Classic" : self::getAvailableType())
 			{
 				case "MySQL":

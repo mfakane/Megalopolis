@@ -47,6 +47,11 @@ class Cookie
 			);
 	}
 	
+	/**
+	 * @template T as string|?string
+	 * @param T $defaultValue
+	 * @psalm-return (T is string ? string : ?string)
+	 */
 	static function getCookie(string $key, ?string $defaultValue = null): ?string
 	{
 		self::checkCookie();

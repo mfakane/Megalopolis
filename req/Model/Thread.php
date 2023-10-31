@@ -34,7 +34,7 @@ class Thread
 		"hash" => "varchar(512)"
 	);
 	
-	public ?ThreadEntry $entry = null;
+	public ThreadEntry $entry;
 	
 	public ?int $id = 0;
 	public ?int $subject = 0;
@@ -42,12 +42,12 @@ class Thread
 	public ?string $body = null;
 	public ?string $afterword = null;
 	
-	public ?bool $convertLineBreak = true;
+	public bool $convertLineBreak = true;
 	public ?string $foreground = null;
 	public ?string $background = null;
 	public ?string $backgroundImage = null;
 	public ?string $border = null;
-	public $writingMode = self::WRITING_MODE_NOT_SPECIFIED;
+	public int $writingMode = self::WRITING_MODE_NOT_SPECIFIED;
 	
 	public ?string $hash = null;
 	
@@ -67,7 +67,22 @@ class Thread
 	}
 	
 	/**
-	 * @return array<string, mixed>
+	 * @return array{
+	 * 	entry: array,
+	 * 	tags: ?string[],
+	 * 	body: ?string,
+	 * 	formattedBody: list<string>,
+	 * 	afterword: ?string,
+	 * 	formattedAfterword: string,
+	 * 	convertLineBreak: bool,
+	 * 	foreground: ?string,
+	 * 	background: ?string,
+	 * 	backgroundImage: ?string,
+	 * 	border: ?string,
+	 * 	writingMode: int,
+	 * 	nonCommentEvaluation: ?int,
+	 * 	comments: ?array
+	 * }
 	 */
 	function toArray(): array
 	{
@@ -90,8 +105,12 @@ class Thread
 			"backgroundImage" => $this->backgroundImage,
 			"border" => $this->border,
 			"writingMode" => intval($this->writingMode),
-			"nonCommentEvaluation" => Configuration::$instance->showPoint[Configuration::ON_ENTRY] ? array_reduce($this->nonCommentEvaluations, function($x, $y) { return $x + $y->point; }, 0) : null,
-			"comments" => Configuration::$instance->showComment[Configuration::ON_ENTRY] ? array_values(array_map(function($_) { return $_->toArray(); }, $this->comments)) : null
+			"nonCommentEvaluation" => Configuration::$instance->showPoint[Configuration::ON_ENTRY]
+				? array_reduce($this->nonCommentEvaluations, fn(int $x, Evaluation $y) => $x + $y->point, 0)
+				: null,
+			"comments" => Configuration::$instance->showComment[Configuration::ON_ENTRY]
+				? array_values(array_map(fn(Comment $_) => $_->toArray(), $this->comments))
+				: null
 		);
 	}
 	
@@ -115,8 +134,6 @@ class Thread
 	
 	function updatePropertyLink(): void
 	{
-		if ($this->entry === null) throw new ApplicationException("Thread entry not set");
-
 		$this->id = &$this->entry->id;
 		$this->subject = &$this->entry->subject;
 	}
@@ -124,7 +141,6 @@ class Thread
 	function evaluate(PDO $db, int $point, bool $saveThread = true): Evaluation
 	{
 		if ($this->id === null) throw new ApplicationException("Thread id not set");
-		if ($this->entry === null) throw new ApplicationException("Thread entry not set");
 
 		$eval = new Evaluation($db);
 		$eval->entryID = $this->id;
@@ -143,8 +159,6 @@ class Thread
 	
 	function unevaluate(PDO $db, Evaluation $eval): void
 	{
-		if ($this->entry === null) throw new ApplicationException("Thread entry not set");
-
 		unset($this->evaluations[$eval->id]);
 		unset($this->nonCommentEvaluations[$eval->id]);
 		
@@ -165,7 +179,6 @@ class Thread
 	function comment(PDO $db, string $name, string $mail, string $body, string $password, int $point, bool $saveThread = true): Comment
 	{
 		if ($this->id === null) throw new ApplicationException("Thread id not set");
-		if ($this->entry === null) throw new ApplicationException("Thread entry not set");
 
 		$comment = new Comment($db);
 		$comment->entryID = $this->id;
@@ -199,8 +212,6 @@ class Thread
 	
 	function uncomment(PDO $db, Comment $comment): void
 	{
-		if ($this->entry === null) throw new ApplicationException("Thread entry not set");
-
 		unset($this->comments[$comment->id]);
 		
 		if ($comment->evaluation)
@@ -214,8 +225,6 @@ class Thread
 	
 	function delete(PDO $db, PDO $idb): void
 	{
-		if ($this->entry === null) throw new ApplicationException("Thread entry not set");
-
 		$this->entry->delete($db, $idb);
 		$this->loaded = false;
 	}
@@ -248,15 +257,16 @@ class Thread
 			App::THREAD_TABLE,
 			$id
 		));
+		$entry = ThreadEntry::load($db, $id);
 		
-		if ($rt)
+		if ($rt && $entry)
 		{
 			$rt = $rt[0];
-			$rt->entry = ThreadEntry::load($db, $id);
+			$rt->entry = $entry;
 			$rt->loaded = true;
 			$rt->updatePropertyLink();
-			$rt->evaluations = Evaluation::getEvaluationsFromEntryID($db, $rt->id);
-			$rt->comments = Comment::getCommentsFromEntryID($db, $rt->id, $rt->evaluations);
+			$rt->evaluations = Evaluation::getEvaluationsFromEntryID($db, $rt->entry->id);
+			$rt->comments = Comment::getCommentsFromEntryID($db, $rt->entry->id, $rt->evaluations);
 			$resEval = array_map(fn(Comment $_) => $_->evaluation?->id, $rt->comments);
 			$rt->nonCommentEvaluations = array();
 			
@@ -308,8 +318,6 @@ class Thread
 	
 	function save(PDO $db, bool $setSubjectLastUpdate = true): void
 	{
-		if ($this->entry === null) throw new ApplicationException("Thread entry not set");
-
 		$this->entry->save($db, $setSubjectLastUpdate);
 		Util::saveToTable($db, $this, self::$threadSchema, App::THREAD_TABLE);
 		Util::saveToTable($db, $this, self::$threadStyleSchema, App::THREAD_STYLE_TABLE);
@@ -372,11 +380,21 @@ class Thread
 		
 		if ($st === null) return array();
 
-		return array_map(function (Thread $instance): Thread
+		return array_map(function (ThreadEntity $record): Thread
 		{
-			$instance->convertLineBreak = (bool)$instance->convertLineBreak;
-			return $instance;
-		}, $st->fetchAll(PDO::FETCH_CLASS, "Thread"));
+			$thread = new Thread();
+			$thread->id = $record->id;
+			$thread->subject = $record->subject;
+			$thread->body = $record->body;
+			$thread->afterword = $record->afterword;
+			$thread->convertLineBreak = (bool)$record->convertLineBreak;
+			$thread->foreground = $record->foreground;
+			$thread->background = $record->background;
+			$thread->backgroundImage = $record->backgroundImage;
+			$thread->border = $record->border;
+			$thread->writingMode = $record->writingMode;
+			return $thread;
+		}, $st->fetchAll(PDO::FETCH_CLASS, "ThreadEntity"));
 	}
 	
 	/**
@@ -385,28 +403,38 @@ class Thread
 	static function getThreadsBySubject(PDO $db, int $subject, int $order = Board::ORDER_DESCEND): array
 	{
 		$entries = ThreadEntry::getEntriesBySubject($db, $subject, $order);
-		
-		foreach ($rt = self::query($db, sprintf
+		$entriesById = array_combine(array_map(fn(ThreadEntry $entry) => $entry->id, $entries), $entries);
+		$threads = self::query($db, sprintf
 		('
 			where %s.subject = %d
 			order by %1$s.id %s',
 			App::THREAD_TABLE,
 			$subject,
 			$order == Board::ORDER_ASCEND ? "asc" : "desc"
-		)) as $i)
+		));
+
+		foreach ($threads as $thread)
 		{
-			foreach ($entries as $j)
-				if ($j->id === $i->id)
-				{
-					$i->entry = $j;
-					
-					break;
-				}
-			
-			$i->loaded = true;
+			if (!isset($thread->id)) continue;
+			$thread->entry = $entriesById[$thread->id];
+			$thread->loaded = true;
+			$thread->updatePropertyLink();
 		}
 		
-		return $rt;
+		return $threads;
 	}
+}
+
+class ThreadEntity {
+	public int $id = 0;
+	public int $subject = 0;
+	public ?string $body = null;
+	public ?string $afterword = null;
+	public int $convertLineBreak = 1;
+	public ?string $foreground = null;
+	public ?string $background = null;
+	public ?string $backgroundImage = null;
+	public ?string $border = null;
+	public int $writingMode = Thread::WRITING_MODE_NOT_SPECIFIED;
 }
 ?>

@@ -1,49 +1,46 @@
 <?php
 class Statistics
 {
-	public $subject = 0;
-	public $entryCount = 0;
-	public $maxPoints = 0;
-	public $avgPoints = 0.0;
-	public $maxEvaluations = 0;
-	public $avgEvaluations = 0.0;
-	public $maxComments = 0;
-	public $avgComments = 0.0;
-	public $avgPointPerEvaluation = 0.0;
-	public $avgEntryPerDay = 0.0;
-	public $usedDays = 0.0;
+	public int $subject = 0;
+	public int $entryCount = 0;
+	public int $maxPoints = 0;
+	public float $avgPoints = 0.0;
+	public int $maxEvaluations = 0;
+	public float $avgEvaluations = 0.0;
+	public int $maxComments = 0;
+	public float $avgComments = 0.0;
+	public float $avgPointPerEvaluation = 0.0;
+	public float $avgEntryPerDay = 0.0;
+	public float $usedDays = 0.0;
 	
 	/**
-	 * @return array of Statistics
+	 * @return Statistics[]
 	 */
-	static function getStatistics(PDO $db)
+	static function getStatistics(PDO $db): array
 	{
 		return self::query($db, 'group by subject');
 	}
 	
 	/**
-	 * @param string $tag
-	 * @return array of Statistics
+	 * @return Statistics[]
 	 */
-	static function getStatisticsByTag(PDO $db, $tag)
+	static function getStatisticsByTag(PDO $db, string $tag): array
 	{
 		return self::query($db, 'where tag = ? group by tag', array($tag));
 	}
 	
 	/**
-	 * @param string $name
-	 * @return array of Statistics
+	 * @return Statistics[]
 	 */
-	static function getStatisticsByName(PDO $db, $name)
+	static function getStatisticsByName(PDO $db, string $name): array
 	{
 		return self::query($db, 'where name = ? group by name', array($name));
 	}
 	
 	/**
-	 * @param string $options [optional]
-	 * @return array of ThreadEntry
+	 * @return Statistics[]
 	 */
-	private static function query(PDO $db, $options = "", array $params = array())
+	private static function query(PDO $db, string $options = "", array $params = array()): array
 	{
 		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
@@ -70,7 +67,7 @@ class Statistics
 		)));
 		Util::executeStatement($st, $params);
 		
-		return $st->fetchAll(PDO::FETCH_CLASS, "Statistics");
+		return $st?->fetchAll(PDO::FETCH_CLASS, "Statistics") ?? array();
 	}
 }
 ?>

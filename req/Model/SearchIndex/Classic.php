@@ -2,15 +2,18 @@
 class ClassicSearchIndex extends SearchIndex
 {
 	const INDEX_TABLE = "searchIndex";
-	static $searchIndexSchema = array
+	static array $searchIndexSchema = array
 	(
 		"id" => "bigint",
 		"type" => "varchar(127)",
 		"word" => "varchar(127)"
 	);
 	
-	function registerThread(PDO $idb, Thread $thread, $removeExisting)
+	function registerThread(PDO $idb, Thread $thread, bool $removeExisting): void
 	{
+		if (!isset($thread->id))
+			return;
+		
 		if ($removeExisting)
 			self::unregister($idb, $thread->id);
 		
@@ -41,7 +44,7 @@ class ClassicSearchIndex extends SearchIndex
 				Util::executeStatement($st, array($k, $i));
 	}
 	
-	function unregisterThread(PDO $idb, array $ids)
+	function unregisterThread(PDO $idb, array $ids): void
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
@@ -53,7 +56,7 @@ class ClassicSearchIndex extends SearchIndex
 		Util::executeStatement($st);
 	}
 	
-	function searchThread(PDO $idb, array $query, array $type = null, array $ids = null)
+	function searchThread(PDO $idb, array $query, array $type = null, array $ids = null): array
 	{
 		if (!$query)
 			return array();
@@ -77,7 +80,10 @@ class ClassicSearchIndex extends SearchIndex
 		return $rt;
 	}
 	
-	private function searchThreadInternal(PDO $idb, array $query, array $type = null, array $ids = null)
+	/**
+	 * @return int[]
+	 */
+	private function searchThreadInternal(PDO $idb, array $query, array $type = null, array $ids = null): array
 	{
 		$words = array();
 		
@@ -99,25 +105,21 @@ class ClassicSearchIndex extends SearchIndex
 		Util::executeStatement($st, $query);
 		$rt = array();
 		
-		foreach ($st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP) as $k => $v)
+		foreach ($st?->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_GROUP) ?? [] as $k => $v)
 			if (count(array_intersect($v, $query)) >= count($query))
 				$rt[] = $k;
 		
 		return $rt;
 	}
 	
-	function ensureTableExists(PDO $idb)
+	function ensureTableExists(PDO $idb): void
 	{
 		$idb->beginTransaction();
 		Util::createTableIfNotExists($idb, self::$searchIndexSchema, self::INDEX_TABLE);
 		$idb->commit();
 	}
 	
-	/**
-	 * @param int $id
-	 * @return array|int
-	 */
-	function getExistingThread(PDO $idb)
+	function getExistingThread(PDO $idb): array
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
@@ -127,7 +129,7 @@ class ClassicSearchIndex extends SearchIndex
 		)));
 		Util::executeStatement($st);
 		
-		return array_map("intval", $st->fetchAll(PDO::FETCH_COLUMN, 0));
+		return array_map("intval", $st?->fetchAll(PDO::FETCH_COLUMN, 0) ?? array());
 	}
 }
 ?>

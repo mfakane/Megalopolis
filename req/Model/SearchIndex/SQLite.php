@@ -15,7 +15,7 @@ class SQLiteSearchIndex extends SearchIndex
 	
 	function registerThread(PDO $idb, Thread $thread, bool $removeExisting): void
 	{
-		if (!isset($thread->id, $thread->entry))
+		if (!isset($thread->id))
 			return;
 
 		if ($removeExisting)

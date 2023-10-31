@@ -1,16 +1,12 @@
 <?php
 class MegalithHandler extends Handler
 {
-	/**
-	 * @var MegalithHandler
-	 */
-	static $instance;
+	static MegalithHandler $instance;
 	
 	/**
 	 * Megalith compatibility layer (sub/)
-	 * @param string $_name Filename
 	 */
-	function sub($_name = null)
+	function sub(?string $_name = null)
 	{
 		$name = Util::escapeInput($_name);
 		
@@ -78,9 +74,8 @@ class MegalithHandler extends Handler
 	
 	/**
 	 * Megalith compatibility layer (dat/)
-	 * @param string $_name Filename
 	 */
-	function dat($_name = null)
+	function dat(?string $_name = null)
 	{
 		$name = Util::escapeInput($_name);
 		
@@ -142,9 +137,8 @@ class MegalithHandler extends Handler
 	
 	/**
 	 * Megalith compatibility layer (com/)
-	 * @param string $_name Filename
 	 */
-	function _com($_name = null)
+	function _com(?string $_name = null)
 	{
 		$path = explode(".", Util::escapeInput($_name), 2);
 		$name = $path[0];
@@ -198,9 +192,8 @@ class MegalithHandler extends Handler
 	
 	/**
 	 * Megalith compatibility layer (aft/)
-	 * @param string $_name Filename
 	 */
-	function aft($_name = null)
+	function aft(?string $_name = null)
 	{
 		$path = explode(".", Util::escapeInput($_name), 2);
 		$name = $path[0];

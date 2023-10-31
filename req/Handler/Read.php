@@ -1,24 +1,15 @@
 <?php
 class ReadHandler extends Handler
 {
-	/**
-	 * @var ReadHandler
-	 */
-	static $instance;
+	static ReadHandler $instance;
 	
-	public $subject;
-	/**
-	 * @var ThreadEntry
-	 */
-	public $entry;
-	/**
-	 * @var Thread
-	 */
-	public $thread;
-	public $page;
-	public $forceTaketori;
+	public int $subject;
+	public ThreadEntry $entry;
+	public Thread $thread;
+	public int $page;
+	public bool $forceTaketori;
 	
-	function index($_subject = "0", $_id = "0", $_page = "1")
+	function index(string $_subject = "0", string $_id = "0", string $_page = "1")
 	{
 		$subject = intval($_subject);
 		$id = intval($_id);
@@ -103,7 +94,7 @@ class ReadHandler extends Handler
 			return Visualizer::visualize("Read/Index");
 	}
 	
-	function _new($_page = null)
+	function _new(?string $_page = null)
 	{
 		$this->page = !is_null($_page) ? intval($_page) : 1;
 		
@@ -149,7 +140,7 @@ class ReadHandler extends Handler
 		return Visualizer::visualize("Read/Edit");
 	}
 	
-	function edit($_subject = "0", $_id = "0")
+	function edit(string $_subject = "0", string $_id = "0")
 	{
 		$this->subject = intval($_subject);
 		$id = intval($_id);
@@ -195,7 +186,7 @@ class ReadHandler extends Handler
 		return Visualizer::visualize("Read/Edit");
 	}
 	
-	function post($_subject = "0", $_id = "0")
+	function post(string $_subject = "0", string $_id = "0")
 	{
 		$subject = intval($_subject);
 		$id = intval($_id);
@@ -266,7 +257,7 @@ class ReadHandler extends Handler
 			return Visualizer::visualize("Read/Success");
 	}
 	
-	function unpost($_subject = "0", $_id = "0")
+	function unpost(string $_subject = "0", string $_id = "0")
 	{
 		$this->subject = intval($_subject);
 		$id = intval($_id);
@@ -315,7 +306,7 @@ class ReadHandler extends Handler
 		return Visualizer::redirect("{$this->entry->subject}");
 	}
 	
-	function comment($_subject = "0", $_id = "0")
+	function comment(string $_subject = "0", string $_id = "0")
 	{
 		$subject = intval($_subject);
 		$id = intval($_id);
@@ -438,7 +429,7 @@ class ReadHandler extends Handler
 		}
 	}
 	
-	function uncomment($_subject = "0", $_id = "0")
+	function uncomment(string $_subject = "0", string $_id = "0")
 	{
 		$subject = intval($_subject);
 		$id = intval($_id);
@@ -480,7 +471,7 @@ class ReadHandler extends Handler
 			return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}");
 	}
 	
-	function evaluate($_subject = "0", $_id = "0")
+	function evaluate(string $_subject = "0", string $_id = "0")
 	{
 		$subject = intval($_subject);
 		$id = intval($_id);
@@ -551,7 +542,7 @@ class ReadHandler extends Handler
 		}
 	}
 
-	function unevaluate($_subject = "0", $_id = "0")
+	function unevaluate(string $_subject = "0", string $_id = "0")
 	{
 		$subject = intval($_subject);
 		$id = intval($_id);
@@ -577,11 +568,7 @@ class ReadHandler extends Handler
 			return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}");
 	}
 	
-	/**
-	 * @param int $id
-	 * @return Thread
-	 */
-	private static function loadThread(PDO $db, $id)
+	private static function loadThread(PDO $db, int $id): Thread
 	{
 		$idb = App::openDB(App::INDEX_DATABASE);
 		
@@ -594,10 +581,9 @@ class ReadHandler extends Handler
 	}
 	
 	/**
-	 * @param bool $isEdit
-	 * @return array
+	 * @return string[]
 	 */
-	private static function checkValues(ThreadEntry $entry, Thread $thread, $isEdit)
+	private static function checkValues(ThreadEntry $entry, Thread $thread, bool $isEdit): array
 	{
 		$rt = array();
 		
@@ -715,13 +701,7 @@ class ReadHandler extends Handler
 		$entry->host = Util::getRemoteHost();
 	}
 	
-	/**
-	 * @param string $name
-	 * @param string $default
-	 * @param bool $tryGet
-	 * @return string
-	 */
-	static function param($name, $default = null, $tryGet = false, $stripLinebreaks = true)
+	static function param(string $name, ?string $default = null, bool $tryGet = false, bool $stripLinebreaks = true): string
 	{
 		if (isset($_POST[$name]))
 		{
