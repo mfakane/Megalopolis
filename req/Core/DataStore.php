@@ -28,7 +28,7 @@ abstract class DataStore
 	
 	protected function registerTableByHandle(PDO &$db, string $name): void
 	{
-		$this->tableNames[$this->getDatabaseNameByHandle($db)][] = $name;
+		$this->tableNames[$this->getDatabaseNameByHandle($db)][] = strtolower($name);
 	}
 	
 	protected function unregisterTableByHandle(PDO &$db, string $name): void
