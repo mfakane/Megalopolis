@@ -426,7 +426,8 @@ class Visualizer
 				$href .= strpos(Util::getSuffix(), "?") !== false ? "&" : "?";
 				
 				foreach ($i as $k => $v)
-					$href .= (isset($encodeTable[$k]) ? $encodeTable[$k] : $encodeTable[$k] = str_ireplace("%2F", "%252F", urlencode($k))) . "=" . (isset($encodeTable[$v]) ? $encodeTable[$v] : $encodeTable[$v] = urlencode($v)) . "&";
+					if (!is_null($v))
+						$href .= (isset($encodeTable[$k]) ? $encodeTable[$k] : $encodeTable[$k] = str_ireplace("%2F", "%252F", urlencode($k))) . "=" . (isset($encodeTable[$v]) ? $encodeTable[$v] : $encodeTable[$v] = urlencode($v)) . "&";
 				
 				$href = rtrim($href, "&");
 			}

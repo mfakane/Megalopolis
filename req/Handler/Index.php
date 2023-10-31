@@ -8,9 +8,9 @@ class IndexHandler extends Handler
 	public int $page = 1;
 	public int $pageCount = 0;
 	/** @var array<int, ThreadEntry> */
-	public array $entries;
+	public array $entries = [];
 	public int $entryCount = 0;
-	public $lastUpdate;
+	public $lastUpdate = 0;
 	
 	function index(string $_subject = "0", string $_id = "0"): bool
 	{

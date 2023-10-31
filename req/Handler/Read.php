@@ -696,12 +696,17 @@ class ReadHandler extends Handler
 		if (!is_null(self::param("convertLineBreak")))	$thread->convertLineBreak = self::param("convertLineBreak") == "true";
 		
 		$entry->pageCount = $thread->pageCount();
-		$entry->size = round(strlen(bin2hex(mb_convert_encoding($thread->body, "Windows-31J", "UTF-8"))) / 2 / 1024, 2);
+		$entry->size = round(strlen(bin2hex(mb_convert_encoding($thread->body ?? "", "Windows-31J", "UTF-8"))) / 2 / 1024, 2);
 		$entry->lastUpdate = time();
 		$entry->host = Util::getRemoteHost();
 	}
 	
-	static function param(string $name, ?string $default = null, bool $tryGet = false, bool $stripLinebreaks = true): string
+	/**
+	 * @template T as string|?string
+	 * @param T $defaultValue
+	 * @psalm-return (T is string ? string : ?string)
+	 */
+	static function param(string $name, ?string $default = null, bool $tryGet = false, bool $stripLinebreaks = true): ?string
 	{
 		if (isset($_POST[$name]))
 		{

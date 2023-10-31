@@ -179,7 +179,7 @@ class App
 		self::load(HANDLER_DIR . "Index");
 		self::$handlerName = "Index";
 		self::$handler = new IndexHandler();
-		IndexHandler::$instance = &self::$handler;
+		IndexHandler::$instance = self::$handler;
 
 		$callbackName = self::$actionName = DEFAULT_ACTION;
 
@@ -218,7 +218,7 @@ class App
 		$handlerName = (App::$handlerName = ucfirst($name)) . "Handler";
 		self::load(HANDLER_DIR . App::$handlerName);
 		self::$handler = new $handlerName;
-		eval($handlerName . '::$instance = &self::$handler;');
+		eval($handlerName . '::$instance = self::$handler;');
 
 		return call_user_func_array(array(self::$handler, $action), $args);
 	}
