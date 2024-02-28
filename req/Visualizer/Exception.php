@@ -1,25 +1,27 @@
 <?php
+namespace Megalopolis;
+
 $c = &Configuration::$instance;
 ?>
-<? Visualizer::doctype() ?>
+<?php Visualizer::doctype() ?>
 <html lang="ja">
 <head>
-	<? Visualizer::head() ?>
+	<?php Visualizer::head() ?>
 	<meta name="robots" content="noindex,nofollow,noarchive" />
 	<title>
 		エラー
 	</title>
 </head>
 <body>
-	<? Visualizer::header("エラー") ?>
+	<?php Visualizer::header("エラー") ?>
 	<p class="notify error">
-		<?+Visualizer::$data->getMessage() ?>
+		<?=Visualizer::escapeOutput(Visualizer::$data->getMessage()) ?>
 	</p>
-	<?if ($c->debug): ?>
+	<?php if ($c->debug): ?>
 		<p class="notify error">
-			<? Visualizer::convertedSummary(Visualizer::$data->getTraceAsString()) ?>
+			<?php Visualizer::convertedSummary(Visualizer::$data->getTraceAsString()) ?>
 		</p>
-	<?endif ?>
-	<? Visualizer::footer() ?>
+	<?php endif ?>
+	<?php Visualizer::footer() ?>
 </body>
 </html>

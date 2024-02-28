@@ -1,4 +1,9 @@
 <?php
+namespace Megalopolis;
+
+use \Exception;
+use \PDO;
+
 class App
 {
 	const NAME = "Megalopolis";
@@ -26,7 +31,7 @@ class App
 	static string $handlerType = "html";
 	/** @var string[] */
 	static array $pathInfo = array();
-	static string $startTime;
+	static float $startTime;
 
 	static function precondition(bool $cond = true, ?string $desc = null): void
 	{
@@ -50,7 +55,7 @@ class App
 	/**
 	 * @template T as string|string[]|array
 	 * @param T $arg
-	 * @return T
+	 * @return (T is string ? string : string[]|array)
 	 */
 	private static function stripSlashesRecursive(string|array $arg): string|array
 	{
@@ -64,7 +69,7 @@ class App
 
 	private static function isBBQed(): bool
 	{
-		return substr_count($_SERVER["REMOTE_ADDR"], ".") == 3 && gethostbyname(implode(".", array_reverse(explode(".", $_SERVER["REMOTE_ADDR"]))) . ".niku.2ch.net") == "127.0.0.2";
+		return isset($_SERVER["REMOTE_ADDR"]) && substr_count($_SERVER["REMOTE_ADDR"], ".") == 3 && gethostbyname(implode(".", array_reverse(explode(".", $_SERVER["REMOTE_ADDR"]))) . ".niku.2ch.net") == "127.0.0.2";
 	}
 
 	/**
@@ -72,22 +77,22 @@ class App
 	 */
 	private static function matchesAddress($arr): bool
 	{
-		$addr = $_SERVER["REMOTE_ADDR"];
+		$addr = $_SERVER["REMOTE_ADDR"] ?? false;
 		$host = Util::getRemoteHost();
 
 		foreach ($arr as $i)
-			if (Util::wildcard($i, $addr) || Util::wildcard($i, $host))
+			if ($addr && Util::wildcard($i, $addr) || $host && Util::wildcard($i, $host))
 				return true;
 
 		return false;
 	}
 
-	static function main()
+	static function main(): void
 	{
 		try
 		{
-			if (!is_writable(DATA_DIR))
-				throw new ApplicationException(DATA_DIR . " が書き込み可能ではありません");
+			if (!is_writable(Constant::DATA_DIR))
+				throw new ApplicationException(Constant::DATA_DIR . " が書き込み可能ではありません");
 			
 			if ($_POST)
 			{
@@ -96,7 +101,7 @@ class App
 					if (Util::getBrowserType() != Util::BROWSER_TYPE_MOBILE && (!isset($_SERVER["HTTP_REFERER"]) || mb_strpos($_SERVER["HTTP_REFERER"], Util::getAbsoluteUrl()) != 0))
 						throw new ApplicationException("不正な送信元です", 403);
 
-					if (((int)Configuration::$instance->useBBQ & Configuration::BBQ_WRITE) && self::isBBQed())
+					if ((Configuration::$instance->useBBQ & Configuration::BBQ_WRITE) && self::isBBQed())
 						throw new ApplicationException("公開プロキシを使用した送信は規制されています", 403);
 
 					if (Configuration::$instance->denyWrite && self::matchesAddress(Configuration::$instance->denyWrite))
@@ -110,7 +115,7 @@ class App
 			{
 				if (!Configuration::$instance->allowRead || !self::matchesAddress(Configuration::$instance->allowRead))
 				{
-					if (((int)Configuration::$instance->useBBQ & Configuration::BBQ_READ) && self::isBBQed())
+					if ((Configuration::$instance->useBBQ & Configuration::BBQ_READ) && self::isBBQed())
 						throw new ApplicationException("公開プロキシを使用した閲覧は規制されています", 403);
 
 					if (Configuration::$instance->denyRead && self::matchesAddress(Configuration::$instance->denyRead))
@@ -119,7 +124,7 @@ class App
 			}
 
 			self::rewriteHtaccess();
-			Util::unencodeInputs();
+			Util::decodeInputs();
 			self::resolve(Util::getPathInfo());
 		}
 		catch (ApplicationException $ex)
@@ -146,9 +151,9 @@ class App
 		}
 	}
 
-	private static function rewriteHtaccess()
+	private static function rewriteHtaccess(): void
 	{
-		if (Configuration::$instance->htaccessAutoConfig && !trim(Util::getPathInfo(), "/") && is_file($htaccess = ".htaccess") && is_writable($htaccess))
+		if (Configuration::$instance->htaccessAutoConfig && !trim(Util::getPathInfo(), "/") && is_file($htaccess = ".htaccess") && is_writable($htaccess) && isset($_SERVER["SCRIPT_NAME"]))
 		{
 			$base = dirname($_SERVER["SCRIPT_NAME"]);
 			$content = file_get_contents($htaccess);
@@ -166,26 +171,26 @@ class App
 	{
 		$pathInfo = explode("/", trim($pathInfo, "/"));
 
-		if ($pathInfo && Util::isEmpty($pathInfo[0]))
+		if (isset($pathInfo[0]) && Util::isEmpty($pathInfo[0]))
 			array_shift($pathInfo);
 
-		if ($pathInfo && ($idx = mb_strrpos($pathInfo[count($pathInfo) - 1], ".")) !== false)
+		if (isset($pathInfo[0]) && ($idx = mb_strrpos($pathInfo[count($pathInfo) - 1], ".")) !== false)
 		{
 			$last = &$pathInfo[count($pathInfo) - 1];
 			self::$handlerType = mb_substr($last, $idx + 1);
 			$last = mb_substr($last, 0, $idx);
 		}
 
-		self::load(HANDLER_DIR . "Index");
+		self::load(Constant::HANDLER_DIR . "Index");
 		self::$handlerName = "Index";
 		self::$handler = new IndexHandler();
 		IndexHandler::$instance = self::$handler;
 
-		$callbackName = self::$actionName = DEFAULT_ACTION;
+		$callbackName = self::$actionName = Constant::DEFAULT_ACTION;
 
 		foreach (array("", "_") as $i)
-			if ($pathInfo)
-				if ($pathInfo && is_callable(array(self::$handler, $i . $pathInfo[0])))
+			if (isset($pathInfo[0]))
+				if (is_callable(array(self::$handler, $i . $pathInfo[0])))
 					$callbackName = $i . (self::$actionName = array_shift($pathInfo));
 				else if (is_callable(array(self::$handler, $i . $pathInfo[count($pathInfo) - 1])))
 					$callbackName = $i . (self::$actionName = array_pop($pathInfo));
@@ -203,7 +208,7 @@ class App
 	{
 		if (is_array($name))
 			array_walk($name, fn(string $x) => self::load($x));
-		else if (is_file($file = APP_DIR . "{$name}.php"))
+		else if (is_file($file = Constant::APP_DIR . "{$name}.php"))
 			require $file;
 		else
 			throw new ApplicationException("{$name} not found");
@@ -215,9 +220,16 @@ class App
 	 */
 	static function callHandler(string $name, string $action, array $args): bool
 	{
-		$handlerName = (App::$handlerName = ucfirst($name)) . "Handler";
-		self::load(HANDLER_DIR . App::$handlerName);
-		self::$handler = new $handlerName;
+		$cast = fn(mixed $orig): Handler => $orig;
+
+		$handlerName = "\\Megalopolis\\" . (App::$handlerName = ucfirst($name)) . "Handler";
+		self::load(Constant::HANDLER_DIR . App::$handlerName);
+
+		if (class_exists($handlerName))
+			self::$handler = $cast(new $handlerName);
+		else
+			throw new ApplicationException("{$handlerName} not found");
+
 		eval($handlerName . '::$instance = self::$handler;');
 
 		return call_user_func_array(array(self::$handler, $action), $args);
@@ -235,10 +247,29 @@ class App
 
 }
 
-App::$startTime = (string)microtime(true);
-App::load(CORE_DIR . "Util");
+App::$startTime = microtime(true);
+App::load(Constant::CORE_DIR . "Util");
 App::precondition();
-App::load(array(CORE_DIR . "Auth", CORE_DIR . "Configuration", CORE_DIR . "Cookie", CORE_DIR . "DataStore", CORE_DIR . "Handler", CORE_DIR . "SessionStore", CORE_DIR . "Visualizer", MODEL_DIR . "Board", MODEL_DIR . "Comment", MODEL_DIR . "Evaluation", MODEL_DIR . "Meta", MODEL_DIR . "SearchIndex", MODEL_DIR . "SearchIndex/Classic", MODEL_DIR . "SearchIndex/SQLite", MODEL_DIR . "SearchIndex/MySQL", MODEL_DIR . "Statistics", MODEL_DIR . "ThreadEntry", MODEL_DIR . "Thread"));
+App::load(array(
+	Constant::CORE_DIR . "Auth",
+	Constant::CORE_DIR . "Configuration",
+	Constant::CORE_DIR . "Cookie",
+	Constant::CORE_DIR . "DataStore",
+	Constant::CORE_DIR . "Handler",
+	Constant::CORE_DIR . "SessionStore",
+	Constant::CORE_DIR . "Visualizer",
+	Constant::MODEL_DIR . "Board",
+	Constant::MODEL_DIR . "Comment",
+	Constant::MODEL_DIR . "Evaluation",
+	Constant::MODEL_DIR . "Meta",
+	Constant::MODEL_DIR . "SearchIndex",
+	Constant::MODEL_DIR . "SearchIndex/Classic",
+	Constant::MODEL_DIR . "SearchIndex/SQLite",
+	Constant::MODEL_DIR . "SearchIndex/MySQL",
+	Constant::MODEL_DIR . "Statistics",
+	Constant::MODEL_DIR . "ThreadEntry",
+	Constant::MODEL_DIR . "Thread"
+));
 App::load("../config");
 
 if (!Configuration::$instance->dataStore)

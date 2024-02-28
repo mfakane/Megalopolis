@@ -1,4 +1,10 @@
 <?php
+namespace Megalopolis;
+
+use \Exception;
+use \PDO;
+use \PDOStatement;
+
 class Util
 {
 	const HASH_ALGORITHM = "sha384";
@@ -102,7 +108,7 @@ class Util
 		if ($mobileType)
 			return $mobileType;
 		
-		$host = isset($_SERVER["REMOTE_HOST"]) && $_SERVER["REMOTE_HOST"] ? $_SERVER["REMOTE_HOST"] : gethostbyaddr($_SERVER["REMOTE_ADDR"]);
+		$host = isset($_SERVER["REMOTE_HOST"]) && $_SERVER["REMOTE_HOST"] ? $_SERVER["REMOTE_HOST"] : (isset($_SERVER["REMOTE_ADDR"]) ? gethostbyaddr($_SERVER["REMOTE_ADDR"]) : "");
 		
 		foreach (array
 		(
@@ -134,10 +140,7 @@ class Util
 			self::MOBILE_TYPE_EMNET		=> "EMnet ユーザ ID ",
 		);
 		
-		if (isset($names[$type]))
-			return $names[$type];
-		else
-			return "契約者固有 ID";
+		return $names[$type] ?? "契約者固有 ID";
 	}
 	
 	static function canGetMobileUniqueID(): bool
@@ -162,12 +165,20 @@ class Util
 			return null;
 	}
 	
-	static function getRemoteHost(): string
+	static function remoteHostMatches(?string $host): bool
+	{
+		if (isset($_SERVER["REMOTE_ADDR"]) && $_SERVER["REMOTE_ADDR"] == $host)
+			return true;
+
+		return self::getRemoteHost() == $host;
+	}
+	
+	static function getRemoteHost(): string|false
 	{
 		if (self::canGetMobileUniqueID() && $id = self::getMobileUniqueID())
 			return $id;
 		
-		return isset($_SERVER["REMOTE_HOST"]) && $_SERVER["REMOTE_HOST"] ? $_SERVER["REMOTE_HOST"] : gethostbyaddr($_SERVER["REMOTE_ADDR"]);
+		return isset($_SERVER["REMOTE_HOST"]) && $_SERVER["REMOTE_HOST"] ? $_SERVER["REMOTE_HOST"] : (isset($_SERVER["REMOTE_ADDR"]) ? gethostbyaddr($_SERVER["REMOTE_ADDR"]) : "");
 	}
 	
 	static function isCachedByBrowser(?int $lastModified = null, ?string $eTagSeed = null): bool
@@ -205,7 +216,7 @@ class Util
 		if (isset($absoluteUrls[$path]))
 			return $absoluteUrls[$path];
 		
-		$script = $_SERVER["SCRIPT_NAME"];
+		$script = $_SERVER["SCRIPT_NAME"] ?? "/";
 		$linkType = Configuration::$instance->linkType;
 
 		if ($linkType == Configuration::LINK_REWRITE ||
@@ -219,7 +230,7 @@ class Util
 			else
 				$script .= "?" . self::PATH_INFO_QUERY_PARAM . "=";
 		
-		return $absoluteUrls[$path] = "http://" . (isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] :  $_SERVER["SERVER_NAME"] . ($_SERVER["SERVER_PORT"] == 80 ? null : ":" . $_SERVER["SERVER_PORT"])) . $script . $path;
+		return $absoluteUrls[$path] = "http://" . (($_SERVER["HTTP_HOST"] ?? $_SERVER["SERVER_NAME"] ?? "") . (!isset($_SERVER["SERVER_PORT"]) || $_SERVER["SERVER_PORT"] == 80 ? "" : ":" . $_SERVER["SERVER_PORT"])) . $script . $path;
 	}
 	
 	static function getSuffix(): string
@@ -248,7 +259,10 @@ class Util
 	{
 		static $phpSelf;
 		
-		return $phpSelf ? $phpSelf : $phpSelf = self::escapeInput($_SERVER["PHP_SELF"]);
+		if (isset($phpSelf)) return $phpSelf;
+		if (isset($_SERVER["PHP_SELF"])) return $phpSelf = self::escapeInput($_SERVER["PHP_SELF"]);
+		
+		return "/" . self::INDEX_FILE_NAME;
 	}
 	
 	static function getPathInfo(): string
@@ -259,7 +273,7 @@ class Util
 		
 		if ($pathInfo)
 			return $pathInfo;
-		else if (isset($_GET[self::PATH_INFO_QUERY_PARAM]))
+		else if (isset($_GET[self::PATH_INFO_QUERY_PARAM]) && is_string($_GET[self::PATH_INFO_QUERY_PARAM]))
 		{
 			$pathInfo = self::escapeInput($_GET[self::PATH_INFO_QUERY_PARAM]);
 			unset($_GET[self::PATH_INFO_QUERY_PARAM]);
@@ -269,7 +283,7 @@ class Util
 		else if ($rt = self::escapeInput((string)getenv("PATH_INFO")))
 			return $pathInfo = $rt;
 		else
-			return $pathInfo = mb_substr(mb_strstr(self::escapeInput($_SERVER["PHP_SELF"]), self::INDEX_FILE_NAME), mb_strlen(self::INDEX_FILE_NAME));
+			return $pathInfo = mb_substr(mb_strstr(self::getPhpSelf(), self::INDEX_FILE_NAME), mb_strlen(self::INDEX_FILE_NAME));
 	}
 	
 	/** @return string[] */
@@ -338,8 +352,10 @@ class Util
 		}
 	}
 
-	static function hashEquals(string $hash, string $raw): bool|string
+	static function hashEquals(string $hash, string|false $raw): bool|string
 	{
+		if ($raw == false) return false;
+		
 		try
 		{
 			if (empty($hash))
@@ -376,17 +392,17 @@ class Util
 		return $input;
 	}
 	
-	static function unencodeInputs(): void
+	static function decodeInputs(): void
 	{
 		if (isset($_POST["encoded"]))
 		{
 			if ($_POST["encoded"] == "true")
 			{
-				$except = isset($_POST["encodedExcept"]) ? array_flip(explode(",", self::escapeInput($_POST["encodedExcept"]))) : array();
+				$except = isset($_POST["encodedExcept"]) && is_string($_POST["encodedExcept"]) ? array_flip(explode(",", self::escapeInput($_POST["encodedExcept"]))) : array();
 				$except += array("encoded" => true, "encodedExcept" => true);
 			
 				foreach ($_POST as $k => $v)
-					if (!isset($except[$k]))
+					if (!isset($except[$k]) && is_string($v))
 						if (($_POST[$k] = base64_decode($v, true)) === false)
 							throw new ApplicationException("パラメータ {$k} のデコードに失敗しました", 404);
 			}
@@ -620,10 +636,7 @@ class Util
 		if (!is_array($dat))
 			array_unshift($line, basename($dat));
 		
-		if (isset($entry))
-			$thread->entry = $entry;
-		else
-			$thread->entry = $entry = self::convertLineToThreadEntry($line, $thread->entry) ?? $thread->entry;
+		$thread->entry = $entry ?? ($entry = self::convertLineToThreadEntry($line, $thread->entry) ?? $thread->entry);
 		
 		$thread->updatePropertyLink();
 
@@ -761,7 +774,10 @@ class Util
 		return $rt;
 	}
 	
-	static function convertAndSaveToThread(PDO $db, PDO $idb, ?int $subject, string $dat, string $com, string $aft, bool $whenContainsWin31JOnly = false, bool $allowSaveCommentsOnly = false, ?ThreadEntry $entry = null): ?Thread
+	/**
+	 * @param string|string[] $dat
+	 */
+	static function convertAndSaveToThread(PDO $db, PDO $idb, ?int $subject, string|array $dat, string $com, string $aft, bool $whenContainsWin31JOnly = false, bool $allowSaveCommentsOnly = false, ?ThreadEntry $entry = null): ?Thread
 	{
 		$save = false;
 		$thread = self::convertAndSaveToThreadInternal($db, $idb, $subject, $dat, $com, $aft, $whenContainsWin31JOnly, $allowSaveCommentsOnly, $save, $entry);
@@ -795,7 +811,7 @@ class Util
 	
 	static function acquireWriteLock(string $name = "default", int $lifetime = 60): string
 	{
-		$path = rtrim(DATA_DIR, "/") . "/" . $name . ".lock";
+		$path = rtrim(Constant::DATA_DIR, "/") . "/" . $name . ".lock";
 		
 		while (!@mkdir($path))
 		{

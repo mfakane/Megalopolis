@@ -1,4 +1,8 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class MySQLSearchIndex extends SQLiteSearchIndex
 {
 	function __construct()

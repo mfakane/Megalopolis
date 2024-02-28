@@ -1,9 +1,11 @@
 <?php
+namespace Megalopolis;
+
 $c = &Configuration::$instance;
 $h = &IndexHandler::$instance;
 $d = &Visualizer::$data;
 
-function convert($s)
+function convert(string $s): string
 {
 	return addcslashes(addslashes($s), '$\\');
 }
@@ -35,12 +37,12 @@ define("REVERSE_SUBJECTS_LIST", false);
 define("SHOW_HOST", false);
 $deny = array();
 $denywrite = array();
-define("BBQ_DENY_READ", <?=(int)$c->useBBQ & Configuration::BBQ_READ ? "true" : "false" ?>);
-define("BBQ_DENY_WRITE", <?=(int)$c->useBBQ & Configuration::BBQ_WRITE ? "true" : "false" ?>);
+define("BBQ_DENY_READ", <?=$c->useBBQ & Configuration::BBQ_READ ? "true" : "false" ?>);
+define("BBQ_DENY_WRITE", <?=$c->useBBQ & Configuration::BBQ_WRITE ? "true" : "false" ?>);
 define("DEFAULT_NAME", "<?=convert($c->defaultName) ?>");
 define("ADMIN_ONLY", <?=$c->adminOnly ? "true" : "false" ?>);
-define("COMMON_POST_PASS", "<?=convert($c->postPassword) ?>");
-define("COMMON_PASS", "<?=convert($c->postPassword) ?>");
+define("COMMON_POST_PASS", "");
+define("COMMON_PASS", "");
 define("USE_ANONY_COMMON_PASS", true);
 define("REQUIRE_COMMENT_PASS", <?=$c->requirePassword[Configuration::ON_COMMENT] ? "true" : "false" ?>);
 define("EMPTY_COMMENT_PASS_DELETABLE", true);

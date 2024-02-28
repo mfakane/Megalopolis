@@ -1,4 +1,8 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 abstract class SearchIndex
 {
 	static ?SearchIndex $instance;

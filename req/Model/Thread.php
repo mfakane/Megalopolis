@@ -1,4 +1,8 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class Thread
 {
 	const REGEX_SPLIT_PAGE = "@<split\s*?/>@";
@@ -145,7 +149,7 @@ class Thread
 		$eval = new Evaluation($db);
 		$eval->entryID = $this->id;
 		$eval->point = $point;
-		$eval->host = Util::getRemoteHost();
+		$eval->host = Util::getRemoteHost() ?: null;
 		$eval->save($db);
 		$this->nonCommentEvaluations[$eval->id] = $this->evaluations[$eval->id] = $eval;
 		$this->entry->responseLastUpdate = time();
@@ -186,7 +190,7 @@ class Thread
 		$comment->mail = $mail;
 		$comment->body = $body;
 		$comment->hash = Util::hash($password);
-		$comment->host = Util::getRemoteHost();
+		$comment->host = Util::getRemoteHost() ?: null;
 		
 		if ($point)
 		{
@@ -394,7 +398,7 @@ class Thread
 			$thread->border = $record->border;
 			$thread->writingMode = $record->writingMode;
 			return $thread;
-		}, $st->fetchAll(PDO::FETCH_CLASS, "ThreadEntity"));
+		}, $st->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\ThreadEntity"));
 	}
 	
 	/**

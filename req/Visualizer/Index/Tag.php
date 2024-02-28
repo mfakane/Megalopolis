@@ -1,4 +1,6 @@
 <?php
+namespace Megalopolis;
+
 $c = &Configuration::$instance;
 $h = &IndexHandler::$instance;
 $d = &Visualizer::$data;
@@ -6,27 +8,27 @@ Visualizer::doctype();
 ?>
 <html lang="ja">
 <head>
-	<? Visualizer::head() ?>
+	<?php Visualizer::head() ?>
 	<title>
-		<?+App::$actionName == "author" ? "作者" : "タグ" ?>の一覧 - <?+$c->title ?>
+		<?=Visualizer::escapeOutput(App::$actionName == "author" ? "作者" : "タグ") ?>の一覧 - <?=Visualizer::escapeOutput($c->title) ?>
 	</title>
 </head>
 <body>
-	<? Visualizer::header(App::$actionName == "author" ? "作者の一覧" : "タグの一覧", array
+	<?php Visualizer::header(App::$actionName == "author" ? "作者の一覧" : "タグの一覧", array
 	(
 		App::$actionName . "/random" => array("おまかせ表示", "refreshIcon.png")
 	)) ?>
-	<?if (App::$actionName == "author" && !$c->showName[Configuration::ON_SUBJECT]): ?>
+	<?php if (App::$actionName == "author" && !$c->showName[Configuration::ON_SUBJECT]): ?>
 		<p class="notify warning">
 			作者の一覧は公開されていません
 		</p>
-	<?elseif (App::$actionName == "tag" && !$c->showTags[Configuration::ON_SUBJECT]): ?>
+	<?php elseif (App::$actionName == "tag" && !$c->showTags[Configuration::ON_SUBJECT]): ?>
 		<p class="notify warning">
 			タグの一覧は公開されていません
 		</p>
-	<?else: ?>
-		<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref(App::$actionName) . "/") ?>
-		<?if ($d): ?>
+	<?php else: ?>
+		<?php Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref(App::$actionName) . "/") ?>
+		<?php if ($d): ?>
 			<?php
 			$byCount = array();
 			
@@ -41,32 +43,32 @@ Visualizer::doctype();
 			}
 			?>
 			<dl class="taglist">
-				<?foreach ($byCount as $by => $vals): ?>
+				<?php foreach ($byCount as $by => $vals): ?>
 					<dt>
 						<?=$by ?>
 					</dt>
 					<dd>
 						<ul>
-							<?foreach ($vals as $k => $v): ?>
+							<?php foreach ($vals as $k => $v): ?>
 								<li>
-									<?if (App::$actionName == "author"): ?>
-										<? Visualizer::linkedName($k, '<span class="count">' . $v . '</span>') ?>
-									<?else: ?>
-										<? Visualizer::linkedTag($k, '<span class="count">' . $v . '</span>') ?>
-									<?endif ?>
+									<?php if (App::$actionName == "author"): ?>
+										<?php Visualizer::linkedName($k, '<span class="count">' . $v . '</span>') ?>
+									<?php else: ?>
+										<?php Visualizer::linkedTag($k, '<span class="count">' . $v . '</span>') ?>
+									<?php endif ?>
 								</li>
-							<?endforeach ?>
+							<?php endforeach ?>
 						</ul>
 					</dd>
-				<?endforeach ?>
+				<?php endforeach ?>
 			</dl>
-		<?else: ?>
+		<?php else: ?>
 			<p class="notify info">
-				<?+App::$actionName == "author" ? "作者はいません" : "タグはありません" ?>
+				<?=Visualizer::escapeOutput(App::$actionName == "author" ? "作者はいません" : "タグはありません") ?>
 			</p>
-		<?endif ?>
-		<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref(App::$actionName) . "/") ?>
-	<?endif ?>
-	<? Visualizer::footer() ?>
+		<?php endif ?>
+		<?php Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref(App::$actionName) . "/") ?>
+	<?php endif ?>
+	<?php Visualizer::footer() ?>
 </body>
 </html>

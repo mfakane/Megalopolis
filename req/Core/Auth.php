@@ -1,4 +1,6 @@
 <?php
+namespace Megalopolis;
+
 class Auth
 {
 	const SESSION_PASSWORD = "Auth_password";
@@ -42,10 +44,10 @@ class Auth
 		return hash(Util::HASH_ALGORITHM, implode(", ", array
 		(
 			self::getSessionID(),
-			$_SERVER["REMOTE_ADDR"],
-			isset($_SERVER["HTTP_USER_AGENT"]) ? $_SERVER["HTTP_USER_AGENT"] : null,
-			isset($_SERVER["HTTP_ACCEPT_LANGUAGE"]) ? $_SERVER["HTTP_ACCEPT_LANGUAGE"] : null,
-			isset($_SERVER["HTTP_ACCEPT_CHARSET"]) ? $_SERVER["HTTP_ACCEPT_CHARSET"] : null
+			$_SERVER["REMOTE_ADDR"] ?? null,
+			$_SERVER["HTTP_USER_AGENT"] ?? null,
+			$_SERVER["HTTP_ACCEPT_LANGUAGE"] ?? null,
+			$_SERVER["HTTP_ACCEPT_CHARSET"] ?? null
 		)));
 	}
 	
@@ -184,7 +186,7 @@ class Auth
 		
 		if (self::hasSession($admin))
 			return $_SESSION[self::SESSION_PASSWORD];
-		else if (isset($_POST["password"]))
+		else if (isset($_POST["password"]) && is_string($_POST["password"]))
 		{
 			if ($ensureToken)
 				self::ensureToken();
@@ -203,6 +205,9 @@ class Auth
 		}
 	}
 	
+	/**
+	 * @return never
+	 */
 	static function loginError(string $error = ""): void
 	{
 		self::cleanSession();

@@ -1,4 +1,6 @@
 <?php
+namespace Megalopolis;
+
 class Cookie
 {
 	const COOKIE_NAME = "Cookie";
@@ -50,7 +52,7 @@ class Cookie
 	/**
 	 * @template T as string|?string
 	 * @param T $defaultValue
-	 * @psalm-return (T is string ? string : ?string)
+	 * @return (T is string ? string : ?string)
 	 */
 	static function getCookie(string $key, ?string $defaultValue = null): ?string
 	{

@@ -1,4 +1,8 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class SQLiteSearchIndex extends SearchIndex
 {
 	const INDEX_TABLE = "searchIndex2";

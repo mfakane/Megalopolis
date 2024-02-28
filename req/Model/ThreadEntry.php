@@ -1,4 +1,8 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class ThreadEntry
 {
 	static int $threadEntrySchemaVersion = 3;
@@ -453,7 +457,7 @@ class ThreadEntry
 		
 		if ($columns == array("*"))
 		{
-			foreach ($st->fetchAll(PDO::FETCH_CLASS, "ThreadEntry") as $i)
+			foreach ($st->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\ThreadEntry") as $i)
 				$rt[$i->id] = $i;
 			
 			return $rt;
@@ -727,7 +731,7 @@ class ThreadEntry
 		
 		if (!$st) return array();
 
-		foreach ($st->fetchAll(PDO::FETCH_CLASS, "ThreadEntry") as $i)
+		foreach ($st->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\ThreadEntry") as $i)
 			$rt[$i->id] = $i;
 		
 		if ($isMysql)
@@ -786,7 +790,7 @@ class ThreadEntry
 		
 		if (!$st) return array();
 
-		foreach ($st->fetchAll(PDO::FETCH_CLASS, "ThreadEntry") as $i)
+		foreach ($st->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\ThreadEntry") as $i)
 			$rt[$i->id] = $i;
 		
 		if ($isMysql)
@@ -1054,7 +1058,7 @@ class ThreadEntry
 
 	/**
 	 * @param array{0: int, 1: int} $subjectRange
-	 * @param ("thread"|"comment"|"evaluation")[] $target
+	 * @param ("thread"|"comment"|"evaluation")[]|string[] $target
 	 * @return ThreadEntry[]
 	 */
 	static function getEntriesByHost(PDO $db, string $host, array $subjectRange, array $target, int $offset = 0, ?int $limit = null, int $order = Board::ORDER_DESCEND, ?int &$foundItems = null): array
@@ -1085,7 +1089,7 @@ class ThreadEntry
 		
 		if (!$st) return array();
 
-		foreach ($st->fetchAll(PDO::FETCH_CLASS, "ThreadEntry") as $i)
+		foreach ($st->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\ThreadEntry") as $i)
 			$rt[$i->id] = $i;
 		
 		if ($isMysql)

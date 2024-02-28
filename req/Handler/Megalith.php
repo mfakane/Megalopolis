@@ -1,4 +1,6 @@
 <?php
+namespace Megalopolis;
+
 class MegalithHandler extends Handler
 {
 	static MegalithHandler $instance;
@@ -6,9 +8,9 @@ class MegalithHandler extends Handler
 	/**
 	 * Megalith compatibility layer (sub/)
 	 */
-	function sub(?string $_name = null)
+	function sub(?string $_name = null): bool
 	{
-		$name = Util::escapeInput($_name);
+		$name = Util::escapeInput($_name ?? "");
 		
 		if (App::$handlerType == "txt" &&
 			preg_match('/^subject(s|[0-9]+|)$/', $name, $matches))
@@ -19,8 +21,8 @@ class MegalithHandler extends Handler
 			
 			if ($matches[1] == "s")
 			{
-				if (Util::isCachedByBrowser(Board::getLastUpdate($db, $latest), $latest))
-					return Visualizer::notModified();
+				if (Util::isCachedByBrowser(Board::getLastUpdate($db, $latest), strval($latest)))
+					Visualizer::notModified();
 				
 				$content = implode("\n", array_map(function($_) { return "subject{$_}.txt"; }, array_merge(array(""), $latest > 1 ? range(1, $latest - 1) : array())));
 			}
@@ -29,36 +31,35 @@ class MegalithHandler extends Handler
 				if (($subject = $matches[1] == "" ? $latest : intval($matches[1])) > $latest)
 					throw new ApplicationException("ファイルが見つかりません", 404);
 				
-				if (($lastUpdate = Board::getLastUpdate($db, $latest)) &&
-					Util::isCachedByBrowser($lastUpdate))
-					return Visualizer::notModified();
+				if (($lastUpdate = Board::getLastUpdate($db, $latest)) && Util::isCachedByBrowser($lastUpdate))
+					Visualizer::notModified();
 				
 				if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
 				{
 					$entries = ThreadEntry::getEntriesBySubject($db, $subject);
-					$lastUpdate = max(array_map(function($_) { return $_->getLatestLastUpdate(); }, $entries) + array(0));
+					$lastUpdate = max(array_map(fn($x) => $x->getLatestLastUpdate(), $entries) + array(0));
 				
 					if (Util::isCachedByBrowser($lastUpdate))
-						return Visualizer::notModified();
+						Visualizer::notModified();
 					
-					$content = implode("\n", array_reverse(array_map(function($_) { return implode("<>", array_map("htmlspecialchars", array
+					$content = implode("\n", array_reverse(array_map(fn($x) => implode("<>", array_map("htmlspecialchars", array_map("strval", array
 					(
-						"{$_->id}.dat",
-						$_->title,
-						Configuration::$instance->showName[Configuration::ON_SUBJECT] ? (Util::isEmpty($_->name) ? Configuration::$instance->defaultName : $_->name) : "",
-						Configuration::$instance->showName[Configuration::ON_SUBJECT] ? $_->mail : "",
-						Configuration::$instance->showName[Configuration::ON_SUBJECT] ? $_->link : "",
-						Configuration::$instance->showComment[Configuration::ON_SUBJECT] ? (Configuration::$instance->showPoint[Configuration::ON_SUBJECT] ? "{$_->commentedEvaluationCount}/{$_->responseCount}" : "0/{$_->responseCount}") : "0/0",
-						Configuration::$instance->showPoint[Configuration::ON_SUBJECT] ? $_->points : "0",
-						Configuration::$instance->showRate[Configuration::ON_SUBJECT] ? $_->rate : "0",
-						date("Y/m/d H:i:s", $_->getLatestLastUpdate()),
+						"{$x->id}.dat",
+						$x->title,
+						Configuration::$instance->showName[Configuration::ON_SUBJECT] ? (Util::isEmpty($x->name) ? Configuration::$instance->defaultName : $x->name) : "",
+						Configuration::$instance->showName[Configuration::ON_SUBJECT] ? $x->mail : "",
+						Configuration::$instance->showName[Configuration::ON_SUBJECT] ? $x->link : "",
+						Configuration::$instance->showComment[Configuration::ON_SUBJECT] ? (Configuration::$instance->showPoint[Configuration::ON_SUBJECT] ? "{$x->commentedEvaluationCount}/{$x->responseCount}" : "0/{$x->responseCount}") : "0/0",
+						Configuration::$instance->showPoint[Configuration::ON_SUBJECT] ? $x->points : "0",
+						Configuration::$instance->showRate[Configuration::ON_SUBJECT] ? $x->rate : "0",
+						date("Y/m/d H:i:s", $x->getLatestLastUpdate()),
 						"",
 						"",
 						"",
 						"",
-						Configuration::$instance->showTags[Configuration::ON_SUBJECT] ? implode(" ", $_->tags) : "",
-						Configuration::$instance->showSize[Configuration::ON_SUBJECT] ? $_->size : ""
-					))); }, $entries)));
+						Configuration::$instance->showTags[Configuration::ON_SUBJECT] ? implode(" ", $x->tags) : "",
+						Configuration::$instance->showSize[Configuration::ON_SUBJECT] ? $x->size : ""
+					)))), $entries)));
 				}
 				else
 					$content = "";
@@ -75,9 +76,9 @@ class MegalithHandler extends Handler
 	/**
 	 * Megalith compatibility layer (dat/)
 	 */
-	function dat(?string $_name = null)
+	function dat(?string $_name = null): bool
 	{
-		$name = Util::escapeInput($_name);
+		$name = Util::escapeInput($_name ?? "");
 		
 		if (App::$handlerType == "dat")
 		{
@@ -87,14 +88,14 @@ class MegalithHandler extends Handler
 				throw new ApplicationException("ファイルが見つかりません", 404);
 			
 			if (Util::isCachedByBrowser($thread->entry->getLatestLastUpdate()))
-				return Visualizer::notModified();
+				Visualizer::notModified();
 			
 			if (Cookie::getCookie(Cookie::LAST_ID_KEY) != $thread->entry->id)
 			{
 				$db->beginTransaction();
 				$thread->entry->incrementReadCount($db);
 				$db->commit();
-				Cookie::setCookie(Cookie::LAST_ID_KEY, $thread->entry->id);
+				Cookie::setCookie(Cookie::LAST_ID_KEY, strval($thread->entry->id));
 				Cookie::sendCookie();
 			}
 			
@@ -104,7 +105,7 @@ class MegalithHandler extends Handler
 			if ($c->showTitle[Configuration::ON_SUBJECT])
 				$content = array
 				(
-					implode("<>", array_map("htmlspecialchars", array
+					implode("<>", array_map("htmlspecialchars", array_map("strval", array
 					(
 						$_->title,
 						$c->showName[Configuration::ON_ENTRY] ? (Util::isEmpty($_->name) ? $c->defaultName : $_->name) : "",
@@ -120,7 +121,7 @@ class MegalithHandler extends Handler
 						$thread->convertLineBreak ? "yes" : "no",
 						$c->showTags[Configuration::ON_ENTRY] ? implode(" ", $_->tags) : "",
 						$c->showSize[Configuration::ON_ENTRY] ? $_->size : ""
-					))),
+					)))),
 					"",
 					str_replace("\r\n", "\n", Visualizer::escapeBody($thread))
 				);
@@ -138,9 +139,9 @@ class MegalithHandler extends Handler
 	/**
 	 * Megalith compatibility layer (com/)
 	 */
-	function _com(?string $_name = null)
+	function _com(?string $_name = null): bool
 	{
-		$path = explode(".", Util::escapeInput($_name), 2);
+		$path = explode(".", Util::escapeInput($_name ?? ""), 2);
 		$name = $path[0];
 		
 		if (App::$handlerType == "dat" && count($path) == 2 && $path[1] == "res")
@@ -151,7 +152,7 @@ class MegalithHandler extends Handler
 				throw new ApplicationException("ファイルが見つかりません", 404);
 			
 			if (Util::isCachedByBrowser($thread->entry->getLatestLastUpdate()))
-				return Visualizer::notModified();
+				Visualizer::notModified();
 			
 			if (Configuration::$instance->showComment[Configuration::ON_ENTRY])
 				$content = array_merge
@@ -167,17 +168,25 @@ class MegalithHandler extends Handler
 						"",
 						"no"
 					)); }, $thread->nonCommentEvaluations),
-					array_map(function($_) { return strtr(implode("<>", array_map("htmlspecialchars", array
-					(
-						$_->body,
-						(Util::isEmpty($_->name) ? Configuration::$instance->defaultName : $_->name),
-						$_->mail,
-						date("Y/m/d H:i:s", $_->dateTime),
-						$_->evaluation ? (Configuration::$instance->showPoint[Configuration::ON_COMMENT] ? $_->evaluation->point : 0) : 0,
-						"",
-						"",
-						"no"
-					))), array("\r\n" => "<br />", "\r" => "<br />", "\n" => "<br />")); }, $thread->comments)
+					array_map(fn($_) =>
+						strtr(
+							implode("<>",
+								array_map(fn($x) => htmlspecialchars(strval($x)),
+								[
+									$_->body,
+									(Util::isEmpty($_->name) ? Configuration::$instance->defaultName : $_->name),
+									$_->mail,
+									date("Y/m/d H:i:s", $_->dateTime),
+									$_->evaluation ? (Configuration::$instance->showPoint[Configuration::ON_COMMENT] ? $_->evaluation->point : 0) : 0,
+									"",
+									"",
+									"no"
+								])
+							),
+							array("\r\n" => "<br />", "\r" => "<br />", "\n" => "<br />")
+						),
+						$thread->comments
+					)
 				);
 			else
 				$content = array();
@@ -193,9 +202,9 @@ class MegalithHandler extends Handler
 	/**
 	 * Megalith compatibility layer (aft/)
 	 */
-	function aft(?string $_name = null)
+	function aft(?string $_name = null): bool
 	{
-		$path = explode(".", Util::escapeInput($_name), 2);
+		$path = explode(".", Util::escapeInput($_name ?? ""), 2);
 		$name = $path[0];
 		
 		if (App::$handlerType == "dat" && count($path) == 2 && $path[1] == "aft")
@@ -206,7 +215,7 @@ class MegalithHandler extends Handler
 				throw new ApplicationException("ファイルが見つかりません", 404);
 			
 			if (Util::isCachedByBrowser($thread->entry->getLatestLastUpdate()))
-				return Visualizer::notModified();
+				Visualizer::notModified();
 			
 			App::closeDB($db);
 			
@@ -222,46 +231,40 @@ class MegalithHandler extends Handler
 	/**
 	 * Megalith compatibility layer (settings)
 	 */
-	function settings()
+	function settings(): bool
 	{
 		if (App::$handlerType != "ini")
 			throw new ApplicationException("ファイルが見つかりません", 404);
 		
 		if (Util::isCachedByBrowser(filemtime("config.php")))
-			return Visualizer::notModified();
+			Visualizer::notModified();
 		
 		return Visualizer::visualize("Index/Settings.Ini", 200, "text/plain", "Shift_JIS", "Windows-31J");
 	}
 	
-	function parseQuery()
+	function parseQuery(): bool
 	{
 		if (isset($_GET["mode"]))
 		{
-			switch(self::param("mode"))
+			switch(IndexHandler::param("mode"))
 			{
 				case "read":
-					return Visualizer::redirect(intval(self::param("log")) . "/" . intval(self::param("key")));
+					return Visualizer::redirect(intval(IndexHandler::param("log")) . "/" . intval(IndexHandler::param("key")));
 				case "update":
-					if (Util::escapeInput(self::param("target", "thread")) == "thread")
+					if (IndexHandler::param("target", "thread") == "thread")
 						return false;
-					else if (Util::escapeInput($_POST["body"]) == "#EMPTY#")
-						return App::callHandler("Read", "evaluate", array(intval(self::param("log")), intval(self::param("key"))));
+					else if (IndexHandler::postParam("body") == "#EMPTY#")
+						return App::callHandler("Read", "evaluate", [IndexHandler::param("log", ""), IndexHandler::param("key", "")]);
 					else
-						return App::callHandler("Read", "comment", array(intval(self::param("log")), intval(self::param("key"))));
+						return App::callHandler("Read", "comment", [IndexHandler::param("log", ""), IndexHandler::param("key", "")]);
 			}
+
+			return false;
 		}
 		else if (isset($_GET["log"]))
-			return Visualizer::redirect(intval(self::param("log")));
+			return Visualizer::redirect(IndexHandler::param("log", ""));
 		else
 			return false;
-	}
-	
-	static function param($name, $value = null)
-	{
-		if (isset($_GET[$name]))
-			return Util::escapeInput($_GET[$name]);
-		else
-			return $value;
 	}
 }
 ?>

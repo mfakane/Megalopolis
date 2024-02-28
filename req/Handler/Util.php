@@ -1,23 +1,27 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class UtilHandler extends Handler
 {
 	static UtilHandler $instance;
 	
-	function index()
+	function index(): bool
 	{
 		Auth::$caption = "管理者ログイン";
 		
-		if (!Configuration::$instance->utilsEnabled && !Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+		if (!Configuration::$instance->utilsEnabled && !Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
 			Auth::loginError("管理者パスワードが一致しません");
 		
 		return Visualizer::visualize();
 	}
 	
-	function track()
+	function track(): bool
 	{
 		Auth::$caption = "管理者ログイン";
 		
-		if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+		if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
 			Auth::loginError("管理者パスワードが一致しません");
 		
 		Auth::cleanSession(!Auth::hasSession(true));
@@ -27,24 +31,21 @@ class UtilHandler extends Handler
 		
 		$db = App::openDB();
 		$subjectCount = Board::getLatestSubject($db);
-		$subjectBegin = max(1, min(IndexHandler::param("subjectBegin", $subjectCount), $subjectCount));
-		$subjectEnd = max(1, min(IndexHandler::param("subjectEnd", $subjectCount), $subjectCount));
+		$subjectBegin = max(1, min(intval(IndexHandler::param("subjectBegin", strval($subjectCount))), $subjectCount));
+		$subjectEnd = max(1, min(intval(IndexHandler::param("subjectEnd", strval($subjectCount))), $subjectCount));
 		list($subjectBegin, $subjectEnd) = array(min($subjectBegin, $subjectEnd), max($subjectBegin, $subjectEnd));
 		Visualizer::$data = array
 		(
-			"host" => IndexHandler::param("host"),
+			"host" => IndexHandler::param("host", ""),
 			"subjectCount" => $subjectCount,
 			"subjectBegin" => $subjectBegin,
 			"subjectEnd" => $subjectEnd,
-			"target" => IndexHandler::param("target", "thread,evaluation,comment"),
+			"target" => IndexHandler::paramAsArray("target", ["thread", "evaluation", "comment"]),
 			"entries" => null,
-			"page" => intval(IndexHandler::param("p", 1)),
+			"page" => intval(IndexHandler::param("p", "1")),
 			"pageCount" => 0,
 			"count" => 0,
 		);
-		
-		if (!is_array(Visualizer::$data["target"]))
-			Visualizer::$data["target"] = explode(",", Visualizer::$data["target"]);
 		
 		if (isset($_GET["host"]))
 		{
@@ -62,17 +63,19 @@ class UtilHandler extends Handler
 			
 			Visualizer::$data["pageCount"] = ceil(Visualizer::$data["count"] / Configuration::$instance->searchPaging);
 			
-			if (isset($_POST["admin"]))
+			if (isset($_POST["admin"]) && is_string($_POST["admin"]))
 			{
 				Auth::ensureToken();
 				Auth::createToken();
 				
 				$idb = App::openDB(App::INDEX_DATABASE);
 				
-				if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+				if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
 					Auth::loginError("管理者パスワードが一致しません");
 				
-				$ids = array_map("intval", array_map(array("Util", "escapeInput"), isset($_POST["id"]) ? (is_array($_POST["id"]) ? $_POST["id"] : array($_POST["id"])) : array()));
+				$ids = IndexHandler::postParamAsArray("ids", []);
+				array_walk_recursive($ids, fn(string $x) => $x = intval($x));
+
 				$db->beginTransaction();
 				
 				if ($db !== $idb)
@@ -108,13 +111,13 @@ class UtilHandler extends Handler
 		return Visualizer::visualize();
 	}
 	
-	function hash()
+	function hash(): bool
 	{
 		self::ensureTestMode(false);
 		
 		if (isset($_POST["raw"]))
 		{
-			$raw = Util::escapeInput($_POST["raw"]);
+			$raw = IndexHandler::postParam("raw", "");
 			
 			Visualizer::$data = array
 			(
@@ -128,7 +131,7 @@ class UtilHandler extends Handler
 		return Visualizer::visualize();
 	}
 	
-	function reindex()
+	function reindex(): bool
 	{
 		$defaultBuffer = 40;
 		$minimumBuffer = 5;
@@ -137,7 +140,7 @@ class UtilHandler extends Handler
 		
 		if (isset($_GET["p"]))
 		{
-			$param = Util::escapeInput($_GET["p"]);
+			$param = IndexHandler::param("p");
 			
 			if ($param == "list")
 			{
@@ -221,12 +224,15 @@ class UtilHandler extends Handler
 			return Visualizer::visualize();
 	}
 	
-	function convert()
+	function convert(): bool
 	{
 		$args = func_get_args();
 		
 		if ($args && $args[0] == "tags")
-			return $this->convertTags(App::$actionName = array_shift($args), $args);
+		{
+			App::$actionName = array_shift($args);
+			return $this->convertTags();
+		}
 		
 		$defaultBuffer = Configuration::$instance->convertDivision;
 		$minimumBuffer = 20;
@@ -243,7 +249,7 @@ class UtilHandler extends Handler
 		
 		if (isset($_GET["p"]))
 		{
-			$params = explode(",", Util::escapeInput($_GET["p"]));
+			$params = explode(",", IndexHandler::param("p", ""));
 			$db = App::openDB();
 			$idb = App::openDB(App::INDEX_DATABASE);
 			$allowOverwrite = isset($_GET["allowOverwrite"]) && $_GET["allowOverwrite"] == "yes";
@@ -258,7 +264,7 @@ class UtilHandler extends Handler
 				
 				foreach ($subjects as $k => $v)
 				{
-					$subjectNum = $k;
+					$subjectNum = intval($k);
 					$v = trim($v);
 					
 					if (!is_file($subjectFile = "{$dir}sub/{$v}"))
@@ -266,16 +272,16 @@ class UtilHandler extends Handler
 					
 					$previousSubjectFile = "{$dir}sub/subject{$subjectNum}.txt";
 					$nextSubjectFile = "{$dir}sub/subject" . ($subjectNum == count($subjects) - 2 ? "" : $subjectNum + 2) . ".txt";
-					$stats = Util::readLines($subjectFile, FILE_SKIP_EMPTY_LINES);
+					$stats = Util::readLines($subjectFile, true);
 					$count = count($stats);
 					
 					$set = array
 					(
 						"start" => $subjectNum > 0
-							? (is_file($previousSubjectFile) ? max(self::getFirstAndLastDataLineIDFromLines(Util::readLines($previousSubjectFile, FILE_SKIP_EMPTY_LINES))) + 1 : min(self::getFirstAndLastDataLineIDFromLines($stats)))
+							? (is_file($previousSubjectFile) ? max(self::getFirstAndLastDataLineIDFromLines(Util::readLines($previousSubjectFile, true))) + 1 : min(self::getFirstAndLastDataLineIDFromLines($stats)))
 							: 0,
 						"end" => $subjectNum < count($subjects)
-							? (is_file($nextSubjectFile) ? min(self::getFirstAndLastDataLineIDFromLines(Util::readLines($nextSubjectFile, FILE_SKIP_EMPTY_LINES))) : max(self::getFirstAndLastDataLineIDFromLines($stats)) + 1)
+							? (is_file($nextSubjectFile) ? min(self::getFirstAndLastDataLineIDFromLines(Util::readLines($nextSubjectFile, true))) : max(self::getFirstAndLastDataLineIDFromLines($stats)) + 1)
 							: 0
 					);
 					$subjectRange[] = $set;
@@ -287,7 +293,7 @@ class UtilHandler extends Handler
 					unset($set);
 				}
 				
-				$subjectRange = array_map(function($k, $v) { return ($k + 1) . "-{$v['start']}-{$v['end']}"; }, array_keys($subjectRange), array_values($subjectRange));
+				$subjectRange = array_map(fn($k, $v) => ($k + 1) . "-{$v['start']}-{$v['end']}", array_keys($subjectRange), $subjectRange);
 				$subjectRange[] = "end";
 				
 				if (App::$handlerType == "json")
@@ -332,7 +338,7 @@ class UtilHandler extends Handler
 				if ($db !== $idb)
 					$idb->beginTransaction();
 				
-				foreach (new DirectoryIterator("{$dir}dat") as $i)
+				foreach (new \DirectoryIterator("{$dir}dat") as $i)
 					if ($i->isFile() &&
 						mb_strstr($i->getFilename(), ".") == ".dat" &&
 						($id = intval(mb_substr($i->getFilename(), 0, -4))) >= $start &&
@@ -349,6 +355,9 @@ class UtilHandler extends Handler
 							{
 								$converting = Util::convertLineToThreadEntry($datLines[0]);
 								$entry = ThreadEntry::load($db, $id);
+
+								if (!$converting || !$entry)
+									continue;
 								
 								if ($entry->lastUpdate > $converting->lastUpdate)
 									continue;
@@ -372,7 +381,7 @@ class UtilHandler extends Handler
 								$db,
 								$idb,
 								$subject,
-								$whenContainsWin31JOnly ? "{$dir}dat/{$id}.dat" : $datLines,
+								$whenContainsWin31JOnly || !isset($datLines) ? "{$dir}dat/{$id}.dat" : $datLines,
 								"{$dir}com/{$id}.res.dat",
 								"{$dir}aft/{$id}.aft.dat",
 								$whenContainsWin31JOnly,
@@ -420,7 +429,7 @@ class UtilHandler extends Handler
 						
 						if (++$currentCount == max($buffer, 1))
 						{
-							$lastID = $thread->id + 1;
+							$lastID = ($thread->id ?? 0) + 1;
 							array_unshift($params, "{$subject}-{$lastID}-{$end}");
 							
 							break;
@@ -454,7 +463,7 @@ class UtilHandler extends Handler
 			return Visualizer::visualize();
 	}
 	
-	static function convertTags()
+	static function convertTags(): bool
 	{
 		$defaultBuffer = 1000;
 		$minimumBuffer = 100;
@@ -469,7 +478,7 @@ class UtilHandler extends Handler
 		if (is_dir("{$dir}com") && (!is_dir("{$dir}sub") || !is_dir("{$dir}dat") || !is_dir("{$dir}aft"))) throw new ApplicationException("ディレクトリ {$dir}com/ が見つかりましたが、他のログディレクトリが見つかりません");
 		if (is_dir("{$dir}aft") && (!is_dir("{$dir}sub") || !is_dir("{$dir}dat") || !is_dir("{$dir}com"))) throw new ApplicationException("ディレクトリ {$dir}aft/ が見つかりましたが、他のログディレクトリが見つかりません");
 		
-		if (isset($_GET["p"]) && $_GET["p"] == "list")
+		if (IndexHandler::param("p") == "list")
 		{
 			$db = App::openDB();
 			$subjectCount = Board::getLatestSubject($db);
@@ -490,9 +499,9 @@ class UtilHandler extends Handler
 			else
 				return Visualizer::redirect("util/convert/tags?s=1&o=0&m={$subjectCount}&c=0");
 		}
-		else if (isset($_GET["p"]) && $_GET["p"] == "end")
+		else if (IndexHandler::param("p") == "end")
 		{
-			Visualizer::$data = isset($_GET["c"]) ? intval($_GET["c"]) : 0;
+			Visualizer::$data = intval(IndexHandler::param("c", "0"));
 			
 			if (App::$handlerType == "json")
 				return Visualizer::json(array
@@ -504,16 +513,16 @@ class UtilHandler extends Handler
 		}
 		else if (isset($_GET["s"]) && isset($_GET["o"]) && isset($_GET["m"]))
 		{
-			$offset = intval(Util::escapeInput($_GET["o"]));
-			$subjectCount = intval(Util::escapeInput($_GET["m"]));
-			$count = intval(Util::escapeInput($_GET["c"]));
+			$offset = intval(IndexHandler::param("o"));
+			$subjectCount = intval(IndexHandler::param("m"));
+			$count = intval(IndexHandler::param("c"));
 			$buffer = isset($_GET["b"]) ? intval($_GET["b"]) : $defaultBuffer;
 			$db = App::openDB();
 			$datCount = 0;
 			$processed = 0;
 			$next = 0;
 			
-			for ($subject = intval(Util::escapeInput($_GET["s"])); $subject < $subjectCount; $subject++)
+			for ($subject = intval(IndexHandler::param("s")); $subject < $subjectCount; $subject++)
 			{
 				$subjectFile = $dir . "sub/subject" . ($subject == $subjectCount ? "" : $subject) . ".txt";
 				$datCount = 0;
@@ -536,9 +545,9 @@ class UtilHandler extends Handler
 									update %s set position = :position where id = :id and tag = :tag',
 									App::THREAD_TAG_TABLE
 								)));
-								$st->bindParam("id", $newEntry->id, PDO::PARAM_INT);
-								$st->bindParam("tag", $v);
-								$st->bindParam("position", $k, PDO::PARAM_INT);
+								$st?->bindParam("id", $newEntry->id, PDO::PARAM_INT);
+								$st?->bindParam("tag", $v);
+								$st?->bindParam("position", $k, PDO::PARAM_INT);
 								Util::executeStatement($st);
 							}
 							
@@ -586,20 +595,26 @@ class UtilHandler extends Handler
 			return Visualizer::visualize("Util/Convert/Tags");
 	}
 	
-	private static function getFirstAndLastDataLineIDFromLines(array $lines)
+	/**
+	 * @param string[] $lines
+	 * @return array{int, int}
+	 */
+	private static function getFirstAndLastDataLineIDFromLines(array $lines): array
 	{
 		return array(self::getDataLineID($lines[0]), self::getDataLineID($lines[count($lines) - 1]));
 	}
 	
-	private static function getDataLineID($s)
+	private static function getDataLineID(string $s): int
 	{
-		return intval(mb_substr($s, 0, mb_strpos($s, ".")));
+		$dotidx = mb_strpos($s, ".");
+		if ($dotidx === false) return -1;
+		return intval(mb_substr($s, 0, $dotidx));
 	}
 	
-	function config()
+	function config(): bool
 	{
 		if (Util::isCachedByBrowser(filemtime("config.php")))
-			return Visualizer::notModified();
+			Visualizer::notModified();
 		
 		$c = Configuration::$instance;
 		$isAdmin = Auth::hasSession(true);
@@ -624,7 +639,7 @@ class UtilHandler extends Handler
 				"title" =>
 					array("タイトル", $c->title),
 				"bbq" =>
-					array("BBQ 適用先", implode("", array_slice(array("none", "read", "write", "read, write"), (int)$c->useBBQ, 1))),
+					array("BBQ 適用先", implode("", array_slice(array("none", "read", "write", "read, write"), $c->useBBQ, 1))),
 				"pointEnabled" =>
 					array("簡易評価可否", $c->usePoints()),
 				"pointMap" =>
@@ -662,7 +677,7 @@ class UtilHandler extends Handler
 				"subjectSplitting" =>
 					array("作品集最大件数", $c->subjectSplitting),
 				"rateType" =>
-					array("rate 種別", implode("", array_slice(array("((points + 25) / ((evals + 1) * 50)) * 10", "average"), (int)$c->rateType, 1))),
+					array("rate 種別", implode("", array_slice(array("((points + 25) / ((evals + 1) * 50)) * 10", "average"), $c->rateType, 1))),
 				"updatePeriod" =>
 					array("更新印表示日数", $c->updatePeriod),
 				"minBodySize" =>
@@ -729,7 +744,7 @@ class UtilHandler extends Handler
 					array("作品上ページ数表示", $c->showPages[Configuration::ON_ENTRY]),
 			),
 		);
-		App::closeDB($idb, false, false);
+		App::closeDB($idb, false);
 		
 		if (App::$handlerType == "json")
 		{
@@ -751,7 +766,7 @@ class UtilHandler extends Handler
 			return Visualizer::visualize();
 	}
 	
-	function fill()
+	function fill(): void
 	{
 		self::ensureTestMode();
 		
@@ -805,14 +820,14 @@ class UtilHandler extends Handler
 		return $rt;
 	}
 	
-	private static function ensureTestMode(bool $requireAuth = true)
+	private static function ensureTestMode(bool $requireAuth = true): void
 	{
 		if (!Configuration::$instance->utilsEnabled)
 			throw new ApplicationException("Test utilities are disabled", 403);
 		
 		Auth::$caption = "管理者ログイン";
 		
-		if ($requireAuth && !Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+		if ($requireAuth && !Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
 			Auth::loginError("管理者パスワードが一致しません");
 	}
 }

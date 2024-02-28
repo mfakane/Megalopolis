@@ -1,4 +1,6 @@
 <?php
+namespace Megalopolis;
+
 $c = &Configuration::$instance;
 $h = &IndexHandler::$instance;
 $d = &Visualizer::$data;
@@ -13,33 +15,35 @@ else
 <?='<?xml version="1.0" encoding="UTF-8"?>' ?>
 <rss version="2.0">
 	<channel>
-		<title><?+$c->title ?> - <?+$title ?></title>
-		<link><?+Visualizer::absoluteHref() ?></link>
+		<title><?=Visualizer::escapeOutput($c->title) ?> - <?=Visualizer::escapeOutput($title) ?></title>
+		<link><?=Visualizer::escapeOutput(Visualizer::absoluteHref()) ?></link>
 		<language>ja-JP</language>
-		<description><?+$c->notes ?></description>
-		<generator><?+App::NAME ?> <?+App::VERSION ?></generator>
-		<?if ($h->entries): ?>
-			<lastBuildDate><?+date("r", $h->lastUpdate) ?></lastBuildDate>
-			<?foreach ($h->entries as $i): ?>
+		<description><?=Visualizer::escapeOutput($c->notes) ?></description>
+		<generator><?=Visualizer::escapeOutput(App::NAME) ?> <?=Visualizer::escapeOutput(App::VERSION) ?></generator>
+		<?php if ($h->entries): ?>
+			<?php if ($h->lastUpdate): ?>
+				<lastBuildDate><?=Visualizer::escapeOutput(date("r", $h->lastUpdate)) ?></lastBuildDate>
+			<?php endif ?>
+			<?php foreach ($h->entries as $i): ?>
 				<item>
-					<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
-						<title><?+$i->title ?></title>
-					<?endif ?>
-					<link><?+Visualizer::absoluteHref($i->subject, $i->id) ?></link>
-					<pubDate><?+date("r", $i->dateTime) ?></pubDate>
-					<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
-						<author><? Visualizer::convertedName($i->name) ?></author>
-					<?endif ?>
-					<?if ($c->useSummary && $c->showSummary[Configuration::ON_SUBJECT]): ?>
-						<description><? Visualizer::convertedSummary($i->summary) ?></description>
-					<?endif ?>
-					<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>
-						<?foreach ($i->tags as $j): ?>
-							<category domain="<?+Visualizer::absoluteHref("tag", $j . (strpos($j, ".") !== false ? ".html" : null)) ?>"><?+$j ?></category>
-						<?endforeach ?>
-					<?endif ?>
+					<?php if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
+						<title><?=Visualizer::escapeOutput($i->title) ?></title>
+					<?php endif ?>
+					<link><?=Visualizer::escapeOutput(Visualizer::absoluteHref($i->subject, $i->id)) ?></link>
+					<pubDate><?=Visualizer::escapeOutput(date("r", $i->dateTime)) ?></pubDate>
+					<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
+						<author><?php Visualizer::convertedName($i->name) ?></author>
+					<?php endif ?>
+					<?php if ($c->useSummary && $c->showSummary[Configuration::ON_SUBJECT]): ?>
+						<description><?php Visualizer::convertedSummary($i->summary ?? "") ?></description>
+					<?php endif ?>
+					<?php if ($c->showTags[Configuration::ON_SUBJECT]): ?>
+						<?php foreach ($i->tags as $j): ?>
+							<category domain="<?=Visualizer::escapeOutput(Visualizer::absoluteHref("tag", $j . (strpos($j, ".") !== false ? ".html" : ""))) ?>"><?=Visualizer::escapeOutput($j) ?></category>
+						<?php endforeach ?>
+					<?php endif ?>
 				</item>
-			<?endforeach ?>
-		<?endif ?>
+			<?php endforeach ?>
+		<?php endif ?>
 	</channel>
 </rss>

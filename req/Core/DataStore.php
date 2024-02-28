@@ -1,4 +1,9 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+use \PDOStatement;
+
 abstract class DataStore
 {
 	/** @var array<string, PDO> */
@@ -23,7 +28,7 @@ abstract class DataStore
 	
 	protected function getHandleByName(string $name): ?PDO
 	{
-		return isset($this->handles[$name]) ? $this->handles[$name] : null;
+		return $this->handles[$name] ?? null;
 	}
 	
 	protected function registerTableByHandle(PDO &$db, string $name): void
@@ -221,7 +226,7 @@ class SQLiteDataStore extends DataStore
 	const MODULE_FTS3 = "fts3";
 	const MODULE_FTS4 = "fts4";
 	
-	function __construct(string $directory = DATA_DIR)
+	function __construct(string $directory = Constant::DATA_DIR)
 	{
 		App::precondition(extension_loaded("pdo_sqlite"), "PDO SQLite");
 		

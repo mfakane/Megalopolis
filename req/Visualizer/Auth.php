@@ -1,34 +1,36 @@
 <?php
+namespace Megalopolis;
+
 $c = &Configuration::$instance;
 $d = &Visualizer::$data;
 ?>
-<? Visualizer::doctype() ?>
+<?php Visualizer::doctype() ?>
 <html lang="ja">
 <head>
-	<? Visualizer::head() ?>
+	<?php Visualizer::head() ?>
 	<meta name="robots" content="noindex,nofollow,noarchive" />
-	<title><?+$c->title ?></title>
+	<title><?=Visualizer::escapeOutput($c->title) ?></title>
 </head>
 <body>
-	<? Visualizer::header(Auth::$caption) ?>
-	<?if ($d): ?>
+	<?php Visualizer::header(Auth::$caption) ?>
+	<?php if ($d): ?>
 		<div class="notify warning">
-			<?+$d ?>
+			<?=Visualizer::escapeOutput($d) ?>
 		</div>
-	<?endif ?>
-	<form class="auth" action="<?+Util::withMobileUniqueIDRequestSuffix(Visualizer::currentHref($_GET)) ?>" method="post">
+	<?php endif ?>
+	<form class="auth" action="<?=Visualizer::escapeOutput(Util::withMobileUniqueIDRequestSuffix(Visualizer::currentHref($_GET))) ?>" method="post">
 		<section>
-			<label for="password"><?+Auth::$label ?></label><input type="password" name="password" id="password" /><br />
+			<label for="password"><?=Visualizer::escapeOutput(Auth::$label) ?></label><input type="password" name="password" id="password" /><br />
 			<button type="submit">
-				<img src="<?+Visualizer::actionHref("style", "sendButtonIcon.png") ?>" alt="" />送信
+				<img src="<?=Visualizer::escapeOutput(Visualizer::actionHref("style", "sendButtonIcon.png")) ?>" alt="" />送信
 			</button>
-			<input type="hidden" name="token" value="<?+$_SESSION[Auth::SESSION_TOKEN] ?>">
-			<? Visualizer::delegateParameters($_POST, array("password", "token")) ?>
+			<input type="hidden" name="token" value="<?=Visualizer::escapeOutput($_SESSION[Auth::SESSION_TOKEN]) ?>">
+			<?php Visualizer::delegateParameters($_POST, array("password", "token")) ?>
 		</section>
 	</form>
-	<?if (Auth::$details): ?>
+	<?php if (Auth::$details): ?>
 		<?=Auth::$details ?>
-	<?endif ?>
-	<? Visualizer::footer() ?>
+	<?php endif ?>
+	<?php Visualizer::footer() ?>
 </body>
 </html>

@@ -1,4 +1,8 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class Statistics
 {
 	public int $subject = 0;
@@ -67,7 +71,7 @@ class Statistics
 		)));
 		Util::executeStatement($st, $params);
 		
-		return $st?->fetchAll(PDO::FETCH_CLASS, "Statistics") ?? array();
+		return $st?->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\Statistics") ?? array();
 	}
 }
 ?>

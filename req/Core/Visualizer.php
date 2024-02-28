@@ -1,7 +1,11 @@
 <?php
+namespace Megalopolis;
+
+use \Megalopolis\App;
+
 class Visualizer
 {
-	static $data;
+	static mixed $data = null;
 	static string $basePath;
 	static ?string $mode = null;
 
@@ -32,7 +36,7 @@ class Visualizer
 	{
 		if (self::$mode)
 			return self::$mode;
-		else if (isset($_GET["visualizer"]))
+		else if (isset($_GET["visualizer"]) && is_string($_GET["visualizer"]))
 		{
 			self::$mode = Util::escapeInput($_GET["visualizer"]);
 			
@@ -394,13 +398,13 @@ class Visualizer
 	/**
 	 * @param string[] $keywords
 	 */
-	static function tweetButton(string $url = "", ?string $text = null, string $hashtags = "", array $keywords = array()): void
+	static function tweetButton(string $url = "", ?string $text = null, ?string $hashtags = null, array $keywords = array()): void
 	{
 		$params = array_filter(array
 		(
 			"text" => strtr($text ?? "", $keywords),
 			"url" => strtr($url, $keywords),
-			"hashtags" => strtr($hashtags, $keywords),
+			"hashtags" => strtr($hashtags ?? "", $keywords),
 		));
 		
 		?>
@@ -410,7 +414,7 @@ class Visualizer
 	}
 	
 	/**
-	 * @param (null|string|array<string, string>)[] $arr
+	 * @param (null|string|array<string, ?string>)[] $arr
 	 */
 	private static function href(array $arr): string
 	{
@@ -427,12 +431,12 @@ class Visualizer
 				
 				foreach ($i as $k => $v)
 					if (!is_null($v))
-						$href .= (isset($encodeTable[$k]) ? $encodeTable[$k] : $encodeTable[$k] = str_ireplace("%2F", "%252F", urlencode($k))) . "=" . (isset($encodeTable[$v]) ? $encodeTable[$v] : $encodeTable[$v] = urlencode($v)) . "&";
+						$href .= ($encodeTable[$k] ?? ($encodeTable[$k] = str_ireplace("%2F", "%252F", urlencode($k)))) . "=" . ($encodeTable[$v] ?? ($encodeTable[$v] = urlencode($v))) . "&";
 				
 				$href = rtrim($href, "&");
 			}
 			else
-				$href .= "/" . (isset($encodeTable[$i]) ? $encodeTable[$i] : $encodeTable[$i] = str_ireplace("%2F", "%252F", urlencode($i)));
+				$href .= "/" . ($encodeTable[$i] ?? ($encodeTable[$i] = str_ireplace("%2F", "%252F", urlencode($i))));
 		
 		return trim($href, "/");
 	}
@@ -485,7 +489,10 @@ class Visualizer
 		header("Pragma: no-cache");
 	}
 	
-	static function notModified(): bool
+	/**
+	 * @return never
+	 */
+	static function notModified(): void
 	{
 		self::statusCode(304);
 		exit;
@@ -525,7 +532,7 @@ class Visualizer
 		header("Status: {$code}");
 	}
 
-	static function converted(?string $s): void
+	static function converted(mixed $s): void
 	{
 		if (isset($s))
 			echo self::escapeOutput($s);
@@ -565,8 +572,10 @@ class Visualizer
 		<?php
 	}
 	
-	static function convertedSummary(string $s): void
+	static function convertedSummary(?string $s): void
 	{
+		if (empty($s)) return;
+	
 		echo self::escapeSummary($s);
 	}
 	
@@ -580,13 +589,15 @@ class Visualizer
 		)));
 	}
 	
-	static function convertedBody(Thread $thread, ?int $page = null, ?int $offset = null, ?int $length = null, ?array $stripExcept = null): void
+	static function convertedBody(?Thread $thread, ?int $page = null, ?int $offset = null, ?int $length = null, ?array $stripExcept = null): void
 	{
 		echo self::escapeBody($thread, $page, $offset, $length, $stripExcept);
 	}
 	
-	static function escapeBody(Thread $thread, ?int $page = null, ?int $offset = null, ?int $length = null, ?array $stripExcept = null): string
+	static function escapeBody(?Thread $thread, ?int $page = null, ?int $offset = null, ?int $length = null, ?array $stripExcept = null): string
 	{
+		if (!isset($thread)) return "";
+		
 		$content = $page ? $thread->page($page) : $thread->body;
 		$s = self::ensureHtml(isset($offset) && $length && isset($content) ? mb_substr($content, $offset, $length) : $content ?? "", $stripExcept);
 		
@@ -596,13 +607,15 @@ class Visualizer
 			return $s;
 	}
 	
-	static function convertedAfterword(Thread $thread, ?array $stripExcept = null): void
+	static function convertedAfterword(?Thread $thread, ?array $stripExcept = null): void
 	{
 		echo self::escapeAfterword($thread, $stripExcept);
 	}
 	
-	static function escapeAfterword(Thread $thread, ?array $stripExcept = null): string
+	static function escapeAfterword(?Thread $thread, ?array $stripExcept = null): string
 	{
+		if (!isset($thread)) return "";
+		
 		$s = isset($thread->afterword) ? self::ensureHtml($thread->afterword, $stripExcept) : "";
 		
 		if ($thread->convertLineBreak)
@@ -621,10 +634,10 @@ class Visualizer
 		));
 	}
 	
-	static function escapeOutput(?string $s): string
+	static function escapeOutput(mixed $s): string
 	{
 		return isset($s)
-			? htmlspecialchars($s, ENT_QUOTES, "UTF-8")
+			? htmlspecialchars(strval($s), ENT_QUOTES, "UTF-8")
 			: "";
 	}
 	
@@ -674,7 +687,7 @@ class Visualizer
 		}
 	}
 	
-	private static function ensureHtmlTagEnd($rt)
+	private static function ensureHtmlTagEnd($rt): void
 	{
 		static $selfClosingTags = array
 		(
@@ -810,6 +823,10 @@ class Visualizer
 		}
 	}
 	
+	/**
+	 * @param array<int|non-empty-string, non-empty-array<int|non-empty-string, array<int|non-empty-string, mixed>|string>|string> $params
+	 * @param string[] $except
+	 */
 	static function delegateParameters(array $params, array $except = array()): void
 	{
 		echo '<input type="hidden" name="encoded" value="true" />';
@@ -820,7 +837,7 @@ class Visualizer
 		$except = array_flip($except) + array("encoded" => true, "encodedExcept" => true);
 		
 		foreach ($params as $k => $v)
-			if (!isset($except[$k]) && strpos($k, "Auth_") === false)
+			if (!isset($except[$k]) && is_string($k) && !is_array($v) && strpos($k, "Auth_") === false)
 				echo '<input type="hidden" name="' . Visualizer::escapeOutput($k) . '" value="' . Visualizer::escapeOutput(Util::encodeForOutput(Util::escapeInput($v))) . '" />';
 	}
 	
@@ -862,17 +879,18 @@ class Visualizer
 
 	static function visualize(?string $path = null, ?int $status = null, ?string $contentType = null, ?string $encoding = null, ?string $mbencoding = null): bool
 	{
+		/** @var int */
 		static $nestLevel = 0;
 		
 		Auth::commitSession();
 		
 		if ($path == null)
-			if (is_dir(APP_DIR . VISUALIZER_DIR . App::$handlerName))
+			if (is_dir(Constant::APP_DIR . Constant::VISUALIZER_DIR . App::$handlerName))
 				$path = App::$handlerName . "/" . ucfirst(App::$actionName);
 			else
 				$path = App::$handlerName;
 		
-		$basePath = APP_DIR . VISUALIZER_DIR;
+		$basePath = Constant::APP_DIR . Constant::VISUALIZER_DIR;
 		$mode = self::visualizerMode();
 		
 		if ($mode == "mobile" &&
@@ -899,20 +917,13 @@ class Visualizer
 		else
 			header("Content-Type: text/html; charset=UTF-8");
 		
-		$table = array
-		(
-			'/<\?\+\s*(.*?)\s*\?>/s' => '<? Visualizer::converted($1) ?>',
-			'/<\?=\s*(.*?)\s*\?>/s' => '<?echo $1 ?>',
-			'/<\?\s*(.*?)\s*\?>/s' => '<?php $1 ?>',
-			'/<\?php php/' => '<?php'
-		);
-		$content = preg_replace(array_keys($table), array_values($table), file_get_contents($path));
-		
 		$start = microtime(true);
 		
 		$nestLevel++;
 		ob_start();
-		eval("?" . ">" . $content);
+
+		require $path;
+
 		$output = ob_get_contents();
 		ob_end_clean();
 		$nestLevel--;
@@ -1023,7 +1034,7 @@ class Visualizer
 		header("X-Content-Security-Policy: {$csp}");
 		
 		if (Util::getBrowserType() == Util::BROWSER_TYPE_WEBKIT &&
-			strpos($ua = $_SERVER["HTTP_USER_AGENT"], "Safari") !== false &&
+			strpos($ua = $_SERVER["HTTP_USER_AGENT"] ?? "", "Safari") !== false &&
 			!preg_match('/Version\/[1-5]\./', $ua))
 			header("X-WebKit-CSP: {$csp}");
 		

@@ -1,15 +1,19 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class ReadHandler extends Handler
 {
 	static ReadHandler $instance;
 	
-	public int $subject;
-	public ThreadEntry $entry;
-	public Thread $thread;
-	public int $page;
-	public bool $forceTaketori;
+	public ?int $subject = null;
+	public ?ThreadEntry $entry = null;
+	public ?Thread $thread = null;
+	public ?int $page = null;
+	public bool $forceTaketori = false;
 	
-	function index(string $_subject = "0", string $_id = "0", string $_page = "1")
+	function index(string $_subject = "0", string $_id = "0", string $_page = "1"): bool
 	{
 		$subject = intval($_subject);
 		$id = intval($_id);
@@ -51,20 +55,22 @@ class ReadHandler extends Handler
 		Cookie::setCookie(Cookie::VIEW_HISTORY_KEY, implode(",", $history));
 		Cookie::sendCookie();
 		
-		if (Util::isCachedByBrowser($this->thread->entry->getLatestLastUpdate(), $page . Cookie::getCookie(Cookie::MOBILE_VERTICAL_KEY) . $this->entry->readCount))
-			return Visualizer::notModified();
+		if (Util::isCachedByBrowser($this->thread->entry->getLatestLastUpdate(), $page . Cookie::getCookie(Cookie::MOBILE_VERTICAL_KEY, "") . $this->entry->readCount))
+			Visualizer::notModified();
 		
-		$this->forceTaketori = preg_match('/<\s*font|font:\s*|font-family:\s*/i', $this->thread->body);
+		$this->forceTaketori = boolval(preg_match('/<\s*font|font:\s*|font-family:\s*/i', $this->thread->body ?? ""));
 		
-		if (isset($_POST["admin"]))
+		if (isset($_POST["admin"]) && is_string($_POST["admin"]))
 		{
 			Auth::ensureToken();
 			Auth::createToken();
 			
-			if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+			if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
 				Auth::loginError("管理者パスワードが一致しません");
-			
-			$ids = array_map("intval", array_map(array("Util", "escapeInput"), isset($_POST["id"]) ? (is_array($_POST["id"]) ? $_POST["id"] : array($_POST["id"])) : array()));
+
+			$ids = !isset($_POST["id"]) ? [] : (!is_array($_POST["id"]) ? [$_POST["id"]] : $_POST["id"]);
+			array_walk_recursive($ids, fn(string $x) => $x = intval(Util::escapeInput($x)));
+
 			$db->beginTransaction();
 			
 			switch ($mode = Util::escapeInput($_POST["admin"]))
@@ -94,7 +100,7 @@ class ReadHandler extends Handler
 			return Visualizer::visualize("Read/Index");
 	}
 	
-	function _new(?string $_page = null)
+	function _new(?string $_page = null): bool
 	{
 		$this->page = !is_null($_page) ? intval($_page) : 1;
 		
@@ -107,7 +113,7 @@ class ReadHandler extends Handler
 			Auth::$label = "管理者パスワード";
 			Auth::$details = '<p class="notify info">管理者のみ新規投稿が可能です。続行するにはパスワードを入力してください</p>';
 			
-			if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+			if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
 				Auth::loginError("パスワードが一致しません");
 		}
 		
@@ -128,11 +134,11 @@ class ReadHandler extends Handler
 		
 		self::setValues($this->entry, $this->thread);
 		
-		if ($_POST || !is_null($_page))
+		if ($_POST || $_page)
 		{
 			Visualizer::$data = self::checkValues($this->entry, $this->thread, false);
 			
-			if (!is_null($_page) ||
+			if ($_page ||
 				self::param("preview", null, true) == "true" && !Visualizer::$data)
 				return Visualizer::visualize("Read/Index");
 		}
@@ -140,11 +146,11 @@ class ReadHandler extends Handler
 		return Visualizer::visualize("Read/Edit");
 	}
 	
-	function edit(string $_subject = "0", string $_id = "0")
+	function edit(string $_subject = "0", string $_id = "0"): bool
 	{
 		$this->subject = intval($_subject);
 		$id = intval($_id);
-		$this->page = max(intval($_page = self::param("p", null, true)), 1);
+		$this->page = max(intval($_page = self::param("p", tryGet: true)), 1);
 		
 		$db = App::openDB();
 		$this->thread = self::loadThread($db, $id);
@@ -154,8 +160,8 @@ class ReadHandler extends Handler
 		Auth::$label = "編集キー";
 		
 		if (!Auth::hasSession(true) &&
-			!($type = Util::hashEquals(Configuration::$instance->adminHash, $login = Auth::login(false, false))) &&
-			!($type = Util::hashEquals($this->thread->hash, $login)))
+			!($type = Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false))) &&
+			!($type = Util::hashEquals($this->thread->hash ?? "", $login)))
 			Auth::loginError("編集キーが一致しません");
 		
 		if ($_POST)
@@ -170,10 +176,10 @@ class ReadHandler extends Handler
 		self::setValues($this->entry, $this->thread);
 		Visualizer::$data = self::checkValues($this->entry, $this->thread, true);
 		
-		if (!is_null($_page) ||
+		if ($_page ||
 			$_POST && self::param("preview", null, true) == "true" && !Visualizer::$data)
 		{
-			$this->forceTaketori = preg_match('/<\s*font|font:\s*|font-family:\s*/i', $this->thread->body);
+			$this->forceTaketori = boolval(preg_match('/<\s*font|font:\s*|font-family:\s*/i', $this->thread->body ?? ""));
 			
 			return Visualizer::visualize("Read/Index");
 		}
@@ -186,7 +192,7 @@ class ReadHandler extends Handler
 		return Visualizer::visualize("Read/Edit");
 	}
 	
-	function post(string $_subject = "0", string $_id = "0")
+	function post(string $_subject = "0", string $_id = "0"): bool
 	{
 		$subject = intval($_subject);
 		$id = intval($_id);
@@ -209,7 +215,7 @@ class ReadHandler extends Handler
 				Auth::$label = "管理者パスワード";
 				Auth::$details = '<p class="notify info">管理者のみ新規投稿が可能です。続行するにはパスワードを入力してください</p>';
 				
-				if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+				if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
 					Auth::loginError("パスワードが一致しません");
 			}
 		}
@@ -218,8 +224,8 @@ class ReadHandler extends Handler
 			$this->thread = self::loadThread($db, $id);
 			
 			if (!Auth::hasSession(true) &&
-				!($type = Util::hashEquals(Configuration::$instance->adminHash, $login = Auth::login(false, false))) &&
-				!($type = Util::hashEquals($this->thread->hash, $login)))
+				!($type = Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false))) &&
+				!($type = Util::hashEquals($this->thread->hash ?? "", $login)))
 				Auth::loginError("編集キーが一致しません");
 		}
 		
@@ -257,7 +263,7 @@ class ReadHandler extends Handler
 			return Visualizer::visualize("Read/Success");
 	}
 	
-	function unpost(string $_subject = "0", string $_id = "0")
+	function unpost(string $_subject = "0", string $_id = "0"): bool
 	{
 		$this->subject = intval($_subject);
 		$id = intval($_id);
@@ -280,8 +286,8 @@ class ReadHandler extends Handler
 		Auth::$details = "<div class='notify warning'>本当に {$this->entry->title} を削除してよろしいですか？続行する場合は編集キーを入力します</div>";
 		
 		if (!Auth::hasSession(true) &&
-			!Util::hashEquals($this->thread->hash, $login = Auth::login(false, false)) &&
-			!Util::hashEquals(Configuration::$instance->adminHash, $login))
+			!Util::hashEquals($this->thread->hash ?? "", $login = Auth::login(false, false)) &&
+			!Util::hashEquals(Configuration::$instance->adminHash ?? "", $login))
 			Auth::loginError("編集キーが一致しません");
 		
 		$db->beginTransaction();
@@ -306,7 +312,7 @@ class ReadHandler extends Handler
 		return Visualizer::redirect("{$this->entry->subject}");
 	}
 	
-	function comment(string $_subject = "0", string $_id = "0")
+	function comment(string $_subject = "0", string $_id = "0"): bool
 	{
 		$subject = intval($_subject);
 		$id = intval($_id);
@@ -347,7 +353,7 @@ class ReadHandler extends Handler
 		$this->thread = self::loadThread($db, $id);
 		$this->entry = &$this->thread->entry;
 		
-		if ($point && array_filter($this->thread->evaluations, function($_) { return $_->host == $_SERVER["REMOTE_ADDR"] || $_->host == Util::getRemoteHost(); }))
+		if ($point && array_filter($this->thread->evaluations, fn($x) => Util::remoteHostMatches($x->host) ))
 			$error[] = "多重評価はできません";
 		
 		if (!Auth::hasSession(true) || !Configuration::$instance->ignoreDisallowedWordsWhenAdmin)
@@ -393,7 +399,7 @@ class ReadHandler extends Handler
 					"error" => $error
 				));
 			else
-				return $this->index($subject, $id);
+				return $this->index(strval($subject), strval($id));
 		}
 		else
 		{
@@ -418,7 +424,7 @@ class ReadHandler extends Handler
 				return Visualizer::json($comment->toArray() + array
 				(
 					"num" => count($this->thread->comments + $this->thread->nonCommentEvaluations),
-					"formattedBody" => Visualizer::escapeSummary($comment->body),
+					"formattedBody" => Visualizer::escapeSummary($comment->body ?? ""),
 					"deleteAction" => Util::getAbsoluteUrl() . "{$this->entry->subject}/{$this->entry->id}/uncomment?id={$comment->id}"
 				));
 			}
@@ -429,11 +435,11 @@ class ReadHandler extends Handler
 		}
 	}
 	
-	function uncomment(string $_subject = "0", string $_id = "0")
+	function uncomment(string $_subject = "0", string $_id = "0"): bool
 	{
 		$subject = intval($_subject);
 		$id = intval($_id);
-		$commentID = intval(self::param("id", 0, true));
+		$commentID = intval(self::param("id", "0", true));
 		$isAdmin = Auth::hasSession(true);
 		
 		if (!$_POST)
@@ -452,8 +458,8 @@ class ReadHandler extends Handler
 		Auth::$caption = "コメントの削除";
 		Auth::$label = "削除キー";
 		
-		if (!Util::hashEquals(Configuration::$instance->adminHash, $login = Auth::login(false, false)) &&
-			!Util::hashEquals($comment->hash, $login))
+		if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false)) &&
+			!Util::hashEquals($comment->hash ?? "", $login))
 			Auth::loginError("削除キーが一致しません");
 		else if (!$isAdmin)
 			Auth::logout();
@@ -471,7 +477,7 @@ class ReadHandler extends Handler
 			return Visualizer::redirect("{$this->entry->subject}/{$this->entry->id}");
 	}
 	
-	function evaluate(string $_subject = "0", string $_id = "0")
+	function evaluate(string $_subject = "0", string $_id = "0"): bool
 	{
 		$subject = intval($_subject);
 		$id = intval($_id);
@@ -493,7 +499,7 @@ class ReadHandler extends Handler
 		$this->thread = self::loadThread($db, $id);
 		$this->entry = &$this->thread->entry;
 			
-		if (array_filter($this->thread->evaluations, function($_) { return $_->host == $_SERVER["REMOTE_ADDR"] || $_->host == Util::getRemoteHost(); }))
+		if (array_filter($this->thread->evaluations, fn($x) => Util::remoteHostMatches($x->host)))
 			$error[] = "多重評価はできません";
 		
 		if ($error)
@@ -509,7 +515,7 @@ class ReadHandler extends Handler
 					"error" => $error
 				));
 			else
-				return $this->index($subject, $id);
+				return $this->index(strval($subject), strval($id));
 		}
 		else
 		{
@@ -542,11 +548,11 @@ class ReadHandler extends Handler
 		}
 	}
 
-	function unevaluate(string $_subject = "0", string $_id = "0")
+	function unevaluate(string $_subject = "0", string $_id = "0"): bool
 	{
 		$subject = intval($_subject);
 		$id = intval($_id);
-		$evaluationID = intval(self::param("id", 0, true));
+		$evaluationID = intval(self::param("id", "0", true));
 		
 		$db = App::openDB();
 		$this->thread = self::loadThread($db, $id);
@@ -554,7 +560,7 @@ class ReadHandler extends Handler
 		
 		if (!($eval = $this->thread->getEvaluationByID($db, $evaluationID)))
 			throw new ApplicationException("指定された番号 {$evaluationID} の簡易評価は {$id} の作品に存在しません", 404);
-		else if ($eval->host != $_SERVER["REMOTE_ADDR"] && $eval->host != Util::getRemoteHost())
+		else if (!Util::remoteHostMatches($eval->host))
 			throw new ApplicationException("指定された簡易評価の送信元が現在の送信元と一致しません", 403);
 		
 		$db->beginTransaction();
@@ -608,23 +614,24 @@ class ReadHandler extends Handler
 			else if (self::param("postPassword") != Configuration::$instance->postPassword)
 				$rt[] = "投稿キーが一致しません";
 		
-		if (mb_strstr($entry->link, ":") &&
+		if (isset($entry->link) &&
+			mb_strstr($entry->link, ":") &&
 			!preg_match("/^http:/", trim($entry->link)))
 			$rt[] = "リンクに不明なプロトコルが指定されています";
 		
-		$summaryLines = mb_substr_count(strtr($entry->summary, array("\r\n" => "\n", "\r" => "\n")), "\n") + 1;
-		$summaryBytes = strlen(bin2hex(mb_convert_encoding($entry->summary, "Windows-31J", "UTF-8"))) / 2;
+		$summaryLines = mb_substr_count(strtr($entry->summary ?? "", array("\r\n" => "\n", "\r" => "\n")), "\n") + 1;
+		$summaryBytes = strlen(bin2hex(mb_convert_encoding($entry->summary ?? "", "Windows-31J", "UTF-8"))) / 2;
 		
 		if (Configuration::$instance->maxSummaryLines > 0 && $summaryLines > Configuration::$instance->maxSummaryLines)
 			$rt[] = "概要が {$summaryLines} 行です。" . Configuration::$instance->maxSummaryLines . " 行以下である必要があります。";
 		else if (Configuration::$instance->maxSummarySize > 0 && Configuration::$instance->maxSummarySize < $summaryBytes)
 			$rt[] = "概要が {$summaryBytes} バイトです。" . Configuration::$instance->maxSummarySize . " バイト以下である必要があります。";
 		
-		if (Util::isEmpty(trim($thread->body)))
+		if (Util::isEmpty(trim($thread->body ?? "")))
 			$rt[] = "本文が入力されていません";
 		else
 		{
-			$bytes = strlen(bin2hex(mb_convert_encoding($thread->body, "Windows-31J", "UTF-8"))) / 2;
+			$bytes = strlen(bin2hex(mb_convert_encoding($thread->body ?? "", "Windows-31J", "UTF-8"))) / 2;
 			
 			if (Configuration::$instance->minBodySize > 0 && Configuration::$instance->minBodySize > $bytes)
 				$rt[] = "本文が {$bytes} バイトです。" . Configuration::$instance->minBodySize . " バイト以上である必要があります。";
@@ -632,19 +639,19 @@ class ReadHandler extends Handler
 				$rt[] = "本文が {$bytes} バイトです。" . Configuration::$instance->maxBodySize . " バイト以下である必要があります。";
 		}
 		
-		if (!Util::isEmpty($thread->foreground) && !preg_match('/^(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}|rgba?\s*\(\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*(,\s*[0-9](\.[0-9]+)?\s*)?\))$/', $thread->foreground))
+		if (!Util::isEmpty($thread->foreground) && !preg_match('/^(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}|rgba?\s*\(\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*(,\s*[0-9](\.[0-9]+)?\s*)?\))$/', $thread->foreground ?? ""))
 			$rt[] = "文字色の指定が不正です";
 		
-		if (!Util::isEmpty($thread->background) && !preg_match('/^(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}|rgba?\s*\(\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*(,\s*[0-9](\.[0-9]+)?\s*)?\))$/', $thread->background))
+		if (!Util::isEmpty($thread->background) && !preg_match('/^(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}|rgba?\s*\(\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*(,\s*[0-9](\.[0-9]+)?\s*)?\))$/', $thread->background ?? ""))
 			$rt[] = "背景色の指定が不正です";
 		
-		if (!Util::isEmpty($thread->border) && !preg_match('/^(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}|rgba?\s*\(\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*(,\s*[0-9](\.[0-9]+)?\s*)?\))$/', $thread->border))
+		if (!Util::isEmpty($thread->border) && !preg_match('/^(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}|rgba?\s*\(\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*,\s*[0-9]{1,3}\s*(,\s*[0-9](\.[0-9]+)?\s*)?\))$/', $thread->border ?? ""))
 			$rt[] = "枠色の指定が不正です";
 		
 		if (!Auth::hasSession(true) || !Configuration::$instance->ignoreDisallowedWordsWhenAdmin)
 		{
 			foreach (Configuration::$instance->disallowedWordsForName as $i)
-				if (mb_strstr($entry->name, $i))
+				if (mb_strstr($entry->name ?? "", $i))
 				{
 					if (Configuration::$instance->showDisallowedWords)
 						$rt[] = "名前に禁止ワードが含まれています: {$i}";
@@ -664,7 +671,7 @@ class ReadHandler extends Handler
 					"本文" => $thread->body,
 					"あとがき" => $thread->afterword,
 				) as $k => $v)
-					if (mb_strstr($v, $i))
+					if (mb_strstr($v ?? "", $i))
 					{
 						if (Configuration::$instance->showDisallowedWords)
 							$rt[] = "{$k}に禁止ワードが含まれています: {$i}";
@@ -678,7 +685,7 @@ class ReadHandler extends Handler
 		return $rt;
 	}
 	
-	private static function setValues(ThreadEntry $entry, Thread $thread)
+	private static function setValues(ThreadEntry $entry, Thread $thread): void
 	{
 		if (!is_null(self::param("title")))				$entry->title = self::param("title");
 		if (!is_null(self::param("name")))				$entry->name = self::param("name");
@@ -698,19 +705,22 @@ class ReadHandler extends Handler
 		$entry->pageCount = $thread->pageCount();
 		$entry->size = round(strlen(bin2hex(mb_convert_encoding($thread->body ?? "", "Windows-31J", "UTF-8"))) / 2 / 1024, 2);
 		$entry->lastUpdate = time();
-		$entry->host = Util::getRemoteHost();
+		$entry->host = Util::getRemoteHost() ?: null;
 	}
 	
 	/**
 	 * @template T as string|?string
 	 * @param T $defaultValue
-	 * @psalm-return (T is string ? string : ?string)
+	 * @return (T is string ? string : ?string)
 	 */
 	static function param(string $name, ?string $default = null, bool $tryGet = false, bool $stripLinebreaks = true): ?string
 	{
 		if (isset($_POST[$name]))
 		{
-			$rt = Util::escapeInput(is_array($_POST[$name]) ? $_POST[$name][count($_POST[$name]) - 1] : $_POST[$name], $stripLinebreaks);
+			$input_array = !is_array($_POST[$name]) ? [$_POST[$name]] : $_POST[$name];
+			$input = $default;
+			array_walk_recursive($input_array, fn(mixed &$x) => $input ??= strval($x));
+			$rt = Util::escapeInput($input ?? "", $stripLinebreaks);
 			
 			if ($name != "preview" &&
 				$name != "encoded" &&
@@ -724,7 +734,14 @@ class ReadHandler extends Handler
 		else if (isset($_SESSION[$name]))
 			return Util::escapeInput($_SESSION[$name], $stripLinebreaks);
 		else if ($tryGet && isset($_GET[$name]))
-			return Util::escapeInput($_GET[$name], $stripLinebreaks);
+		{
+			$input_array = !is_array($_GET[$name]) ? [$_POST[$name]] : $_GET[$name];
+			$input = $default;
+			array_walk_recursive($input_array, fn(mixed &$x) => $input ??= strval($x));
+			$rt = Util::escapeInput($input ?? "", $stripLinebreaks);
+
+			return $rt;
+		}
 		else
 			return $default;
 	}

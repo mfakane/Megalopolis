@@ -1,59 +1,62 @@
 <?php
+namespace Megalopolis;
+
+require_once __DIR__ . "/../Template.php";
+
 $c = &Configuration::$instance;
 $h = &IndexHandler::$instance;
 $d = &Visualizer::$data;
 
 Visualizer::doctype();
-App::load(VISUALIZER_DIR . "Template/Index");
 ?>
 <html lang="ja">
 <head>
-	<? Visualizer::head() ?>
+	<?php Visualizer::head() ?>
 	<title>
-		履歴 - <?+$c->title ?>
+		履歴 - <?=Visualizer::escapeOutput($c->title) ?>
 	</title>
-	<script src="<?+Visualizer::actionHrefArray(array("script", "Index", "Index.js")) ?>"></script>
+	<script src="<?=Visualizer::escapeOutput(Visualizer::actionHrefArray(array("script", "Index", "Index.js"))) ?>"></script>
 </head>
 <body>
-	<? Visualizer::header() ?>
+	<?php Visualizer::header() ?>
 	<div class="entries compact">
 		<article>
 			<h1>閲覧履歴</h1>
-			<?if ($h->entries["view"]): ?>
+			<?php if (isset($h->recentEntries["view"])): ?>
 				<div class="articleBody">
-					<? entries($h->entries["view"], false, "compact") ?>
+					<?php Template::entries($h->recentEntries["view"], false, "compact") ?>
 				</div>
-			<?else: ?>
+			<?php else: ?>
 				<p class="notify info">
 					閲覧履歴はありません
 				</p>
-			<?endif ?>
+			<?php endif ?>
 		</article>
-		<?if ($c->useComments || $c->useAnyPoints()): ?>
+		<?php if ($c->useComments || $c->useAnyPoints()): ?>
 			<article>
 				<h1>
-					<?if ($c->useComments): ?>
-						<?if ($c->useAnyPoints()): ?>
+					<?php if ($c->useComments): ?>
+						<?php if ($c->useAnyPoints()): ?>
 							コメント / 評価履歴
-						<?else: ?>
+						<?php else: ?>
 							コメント履歴
-						<?endif ?>
-					<?else: ?>
+						<?php endif ?>
+					<?php else: ?>
 						評価履歴
-					<?endif ?>
+					<?php endif ?>
 				</h1>
-				<?if ($h->entries["evaluation"]): ?>
+				<?php if (isset($h->recentEntries["evaluation"])): ?>
 					<div class="articleBody">
-						<? entries($h->entries["evaluation"], false, "compact") ?>
+						<?php Template::entries($h->recentEntries["evaluation"], false, "compact") ?>
 					</div>
-				<?else: ?>
+				<?php else: ?>
 					<p class="notify info">
 						評価履歴はありません
 					</p>
-				<?endif ?>
+				<?php endif ?>
 			</article>
-		<?endif ?>
+		<?php endif ?>
 	</div>
-	<? Visualizer::footer() ?>
+	<?php Visualizer::footer() ?>
 </body>
 </html>

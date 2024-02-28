@@ -1,4 +1,8 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class Board
 {
 	const ORDER_ASCEND = 0;

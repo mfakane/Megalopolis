@@ -1,4 +1,8 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class Meta
 {
 	const DATA_VERSION = "dataVersion";

@@ -1,4 +1,8 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class SessionStore
 {
 	static array $sessionStoreSchema = array
@@ -52,9 +56,9 @@ class SessionStore
 			App::SESSION_STORE_TABLE
 		)));
 		Util::executeStatement($st, array($this->sessionName, $sessionId));
-		$rt = $st?->fetchAll();
+		$rt = $st?->fetchAll() ?? [];
 		
-		if (isset($rt) && count($rt))
+		if (count($rt))
 			return $rt[0]["data"];
 		else
 			return "";

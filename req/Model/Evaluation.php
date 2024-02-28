@@ -1,4 +1,8 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class Evaluation
 {
 	static array $evaluationSchema = array
@@ -62,7 +66,7 @@ class Evaluation
 		)));
 		Util::executeStatement($st);
 		
-		return $st?->fetchAll(PDO::FETCH_CLASS, "Evaluation") ?? array();
+		return $st?->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\Evaluation") ?? array();
 	}
 	
 	function save(PDO $db): void

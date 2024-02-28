@@ -1,4 +1,6 @@
 <?php
+namespace Megalopolis;
+
 class IndexHandler extends Handler
 {
 	static IndexHandler $instance;
@@ -7,10 +9,12 @@ class IndexHandler extends Handler
 	public int $subjectCount = 0;
 	public int $page = 1;
 	public int $pageCount = 0;
-	/** @var array<int, ThreadEntry> */
-	public array $entries = [];
-	public int $entryCount = 0;
-	public $lastUpdate = 0;
+	/** @var array<int, ThreadEntry>|null */
+	public ?array $entries = null;
+	/** @var array{view: ThreadEntry[], evaluation: ThreadEntry[]}|null */
+	public ?array $recentEntries = null;
+	public ?int $entryCount = null;
+	public ?int $lastUpdate = null;
 	
 	function index(string $_subject = "0", string $_id = "0"): bool
 	{
@@ -36,19 +40,19 @@ class IndexHandler extends Handler
 		
 		$db = App::openDB();
 		$idb = App::openDB(App::INDEX_DATABASE);
-		
-		if (isset($_POST["admin"]))
+
+		if ($admin = self::param("admin", ""))
 		{
 			Auth::ensureToken();
 			Auth::createToken();
 			
-			if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true) ?: ""))
+			if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
 				Auth::loginError("管理者パスワードが一致しません");
 			
-			$ids = array_map("intval", array_map(array("Util", "escapeInput"), isset($_POST["id"]) ? (is_array($_POST["id"]) ? $_POST["id"] : array($_POST["id"])) : array()));
+			$ids = array_map("intval", self::paramAsArray("id", []));
 			$db->beginTransaction();
 			
-			switch (Util::escapeInput($_POST["admin"]))
+			switch (Util::escapeInput($admin))
 			{
 				case "unpost":
 					if ($db !== $idb)
@@ -86,7 +90,7 @@ class IndexHandler extends Handler
 			$hash = implode(",", array_map(fn(ThreadEntry $x) => $x->id . ":" . (time() - $x->getLatestLastUpdate() < $updatePeriodInSeconds ? "t" : "n"), $this->entries));
 			
 			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY, "") . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "") . $hash))
-				return Visualizer::notModified();
+				Visualizer::notModified();
 		}
 		
 		App::closeDB($idb);
@@ -97,7 +101,7 @@ class IndexHandler extends Handler
 			case "json":
 				return Visualizer::json(array
 				(
-					"entries" => array_values(array_map(function($_) { return $_->toArray(Configuration::ON_SUBJECT); }, $this->entries)),
+					"entries" => array_values(array_map(fn($x) => $x->toArray(Configuration::ON_SUBJECT), $this->entries)),
 					"subject" => $this->subject,
 					"subjectCount" => $this->subjectCount
 				));
@@ -112,10 +116,10 @@ class IndexHandler extends Handler
 		}
 	}
 	
-	function recent()
+	function recent(): bool
 	{
 		$db = App::openDB();
-		$this->entries = array
+		$this->recentEntries = array
 		(
 			"view" => array(),
 			"evaluation" => array(),
@@ -124,12 +128,12 @@ class IndexHandler extends Handler
 		if ($view = Cookie::getCookie(Cookie::VIEW_HISTORY_KEY))
 			foreach (explode(",", $view, Configuration::$instance->maxHistory) as $i)
 				if ($entry = ThreadEntry::load($db, intval($i)))
-					$this->entries["view"][] = $entry;
+					$this->recentEntries["view"][] = $entry;
 		
 		if ($evaluation = Cookie::getCookie(Cookie::EVALUATION_HISTORY_KEY))
 			foreach (explode(",", $evaluation, Configuration::$instance->maxHistory) as $i)
 				if ($entry = ThreadEntry::load($db, intval($i)))
-					$this->entries["evaluation"][] = $entry;
+					$this->recentEntries["evaluation"][] = $entry;
 		
 		App::closeDB($db);
 		
@@ -138,15 +142,15 @@ class IndexHandler extends Handler
 			case "json":
 				return Visualizer::json(array
 				(
-					"view" => array_values(array_map(fn($x) => $x->toArray(Configuration::ON_SUBJECT), $this->entries["view"])),
-					"evaluation" => array_values(array_map(fn($x) => $x->toArray(Configuration::ON_SUBJECT), $this->entries["evaluation"])),
+					"view" => array_map(fn($x) => $x->toArray(Configuration::ON_SUBJECT), $this->recentEntries["view"]),
+					"evaluation" => array_map(fn($x) => $x->toArray(Configuration::ON_SUBJECT), $this->recentEntries["evaluation"]),
 				));
 			default:
 				return Visualizer::visualize();
 		}
 	}
 	
-	function search()
+	function search(): bool
 	{
 		if (!Configuration::$instance->showTitle[Configuration::ON_SUBJECT] && !Auth::hasSession(true))
 			throw new ApplicationException("作品の閲覧は許可されていません", 403);
@@ -176,9 +180,9 @@ class IndexHandler extends Handler
 					break;
 			}
 		
-		$this->page = max(intval(self::param("p", 1)), 1);
+		$this->page = max(intval(self::param("p", "1")), 1);
 		
-		switch ($s = self::param("s"))
+		switch ($s = self::param("s", ""))
 		{
 			case "title":
 			case "name":
@@ -198,6 +202,8 @@ class IndexHandler extends Handler
 				break;
 		}
 		
+		$rt = ["count" => 0];
+		$entries = [];
 		$db = App::openDB();
 		$idb = App::openDB(App::INDEX_DATABASE);
 		$vals = ThreadEntry::getMaxMinValues($db);
@@ -261,38 +267,37 @@ class IndexHandler extends Handler
 			
 			$rt = ThreadEntry::search($db, $idb, $query, ($this->page - 1) * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, $sort[0], $sort[1]);
 			$this->pageCount = (int)ceil($rt["count"] / Configuration::$instance->searchPaging);
-			$this->entries = $rt["result"];
+			$entries = $rt["result"];
 		}
 		
 		if (!Auth::hasToken())
 			Auth::createToken();
 		
-		if (isset($_POST["admin"]) && $this->entries)
+		if (($admin = self::param("admin", "")) && $entries)
 		{
 			Auth::ensureToken();
 			Auth::createToken();
 			
-			if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true) ?: ""))
+			if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
 				Auth::loginError("管理者パスワードが一致しません");
 			
-			$ids = array_map("intval", array_map(array("Util", "escapeInput"), isset($_POST["id"]) ? (is_array($_POST["id"]) ? $_POST["id"] : array($_POST["id"])) : array()));
+			$ids = array_map("intval", self::paramAsArray("id", []));
 			$db->beginTransaction();
 					
 			if ($db !== $idb)
 				$idb->beginTransaction();
 			
-			switch ($mode = Util::escapeInput($_POST["admin"]))
+			switch ($mode = Util::escapeInput($admin))
 			{
 				case "unpost":
 					ThreadEntry::deleteDirect($db, $idb, $ids);
-					/** @var int[] */
-					$subjects = array_map(fn(ThreadEntry $x) => $x->subject, array_intersect_key($this->entries, array_flip($ids)));
+					$subjects = array_map(fn($x) => $x->subject, array_intersect_key($entries, array_flip($ids)));
 
 					foreach (array_unique($subjects) as $subject)
 						Board::setLastUpdate($db, $subject);
 					
 					foreach ($ids as $i)
-						unset($this->entries[$i]);
+						unset($entries[$i]);
 					
 					$rt["count"] -= count($ids);
 					
@@ -304,12 +309,14 @@ class IndexHandler extends Handler
 			
 			$db->commit();
 		}
+
+		$this->entries = $entries;
 		
 		App::closeDB($idb);
 		App::closeDB($db);
 		Visualizer::$data = array
 		(
-			"count" => isset($rt) ? $rt["count"] : 0,
+			"count" => $rt["count"],
 			"evalBegin" => $query["eval"][0],
 			"evalEnd" => $query["eval"][1],
 			"evalMin" => $vals["minEval"],
@@ -329,7 +336,7 @@ class IndexHandler extends Handler
 			case "json":
 				return Visualizer::json(array
 				(
-					"entries" => array_values(array_map(function($_) { return $_->toArray(Configuration::ON_SUBJECT); }, $this->entries)),
+					"entries" => array_values(array_map(fn($x) => $x->toArray(Configuration::ON_SUBJECT), $this->entries)),
 					"page" => $this->page,
 					"pageCount" => $this->pageCount
 				));
@@ -343,84 +350,136 @@ class IndexHandler extends Handler
 	/**
 	 * @template T as string|null
 	 * @param T $value
-	 * @return ?string|string[]
-	 * @psalm-return (T is string ? string : ?string|string[])
+	 * @return ?string
+	 * @psalm-return (T is string ? string : ?string)
 	 */
-	static function param(string $name, ?string $value = null): string|array|null
+	static function param(string $name, ?string $value = null): ?string
 	{
 		if (isset($_GET[$name]))
 			if (is_array($_GET[$name]))
-				return array_map(array("Util", "escapeInput"), $_GET[$name]);
+				return implode(",", array_map(fn($x) => Util::escapeInput(is_array($x) ? implode(",", $x) : $x), $_GET[$name]));
 			else
 				return Util::escapeInput($_GET[$name]);
 		else
 			return $value;
 	}
+
+	/**
+	 * @template T as string[]|null
+	 * @param T $value
+	 * @return string[]|null
+	 * @psalm-return (T is array ? string[] : string[]|null)
+	 */
+	static function paramAsArray(string $name, ?array $value = null): ?array
+	{
+		if (isset($_GET[$name]))
+			if (is_array($_GET[$name]))
+				return array_map(fn($x) => Util::escapeInput(is_array($x) ? implode(",", $x) : $x), $_GET[$name]);
+			else
+				return [Util::escapeInput($_GET[$name])];
+		else
+			return $value;
+	}
+
 	
-	function _new()
+	/**
+	 * @template T as string|null
+	 * @param T $value
+	 * @return ?string
+	 * @psalm-return (T is string ? string : ?string)
+	 */
+	static function postParam(string $name, ?string $value = null): ?string
+	{
+		if (isset($_POST[$name]))
+			if (is_array($_POST[$name]))
+				return implode(",", array_map(fn($x) => Util::escapeInput(is_array($x) ? implode(",", $x) : $x), $_POST[$name]));
+			else
+				return Util::escapeInput($_POST[$name]);
+		else
+			return $value;
+	}
+
+	/**
+	 * @template T as string[]|null
+	 * @param T $value
+	 * @return string[]|null
+	 * @psalm-return (T is array ? string[] : string[]|null)
+	 */
+	static function postParamAsArray(string $name, ?array $value = null): ?array
+	{
+		if (isset($_POST[$name]))
+			if (is_array($_POST[$name]))
+				return array_map(fn($x) => Util::escapeInput(is_array($x) ? implode(",", $x) : $x), $_POST[$name]);
+			else
+				return [Util::escapeInput($_POST[$name])];
+		else
+			return $value;
+	}
+
+	function _new(): bool
 	{
 		$args = func_get_args();
 		
 		return App::callHandler("read", "_new", $args);
 	}
 	
-	function edit()
+	function edit(): bool
 	{
 		$args = func_get_args();
 		
 		return App::callHandler("read", "edit", $args);
 	}
 	
-	function post()
+	function post(): bool
 	{
 		$args = func_get_args();
 		
 		return App::callHandler("read", "post", $args);
 	}
 	
-	function unpost()
+	function unpost(): bool
 	{
 		$args = func_get_args();
 		
 		return App::callHandler("read", "unpost", $args);
 	}
 	
-	function comment()
+	function comment(): bool
 	{
 		$args = func_get_args();
 		
 		return App::callHandler("read", "comment", $args);
 	}
 	
-	function uncomment()
+	function uncomment(): bool
 	{
 		$args = func_get_args();
 		
 		return App::callHandler("read", "uncomment", $args);
 	}
 	
-	function evaluate()
+	function evaluate(): bool
 	{
 		$args = func_get_args();
 		
 		return App::callHandler("read", "evaluate", $args);
 	}
 	
-	function unevaluate()
+	function unevaluate(): bool
 	{
 		$args = func_get_args();
 		
 		return App::callHandler("read", "unevaluate", $args);
 	}
 	
-	function config()
+	function config(): bool
 	{
 		$args = func_get_args();
 		
 		return App::callHandler("util", "config", $args);
 	}
 	
-	function random()
+	function random(): bool
 	{
 		$db = App::openDB();
 		$idb = App::openDB(App::INDEX_DATABASE);
@@ -434,7 +493,7 @@ class IndexHandler extends Handler
 			return Visualizer::redirect();
 	}
 	
-	function author()
+	function author(): bool
 	{
 		$args = func_get_args();
 		$page = $args && ctype_digit($args[count($args) - 1]) ? max(intval(array_pop($args)) - 1, 0) : 0;
@@ -448,10 +507,11 @@ class IndexHandler extends Handler
 				throw new ApplicationException("作者の閲覧は許可されていません", 403);
 		
 		$db = App::openDB();
+		$this->entries = array();
 		
-		if ($isNameList)
+		if ($isNameList || !isset($name))
 		{
-			$pageCount = ceil(($this->entryCount = ThreadEntry::getNameCount($db)) / Configuration::$instance->tagListing);
+			$pageCount = (int)ceil(($this->entryCount = ThreadEntry::getNameCount($db)) / Configuration::$instance->tagListing);
 			Visualizer::$data = ThreadEntry::getNames($db, $page * Configuration::$instance->tagListing, Configuration::$instance->tagListing);
 		}
 		else
@@ -481,13 +541,13 @@ class IndexHandler extends Handler
 			$this->entryCount = null;
 			$this->entries = ThreadEntry::getEntriesByName($db, $name, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $this->entryCount);
 
-			$this->lastUpdate = max(array_map(function($_) { return $_->getLatestLastUpdate(); }, $this->entries) + array(0));
-			$hash = implode(",", array_map(function($_) { return $_->id . ":" . (time() - $_->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"); }, $this->entries));
+			$this->lastUpdate = max(array_map(fn($x) => $x->getLatestLastUpdate(), $this->entries) + array(0));
+			$hash = implode(",", array_map(fn($x) => $x->id . ":" . (time() - $x->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"), $this->entries));
 			
-			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY) . $hash))
-				return Visualizer::notModified();
+			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY, "") . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "") . $hash))
+				Visualizer::notModified();
 			
-			$pageCount = ceil((is_null($this->entryCount) ? ThreadEntry::getEntryCountByName($db, $name) : $this->entryCount) / Configuration::$instance->searchPaging);
+			$pageCount = (int)ceil((is_null($this->entryCount) ? ThreadEntry::getEntryCountByName($db, $name) : $this->entryCount) / Configuration::$instance->searchPaging);
 			$this->subject = 0;
 			$this->subjectCount = Board::getLatestSubject($db);
 			Visualizer::$data = $name;
@@ -518,7 +578,7 @@ class IndexHandler extends Handler
 					return Visualizer::json(array
 					(
 						"name" => $name,
-						"entries" => array_values(array_map(function($_) { return $_->toArray(Configuration::ON_SUBJECT); }, $this->entries)),
+						"entries" => array_values(array_map(fn($x) => $x->toArray(Configuration::ON_SUBJECT), $this->entries)),
 						"page" => $this->page,
 						"pageCount" => $this->pageCount
 					));
@@ -539,7 +599,7 @@ class IndexHandler extends Handler
 		}
 	}
 	
-	function tag()
+	function tag(): bool
 	{
 		$args = func_get_args();
 		$page = $args && ctype_digit($args[count($args) - 1]) ? max(intval(array_pop($args)) - 1, 0) : 0;
@@ -550,8 +610,9 @@ class IndexHandler extends Handler
 			throw new ApplicationException("作品の閲覧は許可されていません", 403);
 		
 		$db = App::openDB();
-		
-		if ($isTagList)
+		$this->entries = array();
+
+		if ($isTagList || !isset($tag))
 		{
 			$pageCount = ceil(($this->entryCount = ThreadEntry::getTagCount($db)) / Configuration::$instance->tagListing);
 			Visualizer::$data = ThreadEntry::getTags($db, $page * Configuration::$instance->tagListing, Configuration::$instance->tagListing);
@@ -583,11 +644,11 @@ class IndexHandler extends Handler
 			$this->entryCount = null;
 			$this->entries = ThreadEntry::getEntriesByTag($db, $tag, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $this->entryCount);
 			
-			$this->lastUpdate = max(array_map(function($_) { return $_->getLatestLastUpdate(); }, $this->entries) + array(0));
-			$hash = implode(",", array_map(function($_) { return $_->id . ":" . (time() - $_->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"); }, $this->entries));
+			$this->lastUpdate = max(array_map(fn($x) => $x->getLatestLastUpdate(), $this->entries) + array(0));
+			$hash = implode(",", array_map(fn($x) => $x->id . ":" . (time() - $x->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"), $this->entries));
 			
-			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY) . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY) . $hash))
-				return Visualizer::notModified();
+			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY, "") . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "") . $hash))
+				Visualizer::notModified();
 			
 			$pageCount = ceil((is_null($this->entryCount) ? ThreadEntry::getEntryCountByTag($db, $tag) : $this->entryCount) / Configuration::$instance->searchPaging);
 			$this->subject = 0;
@@ -604,7 +665,7 @@ class IndexHandler extends Handler
 		App::closeDB($db);
 		
 		$this->page = $page + 1;
-		$this->pageCount = $pageCount;
+		$this->pageCount = (int)$pageCount;
 		
 		switch (App::$handlerType)
 		{
@@ -620,7 +681,7 @@ class IndexHandler extends Handler
 					return Visualizer::json(array
 					(
 						"tag" => $tag,
-						"entries" => array_values(array_map(function($_) { return $_->toArray(Configuration::ON_SUBJECT); }, $this->entries)),
+						"entries" => array_values(array_map(fn($x) => $x->toArray(Configuration::ON_SUBJECT), $this->entries)),
 						"page" => $this->page,
 						"pageCount" => $this->pageCount
 					));
@@ -641,7 +702,7 @@ class IndexHandler extends Handler
 		}
 	}
 
-	private static function toCSV(array $entries)
+	private static function toCSV(array $entries): bool
 	{
 		$c = &Configuration::$instance;
 		$visibility = array_filter(array
@@ -677,34 +738,34 @@ class IndexHandler extends Handler
 		));
 	}
 
-	function util()
+	function util(): bool
 	{
 		$args = func_get_args();
 		
 		return App::callHandler("util", $args ? App::$actionName = array_shift($args) : App::$actionName = "index", $args);
 	}
 	
-	function login()
+	function login(): bool
 	{
 		Auth::$caption = "管理者ログイン";
 		
-		if (!Util::hashEquals(Configuration::$instance->adminHash, Auth::login(true)))
+		if (($password = Auth::login(true)) && !Util::hashEquals(Configuration::$instance->adminHash ?? "", $password))
 			Auth::loginError("管理者パスワードが一致しません");
 		else
-			return Visualizer::redirect(isset($_GET["redir"]) ? $_GET["redir"] : "");
+			return Visualizer::redirect(isset($_GET["redir"]) && is_string($_GET["redir"]) ? $_GET["redir"] : "");
 	}
 	
-	function logout()
+	function logout(): bool
 	{
 		Auth::logout();
 		
-		return Visualizer::redirect(isset($_GET["redir"]) ? $_GET["redir"] : "");
+		return Visualizer::redirect(isset($_GET["redir"]) && is_string($_GET["redir"]) ? $_GET["redir"] : "");
 	}
 	
-	function notice($_name = "")
+	function notice(string $_name = ""): bool
 	{
 		$name = Util::escapeInput($_name);
-		Visualizer::$data = DATA_DIR . "notice/{$name}.txt";
+		Visualizer::$data = Constant::DATA_DIR . "notice/{$name}.txt";
 		
 		if (is_file(Visualizer::$data))
 			return Visualizer::visualize();
@@ -713,31 +774,31 @@ class IndexHandler extends Handler
 	}
 	
 	// Megalith compatibility layer
-	function sub()
+	function sub(): bool
 	{
 		$args = func_get_args();
 		
 		return App::callHandler("Megalith", "sub", $args);
 	}
-	function dat()
+	function dat(): bool
 	{
 		$args = func_get_args();
 		
 		return App::callHandler("Megalith", "dat", $args);
 	}
-	function _com()
+	function _com(): bool
 	{
 		$args = func_get_args();
 		
 		return App::callHandler("Megalith", "_com", $args);
 	}
-	function aft()
+	function aft(): bool
 	{
 		$args = func_get_args();
 		
 		return App::callHandler("Megalith", "aft", $args);
 	}
-	function settings()
+	function settings(): bool
 	{
 		$args = func_get_args();
 		

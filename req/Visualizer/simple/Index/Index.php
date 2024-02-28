@@ -1,9 +1,13 @@
 <?php
+namespace Megalopolis;
+
 $c = &Configuration::$instance;
 $h = &IndexHandler::$instance;
 $d = &Visualizer::$data;
 $searchMode = "query";
 $search = "";
+
+if (!isset($h->entries)) $h->entries = [];
 
 if (App::$actionName == "search")
 {
@@ -39,9 +43,9 @@ else
 
 if (App::$actionName == "index")
 {
-	$h->page = isset($_GET["p"]) ? max(intval(Util::escapeInput($_GET["p"])), 1) : 1;
+	$h->page = isset($_GET["p"]) ? max(intval(IndexHandler::param("p")), 1) : 1;
 	$paging = 50;
-	$h->pageCount = ceil(count($h->entries) / $paging);
+	$h->pageCount = (int)ceil((float)count($h->entries) / $paging);
 }
 else
 	$paging = $c->searchPaging;
@@ -49,34 +53,34 @@ else
 $offset = ($h->page - 1) * $paging;
 
 if (isset($_GET["s"]))
-	switch ($column = Util::escapeInput($_GET["s"]))
+	switch ($column = IndexHandler::param("s"))
 	{
 		case "title":
-			usort($h->entries, function($x, $y) { return strnatcmp($x->title, $y->title); });
+			usort($h->entries, fn($x, $y) => strnatcmp($x->title, $y->title));
 			
 			break;
 		case "name":
-			usort($h->entries, function($x, $y) { return strnatcmp($x->name, $y->name); });
+			usort($h->entries, fn($x, $y) => strnatcmp($x->name, $y->name));
 			
 			break;
 		case "commentCount":
-			usort($h->entries, function($x, $y) { return $y->commentCount - $x->commentCount; });
+			usort($h->entries, fn($x, $y): int => $y->commentCount - $x->commentCount);
 			
 			break;
 		case "points":
-			usort($h->entries, function($x, $y) { return $y->points - $x->points; });
+			usort($h->entries, fn($x, $y): int => $y->points - $x->points);
 			
 			break;
 		case "rate":
-			usort($h->entries, function($x, $y) { return $y->rate - $x->rate; });
+			usort($h->entries, fn($x, $y): int => $y->rate - $x->rate);
 			
 			break;
 		case "size":
-			usort($h->entries, function($x, $y) { return $y->size - $x->size; });
+			usort($h->entries, fn($x, $y): int => $y->size - $x->size);
 			
 			break;
 		case "dateTime":
-			usort($h->entries, function($x, $y) { return $y->dateTime - $x->dateTime; });
+			usort($h->entries, fn($x, $y): int => $y->dateTime - $x->dateTime);
 			
 			break;
 	}
@@ -85,83 +89,83 @@ Visualizer::doctype();
 ?>
 <html lang="ja">
 <head>
-	<? Visualizer::head() ?>
+	<?php Visualizer::head() ?>
 	<title>
-		<?+$title ?> - <?+$c->title ?>
+		<?=Visualizer::escapeOutput($title) ?> - <?=Visualizer::escapeOutput($c->title) ?>
 	</title>
 </head>
 <body>
 	<h1>
-		<?+$title ?>
+		<?=Visualizer::escapeOutput($title) ?>
 	</h1>
-	<?+$c->title ?>&nbsp;<a href="#menu">メニューへ</a>
-	<?if ($c->showTitle[Configuration::ON_SUBJECT] && $c->useSearch): ?>
-		<form class="search" action="<?+Visualizer::actionHref("search") ?>">
-			<input type="text" name="query" value="<?+$search ?>" size="18" /><input type="submit" value="検索" /><br />
+	<?=Visualizer::escapeOutput($c->title) ?>&nbsp;<a href="#menu">メニューへ</a>
+	<?php if ($c->showTitle[Configuration::ON_SUBJECT] && $c->useSearch): ?>
+		<form class="search" action="<?=Visualizer::escapeOutput(Visualizer::actionHref("search")) ?>">
+			<input type="text" name="query" value="<?=Visualizer::escapeOutput($search) ?>" size="18" /><input type="submit" value="検索" /><br />
 			<label><input type="radio" name="mode" value="query"<?=$searchMode == "query" ? ' checked="checked"' : null ?> />全文</label>
 			<label><input type="radio" name="mode" value="title"<?=$searchMode == "title" ? ' checked="checked"' : null ?> />作品名</label>
-			<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
+			<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
 				<label><input type="radio" name="mode" value="name"<?=$searchMode == "name" ? ' checked="checked"' : null ?> />作者</label>
-			<?endif ?>
-			<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>
+			<?php endif ?>
+			<?php if ($c->showTags[Configuration::ON_SUBJECT]): ?>
 				<label><input type="radio" name="mode" value="tag"<?=$searchMode == "tag" ? ' checked="checked"' : null ?> />分類タグ</label>
-			<?endif ?>
+			<?php endif ?>
 		</form>
-	<?elseif (Configuration::$instance->customSearch): ?>
-		<form class="search" action="<?+Visualizer::actionHref("search") ?>">
-			<input type="text" name="<?+Configuration::$instance->customSearch[1] ?>" value="<?+$search ?>" size="18" /><input type="submit" value="検索" />
+	<?php elseif (Configuration::$instance->customSearch): ?>
+		<form class="search" action="<?=Visualizer::escapeOutput(Visualizer::actionHref("search")) ?>">
+			<input type="text" name="<?=Visualizer::escapeOutput(Configuration::$instance->customSearch[1]) ?>" value="<?=Visualizer::escapeOutput($search) ?>" size="18" /><input type="submit" value="検索" />
 			<?php
 			if (isset(Configuration::$instance->customSearch[2]))
 				foreach (Configuration::$instance->customSearch[2] as $k => $v)
-					echo '<input type="hidden" name="', Visualizer::converted($k), '" value="', Visualizer::converted($v), '" />';
+					echo '<input type="hidden" name="', Visualizer::escapeOutput($k), '" value="', Visualizer::escapeOutput($v), '" />';
 			?>
 		</form>
-	<?else: ?>
+	<?php else: ?>
 		<br />
-	<?endif ?>
-	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode) : array()) + array("p" => ""))) ?>
-	<?+App::$actionName == "search" ? $d["count"] : (App::$actionName == "index" ? count($h->entries) : $h->entryCount) ?>件中<?+$offset + 1 ?>～<?+$offset + min($paging, count($h->entries)) ?>件
+	<?php endif ?>
+	<?php Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode) : array()) + array("p" => ""))) ?>
+	<?=Visualizer::escapeOutput(App::$actionName == "search" ? $d["count"] : (App::$actionName == "index" ? count($h->entries) : $h->entryCount)) ?>件中<?=Visualizer::escapeOutput($offset + 1) ?>～<?=Visualizer::escapeOutput($offset + min($paging, count($h->entries))) ?>件
 	<ul class="entries">
-		<?if ($h->entries): ?>
-			<?foreach (App::$actionName == "index" ? array_slice($h->entries, $offset, $paging) : $h->entries as $i): ?>
+		<?php if ($h->entries): ?>
+			<?php foreach (App::$actionName == "index" ? array_slice($h->entries, $offset, $paging) : $h->entries as $i): ?>
 				<li>
-					<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
-						<a href="<?+Visualizer::actionHref($i->subject, $i->id) ?>"><?+$i->title ?></a><br />
-					<?endif ?>
-					<span class="dateTime"><?+Visualizer::formatShortDateTime($i->dateTime) ?></span>
-					<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
-						<span class="name"><? Visualizer::convertedName($i->name) ?></span>
-					<?endif ?>
-					<?if ($c->showComment[Configuration::ON_SUBJECT] || $c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
+					<?php if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
+						<a href="<?=Visualizer::escapeOutput(Visualizer::actionHref($i->subject, $i->id)) ?>"><?=Visualizer::escapeOutput($i->title) ?></a><br />
+					<?php endif ?>
+					<span class="dateTime"><?=Visualizer::escapeOutput(Visualizer::formatShortDateTime($i->dateTime)) ?></span>
+					<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
+						<span class="name"><?php Visualizer::convertedName($i->name) ?></span>
+					<?php endif ?>
+					<?php if ($c->showComment[Configuration::ON_SUBJECT] || $c->showPoint[Configuration::ON_SUBJECT] || $c->showRate[Configuration::ON_SUBJECT]): ?>
 						<br />
-						<?if ($c->showComment[Configuration::ON_SUBJECT]): ?>
-							<span class="commentCount">Cm:<?+$i->commentCount ?></span>
-						<?endif ?>
-						<?if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
-							<span class="points">Pt:<?+$i->points ?></span>
-						<?endif ?>
-						<?if ($c->showRate[Configuration::ON_SUBJECT]): ?>
-							<span class="rate">Rt:<?+$i->rate ?></span>
-						<?endif ?>
-					<?endif ?>
-					<?if ($c->showSize[Configuration::ON_SUBJECT]): ?>
-						<span class="size">Sz:<?+$i->size ?>KB</span>
-					<?endif ?>
-					<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>
+						<?php if ($c->showComment[Configuration::ON_SUBJECT]): ?>
+							<span class="commentCount">Cm:<?=Visualizer::escapeOutput($i->commentCount) ?></span>
+						<?php endif ?>
+						<?php if ($c->showPoint[Configuration::ON_SUBJECT]): ?>
+							<span class="points">Pt:<?=Visualizer::escapeOutput($i->points) ?></span>
+						<?php endif ?>
+						<?php if ($c->showRate[Configuration::ON_SUBJECT]): ?>
+							<span class="rate">Rt:<?=Visualizer::escapeOutput($i->rate) ?></span>
+						<?php endif ?>
+					<?php endif ?>
+					<?php if ($c->showSize[Configuration::ON_SUBJECT]): ?>
+						<span class="size">Sz:<?=Visualizer::escapeOutput($i->size) ?>KB</span>
+					<?php endif ?>
+					<?php if ($c->showTags[Configuration::ON_SUBJECT]): ?>
 						<br />
-						<span class="tags"><?+implode(" ", $i->tags) ?></span>
-					<?endif ?>
+						<span class="tags"><?=Visualizer::escapeOutput(implode(" ", $i->tags)) ?></span>
+					<?php endif ?>
 				</li>
-			<?endforeach ?>
-		<?else: ?>
+			<?php endforeach ?>
+		<?php else: ?>
 			<li>結果はありません</li>
-		<?endif ?>
+		<?php endif ?>
 	</ul>
-	<? Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode) : array()) + array("p" => ""))) ?>
+	<?php Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode) : array()) + array("p" => ""))) ?>
 	<ul class="menu">
 		<a id="menu" name="menu">メニュー</a>
-		<? $i = 0 ?>
-		<?foreach (array
+		<?php $i = 0 ?>
+		<?php foreach (array
 		(
 			"#" => "上へ戻る",
 			"random" => "おまかせ表示",
@@ -181,33 +185,33 @@ Visualizer::doctype();
 				$isParam = strstr($k, "=");
 				$param = $isParam ? explode("=", $k) : array();
 				?>
-				[<?=++$i ?>]<a href="<?+$k == "#" ? $k : Visualizer::actionHref($isParam ? (App::$actionName == "index" ? $h->subject : App::$actionName) : $k, $isParam ? (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode, $param[0] => $param[1]) : array($param[0] => $param[1])) : null) ?>" accesskey="<?=$i ?>"><?+$v ?></a>
+				[<?=++$i ?>]<a href="<?=Visualizer::escapeOutput($k == "#" ? $k : Visualizer::actionHref($isParam ? (App::$actionName == "index" ? $h->subject : App::$actionName) : $k, $isParam ? (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode, $param[0] => $param[1]) : array($param[0] => $param[1])) : null)) ?>" accesskey="<?=$i ?>"><?=Visualizer::escapeOutput($v) ?></a>
 			</li>
-		<?endforeach ?>
-		<?if (App::$actionName == "index"): ?>
+		<?php endforeach ?>
+		<?php if (App::$actionName == "index"): ?>
 			<li>
-				[9]<a href="<?+Visualizer::actionHref(array("visualizer" => "normal")) ?>" accesskey="9">PC版表示</a>
+				[9]<a href="<?=Visualizer::escapeOutput(Visualizer::actionHref(array("visualizer" => "normal"))) ?>" accesskey="9">PC版表示</a>
 			</li>
 			<li>
-				<form action="<?+Visualizer::actionHref() ?>">
+				<form action="<?=Visualizer::escapeOutput(Visualizer::actionHref()) ?>">
 					<div>
 						<label accesskey="0">
 							[0]作品集:
 							<select name="log">
-								<?foreach (range($h->subjectCount, 1, -1) as $i): ?>
-									<option value="<?+$i ?>"<?=$i == $h->subject ? ' selected=""' : null ?>><?+$i ?></option>
-								<?endforeach ?>
+								<?php foreach (range($h->subjectCount, 1, -1) as $i): ?>
+									<option value="<?=Visualizer::escapeOutput($i) ?>"<?=$i == $h->subject ? ' selected=""' : null ?>><?=Visualizer::escapeOutput($i) ?></option>
+								<?php endforeach ?>
 							</select>
 						</label>
 						<input type="submit" value="移動" />
 					</div>
 				</form>
 			</li>
-		<?else: ?>
+		<?php else: ?>
 			<li>
-				[0]<a href="<?+Visualizer::actionHref() ?>" accesskey="0">トップページへ戻る</a>
+				[0]<a href="<?=Visualizer::escapeOutput(Visualizer::actionHref()) ?>" accesskey="0">トップページへ戻る</a>
 			</li>
-		<?endif ?>
+		<?php endif ?>
 	</ul>
 </body>
 </html>

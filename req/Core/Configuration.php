@@ -1,4 +1,6 @@
 <?php
+namespace Megalopolis;
+
 class Configuration
 {
 	static Configuration $instance;
@@ -50,7 +52,7 @@ class Configuration
 	public array $allowWrite = array();
 	public bool $denyWriteFromMobileWithoutID = false;
 	public bool $useSearch = true;
-	/** @var ?array{0: string, 1: string, 2?: string[]} */
+	/** @var ?array{0: string, 1: string, 2?: array<string, string>} */
 	public ?array $customSearch = null;
 	public bool $registerBodyToSearchIndex = true;
 	public int $maximumSearchIndexLength = 1024;

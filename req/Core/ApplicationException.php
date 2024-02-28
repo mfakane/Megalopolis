@@ -1,5 +1,7 @@
 <?php
-class ApplicationException extends Exception
+namespace Megalopolis;
+
+class ApplicationException extends \Exception
 {
 	public int $httpCode;
 	public ?array $data = null;

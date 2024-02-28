@@ -1,4 +1,6 @@
 <?php
+namespace Megalopolis;
+
 $h = UtilHandler::$instance;
 $c = &Configuration::$instance;
 $d = &Visualizer::$data;
@@ -6,19 +8,19 @@ Visualizer::doctype();
 ?>
 <html lang="ja">
 <head>
-	<? Visualizer::head() ?>
+	<?php Visualizer::head() ?>
 	<meta name="robots" content="noindex,noarchive" />
-	<title>設定情報 - <?+$c->title ?></title>
+	<title>設定情報 - <?=Visualizer::escapeOutput($c->title) ?></title>
 </head>
 <body>
-	<? Visualizer::header("設定情報") ?>
-	<?foreach ($d as $name => $data): ?>
+	<?php Visualizer::header("設定情報") ?>
+	<?php foreach ($d as $name => $data): ?>
 		<section>
 			<h2>
-				<?+$name ?>
+				<?=Visualizer::escapeOutput($name) ?>
 			</h2>
 			<dl class="config">
-			<?foreach ($data as $k => $v): ?>
+			<?php foreach ($data as $k => $v): ?>
 				<?php
 					list($title, $key, $value) = is_array($v)
 						? array($k, $v[0], $v[1])
@@ -29,16 +31,16 @@ Visualizer::doctype();
 					else if (is_array($value))
 						$value = implode(", ", $value);
 				?>
-				<dt title="<?+$title ?>">
-					<?+$key ?>
+				<dt title="<?=Visualizer::escapeOutput($title) ?>">
+					<?=Visualizer::escapeOutput($key) ?>
 				</dt>
 				<dd>
-					<?+$value ?>
+					<?=Visualizer::escapeOutput($value) ?>
 				</dd>
-			<?endforeach ?>
+			<?php endforeach ?>
 			</dl>
 		</section>
-	<?endforeach ?>
-	<? Visualizer::footer() ?>
+	<?php endforeach ?>
+	<?php Visualizer::footer() ?>
 </body>
 </html>

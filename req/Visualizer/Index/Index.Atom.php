@@ -1,4 +1,6 @@
 <?php
+namespace Megalopolis;
+
 $c = &Configuration::$instance;
 $h = &IndexHandler::$instance;
 $d = &Visualizer::$data;
@@ -12,39 +14,41 @@ else
 ?>
 <?='<?xml version="1.0" encoding="UTF-8"?>' ?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-	<title><?+$c->title ?> - <?+$title ?></title>
-	<link href="<?+Visualizer::absoluteHref() ?>" />
-	<generator version="<?+App::VERSION ?>"><?+App::NAME ?></generator>
-	<?if ($h->entries): ?>
-		<updated><?+date("c", $h->lastUpdate) ?></updated>
-		<?foreach ($h->entries as $i): ?>
+	<title><?=Visualizer::escapeOutput($c->title) ?> - <?=Visualizer::escapeOutput($title) ?></title>
+	<link href="<?=Visualizer::escapeOutput(Visualizer::absoluteHref()) ?>" />
+	<generator version="<?=Visualizer::escapeOutput(App::VERSION) ?>"><?=Visualizer::escapeOutput(App::NAME) ?></generator>
+	<?php if ($h->entries): ?>
+		<?php if ($h->lastUpdate): ?>
+			<updated><?=Visualizer::escapeOutput(date("c", $h->lastUpdate)) ?></updated>
+		<?php endif ?>
+		<?php foreach ($h->entries as $i): ?>
 			<entry>
-				<?if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
-					<title><?+$i->title ?></title>
-				<?endif ?>
-				<?if ($c->showName[Configuration::ON_SUBJECT]): ?>
+				<?php if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
+					<title><?=Visualizer::escapeOutput($i->title) ?></title>
+				<?php endif ?>
+				<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
 					<author>
-						<name><? Visualizer::convertedName($i->name) ?></name>
-						<?if (!Util::isEmpty($i->mail)): ?>
-							<email><?+$i->mail ?></email>
-						<?endif ?>
-						<?if (!Util::isEmpty($i->link)): ?>
-							<uri><?+$i->link ?></uri>
-						<?endif ?>
+						<name><?php Visualizer::convertedName($i->name) ?></name>
+						<?php if (!Util::isEmpty($i->mail)): ?>
+							<email><?=Visualizer::escapeOutput($i->mail) ?></email>
+						<?php endif ?>
+						<?php if (!Util::isEmpty($i->link)): ?>
+							<uri><?=Visualizer::escapeOutput($i->link) ?></uri>
+						<?php endif ?>
 					</author>
-				<?endif ?>
-				<link href="<?+Visualizer::absoluteHref($i->subject, $i->id) ?>"/>
-				<published><?+date("c", $i->dateTime) ?></published>
-				<updated><?+date("c", $i->lastUpdate) ?></updated>
-				<?if ($c->useSummary && $c->showSummary[Configuration::ON_SUBJECT]): ?>
-					<summary><? Visualizer::convertedSummary($i->summary) ?></summary>
-				<?endif ?>
-				<?if ($c->showTags[Configuration::ON_SUBJECT]): ?>
-					<?foreach ($i->tags as $j): ?>
-						<category term="<?+$j ?>" scheme="<?+Visualizer::absoluteHref("tag", $j . (strpos($j, ".") !== false ? ".html" : null)) ?>" />
-					<?endforeach ?>
-				<?endif ?>
+				<?php endif ?>
+				<link href="<?=Visualizer::escapeOutput(Visualizer::absoluteHref($i->subject, $i->id)) ?>"/>
+				<published><?=Visualizer::escapeOutput(date("c", $i->dateTime)) ?></published>
+				<updated><?=Visualizer::escapeOutput(date("c", $i->lastUpdate)) ?></updated>
+				<?php if ($c->useSummary && $c->showSummary[Configuration::ON_SUBJECT]): ?>
+					<summary><?php Visualizer::convertedSummary($i->summary ?? "") ?></summary>
+				<?php endif ?>
+				<?php if ($c->showTags[Configuration::ON_SUBJECT]): ?>
+					<?php foreach ($i->tags as $j): ?>
+						<category term="<?=Visualizer::escapeOutput($j) ?>" scheme="<?=Visualizer::escapeOutput(Visualizer::absoluteHref("tag", $j . (strpos($j, ".") !== false ? ".html" : ""))) ?>" />
+					<?php endforeach ?>
+				<?php endif ?>
 			</entry>
-		<?endforeach ?>
-	<?endif ?>
+		<?php endforeach ?>
+	<?php endif ?>
 </feed>

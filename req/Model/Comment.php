@@ -1,4 +1,8 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class Comment
 {
 	static array $commentSchema = array
@@ -97,7 +101,7 @@ class Comment
 		$rt = array();
 
 		/** @var CommentEntity */
-		foreach ($st?->fetchAll(PDO::FETCH_CLASS, "CommentEntity") ?? array() as $record)
+		foreach ($st?->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\CommentEntity") ?? array() as $record)
 		{
 			$comment = new Comment();
 			$comment->entryID = $record->entryID;
