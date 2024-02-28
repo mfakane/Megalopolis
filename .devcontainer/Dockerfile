@@ -17,6 +17,9 @@ RUN yes | pecl install xdebug \
     && echo "xdebug.client_port = 9000" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && rm -rf /tmp/pear
 
+# Install extensions
+RUN docker-php-ext-install pdo_mysql
+
 # Install composer
 RUN curl -sSL https://getcomposer.org/installer | php \
     && chmod +x composer.phar \
