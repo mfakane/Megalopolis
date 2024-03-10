@@ -73,8 +73,7 @@ class UtilHandler extends Handler
 				if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
 					Auth::loginError("管理者パスワードが一致しません");
 				
-				$ids = IndexHandler::postParamAsArray("ids", []);
-				array_walk_recursive($ids, fn(string $x) => $x = intval($x));
+				$ids = array_map(fn(string $x) => intval($x), IndexHandler::postParamAsArray("ids", []));
 
 				$db->beginTransaction();
 				

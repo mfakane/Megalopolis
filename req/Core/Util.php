@@ -192,7 +192,7 @@ class Util
 			$eTagSeed
 		)));
 		
-		if ($lastModified)
+		if (isset($lastModified))
 			header("Last-Modified: " . gmdate("D, d M Y H:i:s T", $lastModified));
 		
 		header("ETag: W/\"" . $eTag . "\"");
@@ -200,7 +200,7 @@ class Util
 		header("Cache-Control: private, max-age=0, pre-check=0, must-revalidate");
 		
 		return !Auth::hasSession()
-			&& (!$lastModified || isset($_SERVER["HTTP_IF_MODIFIED_SINCE"]) && strtotime($_SERVER["HTTP_IF_MODIFIED_SINCE"]) >= $lastModified)
+			&& (!isset($lastModified) || isset($_SERVER["HTTP_IF_MODIFIED_SINCE"]) && strtotime($_SERVER["HTTP_IF_MODIFIED_SINCE"]) >= $lastModified)
 			&& (isset($_SERVER["HTTP_IF_NONE_MATCH"]) && (trim(substr($_SERVER["HTTP_IF_NONE_MATCH"], strpos($_SERVER["HTTP_IF_NONE_MATCH"], "W/") === 0 ? 2 : 0), '"')) == $eTag);
 	}
 	
@@ -332,10 +332,10 @@ class Util
 		switch ($version)
 		{
 			case 1:
-				if (!$salt)
+				if (!isset($salt))
 					$salt = mb_substr(hash(self::HASH_ALGORITHM, (string)mt_rand()), 4, 16);
 				
-				if (!$stretch)
+				if (!isset($stretch))
 					$stretch = mt_rand(10, 1000);
 				
 				if (!self::isLength($salt, 16))
@@ -818,7 +818,7 @@ class Util
 			clearstatcache();
 			$mtime = @filemtime($path . "/.");
 			
-			if (!$mtime || time() - $mtime > $lifetime)
+			if ($mtime === false || time() - $mtime > $lifetime)
 				break;
 			
 			usleep(50 * 1000);

@@ -68,8 +68,7 @@ class ReadHandler extends Handler
 			if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
 				Auth::loginError("管理者パスワードが一致しません");
 
-			$ids = !isset($_POST["id"]) ? [] : (!is_array($_POST["id"]) ? [$_POST["id"]] : $_POST["id"]);
-			array_walk_recursive($ids, fn(string $x) => $x = intval(Util::escapeInput($x)));
+			$ids = array_map(fn(string $x) => intval($x), IndexHandler::postParamAsArray("id", []));
 
 			$db->beginTransaction();
 			
@@ -719,7 +718,7 @@ class ReadHandler extends Handler
 		{
 			$input_array = !is_array($_POST[$name]) ? [$_POST[$name]] : $_POST[$name];
 			$input = $default;
-			array_walk_recursive($input_array, fn(mixed &$x) => $input ??= strval($x));
+			array_walk_recursive($input_array, function(mixed &$x) use (&$input) { $input ??= strval($x); });
 			$rt = Util::escapeInput($input ?? "", $stripLinebreaks);
 			
 			if ($name != "preview" &&
@@ -737,7 +736,7 @@ class ReadHandler extends Handler
 		{
 			$input_array = !is_array($_GET[$name]) ? [$_POST[$name]] : $_GET[$name];
 			$input = $default;
-			array_walk_recursive($input_array, fn(mixed &$x) => $input ??= strval($x));
+			array_walk_recursive($input_array, function(mixed &$x) use (&$input) { $input ??= strval($x); });
 			$rt = Util::escapeInput($input ?? "", $stripLinebreaks);
 
 			return $rt;

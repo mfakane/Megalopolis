@@ -34,7 +34,7 @@ class Visualizer
 	
 	static function visualizerMode(): string
 	{
-		if (self::$mode)
+		if (isset(self::$mode))
 			return self::$mode;
 		else if (isset($_GET["visualizer"]) && is_string($_GET["visualizer"]))
 		{
@@ -540,12 +540,12 @@ class Visualizer
 	
 	static function convertedName(?string $s): void
 	{
-		self::converted(empty($s) ? Configuration::$instance->defaultName : $s);
+		self::converted(!isset($s) || empty($s) ? Configuration::$instance->defaultName : $s);
 	}
 	
 	static function linkedName(?string $s, string $additional = ""): void
 	{
-		if (empty($s))
+		if (!isset($s) || empty($s))
 			self::converted(Configuration::$instance->defaultName);
 		else
 		{
@@ -574,7 +574,7 @@ class Visualizer
 	
 	static function convertedSummary(?string $s): void
 	{
-		if (empty($s)) return;
+		if (!isset($s) || empty($s)) return;
 	
 		echo self::escapeSummary($s);
 	}
@@ -643,16 +643,19 @@ class Visualizer
 	
 	private static function ensureHtml(string $str, ?array $stripExcept = null): string
 	{
-		$rt = str_get_html($str);
+		$oldHtml = new \DOMDocument("1.0", "UTF-8");
+		$oldHtml->loadHTML("<body>$str</body>", LIBXML_NOWARNING | LIBXML_NOERROR);
+
+		$newHtml = new \DOMDocument("1.0", "UTF-8");
+
 		$disallowed = Configuration::$instance->disallowedTags;
 		$allowed = array_flip(Configuration::$instance->allowedTags);
 		$disallowedMap = array_flip(array_map(function($x, $y) { return is_int($x) ? $y : $x; }, array_keys($disallowed), array_values($disallowed)));
-		self::replaceTags($rt, $disallowed, $disallowedMap, $allowed);
-		self::ensureHtmlTagEnd($rt);
+
+		self::replaceTags($oldHtml->documentElement->firstElementChild, $newHtml, $newHtml, $disallowed, $disallowedMap, $allowed);
 		
-		$str = $rt->save();
-		$rt->clear();
-		unset($rt);
+		$str = $newHtml->saveHTML();
+		unset($oldHtml, $newHtml);
 		
 		if (!is_array($stripExcept))
 			$stripExcept = Configuration::$instance->allowedTags;
@@ -666,65 +669,68 @@ class Visualizer
 		return $str;
 	}
 	
-	private static function replaceTags($rt, array $disallowed, array $disallowedMap, array $allowed): void
+	private static function replaceTags(\DOMNode $oldNode, \DOMDocument $newDocument, \DOMNode $newNode, array $disallowed, array $disallowedMap, array $allowed): void
 	{
-		foreach ($rt->find("*") as $i)
+		/** @var \DOMNode */
+		foreach ($oldNode->childNodes as $oldChildNode)
 		{
-			if (isset($disallowedMap[$i->tag]))
-				if (isset($disallowed[$i->tag]))
-					$i->tag = $disallowed[$i->tag];
+			if ($oldChildNode->nodeType == XML_ELEMENT_NODE)
+			{
+				if (isset($disallowedMap[$oldChildNode->tagName]))
+					if (isset($disallowed[$oldChildNode->tagName]))
+						$oldChildNode->tagName = $disallowed[$oldChildNode->tagName];
+					else
+					{
+						$newNode->appendChild($newDocument->createTextNode(" :REPLACED: "));
+						continue;
+					}
+				
+				if (!isset($allowed[$oldChildNode->tagName]))
+				{
+					$newNode->appendChild($newDocument->createTextNode($oldChildNode->ownerDocument->saveHTML($oldChildNode)));
+				}
 				else
 				{
-					$i->outertext = " :REPLACED: ";
-					
-					continue;
+					$newChildNode = $newDocument->importNode($oldChildNode, false);
+					self::replaceAttributes($oldChildNode, $newDocument, $newChildNode);
+					self::replaceTags($oldChildNode, $newDocument, $newChildNode, $disallowed, $disallowedMap, $allowed);
+					$newNode->appendChild($newChildNode);
 				}
-			
-			if (!isset($allowed[$i->tag]))
-				$i->outertext = self::escapeOutput($i->outertext);
+			}
 			else
-				self::replaceTags($i, $disallowed, $disallowedMap, $allowed);
+			{
+				$newChildNode = $newDocument->importNode($oldChildNode, false);
+				self::replaceTags($oldChildNode, $newDocument, $newChildNode, $disallowed, $disallowedMap, $allowed);
+				$newNode->appendChild($newChildNode);
+			}
 		}
 	}
 	
-	private static function ensureHtmlTagEnd($rt): void
+	private static function replaceAttributes(\DOMNode $oldElement, \DOMDocument $newDocument, \DOMNode $newElement): void
 	{
-		static $selfClosingTags = array
-		(
-			"area" => true,
-			"base" => true,
-			"br" => true,
-			"col" => true,
-			"command" => true,
-			"embed" => true,
-			"hr" => true,
-			"img" => true,
-			"input" => true,
-			"keygen" => true,
-			"link" => true,
-			"meta" => true,
-			"param" => true,
-			"source" => true,
-			"track" => true,
-			"wbr" => true,
-		);
-		
-		foreach ($rt->find("*") as $i)
+		foreach (($oldElement->attributes ?? []) as $attributeName => $oldAttribute)
 		{
-			if (Util::isEmpty($i->outertext) || $i->outertext == " :REPLACED: ")
-				continue;
-			
-			foreach ($i->attr as $k => $v)
-			{
-				foreach (Configuration::$instance->disallowedAttributes as $j)
-					if (strpos($j, "regex:") === 0 &&
-						preg_match('/^' . substr($j, 6) . '$/i', $k) ||
-						$k == $j)
-						$i->$k = null;
+			$skipAttribute = false;
+
+			foreach (Configuration::$instance->disallowedAttributes as $j)
+				if (strpos($j, "regex:") === 0 &&
+					preg_match('/^' . substr($j, 6) . '$/i', $attributeName) ||
+					$attributeName == $j)
+					{
+						$skipAttribute = true;
+						break;
+					}
 				
-				if ($k == "style")
+			switch ($attributeName)
+			{
+				case "style":
 				{
-					$str = preg_replace('@/\*.*\*/@', "", preg_replace_callback('/\\\([0-9A-Fa-f]{1,6})/i', function($_) { $a = intval($_[1], 16); return $a >= 32 && $a <= 126 ? chr($a) : $_[0]; }, $v));
+					$str = preg_replace_callback('/\\\([0-9A-Fa-f]{1,6})/i', function($x)
+					{
+						$a = intval($x[1], 16);
+						return $a >= 32 && $a <= 126 ? chr($a) : $x[0];
+					}, strval($oldAttribute->value));
+					$str = preg_replace('@/\*.*\*/@', "", $str);
 					
 					foreach (explode(";", $str) as $j)
 					{
@@ -733,93 +739,23 @@ class Visualizer
 						if (preg_match("/b.+havio.+$/i", $k2) ||
 							preg_match('/\b(.+[xｘＸ][pｐＰ][rｒＲ].+[sｓＳ][sｓＳ][iｉＩ][oｏＯ].+|data:|javascript:|vbs:|vbscript:)\b/i', $v2))
 						{
-							$i->$k = null;
-							
+							$skipAttribute = true;
 							break;
 						}
 					}
+					break;
 				}
-				else if ($k == "src" || $k == "href")
-					if (preg_match('/(javascript|data|vbs|vbscript):/', $v))
-						$i->$k = null;
+				case "src":
+				case "href":
+					if (preg_match('/(javascript|data|vbs|vbscript):/', $oldAttribute->value))
+						$skipAttribute = true;
+					break;
 			}
 			
-			self::ensureHtmlTagEnd($i);
-			
-			$outertext = $i->outertext;
-			$matches = array();
-			
-			// close if unclosed tag
-			if (strstr($outertext, "/>") != "/>" && strstr($outertext, "</{$i->tag}>") != "</{$i->tag}>")
-				$outertext .= "</{$i->tag}>";
-			
-			// strip any double-closed tags
-			if (strpos($i->plaintext, "</") !== false)
-			{
-				$stack = array();
-				$html = "";
-				$idx = 0;
-				preg_match_all('@<(/?)([^\s>]*).*?(/?)>@i', $outertext, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
-				
-				if ($matches)
-				{
-					foreach ($matches as $m)
-					{
-						$tag = $m[0][0];
-						$start = $m[0][1];
-						$name = $m[2][0];
-						$isClosing = !Util::isEmpty($m[1][0]);
-						$isSelfClosed = !Util::isEmpty($m[3][0]);
-						$length = strlen($tag);
-						
-						$html .= substr($outertext, $idx, $start - $idx);
-						
-						if (!$isSelfClosed)
-							if ($isClosing)
-								if ($stack && $stack[count($stack) - 1] == $name)
-								{
-									// closed tag
-									$html .= $tag;
-									array_pop($stack);
-								}
-								else
-								{
-									// double closed tag
-									$length = 0;
-								}
-							else
-							{
-								// open tag
-								
-								if (isset($selfClosingTags[$name]))
-								{
-									$html .= substr($tag, 0, -1) . " />";
-									$length += 2;
-								}
-								else
-								{
-									$html .= $tag;
-								
-									array_push($stack, $name);
-								}
-							}
-						
-						$idx = $start + $length;
-					}
-					
-					$html .= substr($outertext, $idx);
-					
-					foreach	($stack as $j)
-					{
-						// unclosed tag
-						$html .= "</{$j}>";
-					}
-					
-					$outertext = $html;
-				}
-			}
-			
-			$i->outertext = $outertext;
+			if ($skipAttribute) continue;
+
+			$newAttribute = $newDocument->importNode($oldAttribute, true);
+			$newElement->appendChild($newAttribute);
 		}
 	}
 	
@@ -905,14 +841,14 @@ class Visualizer
 		if (!is_file($path))
 			throw new ApplicationException("Visualizer {$path} not found");
 		
-		if ($status)
+		if (isset($status))
 			self::statusCode($status);
 		
 		self::defaultHeaders();
 		
-		if ($contentType)
+		if (isset($contentType))
 			header("Content-Type: {$contentType}");
-		else if ($encoding)
+		else if (isset($encoding))
 			header("Content-Type: text/html; charset={$encoding}");
 		else
 			header("Content-Type: text/html; charset=UTF-8");
@@ -932,7 +868,7 @@ class Visualizer
 		{
 			$output = mb_ereg_replace('[\t \r\n]+?<', '<', mb_ereg_replace('>[\t \r\n]+', '>', $output) ?? "") ?? "";
 
-			if ($mbencoding)
+			if (isset($mbencoding))
 				$output = mb_convert_encoding($output, $mbencoding, "UTF8");
 			
 			$output = strtr($output, array
@@ -985,7 +921,7 @@ class Visualizer
 	{
 		Auth::commitSession();
 		
-		if ($status)
+		if (isset($status))
 			self::statusCode($status);
 		
 		header("Location: " . Util::getAbsoluteUrl($path));
@@ -997,7 +933,7 @@ class Visualizer
 	{
 		Auth::commitSession();
 		
-		if (!$mbencoding)
+		if (!isset($mbencoding))
 			$mbencoding = $encoding;
 		
 		mb_http_output($mbencoding);
