@@ -715,8 +715,8 @@ class ReadHandler extends Handler
 	}
 	
 	/**
-	 * @template T as string|?string
-	 * @param T $defaultValue
+	 * @template T of string|?string
+	 * @param T $default
 	 * @return (T is string ? string : ?string)
 	 */
 	static function param(string $name, ?string $default = null, bool $tryGet = false, bool $stripLinebreaks = true): ?string

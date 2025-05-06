@@ -50,7 +50,7 @@ class Cookie
 	}
 	
 	/**
-	 * @template T as string|?string
+	 * @template T of string|?string
 	 * @param T $defaultValue
 	 * @return (T is string ? string : ?string)
 	 */

@@ -53,18 +53,16 @@ class App
 	}
 
 	/**
-	 * @template T as string|string[]|array
+	 * @template T of string|list<string>|array
 	 * @param T $arg
 	 * @return (T is string ? string : string[]|array)
 	 */
-	private static function stripSlashesRecursive(string|array $arg): string|array
+	private static function stripSlashesRecursive($arg): string|array
 	{
-		if (is_array($arg))
-			return array_map(fn(string|array $x) => self::stripSlashesRecursive($x), $arg);
-		else if (is_string($arg))
+		if (is_string($arg))
 			return stripslashes($arg);
 		else
-			return $arg;
+			return array_map(fn(string|array $x) => self::stripSlashesRecursive($x), $arg);
 	}
 
 	private static function isBBQed(): bool

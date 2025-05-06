@@ -348,7 +348,7 @@ class IndexHandler extends Handler
 	}
 	
 	/**
-	 * @template T as string|null
+	 * @template T of string|null
 	 * @param T $value
 	 * @return ?string
 	 * @psalm-return (T is string ? string : ?string)
@@ -365,7 +365,7 @@ class IndexHandler extends Handler
 	}
 
 	/**
-	 * @template T as string[]|null
+	 * @template T of string[]|null
 	 * @param T $value
 	 * @return string[]|null
 	 * @psalm-return (T is array ? string[] : string[]|null)
@@ -383,7 +383,7 @@ class IndexHandler extends Handler
 
 	
 	/**
-	 * @template T as string|null
+	 * @template T of string|null
 	 * @param T $value
 	 * @return ?string
 	 * @psalm-return (T is string ? string : ?string)
@@ -400,7 +400,7 @@ class IndexHandler extends Handler
 	}
 
 	/**
-	 * @template T as string[]|null
+	 * @template T of string[]|null
 	 * @param T $value
 	 * @return string[]|null
 	 * @psalm-return (T is array ? string[] : string[]|null)

@@ -1135,7 +1135,7 @@ class ThreadEntry
 	}
 	
 	/**
-	 * @template T as int
+	 * @template T of int
 	 * @param T $option
 	 * @return null|array{result: ThreadEntry[], count: int}|ThreadEntry
 	 * @psalm-return ($option is self::SEARCH_RANDOM ? (?ThreadEntry) : array{result: ThreadEntry[], count: int})
