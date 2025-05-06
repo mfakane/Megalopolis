@@ -1,8 +1,8 @@
 <?php
 namespace Megalopolis;
 
-$c = &Configuration::$instance;
-$d = &Visualizer::$data;
+$c = Configuration::$instance;
+$d = Visualizer::$data;
 ?>
 <?php Visualizer::doctype() ?>
 <html lang="ja">

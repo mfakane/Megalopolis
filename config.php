@@ -1,8 +1,7 @@
 <?php
 namespace Megalopolis;
 
-Configuration::$instance = new Configuration();
-$config = &Configuration::$instance;
+$config = new Configuration();
 
 /*
  * 全体に関する設定
@@ -538,5 +537,6 @@ $config->convertOnDemand = false;
 $config->importCompositeEvalsAsCommentCount = false;
 
 // 設定終了
+Configuration::$instance = $config;
 unset($config);
 ?>

@@ -1,9 +1,7 @@
 <?php
 namespace Megalopolis;
 
-$c = &Configuration::$instance;
-$h = &IndexHandler::$instance;
-$d = &Visualizer::$data;
+$c = Configuration::$instance;
 
 function convert(string $s): string
 {

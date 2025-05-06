@@ -3,9 +3,8 @@ namespace Megalopolis;
 
 require_once __DIR__ . "/../Template.php";
 
-$c = &Configuration::$instance;
-$h = &IndexHandler::$instance;
-$d = &Visualizer::$data;
+$c = Configuration::$instance;
+$h = IndexHandler::$instance;
 
 Visualizer::doctype();
 ?>

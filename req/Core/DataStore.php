@@ -38,9 +38,14 @@ abstract class DataStore
 	
 	protected function unregisterTableByHandle(PDO &$db, string $name): void
 	{
-		$arr = &$this->tableNames[$this->getDatabaseNameByHandle($db)];
-		
-		unset($arr[array_search($name, $arr)]);
+		$arr = $this->tableNames[$this->getDatabaseNameByHandle($db)];
+		$index = array_search($name, $arr);
+
+		if ($index === false)
+			return;
+
+		array_splice($arr, $index, 1);
+		$this->tableNames[$this->getDatabaseNameByHandle($db)] = $arr;
 	}
 	
 	abstract function open(string $database = "data"): PDO;

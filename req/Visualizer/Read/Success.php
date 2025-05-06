@@ -1,9 +1,7 @@
 <?php
 namespace Megalopolis;
 
-$h = ReadHandler::$instance;
-$c = &Configuration::$instance;
-$d = &Visualizer::$data;
+$c = Configuration::$instance;
 Visualizer::doctype();
 
 switch (App::$actionName)

@@ -40,8 +40,15 @@ class Thread
 	
 	public ThreadEntry $entry;
 	
-	public ?int $id = 0;
-	public ?int $subject = 0;
+	/** @psalm-suppress PropertyNotSetInConstructor */
+	public int $id {
+		get => $this->entry->id;
+	}
+
+	/** @psalm-suppress PropertyNotSetInConstructor */
+	public int $subject {
+		get => $this->entry->subject;
+	}
 	
 	public ?string $body = null;
 	public ?string $afterword = null;
@@ -67,7 +74,6 @@ class Thread
 	function __construct(PDO $db = null)
 	{
 		$this->entry = new ThreadEntry($db);
-		$this->updatePropertyLink();
 	}
 	
 	/**
@@ -134,12 +140,6 @@ class Thread
 		$rt = preg_split(self::REGEX_SPLIT_PAGE, $this->body);
 		
 		return isset($rt[$page - 1]) ? $rt[$page - 1] : null;
-	}
-	
-	function updatePropertyLink(): void
-	{
-		$this->id = &$this->entry->id;
-		$this->subject = &$this->entry->subject;
 	}
 	
 	function evaluate(PDO $db, int $point, bool $saveThread = true): Evaluation

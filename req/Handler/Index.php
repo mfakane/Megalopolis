@@ -704,7 +704,7 @@ class IndexHandler extends Handler
 
 	private static function toCSV(array $entries): bool
 	{
-		$c = &Configuration::$instance;
+		$c = Configuration::$instance;
 		$visibility = array_filter(array
 		(
 			"id" => true,

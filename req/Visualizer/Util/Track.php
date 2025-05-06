@@ -3,9 +3,8 @@ namespace Megalopolis;
 
 require_once __DIR__ . "/../Template.php";
 
-$h = UtilHandler::$instance;
-$c = &Configuration::$instance;
-$d = &Visualizer::$data;
+$c = Configuration::$instance;
+$d = Visualizer::$data;
 Visualizer::doctype();
 
 $pagerHref = Visualizer::actionHref("util", "track", array

@@ -1,9 +1,8 @@
 <?php
 namespace Megalopolis;
 
-$c = &Configuration::$instance;
-$h = &IndexHandler::$instance;
-$d = &Visualizer::$data;
+$c = Configuration::$instance;
+$d = Visualizer::$data;
 
 $isAdmin = Auth::hasSession(true);
 Visualizer::doctype();

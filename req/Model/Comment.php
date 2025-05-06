@@ -47,7 +47,7 @@ class Comment
 	 */
 	function toArray(): array
 	{
-		$c = &Configuration::$instance;
+		$c = Configuration::$instance;
 		
 		return array
 		(

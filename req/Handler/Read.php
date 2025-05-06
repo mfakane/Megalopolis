@@ -8,17 +8,24 @@ class ReadHandler extends Handler
 	static ReadHandler $instance;
 	
 	public ?int $subject = null;
-	public ?ThreadEntry $entry = null;
 	public ?Thread $thread = null;
 	public ?int $page = null;
 	public bool $forceTaketori = false;
+	
+	/** @psalm-suppress PropertyNotSetInConstructor */
+	public ?ThreadEntry $entry {
+		/**
+		 * @psalm-return ($this->thread is null ? null : mixed)
+		 */
+		get => $this->thread?->entry;
+	}
 	
 	function index(string $_subject = "0", string $_id = "0", string $_page = "1"): bool
 	{
 		$subject = intval($_subject);
 		$id = intval($_id);
 		$page = max(intval($_page), 1);
-		$c = &Configuration::$instance;
+		$c = Configuration::$instance;
 		
 		if (App::$actionName == "index" && Auth::hasSession() && !Auth::hasSession(true))
 			Auth::logout();
@@ -34,7 +41,6 @@ class ReadHandler extends Handler
 		$db = App::openDB("data");
 		$this->thread = self::loadThread($db, $id);
 		$this->subject = $this->thread->subject;
-		$this->entry = &$this->thread->entry;
 		$this->page = $page;
 		
 		$history = array_filter(explode(",", Cookie::getCookie(Cookie::VIEW_HISTORY_KEY, "")));
@@ -104,7 +110,7 @@ class ReadHandler extends Handler
 		$this->page = !is_null($_page) ? intval($_page) : 1;
 		
 		$this->thread = new Thread();
-		$this->entry = &$this->thread->entry;
+		assert($this->entry instanceof ThreadEntry);
 		
 		if (Configuration::$instance->adminOnly)
 		{
@@ -153,7 +159,7 @@ class ReadHandler extends Handler
 		
 		$db = App::openDB();
 		$this->thread = self::loadThread($db, $id);
-		$this->entry = &$this->thread->entry;
+		assert($this->entry instanceof ThreadEntry);
 		
 		Auth::$caption = "{$this->entry->title} の編集";
 		Auth::$label = "編集キー";
@@ -207,6 +213,7 @@ class ReadHandler extends Handler
 		if ($id == 0)
 		{
 			$this->thread = new Thread($db);
+			assert($this->entry instanceof ThreadEntry);
 			
 			if (Configuration::$instance->adminOnly)
 			{
@@ -221,6 +228,7 @@ class ReadHandler extends Handler
 		else
 		{
 			$this->thread = self::loadThread($db, $id);
+			assert($this->entry instanceof ThreadEntry);
 			
 			if (!Auth::hasSession(true) &&
 				!($type = Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false))) &&
@@ -228,7 +236,6 @@ class ReadHandler extends Handler
 				Auth::loginError("編集キーが一致しません");
 		}
 		
-		$this->entry = &$this->thread->entry;
 		self::setValues($this->entry, $this->thread);
 		
 		if ($id == 0 || !Util::isEmpty(self::param("editPassword")))
@@ -279,7 +286,7 @@ class ReadHandler extends Handler
 				Auth::unsetSession();
 		
 		$this->thread = self::loadThread($db, $id);
-		$this->entry = &$this->thread->entry;
+		assert($this->entry instanceof ThreadEntry);
 		Auth::$caption = "{$this->entry->title} の削除";
 		Auth::$label = "編集キー";
 		Auth::$details = "<div class='notify warning'>本当に {$this->entry->title} を削除してよろしいですか？続行する場合は編集キーを入力します</div>";
@@ -449,7 +456,7 @@ class ReadHandler extends Handler
 		
 		$db = App::openDB();
 		$this->thread = self::loadThread($db, $id);
-		$this->entry = &$this->thread->entry;
+		assert($this->entry instanceof ThreadEntry);
 		
 		if (!($comment = $this->thread->getCommentByID($db, $commentID)))
 			throw new ApplicationException("指定された番号 {$commentID} のコメントは {$id} の作品に存在しません", 404);
@@ -496,7 +503,7 @@ class ReadHandler extends Handler
 		
 		$lock = Util::acquireWriteLock();
 		$this->thread = self::loadThread($db, $id);
-		$this->entry = &$this->thread->entry;
+		assert($this->entry instanceof ThreadEntry);
 			
 		if (array_filter($this->thread->evaluations, fn($x) => Util::remoteHostMatches($x->host)))
 			$error[] = "多重評価はできません";
@@ -555,7 +562,7 @@ class ReadHandler extends Handler
 		
 		$db = App::openDB();
 		$this->thread = self::loadThread($db, $id);
-		$this->entry = &$this->thread->entry;
+		assert($this->entry instanceof ThreadEntry);
 		
 		if (!($eval = $this->thread->getEvaluationByID($db, $evaluationID)))
 			throw new ApplicationException("指定された番号 {$evaluationID} の簡易評価は {$id} の作品に存在しません", 404);

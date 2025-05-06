@@ -99,8 +99,8 @@ class MegalithHandler extends Handler
 				Cookie::sendCookie();
 			}
 			
-			$c = &Configuration::$instance;
-			$_ = &$thread->entry;
+			$c = Configuration::$instance;
+			$_ = $thread->entry;
 			
 			if ($c->showTitle[Configuration::ON_SUBJECT])
 				$content = array

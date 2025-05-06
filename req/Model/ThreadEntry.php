@@ -154,7 +154,7 @@ class ThreadEntry
 	 */
 	function toArray($on = Configuration::ON_ENTRY): array
 	{
-		$c = &Configuration::$instance;
+		$c = Configuration::$instance;
 		
 		return array
 		(

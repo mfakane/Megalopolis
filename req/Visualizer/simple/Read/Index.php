@@ -1,9 +1,9 @@
 <?php
 namespace Megalopolis;
 
-$c = &Configuration::$instance;
-$h = &ReadHandler::$instance;
-$d = &Visualizer::$data;
+$c = Configuration::$instance;
+$h = ReadHandler::$instance;
+$d = Visualizer::$data;
 
 if (!isset($h->entry) || !isset($h->thread)) throw new ApplicationException("Thread not found.");
 

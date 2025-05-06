@@ -1,7 +1,6 @@
 <?php
 namespace Megalopolis;
 
-$c = &Configuration::$instance;
 ?>
 <?php Visualizer::doctype() ?>
 <html lang="ja">

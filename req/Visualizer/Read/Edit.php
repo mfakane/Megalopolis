@@ -1,8 +1,8 @@
 <?php
 namespace Megalopolis;
 
-$c = &Configuration::$instance;
-$h = &ReadHandler::$instance;
+$c = Configuration::$instance;
+$h = ReadHandler::$instance;
 
 if (!isset($h->entry) || !isset($h->thread)) throw new ApplicationException("Thread not found.");
 

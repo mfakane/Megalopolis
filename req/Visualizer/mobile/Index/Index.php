@@ -3,9 +3,9 @@ namespace Megalopolis;
 
 require_once __DIR__ . "/../MobileTemplate.php";
 
-$c = &Configuration::$instance;
-$h = &IndexHandler::$instance;
-$d = &Visualizer::$data;
+$c = Configuration::$instance;
+$h = IndexHandler::$instance;
+$d = Visualizer::$data;
 $basePath = App::$actionName == "index" ? Visualizer::absoluteHref($h->subject) : Visualizer::absoluteHref(App::$actionName, $d);
 $searchMode = "query";
 $search = "";
