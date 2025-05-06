@@ -9,14 +9,16 @@
 		"vscode": {
 			// Set *default* container specific settings.json values on container create.
 			"settings": {
-				"php.validate.executablePath": "/usr/local/bin/php"
+				"php.validate.executablePath": "/usr/local/bin/php",
+				"psalm.phpExecutablePath": "/usr/local/bin/php"
 			},
-			// Add the IDs of extensions you want installed when the container is created.
+			// Add the IDs of easxtensions you want installed when the container is created.
 			"extensions": [
-				"xdebug.php-pack",
+				"DEVSENSE.phptools-vscode",
 				"mrmlnc.vscode-apache",
 				"getpsalm.psalm-vscode-plugin",
-				"editorconfig.editorconfig"
+				"editorconfig.editorconfig",
+				"eamodio.gitlens"
 			]
 		}
 	},
