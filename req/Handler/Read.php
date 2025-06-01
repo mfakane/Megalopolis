@@ -11,7 +11,7 @@ class ReadHandler extends Handler
 	public ?Thread $thread = null;
 	public ?int $page = null;
 	public bool $forceTaketori = false;
-	
+
 	/** @psalm-suppress PropertyNotSetInConstructor */
 	public ?ThreadEntry $entry {
 		/**
@@ -22,7 +22,6 @@ class ReadHandler extends Handler
 	
 	function index(string $_subject = "0", string $_id = "0", string $_page = "1"): bool
 	{
-		$subject = intval($_subject);
 		$id = intval($_id);
 		$page = max(intval($_page), 1);
 		$c = Configuration::$instance;
@@ -48,7 +47,7 @@ class ReadHandler extends Handler
 		if (!in_array($id, $history))
 		{
 			$db->beginTransaction();
-			$this->entry->incrementReadCount($db);
+			$this->thread->entry->incrementReadCount($db);
 			$db->commit();
 		}
 		
@@ -61,7 +60,7 @@ class ReadHandler extends Handler
 		Cookie::setCookie(Cookie::VIEW_HISTORY_KEY, implode(",", $history));
 		Cookie::sendCookie();
 		
-		if (Util::isCachedByBrowser($this->thread->entry->getLatestLastUpdate(), $page . Cookie::getCookie(Cookie::MOBILE_VERTICAL_KEY, "") . $this->entry->readCount))
+		if (Util::isCachedByBrowser($this->thread->entry->getLatestLastUpdate(), $page . Cookie::getCookie(Cookie::MOBILE_VERTICAL_KEY, "") . $this->thread->entry->readCount))
 			Visualizer::notModified();
 		
 		$this->forceTaketori = boolval(preg_match('/<\s*font|font:\s*|font-family:\s*/i', $this->thread->body ?? ""));
@@ -71,14 +70,14 @@ class ReadHandler extends Handler
 			Auth::ensureToken();
 			Auth::createToken();
 			
-			if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
+			if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
 				Auth::loginError("管理者パスワードが一致しません");
 
 			$ids = array_map(fn(string $x) => intval($x), IndexHandler::postParamAsArray("id", []));
 
 			$db->beginTransaction();
 			
-			switch ($mode = Util::escapeInput($_POST["admin"]))
+			switch (Util::escapeInput($_POST["admin"]))
 			{
 				case "unevaluate":
 					foreach ($ids as $i)
@@ -109,7 +108,7 @@ class ReadHandler extends Handler
 	{
 		$this->page = !is_null($_page) ? intval($_page) : 1;
 		
-		$this->thread = new Thread();
+		$this->thread = new Thread(new ThreadEntry(0));
 		assert($this->entry instanceof ThreadEntry);
 		
 		if (Configuration::$instance->adminOnly)
@@ -118,7 +117,7 @@ class ReadHandler extends Handler
 			Auth::$label = "管理者パスワード";
 			Auth::$details = '<p class="notify info">管理者のみ新規投稿が可能です。続行するにはパスワードを入力してください</p>';
 			
-			if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
+			if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
 				Auth::loginError("パスワードが一致しません");
 		}
 		
@@ -130,20 +129,20 @@ class ReadHandler extends Handler
 		}
 		else
 		{
-			Cookie::setCookie(Cookie::NAME_KEY, self::param("name"));
-			Cookie::setCookie(Cookie::MAIL_KEY, self::param("mail"));
-			Cookie::setCookie(Cookie::LINK_KEY, self::param("link"));
-			Cookie::setCookie(Cookie::PASSWORD_KEY, self::param("editPassword", self::param(Auth::SESSION_PASSWORD)));
+			Cookie::setCookie(Cookie::NAME_KEY, self::param("name", ""));
+			Cookie::setCookie(Cookie::MAIL_KEY, self::param("mail", ""));
+			Cookie::setCookie(Cookie::LINK_KEY, self::param("link", ""));
+			Cookie::setCookie(Cookie::PASSWORD_KEY, self::param("editPassword", self::param(Auth::SESSION_PASSWORD, "")));
 			Cookie::sendCookie();
 		}
 		
 		self::setValues($this->entry, $this->thread);
 		
-		if ($_POST || $_page)
+		if ($_POST || $_page !== null)
 		{
 			Visualizer::$data = self::checkValues($this->entry, $this->thread, false);
 			
-			if ($_page ||
+			if ($_page !== null ||
 				self::param("preview", null, true) == "true" && !Visualizer::$data)
 				return Visualizer::visualize("Read/Index");
 		}
@@ -165,23 +164,23 @@ class ReadHandler extends Handler
 		Auth::$label = "編集キー";
 		
 		if (!Auth::hasSession(true) &&
-			!($type = Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false))) &&
-			!($type = Util::hashEquals($this->thread->hash ?? "", $login)))
+			($type = Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false))) === false &&
+			($type = Util::hashEquals($this->thread->hash ?? "", $login)) === false)
 			Auth::loginError("編集キーが一致しません");
 		
 		if ($_POST)
 		{
-			Cookie::setCookie(Cookie::NAME_KEY, self::param("name"));
-			Cookie::setCookie(Cookie::MAIL_KEY, self::param("mail"));
-			Cookie::setCookie(Cookie::LINK_KEY, self::param("link"));
-			Cookie::setCookie(Cookie::PASSWORD_KEY, self::param("editPassword", self::param(Auth::SESSION_PASSWORD)));
+			Cookie::setCookie(Cookie::NAME_KEY, self::param("name", ""));
+			Cookie::setCookie(Cookie::MAIL_KEY, self::param("mail", ""));
+			Cookie::setCookie(Cookie::LINK_KEY, self::param("link", ""));
+			Cookie::setCookie(Cookie::PASSWORD_KEY, self::param("editPassword", self::param(Auth::SESSION_PASSWORD, "")));
 			Cookie::sendCookie();
 		}
 		
 		self::setValues($this->entry, $this->thread);
 		Visualizer::$data = self::checkValues($this->entry, $this->thread, true);
 		
-		if ($_page ||
+		if ($_page !== null ||
 			$_POST && self::param("preview", null, true) == "true" && !Visualizer::$data)
 		{
 			$this->forceTaketori = boolval(preg_match('/<\s*font|font:\s*|font-family:\s*/i', $this->thread->body ?? ""));
@@ -199,7 +198,6 @@ class ReadHandler extends Handler
 	
 	function post(string $_subject = "0", string $_id = "0"): bool
 	{
-		$subject = intval($_subject);
 		$id = intval($_id);
 		
 		$db = App::openDB();
@@ -212,7 +210,8 @@ class ReadHandler extends Handler
 		
 		if ($id == 0)
 		{
-			$this->thread = new Thread($db);
+			$entry = ThreadEntry::create($db);
+			$this->thread = new Thread($entry);
 			assert($this->entry instanceof ThreadEntry);
 			
 			if (Configuration::$instance->adminOnly)
@@ -221,7 +220,7 @@ class ReadHandler extends Handler
 				Auth::$label = "管理者パスワード";
 				Auth::$details = '<p class="notify info">管理者のみ新規投稿が可能です。続行するにはパスワードを入力してください</p>';
 				
-				if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
+				if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
 					Auth::loginError("パスワードが一致しません");
 			}
 		}
@@ -231,15 +230,16 @@ class ReadHandler extends Handler
 			assert($this->entry instanceof ThreadEntry);
 			
 			if (!Auth::hasSession(true) &&
-				!($type = Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false))) &&
-				!($type = Util::hashEquals($this->thread->hash ?? "", $login)))
+				($type = Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false))) === false &&
+				($type = Util::hashEquals($this->thread->hash ?? "", $login)) === false)
 				Auth::loginError("編集キーが一致しません");
 		}
 		
 		self::setValues($this->entry, $this->thread);
-		
-		if ($id == 0 || !Util::isEmpty(self::param("editPassword")))
-			$this->thread->hash = Util::hash(self::param("editPassword"));
+
+		$editPassword = self::param("editPassword", "");
+		if ($id == 0 || $editPassword != "")
+			$this->thread->hash = Util::hash($editPassword);
 		
 		$errors = self::checkValues($this->entry, $this->thread, $id != 0);
 		
@@ -292,8 +292,8 @@ class ReadHandler extends Handler
 		Auth::$details = "<div class='notify warning'>本当に {$this->entry->title} を削除してよろしいですか？続行する場合は編集キーを入力します</div>";
 		
 		if (!Auth::hasSession(true) &&
-			!Util::hashEquals($this->thread->hash ?? "", $login = Auth::login(false, false)) &&
-			!Util::hashEquals(Configuration::$instance->adminHash ?? "", $login))
+			Util::hashEquals($this->thread->hash ?? "", $login = Auth::login(false, false)) === false &&
+			Util::hashEquals(Configuration::$instance->adminHash ?? "", $login) === false)
 			Auth::loginError("編集キーが一致しません");
 		
 		$db->beginTransaction();
@@ -325,47 +325,47 @@ class ReadHandler extends Handler
 		$db = App::openDB();
 		
 		$error = array();
-		$name = self::param("name");
-		$mail = self::param("mail");
-		$body = self::param("body", null, false, false);
-		$password = self::param("password", self::param("pass"));
-		$postPassword = self::param("postPassword", self::param("compass"));
-		$point = intval(self::param("point"));
+		$name = self::param("name", "");
+		$mail = self::param("mail", "");
+		$body = self::param("body", "", false, false);
+		$password = self::param("password", self::param("pass", ""));
+		$postPassword = self::param("postPassword", self::param("compass", ""));
+		$point = intval(self::param("point", "0"));
 		
 		Cookie::setCookie(Cookie::NAME_KEY, $name);
 		Cookie::setCookie(Cookie::MAIL_KEY, $mail);
 		Cookie::setCookie(Cookie::PASSWORD_KEY, $password);
 		Cookie::sendCookie();
 		
-		if (Configuration::$instance->requireName[Configuration::ON_COMMENT] && Util::isEmpty($name))
+		if (Configuration::$instance->requireName[Configuration::ON_COMMENT] && $name == "")
 			$error[] = "名前が入力されていません";
 			
-		if (Util::isEmpty(trim($body)))
+		if (trim($body) == "")
 			$error[] = "本文が入力されていません";
 		
 		if ($point != 0 && !in_array($point, Configuration::$instance->commentPointMap))
 			$error[] = "評価が不正です";
 			
-		if (Configuration::$instance->requirePassword[Configuration::ON_COMMENT] && Util::isEmpty($password))
+		if (Configuration::$instance->requirePassword[Configuration::ON_COMMENT] && $password == "")
 			$error[] = "削除キーが入力されていません";
 		
-		if (!Util::isEmpty(Configuration::$instance->postPassword))
-			if (Util::isEmpty($postPassword))
+		if (isset(Configuration::$instance->postPassword) && Configuration::$instance->postPassword != "")
+			if ($postPassword == "")
 				$error[] = "投稿キーが入力されていません";
 			else if ($postPassword != Configuration::$instance->postPassword)
 				$error[] = "投稿キーが一致しません";	
 		
 		$lock = Util::acquireWriteLock();
 		$this->thread = self::loadThread($db, $id);
-		$this->entry = &$this->thread->entry;
+		assert($this->entry instanceof ThreadEntry);
 		
-		if ($point && array_filter($this->thread->evaluations, fn($x) => Util::remoteHostMatches($x->host) ))
+		if ($point && array_filter($this->thread->evaluations, fn($x) => Util::remoteHostMatches($x->host)))
 			$error[] = "多重評価はできません";
 		
 		if (!Auth::hasSession(true) || !Configuration::$instance->ignoreDisallowedWordsWhenAdmin)
 		{
 			foreach (Configuration::$instance->disallowedWordsForName as $i)
-				if (mb_strstr($name, $i))
+				if (mb_strstr($name, $i) !== false)
 				{
 					if (Configuration::$instance->showDisallowedWords)
 						$error[] = "名前に禁止ワードが含まれています: {$i}";
@@ -381,7 +381,7 @@ class ReadHandler extends Handler
 					"名前" => $name,
 					"本文" => $body,
 				) as $k => $v)
-					if (mb_strstr($v, $i))
+					if (mb_strstr($v, $i) !== false)
 					{
 						if (Configuration::$instance->showDisallowedWords)
 							$error[] = "{$k}に禁止ワードが含まれています: {$i}";
@@ -443,7 +443,6 @@ class ReadHandler extends Handler
 	
 	function uncomment(string $_subject = "0", string $_id = "0"): bool
 	{
-		$subject = intval($_subject);
 		$id = intval($_id);
 		$commentID = intval(self::param("id", "0", true));
 		$isAdmin = Auth::hasSession(true);
@@ -464,8 +463,8 @@ class ReadHandler extends Handler
 		Auth::$caption = "コメントの削除";
 		Auth::$label = "削除キー";
 		
-		if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false)) &&
-			!Util::hashEquals($comment->hash ?? "", $login))
+		if (Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false)) === false &&
+			Util::hashEquals($comment->hash ?? "", $login) === false)
 			Auth::loginError("削除キーが一致しません");
 		else if (!$isAdmin)
 			Auth::logout();
@@ -556,7 +555,6 @@ class ReadHandler extends Handler
 
 	function unevaluate(string $_subject = "0", string $_id = "0"): bool
 	{
-		$subject = intval($_subject);
 		$id = intval($_id);
 		$evaluationID = intval(self::param("id", "0", true));
 		
@@ -588,7 +586,7 @@ class ReadHandler extends Handler
 			throw new ApplicationException("指定された番号 {$id} の作品は存在しません", 404);
 		
 		App::closeDB($idb);
-		
+
 		return $rt;
 	}
 	
@@ -621,12 +619,12 @@ class ReadHandler extends Handler
 				$rt[] = "投稿キーが一致しません";
 		
 		if (isset($entry->link) &&
-			mb_strstr($entry->link, ":") &&
+			mb_strstr($entry->link, ":") !== false &&
 			!preg_match("/^http:/", trim($entry->link)))
 			$rt[] = "リンクに不明なプロトコルが指定されています";
 		
 		$summaryLines = mb_substr_count(strtr($entry->summary ?? "", array("\r\n" => "\n", "\r" => "\n")), "\n") + 1;
-		$summaryBytes = strlen(bin2hex(mb_convert_encoding($entry->summary ?? "", "Windows-31J", "UTF-8"))) / 2;
+		$summaryBytes = strlen(bin2hex((string)mb_convert_encoding($entry->summary ?? "", "Windows-31J", "UTF-8"))) / 2;
 		
 		if (Configuration::$instance->maxSummaryLines > 0 && $summaryLines > Configuration::$instance->maxSummaryLines)
 			$rt[] = "概要が {$summaryLines} 行です。" . Configuration::$instance->maxSummaryLines . " 行以下である必要があります。";
@@ -637,7 +635,7 @@ class ReadHandler extends Handler
 			$rt[] = "本文が入力されていません";
 		else
 		{
-			$bytes = strlen(bin2hex(mb_convert_encoding($thread->body ?? "", "Windows-31J", "UTF-8"))) / 2;
+			$bytes = strlen(bin2hex((string)mb_convert_encoding($thread->body ?? "", "Windows-31J", "UTF-8"))) / 2;
 			
 			if (Configuration::$instance->minBodySize > 0 && Configuration::$instance->minBodySize > $bytes)
 				$rt[] = "本文が {$bytes} バイトです。" . Configuration::$instance->minBodySize . " バイト以上である必要があります。";
@@ -657,7 +655,7 @@ class ReadHandler extends Handler
 		if (!Auth::hasSession(true) || !Configuration::$instance->ignoreDisallowedWordsWhenAdmin)
 		{
 			foreach (Configuration::$instance->disallowedWordsForName as $i)
-				if (mb_strstr($entry->name ?? "", $i))
+				if (mb_strstr($entry->name ?? "", $i) !== false)
 				{
 					if (Configuration::$instance->showDisallowedWords)
 						$rt[] = "名前に禁止ワードが含まれています: {$i}";
@@ -677,7 +675,7 @@ class ReadHandler extends Handler
 					"本文" => $thread->body,
 					"あとがき" => $thread->afterword,
 				) as $k => $v)
-					if (mb_strstr($v ?? "", $i))
+					if (mb_strstr($v ?? "", $i) !== false)
 					{
 						if (Configuration::$instance->showDisallowedWords)
 							$rt[] = "{$k}に禁止ワードが含まれています: {$i}";
@@ -697,7 +695,7 @@ class ReadHandler extends Handler
 		if (!is_null(self::param("name")))				$entry->name = self::param("name");
 		if (!is_null(self::param("mail")))				$entry->mail = self::param("mail");
 		if (!is_null(self::param("link")))				$entry->link = self::param("link");
-		if (!is_null(self::param("tags")))				$entry->tags = Util::splitTags(self::param("tags"));
+		if (!is_null(self::param("tags")))				$entry->tags = Util::splitTags(self::param("tags", ""));
 		if (!is_null(self::param("summary")))			$entry->summary = self::param("summary", null, false, false);
 		if (!is_null(self::param("body")))				$thread->body = self::param("body", null, false, false);
 		if (!is_null(self::param("afterword")))			$thread->afterword = self::param("afterword", null, false, false);
@@ -709,9 +707,9 @@ class ReadHandler extends Handler
 		if (!is_null(self::param("convertLineBreak")))	$thread->convertLineBreak = self::param("convertLineBreak") == "true";
 		
 		$entry->pageCount = $thread->pageCount();
-		$entry->size = round(strlen(bin2hex(mb_convert_encoding($thread->body ?? "", "Windows-31J", "UTF-8"))) / 2 / 1024, 2);
+		$entry->size = round((float)strlen(bin2hex((string)mb_convert_encoding($thread->body ?? "", "Windows-31J", "UTF-8"))) / 2.0 / 1024.0, 2);
 		$entry->lastUpdate = time();
-		$entry->host = Util::getRemoteHost() ?: null;
+		$entry->host = Util::getRemoteHost() ?? null;
 	}
 	
 	/**

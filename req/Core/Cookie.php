@@ -21,25 +21,25 @@ class Cookie
 	
 	private static function checkCookie(): void
 	{
-		if (self::$data)
+		if (self::$data !== null)
 			return;
 		
 		self::$data = array();
 		
 		if (isset($_COOKIE[self::COOKIE_NAME]))
 			foreach (explode("<", Util::escapeInput($_COOKIE[self::COOKIE_NAME])) as $i)
-				if (mb_strstr($i, ">"))
+				if (mb_strstr($i, ">") !== false)
 				{
 					$s = explode(">", $i, 2);
 					
-					if (!Util::isEmpty($s[1]))
+					if (count($s) > 1 && $s[1] !== "")
 						self::$data[urldecode($s[0])] = urldecode($s[1]);
 				}
 	}
 	
 	static function sendCookie(): void
 	{
-		if (self::$data)
+		if (self::$data !== null)
 			setcookie
 			(
 				self::COOKIE_NAME,

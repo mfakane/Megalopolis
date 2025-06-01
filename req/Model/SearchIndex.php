@@ -28,7 +28,6 @@ abstract class SearchIndex
 	abstract function ensureTableExists(PDO $idb): void;
 
 	/**
-	 * @param int $id
 	 * @return int[]
 	 */
 	abstract function getExistingThread(PDO $idb): array;
@@ -70,7 +69,7 @@ abstract class SearchIndex
 	 * @param ?int[] $ids
 	 * @return int[]
 	 */
-	static function search(PDO $idb, array $query, array $type = null, array $ids = null): array
+	static function search(PDO $idb, array $query, ?array $type = null, ?array $ids = null): array
 	{
 		if (is_array($ids) && !$ids)
 			return array();
@@ -97,7 +96,7 @@ abstract class SearchIndex
 		if (Configuration::$instance->dataStore instanceof MySQLDataStore)
 			return "MySQL";
 		else if (Configuration::$instance->dataStore instanceof SQLiteDataStore)
-			if (Configuration::$instance->dataStore->supportedFullTextSearchModule())
+			if (Configuration::$instance->dataStore->supportedFullTextSearchModule() !== null)
 				return "SQLite";
 		
 		return "Classic";
@@ -190,17 +189,17 @@ abstract class SearchIndex
 					$noIncompletedGram = $i["noIncompletedGram"];
 			}
 			else if (!Util::isEmpty($i))
-				foreach (mb_split('[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F' . self::$endchars . ']', $gramMax == -1 ? mb_strtolower($i) : mb_substr(mb_strtolower($i), 0, $gramMax)) as $j)
-					if ($l = mb_strlen($j))
+				foreach ((array)mb_split('[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F' . self::$endchars . ']', $gramMax == -1 ? mb_strtolower($i) : mb_substr(mb_strtolower($i), 0, $gramMax)) as $j)
+					if ($l = mb_strlen((string)$j))
 						for ($k = 0; $k < $l; $k++)
-							if (!in_array($s = mb_substr($j, $k, $gram), $rt))
+							if (!in_array($s = mb_substr((string)$j, $k, $gram), $rt))
 							{
-								if ($noIncompletedGram && mb_strlen($s) < $gram)
+								if ($noIncompletedGram !== false && mb_strlen($s) < $gram)
 									break;
 								
 								$rt[] = $s;
 								
-								if ($endOnIncompletedGram && mb_strlen($s) < $gram)
+								if ($endOnIncompletedGram !== false && mb_strlen($s) < $gram)
 									break;
 							}
 		

@@ -33,13 +33,27 @@ class Comment
 	
 	public bool $loaded = false;
 
-	function __construct(PDO $db = null)
+	private function __construct(int $id)
 	{
-		if ($db)
-		{
-			$this->id = time();
-			$this->dateTime = time();
-		}
+		$this->id = $id;
+	}
+
+	static function forEntry(ThreadEntry &$entry): Comment
+	{
+		$id = time();
+		$comment = new Comment($id);
+		$comment->dateTime = $id;
+		$comment->entryID = $entry->id;
+		
+		return $comment;
+	}
+
+	static function forDateTime(int $dateTime): Comment
+	{
+		$comment = new Comment($dateTime);
+		$comment->dateTime = $dateTime;
+		
+		return $comment;
 	}
 	
 	/**
@@ -103,9 +117,8 @@ class Comment
 		/** @var CommentEntity */
 		foreach ($st?->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\CommentEntity") ?? array() as $record)
 		{
-			$comment = new Comment();
+			$comment = new Comment($record->id);
 			$comment->entryID = $record->entryID;
-			$comment->id = $record->id;
 			$comment->name = $record->name;
 			$comment->mail = $record->mail;
 			$comment->body = $record->body;

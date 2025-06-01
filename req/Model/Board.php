@@ -28,13 +28,13 @@ class Board
 			App::THREAD_ENTRY_TABLE
 		)));
 		Util::executeStatement($st);
-		$rt = $st?->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
+		$rt = $st?->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0) ?? [];
 		
 		self::$latestSubject = $rt ? intval(array_pop($rt)) : 0;
 		
 		if (Configuration::$instance->convertOnDemand &&
 			is_dir("Megalith/sub"))
-			self::$latestSubject = max(self::$latestSubject, count(glob("Megalith/sub/subject*.txt")) - 1);
+			self::$latestSubject = max(self::$latestSubject, count((array)glob("Megalith/sub/subject*.txt")) - 1);
 		
 		return self::$latestSubject;
 	}
@@ -63,7 +63,7 @@ class Board
 			App::SUBJECT_TABLE
 		)));
 		Util::executeStatement($st, array($subject));
-		$rt = $st?->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
+		$rt = $st?->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0) ?? [];
 		
 		return $rt ? intval(array_shift($rt)) : null;
 	}

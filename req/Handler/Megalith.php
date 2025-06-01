@@ -16,7 +16,6 @@ class MegalithHandler extends Handler
 			preg_match('/^subject(s|[0-9]+|)$/', $name, $matches))
 		{
 			$db = App::openDB();
-			$content = null;
 			$latest = Board::getLatestSubject($db);
 			
 			if ($matches[1] == "s")
@@ -31,7 +30,7 @@ class MegalithHandler extends Handler
 				if (($subject = $matches[1] == "" ? $latest : intval($matches[1])) > $latest)
 					throw new ApplicationException("ファイルが見つかりません", 404);
 				
-				if (($lastUpdate = Board::getLastUpdate($db, $latest)) && Util::isCachedByBrowser($lastUpdate))
+				if (($lastUpdate = Board::getLastUpdate($db, $latest)) !== null && Util::isCachedByBrowser($lastUpdate))
 					Visualizer::notModified();
 				
 				if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
@@ -111,7 +110,7 @@ class MegalithHandler extends Handler
 						$c->showName[Configuration::ON_ENTRY] ? (Util::isEmpty($_->name) ? $c->defaultName : $_->name) : "",
 						$c->showName[Configuration::ON_ENTRY] ? $_->mail : "",
 						$c->showName[Configuration::ON_ENTRY] ? $_->link : "",
-						$c->showComment[Configuration::ON_SUBJECT] ? ($c->showPoint[Configuration::ON_SUBJECT] ? "{$_->commentedEvaluationCount}/{$_->responseCount}" : "0/{$_->responseCount}") : "0/0",
+						$c->showComment[Configuration::ON_SUBJECT] ? (isset($c->showPoint[Configuration::ON_SUBJECT]) && $c->showPoint[Configuration::ON_SUBJECT] ? "{$_->commentedEvaluationCount}/{$_->responseCount}" : "0/{$_->responseCount}") : "0/0",
 						$c->showPoint[Configuration::ON_ENTRY] ? $_->points : "0",
 						$c->showRate[Configuration::ON_ENTRY] ? $_->rate : "0",
 						date("Y/m/d H:i:s", $_->getLatestLastUpdate()),
@@ -236,7 +235,7 @@ class MegalithHandler extends Handler
 		if (App::$handlerType != "ini")
 			throw new ApplicationException("ファイルが見つかりません", 404);
 		
-		if (Util::isCachedByBrowser(filemtime("config.php")))
+		if (Util::isCachedByBrowser((int)filemtime("config.php")))
 			Visualizer::notModified();
 		
 		return Visualizer::visualize("Index/Settings.Ini", 200, "text/plain", "Shift_JIS", "Windows-31J");

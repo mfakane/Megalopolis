@@ -70,7 +70,7 @@ Visualizer::doctype();
 				<?=$h->entryCount ?>
 			</dd>
 		<?php endif ?>
-		<?php if ($h->lastUpdate): ?>
+		<?php if ($h->lastUpdate !== null): ?>
 			<dt>最終更新</dt>
 			<dd>
 				<time datetime="<?=Visualizer::escapeOutput(date("c", $h->lastUpdate)) ?>">
@@ -127,7 +127,7 @@ Visualizer::doctype();
 		</section>
 	<?php endif ?>
 	<?php if ($h->subjectCount): ?>
-		<?php if ($h->entries): ?>
+		<?php if (count($h->entries ?? [])): ?>
 			<?php if ($isAdmin): ?>
 				<form action="" method="post" id="entriesForm">
 			<?php endif ?>
@@ -138,7 +138,7 @@ Visualizer::doctype();
 					<?php Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHrefArray(array("author", $d)) . "/") ?>
 				<?php endif ?>
 			<?php endif ?>
-			<?php Template::entries($h->entries, $isAdmin) ?>
+			<?php Template::entries($h->entries ?? [], $isAdmin) ?>
 			<?php if ($h->pageCount > 1): ?>
 				<?php if (App::$actionName == "tag"): ?>
 					<?php Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHrefArray(array("tag", $d)) . "/") ?>

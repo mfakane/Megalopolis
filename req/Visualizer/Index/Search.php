@@ -29,7 +29,7 @@ $pagerHref = Visualizer::actionHref("search", array
 	<?php Visualizer::head() ?>
 	<meta name="robots" content="noindex,noarchive" />
 	<link rel="search" href="<?=Visualizer::escapeOutput(Visualizer::actionHrefArray(array("search"))) ?>" />
-	<?php if ($h->entries): ?>
+	<?php if (count($h->entries ?? [])): ?>
 		<?php if ($h->page > 1): ?>
 			<link rel="prev" href="<?=Visualizer::escapeOutput($pagerHref . ($h->page - 1)) ?>" />
 		<?php endif ?>
@@ -93,12 +93,12 @@ $pagerHref = Visualizer::actionHref("search", array
 		</section>
 	</form>
 	<div id="content">
-		<?php if ($h->entries): ?>
+		<?php if (count($h->entries ?? [])): ?>
 			<?php if ($isAdmin): ?>
 				<form action="" method="post" id="entriesForm">
 			<?php endif ?>
 			<?php Visualizer::pager($h->page, $h->pageCount, 5, $pagerHref) ?>
-			<?php Template::entries($h->entries, $isAdmin) ?>
+			<?php Template::entries($h->entries ?? [], $isAdmin) ?>
 			<?php Visualizer::pager($h->page, $h->pageCount, 5, $pagerHref) ?>
 			<?php if ($isAdmin): ?>
 					<input type="hidden" name="token" value="<?=Visualizer::escapeOutput($_SESSION[Auth::SESSION_TOKEN]) ?>" />

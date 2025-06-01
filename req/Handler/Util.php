@@ -11,7 +11,7 @@ class UtilHandler extends Handler
 	{
 		Auth::$caption = "管理者ログイン";
 		
-		if (!Configuration::$instance->utilsEnabled && !Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
+		if (!Configuration::$instance->utilsEnabled || Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
 			Auth::loginError("管理者パスワードが一致しません");
 		
 		return Visualizer::visualize();
@@ -21,7 +21,7 @@ class UtilHandler extends Handler
 	{
 		Auth::$caption = "管理者ログイン";
 		
-		if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
+		if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
 			Auth::loginError("管理者パスワードが一致しません");
 		
 		Auth::cleanSession(!Auth::hasSession(true));
@@ -70,7 +70,7 @@ class UtilHandler extends Handler
 				
 				$idb = App::openDB(App::INDEX_DATABASE);
 				
-				if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
+				if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
 					Auth::loginError("管理者パスワードが一致しません");
 				
 				$ids = array_map(fn(string $x) => intval($x), IndexHandler::postParamAsArray("ids", []));
@@ -80,13 +80,14 @@ class UtilHandler extends Handler
 				if ($db !== $idb)
 					$idb->beginTransaction();
 				
-				switch ($mode = Util::escapeInput($_POST["admin"]))
+				switch (Util::escapeInput($_POST["admin"]))
 				{
 					case "unpost":
 						ThreadEntry::deleteDirect($db, $idb, $ids);
 					
-						foreach (array_unique(array_map(function($_) { return $_->subject; }, array_intersect_key(Visualizer::$data["entries"], array_flip($ids)))) as $i)
-							Board::setLastUpdate($db, $i);
+						foreach (array_unique(array_map(function($x) { return $x->subject; }, array_intersect_key(Visualizer::$data["entries"], array_flip($ids)))) as $i)
+							if ($i !== null)
+								Board::setLastUpdate($db, $i);
 						
 						foreach ($ids as $i)
 							unset(Visualizer::$data["entries"][$i]);
@@ -195,7 +196,7 @@ class UtilHandler extends Handler
 				
 				$rt = SearchIndex::ensureTable($idb)->registerSubject($db, $idb, $current, $offset, $buffer);
 				$count += $rt["processed"];
-				$nextOffset = $rt["remaining"] <= 0 ? 0 : $offset += $buffer;
+				$nextOffset = $rt["remaining"] <= 0 ? 0 : $offset + $buffer;
 				$next = $nextOffset == 0 ? $current + 1 : $current;
 				
 				$idb->commit();
@@ -258,7 +259,6 @@ class UtilHandler extends Handler
 			if ($params[0] == "list")
 			{
 				$subjects = array_merge(array_slice(Util::readLines("{$dir}sub/subjects.txt"), 1), array("subject.txt"));
-				$subjectNum = 0;
 				$subjectRange = array();
 				
 				foreach ($subjects as $k => $v)
@@ -343,10 +343,12 @@ class UtilHandler extends Handler
 						($id = intval(mb_substr($i->getFilename(), 0, -4))) >= $start &&
 						($end == 0 || $id < $end))
 					{
-						$datLines = is_file($dat = "{$dir}dat/{$id}.dat") ? array_map(function($_) { return mb_convert_encoding($_, "UTF-8", "Windows-31J"); }, Util::readLines($dat)) : null;
+						$datLines = is_file($dat = "{$dir}dat/{$id}.dat")
+							? array_map(function($_) { return (string)mb_convert_encoding($_, "UTF-8", "Windows-31J"); }, Util::readLines($dat))
+							: null;
 						$entry = null;
 						
-						if ($datLines)
+						if ($datLines !== null)
 							$datLines[0] = "{$id}.dat<>{$datLines[0]}";
 						
 						if (in_array($id, $existing))
@@ -428,7 +430,7 @@ class UtilHandler extends Handler
 						
 						if (++$currentCount == max($buffer, 1))
 						{
-							$lastID = ($thread->id ?? 0) + 1;
+							$lastID = $thread->id + 1;
 							array_unshift($params, "{$subject}-{$lastID}-{$end}");
 							
 							break;
@@ -528,7 +530,7 @@ class UtilHandler extends Handler
 				
 				if (is_file($subjectFile))
 				{
-					$sub = array_map(function($_) { return mb_convert_encoding($_, "UTF-8", "Windows-31J"); }, Util::readLines($subjectFile));
+					$sub = array_map(function($_) { return (string)mb_convert_encoding($_, "UTF-8", "Windows-31J"); }, Util::readLines($subjectFile));
 					$datCount = count($sub);
 					
 					foreach (array_slice($sub, $offset, $buffer) as $i)
@@ -612,7 +614,9 @@ class UtilHandler extends Handler
 	
 	function config(): bool
 	{
-		if (Util::isCachedByBrowser(filemtime("config.php")))
+		$configMtime = filemtime("config.php");
+		
+		if ($configMtime !== false && Util::isCachedByBrowser($configMtime))
 			Visualizer::notModified();
 		
 		$c = Configuration::$instance;
@@ -779,12 +783,13 @@ class UtilHandler extends Handler
 		
 		for ($i = 0; $i < 25; $i++)
 		{
-			$thread = new Thread($db);
-			$thread->entry->id -= rand(100, 10000);
-			$thread->entry->title = self::createRandomString(64);
-			$thread->entry->name = self::createRandomString(16);
-			$thread->entry->mail = self::createRandomString(32);
-			$thread->entry->link = self::createRandomString(32);
+			$entry = ThreadEntry::create($db);
+			$thread = new Thread($entry);
+			$entry->id -= rand(100, 10000);
+			$entry->title = self::createRandomString(64);
+			$entry->name = self::createRandomString(16);
+			$entry->mail = self::createRandomString(32);
+			$entry->link = self::createRandomString(32);
 			
 			for ($j = 0; $j < 5; $j++)
 				$thread->entry->tags[] = self::createRandomString(16);
@@ -826,7 +831,7 @@ class UtilHandler extends Handler
 		
 		Auth::$caption = "管理者ログイン";
 		
-		if ($requireAuth && !Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
+		if ($requireAuth && Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
 			Auth::loginError("管理者パスワードが一致しません");
 	}
 }

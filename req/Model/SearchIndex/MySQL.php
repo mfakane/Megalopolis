@@ -10,9 +10,10 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		$this->gramLength = max(Configuration::$instance->mysqlSearchNgramLength, 2);
 	}
 	
+	#[\Override]
 	function registerThread(PDO $idb, Thread $thread, bool $removeExisting): void
 	{
-		if (!isset($thread->id))
+		if ($thread->id === 0)
 			return;
 
 		/** @var array<string, string[]> */
@@ -46,7 +47,8 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		)));
 		Util::executeStatement($st, array_map(function($_) { return implode(" ", $_); }, $words));
 	}
-	
+
+	#[\Override]
 	function attachIndexCore(PDO $idb): void
 	{
 		if (!Configuration::$instance->dataStore instanceof MySQLDataStore)
@@ -54,7 +56,8 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 
 		Configuration::$instance->dataStore->attachFullTextIndex($idb, self::$searchIndexSchema, self::INDEX_TABLE);
 	}
-	
+
+	#[\Override]
 	function detachIndexCore(PDO $idb): void
 	{
 		if (!Configuration::$instance->dataStore instanceof MySQLDataStore)
@@ -62,8 +65,9 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 
 		Configuration::$instance->dataStore->detachFullTextIndex($idb, self::$searchIndexSchema, self::INDEX_TABLE);
 	}
-	
-	function searchThread(PDO $idb, array $query, array $type = null, array $ids = null): array
+
+	#[\Override]
+	function searchThread(PDO $idb, array $query, ?array $type = null, ?array $ids = null): array
 	{
 		if (!$query)
 			return array();
@@ -83,7 +87,6 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 			if ($words = $this->getWords(array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($i) >= $this->gramLength), $i))
 			{
 				$currentWord = array();
-				$lastLength = 0;
 				
 				foreach ($words as $j)
 				{
@@ -101,8 +104,6 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 						
 						$queryArguments[] = $prefix . $j . (Configuration::$instance->mysqlSearchUseHeadMatching ? "*" : str_repeat("_", $this->gramLength - $currentLength));
 					}
-					
-					$lastLength = $currentLength;
 				}
 				
 				if ($currentWord)
@@ -125,7 +126,8 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		
 		return $st?->fetchAll(PDO::FETCH_COLUMN, 0) ?? array();
 	}
-	
+
+	#[\Override]
 	function unregisterThread(PDO $idb, array $ids): void
 	{
 		$count = count($ids);
@@ -150,7 +152,8 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 				$count
 			))));
 	}
-	
+
+	#[\Override]
 	function getEntryCountCore(PDO $idb): ?int
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf

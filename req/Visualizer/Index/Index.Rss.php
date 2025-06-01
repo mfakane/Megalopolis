@@ -20,11 +20,11 @@ else
 		<language>ja-JP</language>
 		<description><?=Visualizer::escapeOutput($c->notes) ?></description>
 		<generator><?=Visualizer::escapeOutput(App::NAME) ?> <?=Visualizer::escapeOutput(App::VERSION) ?></generator>
-		<?php if ($h->entries): ?>
-			<?php if ($h->lastUpdate): ?>
+		<?php if (count($h->entries ?? [])): ?>
+			<?php if ($h->lastUpdate !== null): ?>
 				<lastBuildDate><?=Visualizer::escapeOutput(date("r", $h->lastUpdate)) ?></lastBuildDate>
 			<?php endif ?>
-			<?php foreach ($h->entries as $i): ?>
+			<?php foreach ($h->entries ?? [] as $i): ?>
 				<item>
 					<?php if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
 						<title><?=Visualizer::escapeOutput($i->title) ?></title>

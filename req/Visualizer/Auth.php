@@ -28,7 +28,7 @@ $d = Visualizer::$data;
 			<?php Visualizer::delegateParameters($_POST, array("password", "token")) ?>
 		</section>
 	</form>
-	<?php if (Auth::$details): ?>
+	<?php if (Auth::$details !== null): ?>
 		<?=Auth::$details ?>
 	<?php endif ?>
 	<?php Visualizer::footer() ?>

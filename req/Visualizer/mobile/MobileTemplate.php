@@ -10,7 +10,7 @@ class MobileTemplate
 		foreach (array
 		(
 			"h" => "作品一覧, home",
-			"s" => Configuration::$instance->showTitle[Configuration::ON_SUBJECT] && Configuration::$instance->useSearch ? "検索, search" : null,
+			"s" => Configuration::$instance->showTitle[Configuration::ON_SUBJECT] === true && Configuration::$instance->useSearch ? "検索, search" : null,
 			"recent" => "履歴, history",
 			"m" => "その他, more"
 		) as $k => $v)

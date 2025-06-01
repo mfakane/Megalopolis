@@ -90,7 +90,7 @@ class Visualizer
 			<meta name="application-name" content="<?php self::converted(Configuration::$instance->title) ?>" />
 			<script src="http://code.jquery.com/jquery-1.8.1.min.js"></script>
 			<link href="<?php self::converted(self::actionHref("style", "style.css")) ?>" rel="stylesheet" />
-			<?php if (Configuration::$instance->skin): ?>
+			<?php if (Configuration::$instance->skin !== null): ?>
 				<link href="<?php self::converted(self::actionHref("style", Configuration::$instance->skin, "style.css")) ?>" rel="stylesheet" />
 			<?php endif ?>
 			<script src="<?php self::converted(self::actionHref("script", "base.js")) ?>"></script>
@@ -257,8 +257,8 @@ class Visualizer
 			Util::BROWSER_TYPE_MSIE,
 			Util::BROWSER_TYPE_MSIE_NEW
 		)) ? "#" : "";
-		$start = max(min($current - floor($range / 2), $max - $range + 1), 1);
-		$end = min(max($current - ceil($range / 2), 0) + $range, $max);
+		$start = (int)max(min((float)$current - floor($range / 2), $max - $range + 1), 1);
+		$end = (int)min((float)max((float)$current - ceil($range / 2), 0) + (float)$range, $max);
 		$isSimple = self::isSimple();
 		
 		list($prefix, $suffix) = (is_array($link) ? $link : array($link)) + array("", "");
@@ -299,7 +299,7 @@ class Visualizer
 						</li>
 					<?php endif ?>
 				<?php endif ?>
-				<?php foreach (range($reverse ? $end : max(min($current - floor($range / 2), $max - $range + 1), 1), $reverse ? $start : $end, $reverse ? -1 : 1) as $i): ?>
+				<?php foreach (range($reverse ? $end : (int)max(min((float)$current - floor($range / 2), $max - $range + 1), 1), $reverse ? $start : $end, $reverse ? -1 : 1) as $i): ?>
 					<li>
 						<a href="<?php self::converted($i == $current ? $loopback : $prefix . $i . $suffix) ?>"<?php echo $i == $current ? ' class="active"' : null ?>>
 							<?php self::converted((string)$i) ?>
@@ -349,8 +349,8 @@ class Visualizer
 		if ($max < 2)
 			return;
 		
-		$start = max(min($current - floor($range / 2), $max - $range + 1), 1);
-		$end = min(max($current - ceil($range / 2), 0) + $range, $max);
+		$start = (int)max(min((float)$current - floor($range / 2), $max - $range + 1), 1);
+		$end = (int)min((float)max((float)$current - ceil($range / 2), 0) + (float)$range, $max);
 		$isSimple = self::isSimple();
 		
 		?>
@@ -370,7 +370,7 @@ class Visualizer
 					</button>
 				</li>
 			<?php endif ?>
-			<?php foreach (range(max(min($current - floor($range / 2), $max - $range + 1), 1), $end, 1) as $i): ?>
+			<?php foreach (range($start, $end, 1) as $i): ?>
 				<li>
 					<button name="<?php echo $pageParam ?>" value="<?php echo $i ?>"<?php if ($i == $current) echo ' class="active loopback"'; ?>>
 						<?php self::converted((string)$i) ?>
@@ -581,7 +581,7 @@ class Visualizer
 	
 	static function escapeSummary(string $s): string
 	{
-		return preg_replace("/^(https?|ftp)(:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)$/", '<a href="$0">$0</a>', strtr(self::escapeOutput($s), array
+		return (string)preg_replace("/^(https?|ftp)(:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)$/", '<a href="$0">$0</a>', strtr(self::escapeOutput($s), array
 		(
 			"\r\n" => "<br />",
 			"\r" => "<br />",
@@ -598,9 +598,9 @@ class Visualizer
 	{
 		if (!isset($thread)) return "";
 		
-		$content = $page ? $thread->page($page) : $thread->body;
-		$s = self::ensureHtml(isset($offset) && $length && isset($content) ? mb_substr($content, $offset, $length) : $content ?? "", $stripExcept);
-		
+		$content = $page !== null ? $thread->page($page) : $thread->body;
+		$s = self::ensureHtml(isset($offset) && $length !== null && isset($content) ? mb_substr($content, $offset, $length) : $content ?? "", $stripExcept);
+
 		if ($thread->convertLineBreak)
 			return self::convertLineBreak($s);
 		else
@@ -654,7 +654,7 @@ class Visualizer
 
 		self::replaceTags($oldHtml->documentElement->firstElementChild, $newHtml, $newHtml, $disallowed, $disallowedMap, $allowed);
 		
-		$str = $newHtml->saveHTML();
+		$str = (string)$newHtml->saveHTML();
 		unset($oldHtml, $newHtml);
 		
 		if (!is_array($stripExcept))
@@ -662,7 +662,7 @@ class Visualizer
 			
 		if ($stripExcept)
 		{
-			$str = preg_replace('@<([^/\sa-zA-Z])@i', '&lt;$1', $str);
+			$str = (string)preg_replace('@<([^/\sa-zA-Z])@i', '&lt;$1', $str);
 			$str = strip_tags($str, "<" . implode("><", $stripExcept) . ">");
 		}
 		
@@ -674,17 +674,18 @@ class Visualizer
 		/** @var \DOMNode */
 		foreach ($oldNode->childNodes as $oldChildNode)
 		{
-			if ($oldChildNode->nodeType == XML_ELEMENT_NODE)
+			if ($oldChildNode->nodeType == XML_ELEMENT_NODE &&
+				$oldChildNode instanceof \DOMElement)
 			{
 				if (isset($disallowedMap[$oldChildNode->tagName]))
 					if (isset($disallowed[$oldChildNode->tagName]))
-						$oldChildNode->tagName = $disallowed[$oldChildNode->tagName];
+					$oldChildNode->tagName = $disallowed[$oldChildNode->tagName];
 					else
 					{
 						$newNode->appendChild($newDocument->createTextNode(" :REPLACED: "));
 						continue;
 					}
-				
+
 				if (!isset($allowed[$oldChildNode->tagName]))
 				{
 					$newNode->appendChild($newDocument->createTextNode($oldChildNode->ownerDocument->saveHTML($oldChildNode)));
@@ -725,12 +726,12 @@ class Visualizer
 			{
 				case "style":
 				{
-					$str = preg_replace_callback('/\\\([0-9A-Fa-f]{1,6})/i', function($x)
+					$str = (string)preg_replace_callback('/\\\([0-9A-Fa-f]{1,6})/i', function($x)
 					{
 						$a = intval($x[1], 16);
 						return $a >= 32 && $a <= 126 ? chr($a) : $x[0];
 					}, strval($oldAttribute->value));
-					$str = preg_replace('@/\*.*\*/@', "", $str);
+					$str = (string)preg_replace('@/\*.*\*/@', "", $str);
 					
 					foreach (explode(";", $str) as $j)
 					{
@@ -760,7 +761,6 @@ class Visualizer
 	}
 	
 	/**
-	 * @param array<int|non-empty-string, non-empty-array<int|non-empty-string, array<int|non-empty-string, mixed>|string>|string> $params
 	 * @param string[] $except
 	 */
 	static function delegateParameters(array $params, array $except = array()): void
@@ -792,21 +792,21 @@ class Visualizer
 		$diff = $now - $time;
 		
 		if ($diff < -$day)
-			return ceil(-$day) . " 日先 " . date("H:i", $time);	
+			return (int)ceil(-$day) . " 日先 " . date("H:i", $time);	
 		else if ($diff < -$hour)
-			return ceil(-$hour) . " 時間先";	
+			return (int)ceil(-$hour) . " 時間先";	
 		else if ($diff < -$minute)
-			return ceil(-$diff / $minute) . " 分先";	
+			return (int)ceil(-$diff / $minute) . " 分先";	
 		else if ($diff < 0)
-			return ceil(-$diff) . " 秒先";
+			return (int)ceil(-$diff) . " 秒先";
 		else if ($diff < $minute)
-			return floor($diff) . " 秒前";	
+			return (int)floor($diff) . " 秒前";	
 		else if ($diff < $hour)
-			return floor($diff / $minute) . " 分前";
+			return (int)floor($diff / $minute) . " 分前";
 		else if ($diff < $day)
-			return floor($diff / $hour) . " 時間前";
+			return (int)floor($diff / $hour) . " 時間前";
 		else if ($diff < $day * 3)
-			return floor($diff / $day) . " 日前 " . date("H:i", $time);
+			return (int)floor($diff / $day) . " 日前 " . date("H:i", $time);
 		else if ($diff < $year)
 			return date("m/d H:i", $time);
 		else
@@ -860,22 +860,22 @@ class Visualizer
 
 		require $path;
 
-		$output = ob_get_contents();
+		$output = (string)ob_get_contents();
 		ob_end_clean();
 		$nestLevel--;
 		
 		if ($nestLevel == 0)
 		{
-			$output = mb_ereg_replace('[\t \r\n]+?<', '<', mb_ereg_replace('>[\t \r\n]+', '>', $output) ?? "") ?? "";
+			$output = (string)mb_ereg_replace('[\t \r\n]+?<', '<', (string)mb_ereg_replace('>[\t \r\n]+', '>', $output));
 
 			if (isset($mbencoding))
-				$output = mb_convert_encoding($output, $mbencoding, "UTF8");
+				$output = (string)mb_convert_encoding($output, $mbencoding, "UTF8");
 			
 			$output = strtr($output, array
 			(
 				"<!DOCTYPE html>" => "<!DOCTYPE html>\r\n",
-				"__RENDER_TIME__" => round((microtime(true) - $start) * 1000, 2) . "ms",
-				"__PROCESS_TIME__" => round(($start - App::$startTime) * 1000, 2) . "ms"
+				"__RENDER_TIME__" => sprintf("%.2f", (microtime(true) - $start) * 1000.0) . "ms",
+				"__PROCESS_TIME__" => sprintf("%.2f", ($start - App::$startTime) * 1000.0) . "ms"
 			));
 		}
 		
@@ -893,7 +893,7 @@ class Visualizer
 		header("Content-Type: application/json");
 		
 		Auth::commitSession();
-		self::echoWithCompression(json_encode($obj));
+		self::echoWithCompression((string)json_encode($obj));
 		
 		return true;
 	}
@@ -907,7 +907,9 @@ class Visualizer
 		header("Content-Type: text/csv; charset=Shift_JIS; header=present");
 		
 		$s = fopen("php://output", 'w');
-		mb_http_output("Windows-31J");
+		if ($s === false) throw new ApplicationException("Failed to open php://output");
+
+		assert(mb_http_output("Windows-31J"));
 		
 		foreach ($obj as $i)
 			fputcsv($s, array_map(fn($_) => mb_convert_encoding($_, "Windows-31J", "UTF-8"), $i));
@@ -936,10 +938,10 @@ class Visualizer
 		if (!isset($mbencoding))
 			$mbencoding = $encoding;
 		
-		mb_http_output($mbencoding);
+		assert(mb_http_output($mbencoding));
 		self::defaultHeaders();
 		header("Content-Type: text/plain; charset={$encoding}");
-		self::echoWithCompression(mb_convert_encoding($content, $mbencoding, "UTF-8"));
+		self::echoWithCompression((string)mb_convert_encoding($content, $mbencoding, "UTF-8"));
 		
 		return true;
 	}
@@ -979,5 +981,5 @@ class Visualizer
 	}
 }
 
-Visualizer::$basePath = rtrim(dirname(mb_strstr(Util::getPhpSelf(), Util::INDEX_FILE_NAME, true) . Util::INDEX_FILE_NAME), "/") . "/";
+Visualizer::$basePath = rtrim(dirname((string)mb_strstr(Util::getPhpSelf(), Util::INDEX_FILE_NAME, true) . Util::INDEX_FILE_NAME), "/") . "/";
 ?>

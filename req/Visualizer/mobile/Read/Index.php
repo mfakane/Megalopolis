@@ -22,9 +22,11 @@ function makeMenu(string $basePath, string $current): void
 	) as $k => $v)
 	{
 		list($n, $i) = explode(", ", $v);
+		$subject = ReadHandler::$instance->entry->subject ?? 0;
+		$id = ReadHandler::$instance->entry->id ?? 0;
 	?>
 		<li>
-			<a href="<?=Visualizer::escapeOutput(Visualizer::absoluteHref(ReadHandler::$instance->entry->subject, ReadHandler::$instance->entry->id, $k)) ?>" data-transition="none"<?php if ($k == $current): ?> class="ui-btn-active"<?php endif ?> data-icon="<?=$i ?>"><?=Visualizer::escapeOutput($n) ?></a>
+			<a href="<?=Visualizer::escapeOutput(Visualizer::absoluteHref($subject, $id, $k)) ?>" data-transition="none"<?php if ($k == $current): ?> class="ui-btn-active"<?php endif ?> data-icon="<?=$i ?>"><?=Visualizer::escapeOutput($n) ?></a>
 		</li>
 	<?php
 	}
@@ -58,7 +60,7 @@ Visualizer::doctype();
 					background-color: <?=Visualizer::escapeOutput($h->thread->background) ?>;
 				<?php endif ?>
 				<?php if (!Util::isEmpty($h->thread->backgroundImage)): ?>
-					background-image: url('<?=Visualizer::escapeOutput((strpos($h->thread->backgroundImage, "http://") === 0 ? null : Visualizer::$basePath) . $h->thread->backgroundImage) ?>');
+					background-image: url('<?=Visualizer::escapeOutput((strpos($h->thread->backgroundImage ?? "", "http://") === 0 ? "" : Visualizer::$basePath) . ($h->thread->backgroundImage ?? "")) ?>');
 				<?php endif ?>
 			}
 		</style>
@@ -214,7 +216,7 @@ Visualizer::doctype();
 					</li>
 					<li>
 						<h3>更新日時</h3>
-						<?=Visualizer::escapeOutput(Visualizer::formatDateTime($h->entry->getLatestLastUpdate())) ?>
+						<?=Visualizer::escapeOutput(Visualizer::formatDateTime($h->entry->getLatestLastUpdate() ?? 0)) ?>
 					</li>
 					<?php if ($c->showPoint[Configuration::ON_ENTRY]): ?>
 						<li>

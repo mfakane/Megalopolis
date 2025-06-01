@@ -42,10 +42,10 @@ class App
 			self::precondition(extension_loaded("pdo"), "PDO");
 			self::precondition(in_array(Util::HASH_ALGORITHM, hash_algos()), "hash_algos() " . Util::HASH_ALGORITHM);
 
-			mb_language("Japanese");
+			assert(mb_language("Japanese"));
 			mb_internal_encoding("UTF-8");
-			mb_http_output("UTF-8");
-			mb_regex_encoding("UTF-8");
+			assert(mb_http_output("UTF-8"));
+			assert(mb_regex_encoding("UTF-8"));
 			ignore_user_abort(true);
 		}
 		else if (!$cond)
@@ -75,11 +75,11 @@ class App
 	 */
 	private static function matchesAddress($arr): bool
 	{
-		$addr = $_SERVER["REMOTE_ADDR"] ?? false;
+		$addr = $_SERVER["REMOTE_ADDR"] ?? null;
 		$host = Util::getRemoteHost();
 
 		foreach ($arr as $i)
-			if ($addr && Util::wildcard($i, $addr) || $host && Util::wildcard($i, $host))
+			if ($addr !== null && Util::wildcard($i, $addr) || $host !== null && Util::wildcard($i, $host))
 				return true;
 
 		return false;
@@ -155,7 +155,9 @@ class App
 		{
 			$base = dirname($_SERVER["SCRIPT_NAME"]);
 			$content = file_get_contents($htaccess);
-			$newcontent = preg_replace('/(RewriteRule \^\(\.\+\)\$) .*/', '$1 /' . trim($base, "/") . '/' . Util::INDEX_FILE_NAME . '?path=\$1 [QSA]', $content);
+			if ($content === false) return;
+				
+			$newcontent = (string)preg_replace('/(RewriteRule \^\(\.\+\)\$) .*/', '$1 /' . trim($base, "/") . '/' . Util::INDEX_FILE_NAME . '?path=\$1 [QSA]', $content);
 
 			if ($content != $newcontent)
 				file_put_contents($htaccess, $newcontent, LOCK_EX);
@@ -174,9 +176,12 @@ class App
 
 		if (isset($pathInfo[0]) && ($idx = mb_strrpos($pathInfo[count($pathInfo) - 1], ".")) !== false)
 		{
-			$last = &$pathInfo[count($pathInfo) - 1];
+			$last = $pathInfo[count($pathInfo) - 1];
+
 			self::$handlerType = mb_substr($last, $idx + 1);
 			$last = mb_substr($last, 0, $idx);
+
+			$pathInfo[count($pathInfo) - 1] = $last;
 		}
 
 		self::load(Constant::HANDLER_DIR . "Index");

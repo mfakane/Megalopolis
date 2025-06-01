@@ -8,7 +8,7 @@ class IndexHandler extends Handler
 	public int $subject = 0;
 	public int $subjectCount = 0;
 	public int $page = 1;
-	public int $pageCount = 0;
+	public int $pageCount = 1;
 	/** @var array<int, ThreadEntry>|null */
 	public ?array $entries = null;
 	/** @var array{view: ThreadEntry[], evaluation: ThreadEntry[]}|null */
@@ -46,7 +46,7 @@ class IndexHandler extends Handler
 			Auth::ensureToken();
 			Auth::createToken();
 			
-			if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
+			if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
 				Auth::loginError("管理者パスワードが一致しません");
 			
 			$ids = array_map("intval", self::paramAsArray("id", []));
@@ -77,17 +77,17 @@ class IndexHandler extends Handler
 		
 		$this->entries = ThreadEntry::getEntriesBySubject($db, $subject);
 		
-		if (!($this->lastUpdate = Board::getLastUpdate($db, $subject)))
+		if (($this->lastUpdate = Board::getLastUpdate($db, $subject)) === null)
 			$this->lastUpdate = max(array_map(fn(ThreadEntry $x) => $x->getLatestLastUpdate(), $this->entries) + array(0));
 		
 		$this->subject = $subject;
 		$this->subjectCount = Board::getLatestSubject($db);
 		$this->entryCount = Board::getEntryCount($db, $idb);
 		
-		if ($this->lastUpdate)
+		if ($this->lastUpdate !== null)
 		{
 			$updatePeriodInSeconds = Configuration::$instance->updatePeriod * 24 * 60 * 60;
-			$hash = implode(",", array_map(fn(ThreadEntry $x) => $x->id . ":" . (time() - $x->getLatestLastUpdate() < $updatePeriodInSeconds ? "t" : "n"), $this->entries));
+			$hash = implode(",", array_map(fn(ThreadEntry $x) => $x->id . ":" . (time() - (int)$x->getLatestLastUpdate() < $updatePeriodInSeconds ? "t" : "n"), $this->entries));
 			
 			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY, "") . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "") . $hash))
 				Visualizer::notModified();
@@ -124,13 +124,14 @@ class IndexHandler extends Handler
 			"view" => array(),
 			"evaluation" => array(),
 		);
-		
-		if ($view = Cookie::getCookie(Cookie::VIEW_HISTORY_KEY))
+		$view = Cookie::getCookie(Cookie::VIEW_HISTORY_KEY);
+		if ($view !== null)
 			foreach (explode(",", $view, Configuration::$instance->maxHistory) as $i)
 				if ($entry = ThreadEntry::load($db, intval($i)))
 					$this->recentEntries["view"][] = $entry;
-		
-		if ($evaluation = Cookie::getCookie(Cookie::EVALUATION_HISTORY_KEY))
+
+		$evaluation = Cookie::getCookie(Cookie::EVALUATION_HISTORY_KEY);
+		if ($evaluation !== null)
 			foreach (explode(",", $evaluation, Configuration::$instance->maxHistory) as $i)
 				if ($entry = ThreadEntry::load($db, intval($i)))
 					$this->recentEntries["evaluation"][] = $entry;
@@ -278,7 +279,7 @@ class IndexHandler extends Handler
 			Auth::ensureToken();
 			Auth::createToken();
 			
-			if (!Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)))
+			if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
 				Auth::loginError("管理者パスワードが一致しません");
 			
 			$ids = array_map("intval", self::paramAsArray("id", []));
@@ -287,14 +288,15 @@ class IndexHandler extends Handler
 			if ($db !== $idb)
 				$idb->beginTransaction();
 			
-			switch ($mode = Util::escapeInput($admin))
+			switch (Util::escapeInput($admin))
 			{
 				case "unpost":
 					ThreadEntry::deleteDirect($db, $idb, $ids);
 					$subjects = array_map(fn($x) => $x->subject, array_intersect_key($entries, array_flip($ids)));
 
 					foreach (array_unique($subjects) as $subject)
-						Board::setLastUpdate($db, $subject);
+						if ($subject !== null)
+							Board::setLastUpdate($db, $subject);
 					
 					foreach ($ids as $i)
 						unset($entries[$i]);
@@ -542,7 +544,7 @@ class IndexHandler extends Handler
 			$this->entries = ThreadEntry::getEntriesByName($db, $name, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $this->entryCount);
 
 			$this->lastUpdate = max(array_map(fn($x) => $x->getLatestLastUpdate(), $this->entries) + array(0));
-			$hash = implode(",", array_map(fn($x) => $x->id . ":" . (time() - $x->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"), $this->entries));
+			$hash = implode(",", array_map(fn($x) => $x->id . ":" . (time() - (int)$x->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"), $this->entries));
 			
 			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY, "") . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "") . $hash))
 				Visualizer::notModified();
@@ -645,7 +647,7 @@ class IndexHandler extends Handler
 			$this->entries = ThreadEntry::getEntriesByTag($db, $tag, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $this->entryCount);
 			
 			$this->lastUpdate = max(array_map(fn($x) => $x->getLatestLastUpdate(), $this->entries) + array(0));
-			$hash = implode(",", array_map(fn($x) => $x->id . ":" . (time() - $x->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"), $this->entries));
+			$hash = implode(",", array_map(fn($x) => $x->id . ":" . (time() - (int)$x->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"), $this->entries));
 			
 			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY, "") . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "") . $hash))
 				Visualizer::notModified();
@@ -748,8 +750,9 @@ class IndexHandler extends Handler
 	function login(): bool
 	{
 		Auth::$caption = "管理者ログイン";
-		
-		if (($password = Auth::login(true)) && !Util::hashEquals(Configuration::$instance->adminHash ?? "", $password))
+		$password = Auth::login(true);
+
+		if ($password !== false && Util::hashEquals(Configuration::$instance->adminHash ?? "", $password) === false)
 			Auth::loginError("管理者パスワードが一致しません");
 		else
 			return Visualizer::redirect(isset($_GET["redir"]) && is_string($_GET["redir"]) ? $_GET["redir"] : "");

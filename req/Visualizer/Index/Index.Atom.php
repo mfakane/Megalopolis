@@ -17,11 +17,11 @@ else
 	<title><?=Visualizer::escapeOutput($c->title) ?> - <?=Visualizer::escapeOutput($title) ?></title>
 	<link href="<?=Visualizer::escapeOutput(Visualizer::absoluteHref()) ?>" />
 	<generator version="<?=Visualizer::escapeOutput(App::VERSION) ?>"><?=Visualizer::escapeOutput(App::NAME) ?></generator>
-	<?php if ($h->entries): ?>
-		<?php if ($h->lastUpdate): ?>
+	<?php if (count($h->entries ?? [])): ?>
+		<?php if ($h->lastUpdate !== null): ?>
 			<updated><?=Visualizer::escapeOutput(date("c", $h->lastUpdate)) ?></updated>
 		<?php endif ?>
-		<?php foreach ($h->entries as $i): ?>
+		<?php foreach ($h->entries ?? [] as $i): ?>
 			<entry>
 				<?php if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
 					<title><?=Visualizer::escapeOutput($i->title) ?></title>

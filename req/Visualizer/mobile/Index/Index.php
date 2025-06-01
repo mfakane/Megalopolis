@@ -20,14 +20,12 @@ if (App::$actionName == "search")
 	else if (!is_null($search = IndexHandler::param("tag")))
 		$searchMode = "tag";
 
-global $m;
-
 $m = App::$actionName == "search" ? "s" : (App::$pathInfo ? Util::escapeInput(App::$pathInfo[count(App::$pathInfo) - 1]) : "h");
 
 if (!Util::isLength($m, 1) || intval($m))
 	$m = "h";
 
-function sortMenu($h, string $label, string $columnName): void
+function sortMenu(string $label, string $columnName): void
 {
 	?>
 	<li>
@@ -268,13 +266,13 @@ App::load(Constant::VISUALIZER_DIR . "mobile/Template/Index");
 		<div data-role="content">
 			<ul data-role="listview">
 				<?php if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
-					<?php sortMenu($h, "作品名", "title") ?>
-					<?php if ($c->showName[Configuration::ON_SUBJECT]) sortMenu($h, "作者", "name") ?>
-					<?php if ($c->showSize[Configuration::ON_SUBJECT]) sortMenu($h, "サイズ", "size") ?>
-					<?php if ($c->showComment[Configuration::ON_SUBJECT]) sortMenu($h, "コメント数", "commentCount") ?>
-					<?php if ($c->showPoint[Configuration::ON_SUBJECT]) sortMenu($h, "POINT", "points") ?>
-					<?php if ($c->showRate[Configuration::ON_SUBJECT]) sortMenu($h, "Rate", "rate") ?>
-					<?php sortMenu($h, "投稿日時", "dateTime") ?>
+					<?php sortMenu("作品名", "title") ?>
+					<?php if ($c->showName[Configuration::ON_SUBJECT]) sortMenu("作者", "name") ?>
+					<?php if ($c->showSize[Configuration::ON_SUBJECT]) sortMenu("サイズ", "size") ?>
+					<?php if ($c->showComment[Configuration::ON_SUBJECT]) sortMenu("コメント数", "commentCount") ?>
+					<?php if ($c->showPoint[Configuration::ON_SUBJECT]) sortMenu("POINT", "points") ?>
+					<?php if ($c->showRate[Configuration::ON_SUBJECT]) sortMenu("Rate", "rate") ?>
+					<?php sortMenu("投稿日時", "dateTime") ?>
 				<?php endif ?>
 			</ul>
 		</div>

@@ -45,7 +45,7 @@ if (App::$actionName == "index")
 {
 	$h->page = isset($_GET["p"]) ? max(intval(IndexHandler::param("p")), 1) : 1;
 	$paging = 50;
-	$h->pageCount = (int)ceil((float)count($h->entries) / $paging);
+	$h->pageCount = (int)ceil((float)count($h->entries) / (float)$paging);
 }
 else
 	$paging = $c->searchPaging;
@@ -53,7 +53,7 @@ else
 $offset = ($h->page - 1) * $paging;
 
 if (isset($_GET["s"]))
-	switch ($column = IndexHandler::param("s"))
+	switch (IndexHandler::param("s"))
 	{
 		case "title":
 			usort($h->entries, fn($x, $y) => strnatcmp($x->title, $y->title));
@@ -182,7 +182,7 @@ Visualizer::doctype();
 				if (!$v)
 					continue;
 				
-				$isParam = strstr($k, "=");
+				$isParam = strstr($k, "=") !== false;
 				$param = $isParam ? explode("=", $k) : array();
 				?>
 				[<?=++$i ?>]<a href="<?=Visualizer::escapeOutput($k == "#" ? $k : Visualizer::actionHref($isParam ? (App::$actionName == "index" ? $h->subject : App::$actionName) : $k, $isParam ? (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode, $param[0] => $param[1]) : array($param[0] => $param[1])) : null)) ?>" accesskey="<?=$i ?>"><?=Visualizer::escapeOutput($v) ?></a>

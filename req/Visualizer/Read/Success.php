@@ -4,6 +4,8 @@ namespace Megalopolis;
 $c = Configuration::$instance;
 Visualizer::doctype();
 
+$verb = "";
+
 switch (App::$actionName)
 {
 	case "post":

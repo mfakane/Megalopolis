@@ -22,11 +22,13 @@ else
 if (isset(App::$pathInfo[3]) &&
 	$v = intval(App::$pathInfo[3]))
 	$h->page = max($v, 1);
+else
+	$h->page = 1;
 
 $paging = 8000;
-$maxPage = ceil(mb_strlen($h->thread->body ?? "") / $paging);
+$maxPage = (int)ceil((float)mb_strlen($h->thread->body ?? "") / (float)$paging);
 $commentPaging = 25;
-$maxCommentPage = ceil(count($h->thread->comments) / $commentPaging);
+$maxCommentPage = (int)ceil((float)count($h->thread->comments) / (float)$commentPaging);
 
 $length = $paging;
 $offset = $h->page * $paging - $paging;
@@ -182,7 +184,7 @@ if ($h->page < $maxPage && ($idx = mb_strrpos(mb_substr($h->thread->body ?? "", 
 									<option value="<?=Visualizer::escapeOutput($i) ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?=Visualizer::escapeOutput($i) ?> 点</option>
 								<?php endif ?>
 							<?php endforeach ?>
-							<option value="0"<?=!ReadHandler::param("point") ? ' selected="selected"' : null ?>>無評価</option>
+							<option value="0"<?=ReadHandler::param("point") === null ? ' selected="selected"' : null ?>>無評価</option>
 							<?php foreach ($c->commentPointMap as $i): ?>
 								<?php if ($i < 0): ?>
 									<option value="<?=Visualizer::escapeOutput($i) ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?=Visualizer::escapeOutput($i) ?> 点</option>

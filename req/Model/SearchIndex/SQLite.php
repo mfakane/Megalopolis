@@ -17,9 +17,10 @@ class SQLiteSearchIndex extends SearchIndex
 		"tag" => "varchar(2048) fulltext"
 	);
 	
+	#[\Override]
 	function registerThread(PDO $idb, Thread $thread, bool $removeExisting): void
 	{
-		if (!isset($thread->id))
+		if ($thread->id === 0)
 			return;
 
 		if ($removeExisting)
@@ -50,6 +51,7 @@ class SQLiteSearchIndex extends SearchIndex
 		Util::executeStatement($st, array_map(function($_) { return implode(" ", $_); }, $words));
 	}
 	
+	#[\Override]
 	function unregisterThread(PDO $idb, array $ids): void
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
@@ -61,7 +63,8 @@ class SQLiteSearchIndex extends SearchIndex
 		)));
 		Util::executeStatement($st);
 	}
-	
+
+	#[\Override]
 	function searchThread(PDO $idb, array $query, ?array $type = null, ?array $ids = null): array
 	{
 		if (!$query)
@@ -114,14 +117,16 @@ class SQLiteSearchIndex extends SearchIndex
 		
 		return $st?->fetchAll(PDO::FETCH_COLUMN, 0) ?? array();
 	}
-	
+
+	#[\Override]
 	function ensureTableExists(PDO $idb): void
 	{
 		$idb->beginTransaction();
 		Util::createFullTextTableIfNotExists($idb, self::$searchIndexSchema, self::INDEX_TABLE);
 		$idb->commit();
 	}
-	
+
+	#[\Override]
 	function getExistingThread(PDO $idb): array
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf

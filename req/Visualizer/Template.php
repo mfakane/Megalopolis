@@ -50,7 +50,7 @@ class Template
 	{
 		$rt = array();
 		
-		foreach ($visibility as $k => $v)
+		foreach ($visibility as $k => $_)
 			if (isset($arr[$k]))
 				$rt[$k] = $arr[$k];
 		
@@ -109,7 +109,7 @@ class Template
 		{
 		?>
 			<ul class="compact">
-				<?php foreach ($entries as $idx => $i): ?>
+				<?php foreach ($entries as $_ => $i): ?>
 					<li>
 						<?php if ($isAdmin || $c->showTitle[Configuration::ON_SUBJECT]): ?>
 							<h2>
@@ -117,13 +117,13 @@ class Template
 							</h2>
 						<?php endif ?>
 						<time class="lastUpdate" datetime="<?php Visualizer::converted(date("c", $i->getLatestLastUpdate())) ?>">
-							<?php Visualizer::converted(Visualizer::formatDateTime($i->getLatestLastUpdate())) ?>
+							<?php Visualizer::converted(Visualizer::formatDateTime($i->getLatestLastUpdate() ?? 0)) ?>
 						</time>
 						<?php if (time() - $i->dateTime < $c->updatePeriod * 24 * 60 * 60): ?>
 							<span class="update">
 								NEW
 							</span>
-						<?php elseif (time() - $i->getLatestLastUpdate() < $c->updatePeriod * 24 * 60 * 60): ?>
+						<?php elseif (time() - ($i->getLatestLastUpdate() ?? 0) < $c->updatePeriod * 24 * 60 * 60): ?>
 							<span class="update">
 								UP
 							</span>
@@ -161,7 +161,7 @@ class Template
 		{
 		?>
 			<div class="entries" id="entries"<?php echo $data ?>>
-				<?php foreach ($entries as $idx => $i): ?>
+				<?php foreach ($entries as $_ => $i): ?>
 					<article>
 						<div class="articleBody">
 							<?php if ($isAdmin || $c->showTitle[Configuration::ON_SUBJECT]): ?>
@@ -173,7 +173,7 @@ class Template
 								</h2>
 							<?php endif ?>
 							<time class="lastUpdate<?php echo isset($visibility["lastUpdate"]) ? null : " hidden" ?>" datetime="<?php Visualizer::converted(date("c", $i->getLatestLastUpdate())) ?>" data-unixtime="<?php Visualizer::converted(strval($i->getLatestLastUpdate())) ?>">
-								<?php Visualizer::converted(Visualizer::formatDateTime($i->getLatestLastUpdate())) ?>
+								<?php Visualizer::converted(Visualizer::formatDateTime($i->getLatestLastUpdate() ?? 0)) ?>
 							</time>
 							<time class="dateTime<?php echo isset($visibility["dateTime"]) ? null : " hidden" ?>" datetime="<?php Visualizer::converted(date("c", $i->dateTime)) ?>" data-unixtime="<?php Visualizer::converted(strval($i->dateTime)) ?>">
 								<?php Visualizer::converted(Visualizer::formatDateTime($i->dateTime)) ?>
@@ -182,7 +182,7 @@ class Template
 								<span class="update">
 									NEW
 								</span>
-							<?php elseif (time() - $i->getLatestLastUpdate() < $c->updatePeriod * 24 * 60 * 60): ?>
+							<?php elseif (time() - ($i->getLatestLastUpdate() ?? 0) < $c->updatePeriod * 24 * 60 * 60): ?>
 								<span class="update">
 									UP
 								</span>
@@ -290,7 +290,7 @@ class Template
 						</tr>
 					</thead>
 					<tbody>
-						<?php foreach ($entries as $idx => $i): ?>
+						<?php foreach ($entries as $_ => $i): ?>
 							<tr class="article<?php if (!$isAdmin && !$c->showTags[Configuration::ON_SUBJECT] && !$c->showSummary[Configuration::ON_SUBJECT]) { echo ' notags'; } else if ($c->useSummary && !Util::isEmpty($i->summary)) { echo ' hasSummary'; } ?>" id="article<?php echo $i->id ?>">
 								<?php if ($isAdmin): ?>
 									<td class="checkbox">
@@ -303,7 +303,7 @@ class Template
 											<span class="update">
 												NEW
 											</span>
-										<?php elseif (time() - $i->getLatestLastUpdate() < $c->updatePeriod * 24 * 60 * 60): ?>
+										<?php elseif (time() - ($i->getLatestLastUpdate() ?? 0) < $c->updatePeriod * 24 * 60 * 60): ?>
 											<span class="update">
 												UP
 											</span>
@@ -328,7 +328,7 @@ class Template
 									<?php Visualizer::converted(substr(Visualizer::formatDateTime($i->dateTime), 2, -3)) ?>
 								</td>
 								<td class="lastUpdate<?php echo isset($visibility["lastUpdate"]) ? null : " hidden" ?>" data-unixtime="<?php Visualizer::converted(strval($i->getLatestLastUpdate())) ?>">
-									<?php Visualizer::converted(substr(Visualizer::formatDateTime($i->getLatestLastUpdate()), 2, -3)) ?>
+									<?php Visualizer::converted(substr(Visualizer::formatDateTime($i->getLatestLastUpdate() ?? 0), 2, -3)) ?>
 								</td>
 								<?php if ($isAdmin || $c->showPages[Configuration::ON_SUBJECT]) self::entryInfoSingle($i, $visibility, "pageCount", $i->pageCount) ?>
 								<?php if ($isAdmin || $c->showSize[Configuration::ON_SUBJECT]) self::entryInfoSingle($i, $visibility, "size", "{$i->size}KB") ?>

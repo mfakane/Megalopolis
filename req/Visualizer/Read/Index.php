@@ -9,6 +9,9 @@ if (!isset($h->entry) || !isset($h->thread)) throw new ApplicationException("Thr
 
 $isEdit = in_array(App::$actionName, array("new", "edit"));
 $isAdmin = Auth::hasSession(true);
+
+/** @var array */
+$postOrSession = $_POST ? $_POST : $_SESSION;
 Visualizer::doctype();
 ?>
 <html lang="ja">
@@ -59,7 +62,7 @@ Visualizer::doctype();
 				background-color: <?=Visualizer::escapeOutput($h->thread->background) ?>;
 			<?php endif ?>
 			<?php if (!Util::isEmpty($h->thread->backgroundImage)): ?>
-				background-image: url('<?=Visualizer::escapeOutput((strpos($h->thread->backgroundImage ?? "", "http://") === 0  ? null : Visualizer::$basePath) . ($h->thread->backgroundImage ?? "")) ?>');
+				background-image: url('<?=Visualizer::escapeOutput((strpos($h->thread->backgroundImage ?? "", "http://") === 0  ? "" : Visualizer::$basePath) . ($h->thread->backgroundImage ?? "")) ?>');
 			<?php endif ?>
 			<?php if (!Util::isEmpty($h->thread->border)): ?>
 				border-color: <?=Visualizer::escapeOutput($h->thread->border) ?>;
@@ -82,19 +85,19 @@ Visualizer::doctype();
 		<dt>最終更新</dt>
 		<dd>
 			<time datetime="<?=Visualizer::escapeOutput(date("c", $h->entry->getLatestLastUpdate())) ?>">
-				<?=Visualizer::escapeOutput(Visualizer::formatDateTime($h->entry->getLatestLastUpdate())) ?>
+				<?=Visualizer::escapeOutput(Visualizer::formatDateTime($h->entry->getLatestLastUpdate() ?? 0)) ?>
 			</time>
 		</dd>
 		<?php if ($c->showSize[Configuration::ON_ENTRY]): ?>
 			<dt>サイズ</dt>
 			<dd>
-				<?=Visualizer::escapeOutput($h->entry->size ?? 0) ?>KB
+				<?=Visualizer::escapeOutput($h->entry->size) ?>KB
 			</dd>
 		<?php endif ?>
 		<?php if ($c->showPages[Configuration::ON_ENTRY]): ?>
 			<dt>ページ数</dt>
 			<dd>
-				<?=Visualizer::escapeOutput($h->entry->pageCount ?? 1) ?>
+				<?=Visualizer::escapeOutput($h->entry->pageCount) ?>
 			</dd>
 		<?php endif ?>
 	</dl>
@@ -105,7 +108,7 @@ Visualizer::doctype();
 			<?php if ($c->showReadCount[Configuration::ON_ENTRY]): ?>
 				<dt>閲覧数</dt>
 				<dd>
-					<?=Visualizer::escapeOutput($h->entry->readCount ?? 0) ?>
+					<?=Visualizer::escapeOutput($h->entry->readCount) ?>
 				</dd>
 			<?php endif ?>
 			<?php if ($c->showPoint[Configuration::ON_ENTRY] || $c->showRate[Configuration::ON_ENTRY]): ?>
@@ -116,7 +119,7 @@ Visualizer::doctype();
 					</dd>
 					<dt>POINT</dt>
 					<dd id="points">
-						<?=Visualizer::escapeOutput($h->entry->points ?? 0) ?>
+						<?=Visualizer::escapeOutput($h->entry->points) ?>
 					</dd>
 				<?php endif ?>
 				<?php if ($c->showRate[Configuration::ON_ENTRY]): ?>
@@ -148,12 +151,12 @@ Visualizer::doctype();
 	<?php if (App::$actionName != "index" && $h->entry->pageCount > 1): ?>
 		<form class="pagerContainer" action="<?=Visualizer::escapeOutput(App::$actionName == "new" ? Visualizer::actionHref(App::$actionName) : Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName)) ?>" method="post">
 			<?php Visualizer::submitPager($h->page ?? 1, $h->entry->pageCount, 10, "p") ?>
-			<?php Visualizer::delegateParameters($_POST ? $_POST : $_SESSION, array("p")) ?>
+			<?php Visualizer::delegateParameters($postOrSession, array("p")) ?>
 		</form>
 	<?php else: ?>
 		<?php Visualizer::pager($h->page ?? 1, $h->entry->pageCount, 10, array(Visualizer::actionHref($h->subject, $h->entry->id) . "/", "#body")) ?>
 	<?php endif ?>
-	<section id="body" data-style-path="<?=Visualizer::escapeOutput(Visualizer::$basePath) ?>style/<?=Visualizer::escapeOutput($c->skin && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null) ?>" data-writing-mode="<?=intval($h->thread->writingMode) ?>" data-force-taketori="<?=$h->forceTaketori ? "true" : "false" ?>">
+	<section id="body" data-style-path="<?=Visualizer::escapeOutput(Visualizer::$basePath) ?>style/<?=Visualizer::escapeOutput($c->skin !== null && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null) ?>" data-writing-mode="<?=intval($h->thread->writingMode) ?>" data-force-taketori="<?=$h->forceTaketori ? "true" : "false" ?>">
 		<div id="verticalWrapper">
 			<div id="contentWrapper">
 				<?php if ($h->page == 1 && $c->showHeaderInsideBorder): ?>
@@ -214,10 +217,10 @@ Visualizer::doctype();
 							<footer>
 								<?php Visualizer::tweetButton(Visualizer::absoluteHref($h->subject, $h->entry->id), $c->entryTweetButtonText, $c->entryTweetButtonHashtags, array
 								(
-									"[id]" => $h->entry->id,
-									"[subject]" => $h->entry->subject,
-									"[title]" => $h->entry->title,
-									"[name]" => $h->entry->name,
+									"[id]" => strval($h->entry->id),
+									"[subject]" => strval($h->entry->subject),
+									"[title]" => $h->entry->title ?? "",
+									"[name]" => $h->entry->name ?? "",
 								)) ?>
 							</footer>
 						<?php endif ?>
@@ -229,7 +232,7 @@ Visualizer::doctype();
 	<?php if (App::$actionName != "index" && $h->entry->pageCount > 1): ?>
 		<form class="pagerContainer" action="<?=Visualizer::escapeOutput(App::$actionName == "new" ? Visualizer::actionHref(App::$actionName) : Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName)) ?>" method="post">
 			<?php Visualizer::submitPager($h->page ?? 1, $h->entry->pageCount, 10, "p") ?>
-			<?php Visualizer::delegateParameters($_POST ? $_POST : $_SESSION, array("p")) ?>
+			<?php Visualizer::delegateParameters($postOrSession, array("p")) ?>
 		</form>
 	<?php else: ?>
 		<?php Visualizer::pager($h->page ?? 1, $h->entry->pageCount, 10, array(Visualizer::actionHref($h->subject, $h->entry->id) . "/", "#body")) ?>
@@ -245,7 +248,7 @@ Visualizer::doctype();
 							<button type="submit">
 								<img src="<?=Visualizer::escapeOutput(Visualizer::actionHref("style", "backButtonIcon.png")) ?>" alt="" />修正
 							</button>
-							<?php Visualizer::delegateParameters($_POST ? $_POST : $_SESSION, array("preview", "p")) ?>
+							<?php Visualizer::delegateParameters($postOrSession, array("preview", "p")) ?>
 						</div>
 					</form>
 				</li>
@@ -257,7 +260,7 @@ Visualizer::doctype();
 							<button type="submit">
 								送信<img src="<?=Visualizer::escapeOutput(Visualizer::actionHref("style", "sendButtonIcon.png")) ?>" class="last" alt="" />
 							</button>
-							<?php Visualizer::delegateParameters($_POST ? $_POST : $_SESSION, array("preview", "p")) ?>
+							<?php Visualizer::delegateParameters($postOrSession, array("preview", "p")) ?>
 						</div>
 					</form>
 				</li>
@@ -360,7 +363,7 @@ Visualizer::doctype();
 					<form action="" method="post">
 				<?php endif ?>
 				<dl id="comments">
-					<?php if (($h->thread->nonCommentEvaluations || $c->pointMap) && $c->showPoint[Configuration::ON_COMMENT]): ?>
+					<?php if (($h->thread->nonCommentEvaluations || $c->pointMap) && isset($c->showPoint[Configuration::ON_COMMENT]) && $c->showPoint[Configuration::ON_COMMENT]): ?>
 						<?php if ($isAdmin): ?>
 							<?php if ($h->thread->nonCommentEvaluations): ?>
 								<?php foreach (array_filter($arr, function($_) { return $_ instanceof Evaluation; }) as $k => $i): ?>
@@ -376,9 +379,7 @@ Visualizer::doctype();
 										<time datetime="<?=Visualizer::escapeOutput(date("c", $i->dateTime)) ?>">
 											<?=Visualizer::escapeOutput(Visualizer::formatDateTime($i->dateTime)) ?>
 										</time>
-										<?php if ($isAdmin): ?>
-											<span class="host"><?=Visualizer::escapeOutput($i->host) ?></span>
-										<?php endif ?>
+										<span class="host"><?=Visualizer::escapeOutput($i->host) ?></span>
 									</dt>
 								<?php endforeach ?>
 							<?php else: ?>
@@ -410,7 +411,7 @@ Visualizer::doctype();
 									<input type="checkbox" name="id[]" value="<?=Visualizer::escapeOutput($i->id) ?>" />
 								<?php endif ?>
 								<?=Visualizer::escapeOutput($k + 1) ?>.
-								<?php if ($isAdmin || $c->showPoint[Configuration::ON_COMMENT]): ?>
+								<?php if ($isAdmin || isset($c->showPoint[Configuration::ON_COMMENT]) && $c->showPoint[Configuration::ON_COMMENT]): ?>
 									<?php if ($i->evaluation): ?>
 										<?php if ($i->evaluation->point < 0): ?>
 											<span class="point minus"><?=Visualizer::escapeOutput($i->evaluation->point) ?></span>点
@@ -421,7 +422,7 @@ Visualizer::doctype();
 										<span class="point none">無評価</span>
 									<?php endif ?>
 								<?php endif ?>
-								<?php if ($isAdmin || $c->showName[Configuration::ON_COMMENT]): ?>
+								<?php if ($isAdmin || isset($c->showName[Configuration::ON_COMMENT]) && $c->showName[Configuration::ON_COMMENT]): ?>
 									<span class="name">
 										<?php if (!Util::isEmpty($i->mail)): ?>
 											<a href="mailto:<?=Visualizer::escapeOutput($i->mail) ?>">

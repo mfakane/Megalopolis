@@ -13,9 +13,10 @@ class ClassicSearchIndex extends SearchIndex
 		"word" => "varchar(127)"
 	);
 	
+	#[\Override]
 	function registerThread(PDO $idb, Thread $thread, bool $removeExisting): void
 	{
-		if (!isset($thread->id))
+		if ($thread->id === 0)
 			return;
 		
 		if ($removeExisting)
@@ -47,7 +48,8 @@ class ClassicSearchIndex extends SearchIndex
 			foreach ($v as $i)
 				Util::executeStatement($st, array($k, $i));
 	}
-	
+
+	#[\Override]
 	function unregisterThread(PDO $idb, array $ids): void
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
@@ -59,8 +61,9 @@ class ClassicSearchIndex extends SearchIndex
 		)));
 		Util::executeStatement($st);
 	}
-	
-	function searchThread(PDO $idb, array $query, array $type = null, array $ids = null): array
+
+	#[\Override]
+	function searchThread(PDO $idb, array $query, ?array $type = null, ?array $ids = null): array
 	{
 		if (!$query)
 			return array();
@@ -87,7 +90,7 @@ class ClassicSearchIndex extends SearchIndex
 	/**
 	 * @return int[]
 	 */
-	private function searchThreadInternal(PDO $idb, array $query, array $type = null, array $ids = null): array
+	private function searchThreadInternal(PDO $idb, array $query, ?array $type, ?array $ids): array
 	{
 		$words = array();
 		
@@ -103,7 +106,7 @@ class ClassicSearchIndex extends SearchIndex
 			where word in (%s) %s %s',
 			self::INDEX_TABLE,
 			implode(", ", array_fill(0, count($query), "?")),
-			$type ? "and type in (" . implode(",", array_map(function($_) { return "'{$_}'"; }, $type)) . ")" : "",
+			$type !== null ? "and type in (" . implode(",", array_map(function($_) { return "'{$_}'"; }, $type)) . ")" : "",
 			is_array($ids) ? "and id in (" . implode(",", $ids) . ")" : ""
 		)));
 		Util::executeStatement($st, $query);
@@ -115,14 +118,16 @@ class ClassicSearchIndex extends SearchIndex
 		
 		return $rt;
 	}
-	
+
+	#[\Override]
 	function ensureTableExists(PDO $idb): void
 	{
 		$idb->beginTransaction();
 		Util::createTableIfNotExists($idb, self::$searchIndexSchema, self::INDEX_TABLE);
 		$idb->commit();
 	}
-	
+
+	#[\Override]
 	function getExistingThread(PDO $idb): array
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf

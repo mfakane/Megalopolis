@@ -84,11 +84,11 @@ abstract class DataStore
 			return null;
 	}
 	
-	function executeStatement(?PDOStatement $st, array $params = null, bool $throw = true): bool
+	function executeStatement(?PDOStatement $st, ?array $params = null, bool $throw = true): bool
 	{
 		if (!$st) return false;
 
-		foreach(range(1, 5) as $i)
+		foreach(range(1, 5) as $_)
 		{
 			if (is_null($params))
 				$rt = $st->execute();
@@ -115,7 +115,7 @@ abstract class DataStore
 		{
 			$message = implode(":", $st->errorInfo());
 			
-			if (defined("SQL_DEBUG") && SQL_DEBUG)
+			if (defined("SQL_DEBUG") && boolval(constant("SQL_DEBUG")))
 				$message .= "\r\n" . $st->queryString;
 			
 			throw new ApplicationException($message);
@@ -124,7 +124,7 @@ abstract class DataStore
 			return false;
 	}
 	
-	function createTableIfNotExists(PDO $db, array $schema, string $name, array $index = null): bool
+	function createTableIfNotExists(PDO $db, array $schema, string $name, ?array $index = null): bool
 	{
 		if (!$this->hasTable($db, $name))
 		{
@@ -228,8 +228,8 @@ class SQLiteDataStore extends DataStore
 	/** @var array<string, int> */
 	private $handleOpenCount = array();
 	
-	const MODULE_FTS3 = "fts3";
-	const MODULE_FTS4 = "fts4";
+	const string MODULE_FTS3 = "fts3";
+	const string MODULE_FTS4 = "fts4";
 	
 	function __construct(string $directory = Constant::DATA_DIR)
 	{
@@ -238,6 +238,7 @@ class SQLiteDataStore extends DataStore
 		$this->directory = $directory;
 	}
 	
+	#[\Override]
 	function open(string $database = "data"): PDO
 	{
 		if (!isset($this->handleOpenCount[$database]))
@@ -263,12 +264,13 @@ class SQLiteDataStore extends DataStore
 		
 		return $db;
 	}
-	
+
+	#[\Override]
 	function close(PDO &$db, bool $vacuum = false): void
 	{
 		$name = $this->getDatabaseNameByHandle($db);
 		
-		if (!$name || --$this->handleOpenCount[$name] > 0)
+		if ($name === false || --$this->handleOpenCount[$name] > 0)
 			return;
 		
 		unset($this->handleOpenCount[$name]);
@@ -281,6 +283,7 @@ class SQLiteDataStore extends DataStore
 	/**
 	 * @return string[]
 	 */
+	#[\Override]
 	function getTables(PDO $db)
 	{
 		$st = $this->ensureStatement($db, $db->prepare("select name from sqlite_master where type = 'table'"));
@@ -291,7 +294,7 @@ class SQLiteDataStore extends DataStore
 		return $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
 	}
 	
-	function alterTable(PDO $db, array $schema, string $name, array $index = null): void
+	function alterTable(PDO $db, array $schema, string $name, ?array $index = null): void
 	{
 		$tempName = "{$name}Temp";
 		$this->createTableIfNotExists($db, $schema, $tempName, $index);
@@ -300,6 +303,7 @@ class SQLiteDataStore extends DataStore
 		$this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf('alter table %s rename to %s', $tempName, $name))));
 	}
 
+	#[\Override]
 	function createFullTextTableIfNotExists(PDO $db, array $schema, string $name, string $indexSuffix = "Index"): bool
 	{
 		if (!$this->hasTable($db, $name))
@@ -339,8 +343,6 @@ class SQLiteDataStore extends DataStore
 				break;
 			}
 		
-		$db = null;
-		
 		return $rt;
 	}
 }
@@ -373,6 +375,7 @@ class MySQLDataStore extends DataStore
 		$this->password = $password;
 	}
 
+	#[\Override]
 	function open(string $database = "data"): PDO
 	{
 		$this->openCount++;
@@ -406,6 +409,7 @@ class MySQLDataStore extends DataStore
 		return $db;
 	}
 	
+	#[\Override]
 	function close(PDO &$db, bool $vacuum = false): void
 	{
 		if (--$this->openCount > 0)
@@ -417,6 +421,7 @@ class MySQLDataStore extends DataStore
 	/**
 	 * @return string[]
 	 */
+	#[\Override]
 	function getTables(PDO $db)
 	{
 		$st = $this->ensureStatement($db, $db->prepare("show tables"));
@@ -426,8 +431,9 @@ class MySQLDataStore extends DataStore
 		
 		return $st->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
 	}
-	
-	function createTableIfNotExists(PDO $db, array $schema, string $name, array $index = null): bool
+
+	#[\Override]
+	function createTableIfNotExists(PDO $db, array $schema, string $name, ?array $index = null): bool
 	{
 		if (!$this->hasTable($db, $name))
 		{
@@ -455,7 +461,8 @@ class MySQLDataStore extends DataStore
 
 		return false;
 	}
-	
+
+	#[\Override]
 	function createFullTextTableIfNotExists(PDO $db, array $schema, string $name, string $indexSuffix = "Index"): bool
 	{
 		if (!$this->hasTable($db, $name))

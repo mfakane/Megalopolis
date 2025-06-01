@@ -5,6 +5,10 @@ $h = ReadHandler::$instance;
 $c = Configuration::$instance;
 Visualizer::doctype();
 
+if (!isset($h->entry) || !isset($h->thread)) throw new ApplicationException("Thread not found.");
+
+$verb = "";
+
 switch (App::$actionName)
 {
 	case "comment":

@@ -4,7 +4,6 @@ namespace Megalopolis;
 $c = Configuration::$instance;
 $d = Visualizer::$data;
 
-$isAdmin = Auth::hasSession(true);
 Visualizer::doctype();
 ?>
 <html lang="ja">
