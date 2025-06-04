@@ -247,7 +247,12 @@ class Util
 			else
 				$script .= "?" . self::PATH_INFO_QUERY_PARAM . "=";
 
-		return $absoluteUrls[$path] = "http://" . (($_SERVER["HTTP_HOST"] ?? $_SERVER["SERVER_NAME"] ?? "") . (!isset($_SERVER["SERVER_PORT"]) || $_SERVER["SERVER_PORT"] == 80 ? "" : ":" . $_SERVER["SERVER_PORT"])) . $script . $path;
+		$hostWithOrWithoutPort = $_SERVER["HTTP_HOST"] ?? $_SERVER["SERVER_NAME"] ?? "";
+		[$hostWithoutPort, $port] = explode(":", $hostWithOrWithoutPort . ":" . ($_SERVER["SERVER_PORT"] ?? "80"));
+		$scheme = isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on" ? "https" : "http";
+		$portAndColonIfNeeded = $port == ($scheme === "http" ? 80 : 443) ? "" : ":{$port}";
+
+		return $absoluteUrls[$path] = "{$scheme}://{$hostWithoutPort}{$portAndColonIfNeeded}{$script}{$path}";
 	}
 
 	static function getSuffix(): string
