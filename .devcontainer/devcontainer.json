@@ -14,11 +14,13 @@
 			},
 			// Add the IDs of easxtensions you want installed when the container is created.
 			"extensions": [
-				"DEVSENSE.phptools-vscode",
+				"bmewburn.vscode-intelephense-client",
+				"DEVSENSE.composer-php-vscode",
 				"mrmlnc.vscode-apache",
 				"getpsalm.psalm-vscode-plugin",
 				"editorconfig.editorconfig",
-				"eamodio.gitlens"
+				"eamodio.gitlens",
+				"xdebug.php-debug"
 			]
 		}
 	},
