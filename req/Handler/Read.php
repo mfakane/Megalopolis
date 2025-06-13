@@ -108,7 +108,8 @@ class ReadHandler extends Handler
 	{
 		$this->page = !is_null($_page) ? intval($_page) : 1;
 		
-		$this->thread = new Thread(new ThreadEntry(0));
+		$entry = new ThreadEntry(0);
+		$this->thread = new Thread($entry);
 		assert($this->entry instanceof ThreadEntry);
 		
 		if (Configuration::$instance->adminOnly)
