@@ -8,42 +8,42 @@ use \PDOStatement;
 
 class Util
 {
-	const HASH_ALGORITHM = "sha384";
-	const HASH_TYPE_ANTHOLOGYS = "Anthologys";
-	const HASH_TYPE_MEGALITH = "Megalith";
-	const HASH_TYPE_MEGALOPOLIS1 = "Megalopolis1";
-	const HASH_TYPE_LATEST = self::HASH_TYPE_MEGALOPOLIS1;
-	const PATH_INFO_QUERY_PARAM = "path";
-	const INDEX_FILE_NAME = "index.php";
+	const string HASH_ALGORITHM = "sha384";
+	const string HASH_TYPE_ANTHOLOGYS = "Anthologys";
+	const string HASH_TYPE_MEGALITH = "Megalith";
+	const string HASH_TYPE_MEGALOPOLIS1 = "Megalopolis1";
+	const string HASH_TYPE_LATEST = self::HASH_TYPE_MEGALOPOLIS1;
+	const string PATH_INFO_QUERY_PARAM = "path";
+	const string INDEX_FILE_NAME = "index.php";
 
-	const BROWSER_TYPE_UNKNOWN = "Unknown";
-	const BROWSER_TYPE_IPHONE = "iPhone";
-	const BROWSER_TYPE_IPAD = "iPad";
-	const BROWSER_TYPE_ANDROID = "Android";
-	const BROWSER_TYPE_ANDROIDMOBILE = "Android Mobile";
-	const BROWSER_TYPE_PSP = "PlayStation Portable";
-	const BROWSER_TYPE_3DS = "Nintendo 3DS";
-	const BROWSER_TYPE_NETFRONT = "NetFront";
-	const BROWSER_TYPE_IEMOBILE7 = "Trident/3.1";
-	const BROWSER_TYPE_MOBILE = "Mobile";
-	const BROWSER_TYPE_MSIE_NEW = "Trident/";
-	const BROWSER_TYPE_MSIE7 = "MSIE 7";
-	const BROWSER_TYPE_MSIE6 = "MSIE 6";
-	const BROWSER_TYPE_MSIE = "MSIE ";
-	const BROWSER_TYPE_FIREFOX2 = "Firefox/2.";
-	const BROWSER_TYPE_FIREFOX = "Firefox";
-	const BROWSER_TYPE_GECKO = "Gecko";
-	const BROWSER_TYPE_PRESTO = "Presto";
-	const BROWSER_TYPE_PRESTO_M = "Opera Mobi";
-	const BROWSER_TYPE_WEBKIT = "WebKit";
-	const BROWSER_TYPE_KHTML = "KHTML";
+	const string BROWSER_TYPE_UNKNOWN = "Unknown";
+	const string BROWSER_TYPE_IPHONE = "iPhone";
+	const string BROWSER_TYPE_IPAD = "iPad";
+	const string BROWSER_TYPE_ANDROID = "Android";
+	const string BROWSER_TYPE_ANDROIDMOBILE = "Android Mobile";
+	const string BROWSER_TYPE_PSP = "PlayStation Portable";
+	const string BROWSER_TYPE_3DS = "Nintendo 3DS";
+	const string BROWSER_TYPE_NETFRONT = "NetFront";
+	const string BROWSER_TYPE_IEMOBILE7 = "Trident/3.1";
+	const string BROWSER_TYPE_MOBILE = "Mobile";
+	const string BROWSER_TYPE_MSIE_NEW = "Trident/";
+	const string BROWSER_TYPE_MSIE7 = "MSIE 7";
+	const string BROWSER_TYPE_MSIE6 = "MSIE 6";
+	const string BROWSER_TYPE_MSIE = "MSIE ";
+	const string BROWSER_TYPE_FIREFOX2 = "Firefox/2.";
+	const string BROWSER_TYPE_FIREFOX = "Firefox";
+	const string BROWSER_TYPE_GECKO = "Gecko";
+	const string BROWSER_TYPE_PRESTO = "Presto";
+	const string BROWSER_TYPE_PRESTO_M = "Opera Mobi";
+	const string BROWSER_TYPE_WEBKIT = "WebKit";
+	const string BROWSER_TYPE_KHTML = "KHTML";
 
-	const MOBILE_TYPE_UNKNOWN = "Unknown";
-	const MOBILE_TYPE_IMODE = "docomo";
-	const MOBILE_TYPE_EZWEB = "kddi";
-	const MOBILE_TYPE_YKEITAI = "softbank";
-	const MOBILE_TYPE_WILLCOM = "willcom";
-	const MOBILE_TYPE_EMNET = "emobile";
+	const string MOBILE_TYPE_UNKNOWN = "Unknown";
+	const string MOBILE_TYPE_IMODE = "docomo";
+	const string MOBILE_TYPE_EZWEB = "kddi";
+	const string MOBILE_TYPE_YKEITAI = "softbank";
+	const string MOBILE_TYPE_WILLCOM = "willcom";
+	const string MOBILE_TYPE_EMNET = "emobile";
 
 	static function getBrowserType(): string
 	{

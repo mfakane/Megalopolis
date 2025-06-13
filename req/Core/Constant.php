@@ -4,16 +4,16 @@ namespace Megalopolis;
 
 class Constant
 {
-	const APP_DIR = "req/";
-	const DATA_DIR = "store/";
+	const string APP_DIR = "req/";
+	const string DATA_DIR = "store/";
 
-	const CORE_DIR = "Core/";
-	const HANDLER_DIR = "Handler/";
-	const LIBRARY_DIR = "Library/";
-	const MODEL_DIR = "Model/";
-	const VISUALIZER_DIR = "Visualizer/";
+	const string CORE_DIR = "Core/";
+	const string HANDLER_DIR = "Handler/";
+	const string LIBRARY_DIR = "Library/";
+	const string MODEL_DIR = "Model/";
+	const string VISUALIZER_DIR = "Visualizer/";
 
-	const DEFAULT_HANDLER = "index";
-	const DEFAULT_ACTION = "index";
-	const SQL_DEBUG = false;
+	const string DEFAULT_HANDLER = "index";
+	const string DEFAULT_ACTION = "index";
+	const bool SQL_DEBUG = false;
 }

@@ -5,7 +5,7 @@ use \PDO;
 
 class SQLiteSearchIndex extends SearchIndex
 {
-	const INDEX_TABLE = "searchIndex2";
+	const string INDEX_TABLE = "searchIndex2";
 	static array $searchIndexSchema = array
 	(
 		"docid" => "bigint primary key not null",

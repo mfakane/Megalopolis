@@ -3,10 +3,10 @@ namespace Megalopolis;
 
 class Auth
 {
-	const SESSION_PASSWORD = "Auth_password";
-	const SESSION_IS_ADMIN = "Auth_isAdmin";
-	const SESSION_FINGERPRINT = "Auth_fingerprint";
-	const SESSION_TOKEN = "Auth_token";
+	const string SESSION_PASSWORD = "Auth_password";
+	const string SESSION_IS_ADMIN = "Auth_isAdmin";
+	const string SESSION_FINGERPRINT = "Auth_fingerprint";
+	const string SESSION_TOKEN = "Auth_token";
 
 	static string $caption = "認証";
 	static string $label = "パスワード";

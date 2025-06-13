@@ -5,8 +5,8 @@ use \PDO;
 
 class Meta
 {
-	const DATA_VERSION = "dataVersion";
-	const DATA_VERSION_VALUE_LATEST = "1";
+	const string DATA_VERSION = "dataVersion";
+	const string DATA_VERSION_VALUE_LATEST = "1";
 	
 	static ?array $meta = null;
 	static array $metaTableSchema = array

@@ -5,7 +5,7 @@ use \PDO;
 
 class ClassicSearchIndex extends SearchIndex
 {
-	const INDEX_TABLE = "searchIndex";
+	const string INDEX_TABLE = "searchIndex";
 	static array $searchIndexSchema = array
 	(
 		"id" => "bigint",

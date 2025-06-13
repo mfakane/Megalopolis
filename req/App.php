@@ -6,24 +6,24 @@ use \PDO;
 
 class App
 {
-	const NAME = "Megalopolis";
-	const VERSION = 47;
-	const MEGALITH_VERSION = 50;
+	const string NAME = "Megalopolis";
+	const int VERSION = 47;
+	const int MEGALITH_VERSION = 50;
 
-	const META_TABLE = "meta";
-	const SUBJECT_TABLE = "subject";
-	const THREAD_ENTRY_TABLE = "threadEntry";
-	const THREAD_EVALUATION_TABLE = "threadEvaluation";
-	const THREAD_TAG_TABLE = "threadTag";
-	const THREAD_TABLE = "thread";
-	const THREAD_STYLE_TABLE = "threadStyle";
-	const THREAD_PASSWORD_TABLE = "threadPassword";
-	const COMMENT_TABLE = "comment";
-	const EVALUATION_TABLE = "evaluation";
-	const AUTHOR_TABLE = "author";
-	const TAG_TABLE = "tags";
-	const SESSION_STORE_TABLE = "sessionStore";
-	const INDEX_DATABASE = "search";
+	const string META_TABLE = "meta";
+	const string SUBJECT_TABLE = "subject";
+	const string THREAD_ENTRY_TABLE = "threadEntry";
+	const string THREAD_EVALUATION_TABLE = "threadEvaluation";
+	const string THREAD_TAG_TABLE = "threadTag";
+	const string THREAD_TABLE = "thread";
+	const string THREAD_STYLE_TABLE = "threadStyle";
+	const string THREAD_PASSWORD_TABLE = "threadPassword";
+	const string COMMENT_TABLE = "comment";
+	const string EVALUATION_TABLE = "evaluation";
+	const string AUTHOR_TABLE = "author";
+	const string TAG_TABLE = "tags";
+	const string SESSION_STORE_TABLE = "sessionStore";
+	const string INDEX_DATABASE = "search";
 
 	static ?Handler $handler;
 	static string $handlerName;

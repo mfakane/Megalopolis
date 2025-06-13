@@ -5,9 +5,9 @@ use \PDO;
 
 class Board
 {
-	const ORDER_ASCEND = 0;
-	const ORDER_DESCEND = 1;
-	
+	const int ORDER_ASCEND = 0;
+	const int ORDER_DESCEND = 1;
+
 	static array $subjectSchema = array
 	(
 		"id" => "integer primary key not null",

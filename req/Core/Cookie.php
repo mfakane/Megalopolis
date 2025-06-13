@@ -3,19 +3,19 @@ namespace Megalopolis;
 
 class Cookie
 {
-	const COOKIE_NAME = "Cookie";
-	const NAME_KEY = "Name";
-	const MAIL_KEY = "Mail";
-	const LINK_KEY = "Link";
-	const PASSWORD_KEY = "Password";
-	const LAST_ID_KEY = "LastID";
-	const FONT_SIZE_KEY = "FontSize";
-	const MOBILE_VERTICAL_KEY = "MobileVertical";
-	const LIST_TYPE_KEY = "ListType";
-	const LIST_VISIBILITY_KEY = "ListVisibility";
-	const VIEW_HISTORY_KEY = "ViewHistory";
-	const EVALUATION_HISTORY_KEY = "EvaluationHistory";
-	
+	const string COOKIE_NAME = "Cookie";
+	const string NAME_KEY = "Name";
+	const string MAIL_KEY = "Mail";
+	const string LINK_KEY = "Link";
+	const string PASSWORD_KEY = "Password";
+	const string LAST_ID_KEY = "LastID";
+	const string FONT_SIZE_KEY = "FontSize";
+	const string MOBILE_VERTICAL_KEY = "MobileVertical";
+	const string LIST_TYPE_KEY = "ListType";
+	const string LIST_VISIBILITY_KEY = "ListVisibility";
+	const string VIEW_HISTORY_KEY = "ViewHistory";
+	const string EVALUATION_HISTORY_KEY = "EvaluationHistory";
+
 	/** @var string[]|null */
 	static ?array $data = null;
 	

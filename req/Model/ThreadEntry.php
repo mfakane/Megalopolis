@@ -54,9 +54,9 @@ class ThreadEntry
 		"threadCount" => "integer",
 	);
 
-	const SEARCH_RANDOM = 0;
-	const SEARCH_ASCENDING = 1;
-	const SEARCH_DESCENDING = 2;
+	const int SEARCH_RANDOM = 0;
+	const int SEARCH_ASCENDING = 1;
+	const int SEARCH_DESCENDING = 2;
 
 	public int $id;
 	public ?int $subject = null;

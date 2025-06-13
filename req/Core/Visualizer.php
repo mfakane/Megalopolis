@@ -9,7 +9,7 @@ class Visualizer
 	static string $basePath;
 	static ?string $mode = null;
 
-	const MODE_COOKIE_NAME = "VisualizerMode";
+	const string MODE_COOKIE_NAME = "VisualizerMode";
 	
 	static function isMobile(): bool
 	{

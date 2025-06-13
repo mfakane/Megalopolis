@@ -5,28 +5,28 @@ class Configuration
 {
 	static Configuration $instance;
 	
-	const LINK_AUTO = 0;
-	const LINK_REWRITE = 1;
-	const LINK_PATH = 2;
-	const LINK_QUERY = 3;
-	const ORDER_ASCEND = Board::ORDER_ASCEND;
-	const ORDER_DESCEND = Board::ORDER_DESCEND;
-	const RATE_FIVE = 0;
-	const RATE_AVERAGE = 1;
-	const BBQ_NONE = 0;
-	const BBQ_READ = 1;
-	const BBQ_WRITE = 2;
-	const BBQ_READWRITE = 3;
-	const ON_ENTRY = "Entry";
-	const ON_COMMENT = "Comment";
-	const ON_SUBJECT = "Subject";
-	const ON_AUTHOR = "Author";
-	const ON_TAG = "Tag";
-	const LIST_DOUBLE = 0;
-	const LIST_SINGLE = 1;
-	const EVAL_BOTH = -1;
-	const EVAL_POINT = 0;
-	const EVAL_COMMENT = 1;
+	const int LINK_AUTO = 0;
+	const int LINK_REWRITE = 1;
+	const int LINK_PATH = 2;
+	const int LINK_QUERY = 3;
+	const int ORDER_ASCEND = Board::ORDER_ASCEND;
+	const int ORDER_DESCEND = Board::ORDER_DESCEND;
+	const int RATE_FIVE = 0;
+	const int RATE_AVERAGE = 1;
+	const int BBQ_NONE = 0;
+	const int BBQ_READ = 1;
+	const int BBQ_WRITE = 2;
+	const int BBQ_READWRITE = 3;
+	const string ON_ENTRY = "Entry";
+	const string ON_COMMENT = "Comment";
+	const string ON_SUBJECT = "Subject";
+	const string ON_AUTHOR = "Author";
+	const string ON_TAG = "Tag";
+	const int LIST_DOUBLE = 0;
+	const int LIST_SINGLE = 1;
+	const int EVAL_BOTH = -1;
+	const int EVAL_POINT = 0;
+	const int EVAL_COMMENT = 1;
 	
 	public bool $debug = false;
 	

@@ -6,10 +6,10 @@ use \PDO;
 
 class Thread
 {
-	const REGEX_SPLIT_PAGE = "@<split\s*?/>@";
-	const WRITING_MODE_NOT_SPECIFIED = 0;
-	const WRITING_MODE_HORIZONTAL = 1;
-	const WRITING_MODE_VERTICAL = 2;
+	const string REGEX_SPLIT_PAGE = "@<split\s*?/>@";
+	const int WRITING_MODE_NOT_SPECIFIED = 0;
+	const int WRITING_MODE_HORIZONTAL = 1;
+	const int WRITING_MODE_VERTICAL = 2;
 
 	static int $threadSchemaVersion = 2;
 	static array $threadSchema = array(
