@@ -156,8 +156,9 @@ class App
 			$base = dirname($_SERVER["SCRIPT_NAME"]);
 			$content = file_get_contents($htaccess);
 			if ($content === false) return;
-				
-			$newcontent = (string)preg_replace('/(RewriteRule \^\(\.\+\)\$) .*/', '$1 /' . trim($base, "/") . '/' . Util::INDEX_FILE_NAME . '?path=\$1 [QSA]', $content);
+			
+			$target = "/" . trim(trim($base, "/") . "/" . Util::INDEX_FILE_NAME, "/");
+			$newcontent = (string)preg_replace('/(RewriteRule \^\(\.\+\)\$) .*/', '$1 ' . $target . '?path=\$1 [QSA]', $content);
 
 			if ($content != $newcontent)
 				file_put_contents($htaccess, $newcontent, LOCK_EX);
