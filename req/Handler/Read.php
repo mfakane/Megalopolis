@@ -106,7 +106,7 @@ class ReadHandler extends Handler
 	
 	function _new(?string $_page = null): bool
 	{
-		$this->page = !is_null($_page) ? intval($_page) : 1;
+		$this->page = !is_null($_page) ? intval($_page) : max(intval($_page = self::param("p", tryGet: true)), 1);
 		
 		$entry = new ThreadEntry(0);
 		$this->thread = new Thread($entry);
@@ -723,8 +723,9 @@ class ReadHandler extends Handler
 		if (isset($_POST[$name]))
 		{
 			$input_array = !is_array($_POST[$name]) ? [$_POST[$name]] : $_POST[$name];
-			$input = $default;
+			$input = null;
 			array_walk_recursive($input_array, function(mixed &$x) use (&$input) { $input ??= strval($x); });
+			$input ??= $default;
 			$rt = Util::escapeInput($input ?? "", $stripLinebreaks);
 			
 			if ($name != "preview" &&
@@ -741,8 +742,9 @@ class ReadHandler extends Handler
 		else if ($tryGet && isset($_GET[$name]))
 		{
 			$input_array = !is_array($_GET[$name]) ? [$_POST[$name]] : $_GET[$name];
-			$input = $default;
+			$input = null;
 			array_walk_recursive($input_array, function(mixed &$x) use (&$input) { $input ??= strval($x); });
+			$input ??= $default;
 			$rt = Util::escapeInput($input ?? "", $stripLinebreaks);
 
 			return $rt;
