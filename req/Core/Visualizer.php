@@ -643,18 +643,17 @@ class Visualizer
 	
 	private static function ensureHtml(string $str, ?array $stripExcept = null): string
 	{
-		$oldHtml = new \DOMDocument("1.0", "UTF-8");
-		$oldHtml->loadHTML("<body>$str</body>", LIBXML_NOWARNING | LIBXML_NOERROR);
+		$oldHtml = \Dom\HTMLDocument::createFromString("<body>$str</body>", LIBXML_NOERROR);
 
-		$newHtml = new \DOMDocument("1.0", "UTF-8");
+		$newHtml = \Dom\HTMLDocument::createFromString("<body>$str</body>", LIBXML_NOERROR);
 
 		$disallowed = Configuration::$instance->disallowedTags;
 		$allowed = array_flip(Configuration::$instance->allowedTags);
 		$disallowedMap = array_flip(array_map(function($x, $y) { return is_int($x) ? $y : $x; }, array_keys($disallowed), array_values($disallowed)));
 
-		self::replaceTags($oldHtml->documentElement->firstElementChild, $newHtml, $newHtml, $disallowed, $disallowedMap, $allowed);
+		self::replaceTags($oldHtml->body, $newHtml, $newHtml->body, $disallowed, $disallowedMap, $allowed);
 		
-		$str = (string)$newHtml->saveHTML();
+		$str = $newHtml->saveHtml($newHtml->body);
 		unset($oldHtml, $newHtml);
 		
 		if (!is_array($stripExcept))
@@ -668,14 +667,14 @@ class Visualizer
 		
 		return $str;
 	}
-	
-	private static function replaceTags(\DOMNode $oldNode, \DOMDocument $newDocument, \DOMNode $newNode, array $disallowed, array $disallowedMap, array $allowed): void
+
+	private static function replaceTags(\Dom\Node $oldNode, \Dom\HTMLDocument $newDocument, \Dom\Node $newNode, array $disallowed, array $disallowedMap, array $allowed): void
 	{
-		/** @var \DOMNode */
+		/** @var \Dom\Node */
 		foreach ($oldNode->childNodes as $oldChildNode)
 		{
 			if ($oldChildNode->nodeType == XML_ELEMENT_NODE &&
-				$oldChildNode instanceof \DOMElement)
+				$oldChildNode instanceof \Dom\Element)
 			{
 				if (isset($disallowedMap[$oldChildNode->tagName]))
 					if (isset($disallowed[$oldChildNode->tagName]))
@@ -688,7 +687,9 @@ class Visualizer
 
 				if (!isset($allowed[$oldChildNode->tagName]))
 				{
-					$newNode->appendChild($newDocument->createTextNode($oldChildNode->ownerDocument->saveHTML($oldChildNode)));
+					/** @var \Dom\HTMLDocument */
+					$doc = $oldChildNode->ownerDocument;
+					$newNode->appendChild($newDocument->createTextNode($doc->saveHtml($oldChildNode)));
 				}
 				else
 				{
@@ -706,8 +707,8 @@ class Visualizer
 			}
 		}
 	}
-	
-	private static function replaceAttributes(\DOMNode $oldElement, \DOMDocument $newDocument, \DOMNode $newElement): void
+
+	private static function replaceAttributes(\Dom\Node $oldElement, \Dom\HTMLDocument $newDocument, \Dom\Node $newElement): void
 	{
 		foreach (($oldElement->attributes ?? []) as $attributeName => $oldAttribute)
 		{
