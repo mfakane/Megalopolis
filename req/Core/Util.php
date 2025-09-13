@@ -341,9 +341,12 @@ class Util
 		return Configuration::$instance->dataStore?->createFullTextTableIfNotExists($db, $schema, $name, $indexSuffix) ?? false;
 	}
 
-	static function saveToTable(PDO $db, mixed $obj, array $schema, string $name): void
+	/**
+	 * @param array<string, string|int|float|null> $values
+	 */
+	static function saveToTable(PDO $db, array $values, string $tableName): void
 	{
-		Configuration::$instance->dataStore?->saveToTable($db, $obj, $schema, $name);
+		Configuration::$instance->dataStore?->saveToTable($db, $values, $tableName);
 	}
 
 	static function hasTable(PDO $db, string $name): bool

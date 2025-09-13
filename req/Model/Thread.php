@@ -311,9 +311,32 @@ class Thread
 	function save(PDO $db, bool $setSubjectLastUpdate = true): void
 	{
 		$this->entry->save($db, $setSubjectLastUpdate);
-		Util::saveToTable($db, $this, self::$threadSchema, App::THREAD_TABLE);
-		Util::saveToTable($db, $this, self::$threadStyleSchema, App::THREAD_STYLE_TABLE);
-		Util::saveToTable($db, $this, self::$threadPasswordSchema, App::THREAD_PASSWORD_TABLE);
+
+		$threadEntity = [
+			"id" => $this->entry->id,
+			"subject" => $this->entry->subject,
+			"body" => $this->body,
+			"afterword" => $this->afterword
+		];
+		Util::saveToTable($db, $threadEntity, App::THREAD_TABLE);
+
+		$threadStyleEntity = [
+			"id" => $this->entry->id,
+			"convertLineBreak" => $this->convertLineBreak ? 1 : 0,
+			"foreground" => $this->foreground,
+			"background" => $this->background,
+			"backgroundImage" => $this->backgroundImage,
+			"border" => $this->border,
+			"writingMode" => $this->writingMode
+		];
+		Util::saveToTable($db, $threadStyleEntity, App::THREAD_STYLE_TABLE);
+
+		$threadPasswordEntity = [
+			"id" => $this->entry->id,
+			"hash" => $this->hash
+		];
+		Util::saveToTable($db, $threadPasswordEntity, App::THREAD_PASSWORD_TABLE);
+		
 		$this->loaded = true;
 	}
 

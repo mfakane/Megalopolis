@@ -279,8 +279,32 @@ class ThreadEntry
 		if ($this->id === 0 || $this->subject === null)
 			throw new ApplicationException("ID が設定されていません");
 
-		Util::saveToTable($db, $this, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE);
-		Util::saveToTable($db, $this, self::$threadEvaluationSchema, App::THREAD_EVALUATION_TABLE);
+		$threadEntity = [
+			"id" => $this->id,
+			"subject" => $this->subject,
+			"title" => $this->title,
+			"name" => $this->name,
+			"summary" => $this->summary,
+			"link" => $this->link,
+			"mail" => $this->mail,
+			"host" => $this->host,
+			"dateTime" => $this->dateTime,
+			"lastUpdate" => $this->lastUpdate,
+			"pageCount" => $this->pageCount,
+			"size" => $this->size
+		];
+		Util::saveToTable($db, $threadEntity, App::THREAD_ENTRY_TABLE);
+
+		$threadEvaluationEntity = [
+			"id" => $this->id,
+			"points" => $this->points,
+			"responseCount" => $this->responseCount,
+			"commentCount" => $this->commentCount,
+			"evaluationCount" => $this->evaluationCount,
+			"readCount" => $this->readCount,
+			"responseLastUpdate" => $this->responseLastUpdate
+		];
+		Util::saveToTable($db, $threadEvaluationEntity, App::THREAD_EVALUATION_TABLE);
 
 		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf(
 			'

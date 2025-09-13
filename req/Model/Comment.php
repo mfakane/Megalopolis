@@ -38,6 +38,35 @@ class Comment
 		$this->id = $id;
 	}
 
+	/**
+	 * @param array{
+	 * entryID: int,
+	 * id: int,
+	 * name?: ?string,
+	 * mail?: ?string,
+	 * body?: ?string,
+	 * host?: ?string,
+	 * dateTime?: int,
+	 * hash?: ?string,
+	 * evaluation?: int,
+	 * } $data
+	 */
+	static function fromArray(array $data, ?Evaluation $evaluation = null): Comment
+	{
+		$comment = new Comment($data["id"]);
+		$comment->entryID = $data["entryID"];
+		
+		if (isset($data["name"])) $comment->name = $data["name"];
+		if (isset($data["mail"])) $comment->mail = $data["mail"];
+		if (isset($data["body"])) $comment->body = $data["body"];
+		if (isset($data["host"])) $comment->host = $data["host"];
+		if (isset($data["dateTime"])) $comment->dateTime = $data["dateTime"];
+		if (isset($data["hash"])) $comment->hash = $data["hash"];
+		if (isset($data["evaluation"])) $comment->evaluation = $evaluation;
+		
+		return $comment;
+	}
+
 	static function forEntry(ThreadEntry &$entry): Comment
 	{
 		$id = time();
@@ -112,20 +141,14 @@ class Comment
 			trim($options)
 		)));
 		Util::executeStatement($st);
-		$rt = array();
 
-		/** @var CommentEntity */
-		foreach ($st?->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\CommentEntity") ?? array() as $record)
+		/** @var Comment[] */
+		$rt = [];
+
+		foreach ($st?->fetchAll() ?? [] as $record)
 		{
-			$comment = new Comment($record->id);
-			$comment->entryID = $record->entryID;
-			$comment->name = $record->name;
-			$comment->mail = $record->mail;
-			$comment->body = $record->body;
-			$comment->host = $record->host;
-			$comment->dateTime = $record->dateTime;
-			$comment->hash = $record->hash;
-			$comment->evaluation = isset($evals[$record->evaluation]) ? $evals[$record->evaluation] : null;
+			$comment = self::fromArray($record);
+			$comment->evaluation = isset($evals[$record["evaluation"]]) ? $evals[$record["evaluation"]] : null;
 			$rt[] = $comment;
 		}
 
@@ -137,18 +160,20 @@ class Comment
 		if ($this->evaluation)
 			$this->evaluation->save($db);
 		
-		$entity = new CommentEntity();
-		$entity->entryID = $this->entryID;
-		$entity->id = $this->id;
-		$entity->name = $this->name;
-		$entity->mail = $this->mail;
-		$entity->body = $this->body;
-		$entity->host = $this->host;
-		$entity->dateTime = $this->dateTime;
-		$entity->hash = $this->hash;
-		$entity->evaluation = $this->evaluation?->id;
+		
+		$entity = [
+			"entryID" => $this->entryID,
+			"id" => $this->id,
+			"name" => $this->name,
+			"mail" => $this->mail,
+			"body" => $this->body,
+			"host" => $this->host,
+			"dateTime" => $this->dateTime,
+			"hash" => $this->hash,
+			"evaluation" => $this->evaluation?->id,
+		];
+		Util::saveToTable($db, $entity, App::COMMENT_TABLE);
 
-		Util::saveToTable($db, $entity, self::$commentSchema, App::COMMENT_TABLE);
 		$this->loaded = true;
 	}
 	
@@ -172,16 +197,3 @@ class Comment
 		Util::createTableIfNotExists($db, self::$commentSchema, App::COMMENT_TABLE);
 	}
 }
-
-class CommentEntity {
-	public int $entryID = 0;
-	public int $id = 0;
-	public ?string $name = null;
-	public ?string $mail = null;
-	public ?string $body = null;
-	public ?string $host = null;
-	public int $dateTime = 0;
-	public ?string $hash = null;
-	public ?int $evaluation = null;
-}
-?>

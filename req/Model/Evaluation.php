@@ -1,4 +1,5 @@
 <?php
+
 namespace Megalopolis;
 
 use \PDO;
@@ -25,6 +26,27 @@ class Evaluation
 	function __construct(int $id)
 	{
 		$this->id = $id;
+	}
+
+	/**
+	 * @param array{
+	 * entryID: int,
+	 * id: int,
+	 * point?: ?int,
+	 * host?: ?string,
+	 * dateTime?: int,
+	 * } $data
+	 */
+	static function fromArray(array $data): Evaluation
+	{
+		$evaluation = new Evaluation($data["id"]);
+		$evaluation->entryID = $data["entryID"];
+
+		if (isset($data["point"])) $evaluation->point = $data["point"];
+		if (isset($data["host"])) $evaluation->host = $data["host"];
+		if (isset($data["dateTime"])) $evaluation->dateTime = $data["dateTime"];
+
+		return $evaluation;
 	}
 
 	static function forComment(Comment &$comment): Evaluation
@@ -83,12 +105,27 @@ class Evaluation
 		)));
 		Util::executeStatement($st);
 
-		return $st?->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\Evaluation") ?? array();
+		/** @var Evaluation[] */
+		$rt = [];
+
+		foreach ($st?->fetchAll() ?? [] as $record) {
+			$rt[] = self::fromArray($record);
+		}
+
+		return $rt;
 	}
 
 	function save(PDO $db): void
 	{
-		Util::saveToTable($db, $this, self::$evaluationSchema, App::EVALUATION_TABLE);
+		$entity = [
+			"entryID" => $this->entryID,
+			"id" => $this->id,
+			"point" => $this->point,
+			"host" => $this->host,
+			"dateTime" => $this->dateTime,
+		];
+		Util::saveToTable($db, $entity, App::EVALUATION_TABLE);
+		
 		$this->loaded = true;
 	}
 

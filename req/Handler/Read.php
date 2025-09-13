@@ -730,7 +730,7 @@ class ReadHandler extends Handler
 		} else if (isset($_SESSION[$name]))
 			return Util::escapeInput($_SESSION[$name], $stripLinebreaks);
 		else if ($tryGet && isset($_GET[$name])) {
-			$input_array = !is_array($_GET[$name]) ? [$_POST[$name]] : $_GET[$name];
+			$input_array = !is_array($_GET[$name]) ? [$_GET[$name]] : $_GET[$name];
 			$input = null;
 			array_walk_recursive($input_array, function (mixed &$x) use (&$input) {
 				$input ??= strval($x);

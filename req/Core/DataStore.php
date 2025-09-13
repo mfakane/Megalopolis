@@ -164,7 +164,10 @@ abstract class DataStore
 		$this->unregisterTableByHandle($db, $name);
 	}
 
-	function saveToTable(PDO $db, mixed $obj, array $schema, string $name): void
+	/**
+	 * @param array<string, string|int|float|null> $values
+	 */
+	function saveToTable(PDO $db, array $values, string $tableName): void
 	{
 		$st = $this->ensureStatement($db, $db->prepare(sprintf(
 			'
@@ -174,14 +177,17 @@ abstract class DataStore
 			)
 			values
 			(
-				:%s
+				%s
 			)',
-			$name,
-			implode(", ", array_keys($schema)),
-			implode(", :", array_keys($schema))
+			$tableName,
+			implode(", ", array_keys($values)),
+			implode(", ", array_map(fn($k) => ":$k", array_keys($values)))
 		)));
 		if (!$st) return;
-		$this->bindValues($st, $obj, $schema);
+
+		foreach ($values as $k => $v)
+			$st->bindValue(":$k", $v, is_null($v) ? PDO::PARAM_NULL : (is_int($v) ? PDO::PARAM_INT : PDO::PARAM_STR));
+
 		$this->executeStatement($st);
 	}
 
