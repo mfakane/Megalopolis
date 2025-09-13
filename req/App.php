@@ -239,16 +239,13 @@ class App
 		return call_user_func_array(array(self::$handler, $action), $args);
 	}
 
-	static function openDB(string $name = "data"): PDO
+	static function openDB(string $name = "data"): DataStoreHandle
 	{
-		return Configuration::$instance->dataStore?->open($name) ?? throw new ApplicationException("データベースが開けません");
-	}
+		$dataStore = Configuration::$instance->dataStore;
+		if (!$dataStore) throw new ApplicationException("データベースが開けません");
 
-	static function closeDB(PDO &$db, bool $vacuum = false): void
-	{
-		Configuration::$instance->dataStore?->close($db, $vacuum);
+		return new DataStoreHandle($dataStore, $dataStore->open($name));
 	}
-
 }
 
 App::$startTime = microtime(true);

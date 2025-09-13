@@ -645,7 +645,7 @@ class Visualizer
 	{
 		$oldHtml = \Dom\HTMLDocument::createFromString("<body>$str</body>", LIBXML_NOERROR);
 
-		$newHtml = \Dom\HTMLDocument::createFromString("<body>$str</body>", LIBXML_NOERROR);
+		$newHtml = \Dom\HTMLDocument::createFromString("<body></body>", LIBXML_NOERROR);
 
 		$disallowed = Configuration::$instance->disallowedTags;
 		$allowed = array_flip(Configuration::$instance->allowedTags);

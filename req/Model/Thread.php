@@ -302,17 +302,7 @@ class Thread
 					break;
 				}
 
-				$db->beginTransaction();
-
-				if ($db !== $idb)
-					$idb->beginTransaction();
-
 				$rt = Util::convertAndSaveToThread($db, $idb, $subject, $path, "Megalith/com/{$id}.res.dat", "Megalith/aft/{$id}.aft.dat");
-
-				if ($db !== $idb)
-					$idb->commit();
-
-				$db->commit();
 			}
 
 		return $rt;
@@ -329,8 +319,6 @@ class Thread
 
 	static function ensureTable(PDO $db): void
 	{
-		$db->beginTransaction();
-
 		if (Util::hasTable($db, App::THREAD_TABLE)) {
 			$currentThreadSchemaVersion = intval(Meta::get($db, App::THREAD_TABLE, "1"));
 
@@ -356,8 +344,6 @@ class Thread
 		Util::createTableIfNotExists($db, self::$threadPasswordSchema, App::THREAD_PASSWORD_TABLE);
 		Meta::set($db, App::THREAD_STYLE_TABLE, strval(self::$threadStyleSchemaVersion));
 		Meta::set($db, App::THREAD_TABLE, strval(self::$threadSchemaVersion));
-
-		$db->commit();
 	}
 
 	/**
@@ -367,10 +353,10 @@ class Thread
 	{
 		$st = Util::ensureStatement($db, $db->prepare(sprintf(
 			'
-			select * from %s
-			left join %s on %1$s.id = %2$s.id
-			left join %s on %1$s.id = %3$s.id
-			%s',
+			select * from %1$s
+			left join %2$s on %1$s.id = %2$s.id
+			left join %3$s on %1$s.id = %3$s.id
+			%4$s',
 			App::THREAD_TABLE,
 			App::THREAD_STYLE_TABLE,
 			App::THREAD_PASSWORD_TABLE,
@@ -380,19 +366,32 @@ class Thread
 
 		if ($st === null) return [];
 
-		return array_map(function (ThreadEntity $record): Thread {
-			$thread = new Thread(new ThreadEntry($record->id));
-			$thread->entry->subject = $record->subject;
-			$thread->body = $record->body;
-			$thread->afterword = $record->afterword;
-			$thread->convertLineBreak = (bool) $record->convertLineBreak;
-			$thread->foreground = $record->foreground;
-			$thread->background = $record->background;
-			$thread->backgroundImage = $record->backgroundImage;
-			$thread->border = $record->border;
-			$thread->writingMode = $record->writingMode;
+		/** @param array{
+		 * id: int,
+		 * subject: string,
+		 * body: string,
+		 * afterword: string,
+		 * convertLineBreak: int,
+		 * foreground: ?string,
+		 * background: ?string,
+		 * backgroundImage: ?string,
+		 * border: ?string,
+		 * writingMode: int
+		 * } $record */
+		return array_map(function (array $record): Thread {
+			$entry = new ThreadEntry($record['id']);
+			$thread = new Thread($entry);
+			$thread->entry->subject = $record['subject'];
+			$thread->body = $record['body'];
+			$thread->afterword = $record['afterword'];
+			$thread->convertLineBreak = (bool) $record['convertLineBreak'];
+			$thread->foreground = $record['foreground'];
+			$thread->background = $record['background'];
+			$thread->backgroundImage = $record['backgroundImage'];
+			$thread->border = $record['border'];
+			$thread->writingMode = $record['writingMode'];
 			return $thread;
-		}, $st->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\ThreadEntity"));
+		}, $st->fetchAll());
 	}
 
 	/**
@@ -404,8 +403,8 @@ class Thread
 		$entriesById = array_combine(array_map(fn(ThreadEntry $entry) => $entry->id, $entries), $entries);
 		$threads = self::query($db, sprintf(
 			'
-			where %s.subject = %d
-			order by %1$s.id %s',
+			where %1$s.subject = %2$d
+			order by %1$s.id %3$s',
 			App::THREAD_TABLE,
 			$subject,
 			$order == Board::ORDER_ASCEND ? "asc" : "desc"

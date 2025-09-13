@@ -15,12 +15,12 @@ class MegalithHandler extends Handler
 		if (App::$handlerType == "txt" &&
 			preg_match('/^subject(s|[0-9]+|)$/', $name, $matches))
 		{
-			$db = App::openDB();
-			$latest = Board::getLatestSubject($db);
+			$dh = App::openDB();
+			$latest = $dh->execute(fn($db) => Board::getLatestSubject($db));
 			
 			if ($matches[1] == "s")
 			{
-				if (Util::isCachedByBrowser(Board::getLastUpdate($db, $latest), strval($latest)))
+				if (Util::isCachedByBrowser($dh->execute(fn($db) => Board::getLastUpdate($db, $latest)), strval($latest)))
 					Visualizer::notModified();
 				
 				$content = implode("\n", array_map(function($_) { return "subject{$_}.txt"; }, array_merge(array(""), $latest > 1 ? range(1, $latest - 1) : array())));
@@ -29,13 +29,13 @@ class MegalithHandler extends Handler
 			{
 				if (($subject = $matches[1] == "" ? $latest : intval($matches[1])) > $latest)
 					throw new ApplicationException("ファイルが見つかりません", 404);
-				
-				if (($lastUpdate = Board::getLastUpdate($db, $latest)) !== null && Util::isCachedByBrowser($lastUpdate))
+
+				if (($lastUpdate = $dh->execute(fn($db) => Board::getLastUpdate($db, $latest))) !== null && Util::isCachedByBrowser($lastUpdate))
 					Visualizer::notModified();
 				
 				if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
 				{
-					$entries = ThreadEntry::getEntriesBySubject($db, $subject);
+					$entries = $dh->execute(fn($db) => ThreadEntry::getEntriesBySubject($db, $subject));
 					$lastUpdate = max(array_map(fn($x) => $x->getLatestLastUpdate(), $entries) + array(0));
 				
 					if (Util::isCachedByBrowser($lastUpdate))
@@ -64,7 +64,7 @@ class MegalithHandler extends Handler
 					$content = "";
 			}
 			
-			App::closeDB($db);
+			$dh->close();
 			
 			return Visualizer::text($content, "Shift_JIS", "Windows-31J");
 		}
@@ -81,9 +81,10 @@ class MegalithHandler extends Handler
 		
 		if (App::$handlerType == "dat")
 		{
-			$db = App::openDB();
+			$dh = App::openDB();
 			
-			if (!($thread = Thread::load($db, intval($name))))
+			$thread = $dh->execute(fn($db) => Thread::load($db, intval($name)));
+			if (!$thread)
 				throw new ApplicationException("ファイルが見つかりません", 404);
 			
 			if (Util::isCachedByBrowser($thread->entry->getLatestLastUpdate()))
@@ -91,9 +92,7 @@ class MegalithHandler extends Handler
 			
 			if (Cookie::getCookie(Cookie::LAST_ID_KEY) != $thread->entry->id)
 			{
-				$db->beginTransaction();
-				$thread->entry->incrementReadCount($db);
-				$db->commit();
+				$dh->withTransaction(fn($db) => $thread->entry->incrementReadCount($db));
 				Cookie::setCookie(Cookie::LAST_ID_KEY, strval($thread->entry->id));
 				Cookie::sendCookie();
 			}
@@ -126,9 +125,9 @@ class MegalithHandler extends Handler
 				);
 			else
 				$content = array();
-			
-			App::closeDB($db);
-			
+
+			$dh->close();
+
 			return Visualizer::text(implode("\n", $content), "Shift_JIS", "Windows-31J");
 		}
 		else
@@ -145,9 +144,10 @@ class MegalithHandler extends Handler
 		
 		if (App::$handlerType == "dat" && count($path) == 2 && $path[1] == "res")
 		{
-			$db = App::openDB();
+			$dh = App::openDB();
 			
-			if (!($thread = Thread::load($db, intval($name))))
+			$thread = $dh->execute(fn($db) => Thread::load($db, intval($name)));
+			if (!$thread)
 				throw new ApplicationException("ファイルが見つかりません", 404);
 			
 			if (Util::isCachedByBrowser($thread->entry->getLatestLastUpdate()))
@@ -189,9 +189,9 @@ class MegalithHandler extends Handler
 				);
 			else
 				$content = array();
-			
-			App::closeDB($db);
-			
+
+			$dh->close();
+
 			return Visualizer::text(implode("\n", $content), "Shift_JIS", "Windows-31J");
 		}
 		else
@@ -208,16 +208,17 @@ class MegalithHandler extends Handler
 		
 		if (App::$handlerType == "dat" && count($path) == 2 && $path[1] == "aft")
 		{
-			$db = App::openDB();
-			
-			if (!($thread = Thread::load($db, intval($name))))
+			$dh = App::openDB();
+
+			$thread = $dh->execute(fn($db) => Thread::load($db, intval($name)));
+			if (!$thread)
 				throw new ApplicationException("ファイルが見つかりません", 404);
 			
 			if (Util::isCachedByBrowser($thread->entry->getLatestLastUpdate()))
 				Visualizer::notModified();
-			
-			App::closeDB($db);
-			
+
+			$dh->close();
+
 			if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
 				return Visualizer::text(str_replace("\r\n", "\n", Visualizer::escapeAfterword($thread)), "Shift_JIS", "Windows-31J");
 			else

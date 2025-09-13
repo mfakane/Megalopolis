@@ -1,4 +1,5 @@
 <?php
+
 namespace Megalopolis;
 
 use \PDO;
@@ -9,7 +10,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 	{
 		$this->gramLength = max(Configuration::$instance->mysqlSearchNgramLength, 2);
 	}
-	
+
 	#[\Override]
 	function registerThread(PDO $idb, Thread $thread, bool $removeExisting): void
 	{
@@ -17,21 +18,20 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 			return;
 
 		/** @var array<string, string[]> */
-		$words = array_filter(array
-		(
-			"title" => $this->getWords($thread->entry->title),
-			"name" => $this->getWords($thread->entry->name),
-			"summary" => $this->getWords($thread->entry->summary),
-			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords($thread->body) : null,
-			"afterword" => $this->getWords($thread->afterword),
-			"tag" => call_user_func_array(array("SearchIndex", "getWords"), $thread->entry->tags)
+		$words = array_filter(array(
+			"title" => $this->getWords([$thread->entry->title]),
+			"name" => $this->getWords([$thread->entry->name]),
+			"summary" => $this->getWords([$thread->entry->summary]),
+			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([$thread->body]) : null,
+			"afterword" => $this->getWords([$thread->afterword]),
+			"tag" => SearchIndex::getWords($thread->entry->tags)
 		));
-		
+
 		foreach ($words as $k => $v)
 			$words[$k] = array_map(fn($_) => str_pad($_, $this->gramLength, "_"), $v);
-		
-		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
-		('
+
+		$st = Util::ensureStatement($idb, $idb->prepare(sprintf(
+			'
 			insert into %s(docid, %s)
 			values
 			(
@@ -42,10 +42,16 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 			self::INDEX_TABLE,
 			implode(", ", array_keys($words)),
 			$thread->id,
-			implode(", ", array_map(function($_) { return ":{$_}"; }, array_keys($words))),
-			implode(", ", array_map(function($_) { return "{$_} = values({$_})"; }, array_keys($words)))
+			implode(", ", array_map(function ($_) {
+				return ":{$_}";
+			}, array_keys($words))),
+			implode(", ", array_map(function ($_) {
+				return "{$_} = values({$_})";
+			}, array_keys($words)))
 		)));
-		Util::executeStatement($st, array_map(function($_) { return implode(" ", $_); }, $words));
+		Util::executeStatement($st, array_map(function ($_) {
+			return implode(" ", $_);
+		}, $words));
 	}
 
 	#[\Override]
@@ -71,59 +77,55 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 	{
 		if (!$query)
 			return array();
-		
+
 		$queryArguments = array();
-		
-		foreach ($query as $i)
-		{
+
+		foreach ($query as $i) {
 			$prefix = "+";
-			
-			if (strpos($i, "-") === 0)
-			{
+
+			if (strpos($i, "-") === 0) {
 				$i = substr($i, 1);
 				$prefix = "-";
 			}
-			
-			if ($words = $this->getWords(array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($i) >= $this->gramLength), $i))
-			{
+
+			if ($words = $this->getWords([array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($i) >= $this->gramLength), $i])) {
 				$currentWord = array();
-				
-				foreach ($words as $j)
-				{
+
+				foreach ($words as $j) {
 					$currentLength = mb_strlen($j);
-					
+
 					if ($currentLength == $this->gramLength)
 						$currentWord[] = $j;
-					else
-					{
-						if ($currentWord)
-						{
+					else {
+						if ($currentWord) {
 							$queryArguments[] = $prefix . '"' . implode(" ", $currentWord) . '"';
 							$currentWord = array();
 						}
-						
+
 						$queryArguments[] = $prefix . $j . (Configuration::$instance->mysqlSearchUseHeadMatching ? "*" : str_repeat("_", $this->gramLength - $currentLength));
 					}
 				}
-				
+
 				if ($currentWord)
 					$queryArguments[] = $prefix . '"' . implode(" ", $currentWord) . '"';
 			}
 		}
-		
+
 		if (!($queryArguments = array_filter($queryArguments)))
 			return array();
-		
+
 		$targetColumns = $type == null ? array_keys(self::$searchIndexSchema) : $type;
-		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
-		('
+		$st = Util::ensureStatement($idb, $idb->prepare(sprintf(
+			'
 			select docid from
-			(' . implode(" union ", array_map(function($_) { return "select docid from %2\$s where match({$_}) against(? in boolean mode)"; }, $targetColumns)) . ') as search %s',
+			(' . implode(" union ", array_map(function ($_) {
+				return "select docid from %2\$s where match({$_}) against(? in boolean mode)";
+			}, $targetColumns)) . ') as search %1$s',
 			is_array($ids) ? "where docid in (" . ($ids ? implode(", ", $ids) : -1) . ")" : "",
 			self::INDEX_TABLE
 		)));
 		Util::executeStatement($st, array_fill(0, count($targetColumns), implode(" ", $queryArguments)));
-		
+
 		return $st?->fetchAll(PDO::FETCH_COLUMN, 0) ?? array();
 	}
 
@@ -131,10 +133,10 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 	function unregisterThread(PDO $idb, array $ids): void
 	{
 		$count = count($ids);
-		
+
 		if ($count == 1)
-			Util::executeStatement(Util::ensureStatement($idb, $idb->prepare(sprintf
-			('
+			Util::executeStatement(Util::ensureStatement($idb, $idb->prepare(sprintf(
+				'
 				delete from %s
 				where docid = ?
 				limit %d',
@@ -142,8 +144,8 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 				$count
 			))), array($ids[0]));
 		else
-			Util::executeStatement(Util::ensureStatement($idb, $idb->prepare(sprintf
-			('
+			Util::executeStatement(Util::ensureStatement($idb, $idb->prepare(sprintf(
+				'
 				delete from %s
 				where docid in (%s)
 				limit %d',
@@ -156,15 +158,14 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 	#[\Override]
 	function getEntryCountCore(PDO $idb): ?int
 	{
-		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
-		('
+		$st = Util::ensureStatement($idb, $idb->prepare(sprintf(
+			'
 			select count(*) from %s',
 			self::INDEX_TABLE
 		)));
 		Util::executeStatement($st);
 		$rt = $st?->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0) ?? array(0);
-		
+
 		return intval(array_shift($rt));
 	}
 }
-?>

@@ -24,12 +24,12 @@ class ClassicSearchIndex extends SearchIndex
 		
 		$words = array_filter(array
 		(
-			"title" => $this->getWords($thread->entry->title),
-			"name" => $this->getWords($thread->entry->name),
-			"summary" => $this->getWords($thread->entry->summary),
-			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords($thread->body) : null,
-			"afterword" => $this->getWords($thread->afterword),
-			"tag" => call_user_func_array(array("SearchIndex", "getWords"), $thread->entry->tags)
+			"title" => $this->getWords([$thread->entry->title]),
+			"name" => $this->getWords([$thread->entry->name]),
+			"summary" => $this->getWords([$thread->entry->summary]),
+			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([$thread->body]) : null,
+			"afterword" => $this->getWords([$thread->afterword]),
+			"tag" => SearchIndex::getWords($thread->entry->tags)
 		));
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
@@ -88,6 +88,7 @@ class ClassicSearchIndex extends SearchIndex
 	}
 	
 	/**
+	 * @param string[] $query
 	 * @return int[]
 	 */
 	private function searchThreadInternal(PDO $idb, array $query, ?array $type, ?array $ids): array
@@ -95,7 +96,7 @@ class ClassicSearchIndex extends SearchIndex
 		$words = array();
 		
 		foreach ($query as $i)
-			$words = array_merge($words, $this->getWords(array("noIncompletedGram" => true), $i));
+			$words = array_merge($words, $this->getWords([array("noIncompletedGram" => true), $i]));
 		
 		if (!$words)
 			return array();
@@ -122,9 +123,7 @@ class ClassicSearchIndex extends SearchIndex
 	#[\Override]
 	function ensureTableExists(PDO $idb): void
 	{
-		$idb->beginTransaction();
 		Util::createTableIfNotExists($idb, self::$searchIndexSchema, self::INDEX_TABLE);
-		$idb->commit();
 	}
 
 	#[\Override]

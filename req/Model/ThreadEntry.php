@@ -92,6 +92,56 @@ class ThreadEntry
 		$this->id = $id;
 	}
 
+	/**
+	 * @param array{
+	 * id: int,
+	 * subject: int,
+	 * title: ?string,
+	 * name: ?string,
+	 * summary: ?string,
+	 * link: ?string,
+	 * mail: ?string,
+	 * host: ?string,
+	 * dateTime: ?int,
+	 * lastUpdate: ?int,
+	 * pageCount: ?int,
+	 * size: ?float,
+	 * points: ?int,
+	 * responseCount: ?int,
+	 * commentCount: ?int,
+	 * evaluationCount: ?int,
+	 * readCount: ?int,
+	 * responseLastUpdate: ?int
+	 * } $arr
+	 * @return ThreadEntry
+	 */
+	static function fromArray(array $arr): ThreadEntry
+	{
+		$entry = new ThreadEntry(intval($arr["id"]));
+		$entry->subject = intval($arr["subject"]);
+		$entry->title = $arr["title"] === null ? null : strval($arr["title"]);
+		$entry->name = $arr["name"] === null ? null : strval($arr["name"]);
+		$entry->summary = $arr["summary"] === null ? null : strval($arr["summary"]);
+		$entry->link = $arr["link"] === null ? null : strval($arr["link"]);
+		$entry->mail = $arr["mail"] === null ? null : strval($arr["mail"]);
+		$entry->host = $arr["host"] === null ? null : strval($arr["host"]);
+		$entry->dateTime = $arr["dateTime"] === null ? 0 : intval($arr["dateTime"]);
+		$entry->lastUpdate = $arr["lastUpdate"] === null ? 0 : intval($arr["lastUpdate"]);
+		$entry->pageCount = $arr["pageCount"] === null ? 1 : intval($arr["pageCount"]);
+		$entry->size = $arr["size"] === null ? 0.0 : floatval($arr["size"]);
+
+		$entry->points = $arr["points"] === null ? 0 : intval($arr["points"]);
+		$entry->responseCount = $arr["responseCount"] === null ? 0 : intval($arr["responseCount"]);
+		$entry->commentCount = $arr["commentCount"] === null ? 0 : intval($arr["commentCount"]);
+		$entry->evaluationCount = $arr["evaluationCount"] === null ? 0 : intval($arr["evaluationCount"]);
+		$entry->commentedEvaluationCount = $entry->commentCount - ($entry->responseCount - $entry->evaluationCount);
+		$entry->readCount = $arr["readCount"] === null ? 0 : intval($arr["readCount"]);
+		$entry->responseLastUpdate = $arr["responseLastUpdate"] === null ? $entry->lastUpdate : intval($arr["responseLastUpdate"]);
+		$entry->calculateRate();
+
+		return $entry;
+	}
+
 	static function create(PDO $db): ThreadEntry
 	{
 		$entry = new ThreadEntry(time());
@@ -433,17 +483,18 @@ class ThreadEntry
 		Meta::set($db, App::TAG_TABLE, strval(self::$tagSchemaVersion));
 	}
 
-	private static function query(PDO $db, string $options = "", array $params = array(), array $columns = array("*")): array
+	/**
+	 * @return ThreadEntry[]
+	 */
+	private static function query(PDO $db, string $options = "", array $params = array()): array
 	{
 		static $queryCache = array();
 
-		$rt = array();
 		$sql = sprintf(
 			'
-			select %s from %s
-			left join %s on %2$s.id = %3$s.id
-			%s',
-			implode(", ", $columns),
+			select * from %1$s
+			left join %2$s on %1$s.id = %2$s.id
+			%3$s',
 			App::THREAD_ENTRY_TABLE,
 			App::THREAD_EVALUATION_TABLE,
 			trim($options)
@@ -451,13 +502,18 @@ class ThreadEntry
 		$st = isset($queryCache[$sql]) ? $queryCache[$sql] : $queryCache[$sql] = Util::ensureStatement($db, $db->prepare($sql));
 		Util::executeStatement($st, $params);
 
-		if ($columns == array("*")) {
-			foreach ($st->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\ThreadEntry") as $i)
-				$rt[$i->id] = $i;
+		/**
+		 * @var array<int, ThreadEntry> $rt
+		 */
+		$rt = [];
 
-			return $rt;
-		} else
-			return $st->fetchAll();
+		foreach ($st->fetchAll() as $i)
+		{
+			$entry = ThreadEntry::fromArray($i);
+			$rt[$entry->id] = $entry;
+		}
+
+		return $rt;
 	}
 
 	/**
@@ -663,7 +719,7 @@ class ThreadEntry
 	{
 		$rt = self::query($db, sprintf(
 			'
-			where %s.subject = %d
+			where %1$s.subject = %2$d
 			group by %1$s.id',
 			App::THREAD_ENTRY_TABLE,
 			$subject
@@ -706,7 +762,6 @@ class ThreadEntry
 	static function getEntriesByName(PDO $db, string $name, int $offset = 0, ?int $limit = null, int $order = Board::ORDER_DESCEND, ?int &$foundItems = null): array
 	{
 		$isMysql = Configuration::$instance->dataStore instanceof MySQLDataStore;
-		$rt = array();
 		$sql = sprintf(
 			'
 			select %s * from %s as t
@@ -722,10 +777,18 @@ class ThreadEntry
 		);
 		Util::executeStatement($st = Util::ensureStatement($db, $db->prepare($sql)), array($name));
 
-		if (!$st) return array();
+		if (!$st) return [];
 
-		foreach ($st->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\ThreadEntry") as $i)
-			$rt[$i->id] = $i;
+		/**
+		 * @var array<int, ThreadEntry>
+		 */
+		$rt = [];
+
+		foreach ($st->fetchAll() as $i)
+		{
+			$entry = ThreadEntry::fromArray($i);
+			$rt[$entry->id] = $entry;
+		}
 
 		if ($isMysql) {
 			Util::executeStatement($st2 = Util::ensureStatement($db, $db->prepare("select found_rows()")));
@@ -757,7 +820,6 @@ class ThreadEntry
 	static function getEntriesByTag(PDO $db, string $tag, int $offset = 0, ?int $limit = null, int $order = Board::ORDER_DESCEND, ?int &$foundItems = null): array
 	{
 		$isMysql = Configuration::$instance->dataStore instanceof MySQLDataStore;
-		$rt = array();
 		$sql = sprintf(
 			'
 			select %s * from %s as tt
@@ -774,10 +836,18 @@ class ThreadEntry
 		);
 		Util::executeStatement($st = Util::ensureStatement($db, $db->prepare($sql)), array($tag));
 
-		if (!$st) return array();
+		if (!$st) return [];
 
-		foreach ($st->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\ThreadEntry") as $i)
-			$rt[$i->id] = $i;
+		/**
+		 * @var array<int, ThreadEntry>
+		 */
+		$rt = [];
+
+		foreach ($st->fetchAll() as $i)
+		{
+			$entry = ThreadEntry::fromArray($i);
+			$rt[$entry->id] = $entry;
+		}
 
 		if ($isMysql) {
 			Util::executeStatement($st2 = Util::ensureStatement($db, $db->prepare("select found_rows()")));
@@ -1051,7 +1121,6 @@ class ThreadEntry
 	static function getEntriesByHost(PDO $db, string $host, array $subjectRange, array $target, int $offset = 0, ?int $limit = null, int $order = Board::ORDER_DESCEND, ?int &$foundItems = null): array
 	{
 		$isMysql = Configuration::$instance->dataStore instanceof MySQLDataStore;
-		$rt = array();
 		$sql = sprintf(
 			'
 			from (select * from %s where subject between :begin and :end) as t
@@ -1072,10 +1141,18 @@ class ThreadEntry
 			":host" => str_replace("*", "%", $host)
 		));
 
-		if (!$st) return array();
+		if (!$st) return [];
 
-		foreach ($st->fetchAll(PDO::FETCH_CLASS, "\\Megalopolis\\ThreadEntry") as $i)
-			$rt[$i->id] = $i;
+		/**
+		 * @var array<int, ThreadEntry>
+		 */
+		$rt = [];
+
+		foreach ($st->fetchAll() as $i)
+		{
+			$entry = ThreadEntry::fromArray($i);
+			$rt[$entry->id] = $entry;
+		}
 
 		if ($isMysql) {
 			Util::executeStatement($st2 = Util::ensureStatement($db, $db->prepare("select found_rows()")));
@@ -1166,9 +1243,9 @@ class ThreadEntry
 			$whereString = "where " . implode(" and ", array_filter($where));
 			Util::executeStatement($st = Util::ensureStatement($db, $db->prepare(sprintf(
 				'
-				select count(1) from %s
-				left join %s on %1$s.id = %2$s.id
-				%s',
+				select count(1) from %1$s
+				left join %2$s on %1$s.id = %2$s.id
+				%3$s',
 				App::THREAD_ENTRY_TABLE,
 				App::THREAD_EVALUATION_TABLE,
 				$whereString
@@ -1178,20 +1255,25 @@ class ThreadEntry
 		}
 
 		if ($option == self::SEARCH_RANDOM) {
+			/** @var array<int, int> */
+			$rt = [];
+
 			if (is_array($ids) && !$ids)
 				return null;
 			else
-				$rt = self::query($db, $whereString, array(), array(App::THREAD_ENTRY_TABLE . ".id"));
+				foreach (self::query($db, $whereString, array()) as $entry)
+					$rt[$entry->id] = $entry->id;
 
 			if (
 				Configuration::$instance->convertOnDemand &&
 				is_dir("Megalith/sub")
 			)
-				$rt = array_merge($rt, self::searchAllMegalithEntries($db, $query));
+				foreach (self::searchAllMegalithEntries($db, $query) as $entry)
+					$rt[$entry->id] = $entry->id;
 
 			$val = $rt[array_rand($rt)];
 
-			return is_array($val) ? ThreadEntry::load($db, $val[0]) : $val;
+			return ThreadEntry::load($db, $val);
 		} else {
 			if (is_array($ids) && !$ids)
 				$rt = array();

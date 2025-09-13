@@ -14,7 +14,7 @@ class SessionStore implements \SessionHandlerInterface
 	);
 
 	static SessionStore $instance;
-	private ?PDO $db = null;
+	private ?DataStoreHandle $dh = null;
 	private ?string $sessionName = null;
 
 	static function useSessionStore(): void
@@ -26,12 +26,12 @@ class SessionStore implements \SessionHandlerInterface
 	#[\Override]
 	function open(string $path, string $name): bool
 	{
-		$this->db = App::openDB();
+		$this->dh = App::openDB();
 		$this->sessionName = $name;
 
-		Util::createTableIfNotExists($this->db, self::$sessionStoreSchema, App::SESSION_STORE_TABLE, array(
+		$this->dh->execute(fn($db) => Util::createTableIfNotExists($db, self::$sessionStoreSchema, App::SESSION_STORE_TABLE, array(
 			App::SESSION_STORE_TABLE . "LastUpdateIndex" => array("lastUpdate")
-		));
+		)));
 
 		return true;
 	}
@@ -39,8 +39,10 @@ class SessionStore implements \SessionHandlerInterface
 	#[\Override]
 	function close(): bool
 	{
-		if ($this->db)
-			App::closeDB($this->db);
+		if ($this->dh)
+			$this->dh->close();
+
+		$this->dh = null;
 
 		return true;
 	}
@@ -48,17 +50,20 @@ class SessionStore implements \SessionHandlerInterface
 	#[\Override]
 	function read(string $id): string
 	{
-		if (!$this->db)
+		if (!$this->dh)
 			return "";
 
-		$st = Util::ensureStatement($this->db, $this->db->prepare(sprintf(
-			'
+		$rt = $this->dh->execute(function ($db) use ($id) {
+			$st = Util::ensureStatement($db, $db->prepare(sprintf(
+				'
 			select * from %s
 			where name = ? and id = ?',
-			App::SESSION_STORE_TABLE
-		)));
-		Util::executeStatement($st, array($this->sessionName, $id));
-		$rt = $st?->fetchAll() ?? [];
+				App::SESSION_STORE_TABLE
+			)));
+			Util::executeStatement($st, array($this->sessionName, $id));
+			return $st?->fetchAll() ?? [];
+		});
+
 
 		if (count($rt))
 			return $rt[0]["data"];
@@ -69,10 +74,10 @@ class SessionStore implements \SessionHandlerInterface
 	#[\Override]
 	function write(string $id, string $data): bool
 	{
-		if (!$this->db)
+		if (!$this->dh)
 			return false;
 
-		Util::executeStatement(Util::ensureStatement($this->db, $this->db->prepare(sprintf(
+		$this->dh->execute(fn($db) => Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf(
 			'
 			replace into %s(name, id, lastUpdate, data) values(?, ?, ?, ?)',
 			App::SESSION_STORE_TABLE
@@ -81,7 +86,7 @@ class SessionStore implements \SessionHandlerInterface
 			$id,
 			time(),
 			$data
-		));
+		)));
 
 		return true;
 	}
@@ -89,17 +94,17 @@ class SessionStore implements \SessionHandlerInterface
 	#[\Override]
 	function destroy(string $id): bool
 	{
-		if (!$this->db)
+		if (!$this->dh)
 			return false;
 
-		Util::executeStatement(Util::ensureStatement($this->db, $this->db->prepare(sprintf(
+		$this->dh->execute(fn($db) => Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf(
 			'
 			delete from %s where name = ? and id = ?',
 			App::SESSION_STORE_TABLE
 		))), array(
 			$this->sessionName,
 			$id
-		), false);
+		), false));
 
 		return true;
 	}
@@ -107,17 +112,21 @@ class SessionStore implements \SessionHandlerInterface
 	#[\Override]
 	function gc(int $max_lifetime): false|int
 	{
-		if (!$this->db)
+		if (!$this->dh)
 			return false;
 
-		$st = Util::ensureStatement($this->db, $this->db->prepare(sprintf(
-			'delete from %s where lastUpdate <= %d',
-			App::SESSION_STORE_TABLE,
-			time() - $max_lifetime
-		)));
-		Util::executeStatement($st, null, false);
+		$rt = $this->dh->execute(function ($db) use ($max_lifetime) {
+			$st = Util::ensureStatement($db, $db->prepare(sprintf(
+				'delete from %s where lastUpdate <= %d',
+				App::SESSION_STORE_TABLE,
+				time() - $max_lifetime
+			)));
+			Util::executeStatement($st, null, false);
 
-		return $st?->rowCount() ?? 0;
+			return $st?->rowCount() ?? 0;
+		});
+
+		return $rt;
 	}
 
 	function apply(): void

@@ -167,11 +167,12 @@ abstract class SearchIndex
 			"count" => $count
 		);
 	}
-	
+
 	/**
+	 * @param (?string|array{endOnIncompletedGram?: bool, noIncompletedGram?: bool})[] $strings
 	 * @return string[]
 	 */
-	function getWords(): array
+	function getWords(array $strings): array
 	{
 		$rt = array();
 		$gram = $this->gramLength;
@@ -179,7 +180,7 @@ abstract class SearchIndex
 		$endOnIncompletedGram = false;
 		$noIncompletedGram = false;
 		
-		foreach (func_get_args() as $i)
+		foreach ($strings as $i)
 			if (is_array($i))
 			{
 				if (isset($i["endOnIncompletedGram"]))
@@ -188,7 +189,7 @@ abstract class SearchIndex
 				if (isset($i["noIncompletedGram"]))
 					$noIncompletedGram = $i["noIncompletedGram"];
 			}
-			else if (!Util::isEmpty($i))
+			else if (is_string($i) && mb_strlen($i) > 0)
 				foreach ((array)mb_split('[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F' . self::$endchars . ']', $gramMax == -1 ? mb_strtolower($i) : mb_substr(mb_strtolower($i), 0, $gramMax)) as $j)
 					if ($l = mb_strlen((string)$j))
 						for ($k = 0; $k < $l; $k++)

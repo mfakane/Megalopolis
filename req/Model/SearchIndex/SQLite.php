@@ -28,12 +28,12 @@ class SQLiteSearchIndex extends SearchIndex
 		
 		$words = array_filter(array
 		(
-			"title" => $this->getWords($thread->entry->title),
-			"name" => $this->getWords($thread->entry->name),
-			"summary" => $this->getWords($thread->entry->summary),
-			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords($thread->body) : null,
-			"afterword" => $this->getWords($thread->afterword),
-			"tag" => call_user_func_array(array("SearchIndex", "getWords"), $thread->entry->tags)
+			"title" => $this->getWords([$thread->entry->title]),
+			"name" => $this->getWords([$thread->entry->name]),
+			"summary" => $this->getWords([$thread->entry->summary]),
+			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([$thread->body]) : null,
+			"afterword" => $this->getWords([$thread->afterword]),
+			"tag" => SearchIndex::getWords($thread->entry->tags)
 		));
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
@@ -82,7 +82,7 @@ class SQLiteSearchIndex extends SearchIndex
 				$prefix = "-";
 			}
 			
-			if ($words = $this->getWords(array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($i) >= $this->gramLength), $i))
+			if ($words = $this->getWords([array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($i) >= $this->gramLength), $i]))
 			{
 				$currentWord = array();
 				
@@ -108,7 +108,7 @@ class SQLiteSearchIndex extends SearchIndex
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
 			select docid from
-			(' . implode(" union ", array_map(function($_) { return "select docid from %2\$s where {$_} match ?"; }, $targetColumns)) . ') %s',
+			(' . implode(" union ", array_map(function($_) { return "select docid from %2\$s where {$_} match ?"; }, $targetColumns)) . ') %1$s',
 			is_array($ids) ? "where docid in (" . ($ids ? implode(", ", $ids) : -1) . ")" : "",
 			self::INDEX_TABLE
 		)));
@@ -121,9 +121,7 @@ class SQLiteSearchIndex extends SearchIndex
 	#[\Override]
 	function ensureTableExists(PDO $idb): void
 	{
-		$idb->beginTransaction();
 		Util::createFullTextTableIfNotExists($idb, self::$searchIndexSchema, self::INDEX_TABLE);
-		$idb->commit();
 	}
 
 	#[\Override]

@@ -169,9 +169,7 @@ class Comment
 	
 	static function ensureTable(PDO $db): void
 	{
-		$db->beginTransaction();
 		Util::createTableIfNotExists($db, self::$commentSchema, App::COMMENT_TABLE);
-		$db->commit();
 	}
 }
 
