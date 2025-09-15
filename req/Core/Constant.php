@@ -15,5 +15,4 @@ class Constant
 
 	const string DEFAULT_HANDLER = "index";
 	const string DEFAULT_ACTION = "index";
-	const bool SQL_DEBUG = false;
 }

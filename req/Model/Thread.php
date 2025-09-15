@@ -399,7 +399,8 @@ class Thread
 		 * background: ?string,
 		 * backgroundImage: ?string,
 		 * border: ?string,
-		 * writingMode: int
+		 * writingMode: int,
+		 * hash: ?string
 		 * } $record */
 		return array_map(function (array $record): Thread {
 			$entry = new ThreadEntry($record['id']);
@@ -413,6 +414,7 @@ class Thread
 			$thread->backgroundImage = $record['backgroundImage'];
 			$thread->border = $record['border'];
 			$thread->writingMode = $record['writingMode'];
+			$thread->hash = $record['hash'];
 			return $thread;
 		}, $st->fetchAll());
 	}

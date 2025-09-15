@@ -1,3 +1,6 @@
 vendor/
 store/*.sqlite
 .htaccess
+*.lock
+.direnv/
+.env

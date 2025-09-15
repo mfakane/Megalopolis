@@ -10,8 +10,5 @@
         <file name="config.php" />
         <file name="index.php" />
         <directory name="req" />
-        <ignoreFiles>
-            <directory name="vendor" />
-        </ignoreFiles>
     </projectFiles>
 </psalm>

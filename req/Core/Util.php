@@ -398,7 +398,7 @@ class Util
 				return self::HASH_TYPE_MEGALOPOLIS1;
 			else
 				return false;
-		} catch (Exception $ex) {
+		} catch (\Throwable) {
 			return false;
 		}
 	}

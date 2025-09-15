@@ -2,6 +2,9 @@
 namespace Megalopolis;
 
 $c = Configuration::$instance;
+
+/** @var \Throwable $exception */
+$exception = Visualizer::$data;
 ?>
 <?php Visualizer::doctype() ?>
 <html lang="ja">
@@ -15,11 +18,11 @@ $c = Configuration::$instance;
 <body>
 	<?php Visualizer::header("エラー") ?>
 	<p class="notify error">
-		<?=Visualizer::escapeOutput(Visualizer::$data->getMessage()) ?>
+		<?=Visualizer::escapeOutput($exception->getMessage()) ?>
 	</p>
 	<?php if ($c->debug): ?>
 		<p class="notify error">
-			<?php Visualizer::convertedSummary(Visualizer::$data->getTraceAsString()) ?>
+			<?php Visualizer::convertedSummary($exception->getTraceAsString()) ?>
 		</p>
 	<?php endif ?>
 	<?php Visualizer::footer() ?>

@@ -12,6 +12,8 @@ abstract class DataStore
 	/** @var string[][] */
 	protected array $tableNames = array();
 
+	protected int $transactionCount = 0;
+
 	protected function registerHandle(PDO &$db, string $name): void
 	{
 		$this->handles[$name] = &$db;
@@ -47,6 +49,46 @@ abstract class DataStore
 
 		array_splice($arr, $index, 1);
 		$this->tableNames[$this->getDatabaseNameByHandle($db)] = $arr;
+	}
+
+	function beginTransactionOrSavepoint(PDO &$db): void
+	{
+		if ($this->transactionCount == 0)
+		{
+			$db->beginTransaction();
+			$this->transactionCount++;
+		}
+		else
+		{
+			$this->executeStatement($this->ensureStatement($db, $db->prepare("savepoint SP{$this->transactionCount}")));
+			$this->transactionCount++;
+		}
+	}
+
+	function commitOrReleaseSavepoint(PDO &$db): void
+	{
+		$this->transactionCount--;
+
+		if ($this->transactionCount < 0)
+			throw new ApplicationException("トランザクションが開始されていません");
+
+		if ($this->transactionCount == 0)
+			$db->commit();
+		else
+			$this->executeStatement($this->ensureStatement($db, $db->prepare("release savepoint SP{$this->transactionCount}")));
+	}
+
+	function rollBackOrToSavepoint(PDO &$db): void
+	{
+		$this->transactionCount--;
+	
+		if ($this->transactionCount < 0)
+			throw new ApplicationException("トランザクションが開始されていません");
+
+		if ($this->transactionCount == 0)
+			$db->rollBack();
+		else
+			$this->executeStatement($this->ensureStatement($db, $db->prepare("rollback to savepoint SP{$this->transactionCount}")));
 	}
 
 	abstract function open(string $database = "data"): PDO;
@@ -114,7 +156,7 @@ abstract class DataStore
 		else if ($throw) {
 			$message = implode(":", $st->errorInfo());
 
-			if (defined("SQL_DEBUG") && boolval(constant("SQL_DEBUG")))
+			if (Configuration::$instance->debug)
 				$message .= "\r\n" . $st->queryString;
 
 			throw new ApplicationException($message);
@@ -519,6 +561,7 @@ class DataStoreHandle
 {
 	private DataStore $store;
 	private ?PDO $db;
+	private bool $inLocalTransaction = false;
 
 	function __construct(DataStore $store, PDO $db)
 	{
@@ -531,21 +574,26 @@ class DataStoreHandle
 	 * @param callable(PDO $db): T $callback
 	 * @return T
 	 */
-	function withTransaction(callable $callback, bool $ignoreNested = false): mixed
+	function withTransaction(callable $callback, bool $allowNested = false): mixed
 	{
 		if (!isset($this->db)) throw new ApplicationException("データベースが開かれていません");
 
-		if ($this->db->inTransaction())
-			return $ignoreNested ? $callback($this->db) : throw new ApplicationException("既にトランザクションが開始されています");
+		if ($this->db->inTransaction() && !$allowNested)
+			throw new ApplicationException("既にトランザクションが開始されています");
 
-		$this->db->beginTransaction();
+		$this->store->beginTransactionOrSavepoint($this->db);
 		try {
+			$this->inLocalTransaction = true;
+
 			$result = $callback($this->db);
-			$this->db->commit();
+			$this->store->commitOrReleaseSavepoint($this->db);
+			$this->inLocalTransaction = false;
+
 			return $result;
 		} catch (\Throwable $e) {
-			$this->db->rollBack();
-			throw $e;
+			if ($this->db->inTransaction()) $this->store->rollBackOrToSavepoint($this->db);
+			$this->inLocalTransaction = false;
+			throw new ApplicationException($e->getMessage(), 500, $e);
 		}
 	}
 
@@ -589,8 +637,8 @@ class DataStoreHandle
 	{
 		if (!isset($this->db)) return;
 
-		if ($this->db->inTransaction())
-			$this->db->rollBack();
+		if ($this->inLocalTransaction)
+			$this->store->rollBackOrToSavepoint($this->db);
 
 		$this->store->close($this->db);
 		unset($this->db);

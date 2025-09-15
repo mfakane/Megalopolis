@@ -27,9 +27,9 @@ class Configuration
 	const int EVAL_BOTH = -1;
 	const int EVAL_POINT = 0;
 	const int EVAL_COMMENT = 1;
-	
+
 	public bool $debug = false;
-	
+
 	/*
 	 * 全体に関する設定
 	 */
@@ -386,6 +386,12 @@ class Configuration
 	public bool $convertOnDemand = false;
 	public bool $importCompositeEvalsAsCommentCount = false;
 	
+	function __construct()
+	{
+		if (isset($_ENV["DEBUG_TRACE"]) && $_ENV["DEBUG_TRACE"] === "true")
+			$this->debug = true;
+	}
+
 	function usePoints(): bool
 	{
 		return !empty($this->pointMap);

@@ -132,7 +132,7 @@ class App
 			Visualizer::$data = $ex;
 
 			if (self::$handlerType == "json" || strstr(Util::getPathInfo(), ".json") == ".json")
-			Visualizer::json(array("error" => $ex->getMessage(), "data" => $ex->data));
+				Visualizer::json(array("error" => $ex->getMessage(), "data" => $ex->data));
 			else
 				Visualizer::visualize("Exception");
 		}
@@ -251,6 +251,10 @@ class App
 App::$startTime = microtime(true);
 App::load(Constant::CORE_DIR . "Util");
 App::precondition();
+
+$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . "/..");
+$dotenv->safeLoad();
+
 App::load(array(
 	Constant::CORE_DIR . "Auth",
 	Constant::CORE_DIR . "Configuration",
