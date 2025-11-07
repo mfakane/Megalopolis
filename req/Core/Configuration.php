@@ -63,7 +63,9 @@ class Configuration
 	 * データストアに関する設定
 	 */
 	public ?DataStore $dataStore = null;
-	public bool $storeSessionIntoDataStore = true;
+
+	/** @deprecated */
+	public bool $storeSessionIntoDataStore = false;
 	
 	/*
 	 * 評価に関する設定

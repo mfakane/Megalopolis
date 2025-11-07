@@ -18,23 +18,36 @@ class Auth
 		$sessionName = "MEGALOPOLIS_" . basename(dirname(dirname(dirname(__FILE__))));
 
 		if (!self::isSessionEnabled() && ($beginNew || isset($_COOKIE[$sessionName]))) {
-			session_set_cookie_params(0, dirname(Util::getPhpSelf()), httponly: true);
-			session_name($sessionName);
+			// if (Configuration::$instance->storeSessionIntoDataStore)
+			// 	SessionStore::useSessionStore();
 
-			if (Configuration::$instance->storeSessionIntoDataStore)
-				SessionStore::useSessionStore();
-
-			if (!session_start()) {
+			if (!session_start([
+				"name" => $sessionName,
+				"cookie_path" => "/",
+				"cookie_httponly" => true,
+				"cookie_lifetime" => 0,
+				"cookie_samesite" => "lax",
+				"use_strict_mode" => true,
+			])) {
 				self::logout();
 				return;
+			}
+
+			if ($beginNew) {
+				// セッション開始直後にクッキーの明示的設定を行う
+				$sessionId = session_id();
+				if ($sessionId !== false) {
+					setcookie($sessionName, $sessionId, 0, '/');
+				}
 			}
 
 			$currentFingerprint = self::createFingerprint();
 
 			if (!isset($_SESSION[self::SESSION_FINGERPRINT]))
 				$_SESSION[self::SESSION_FINGERPRINT] = $currentFingerprint;
-			else if ($_SESSION[self::SESSION_FINGERPRINT] != $currentFingerprint)
+			else if ($_SESSION[self::SESSION_FINGERPRINT] != $currentFingerprint) {
 				self::logout();
+			}
 		}
 	}
 
@@ -82,20 +95,26 @@ class Auth
 
 	static function createToken(): string
 	{
-		return $_SESSION[self::SESSION_TOKEN] = hash(Util::HASH_ALGORITHM, mt_rand() . self::createFingerprint());
+		$token = hash("sha1", mt_rand() . self::createFingerprint());
+		$_SESSION[self::SESSION_TOKEN] = $token;
+		return $token;
 	}
 
 	static function clearToken(): void
 	{
-		if (isset($_SESSION[self::SESSION_TOKEN]))
+		if (isset($_SESSION[self::SESSION_TOKEN])) {
 			unset($_SESSION[self::SESSION_TOKEN]);
+		}
 	}
 
-	static function ensureToken(string $key = "token", bool $throw = true): bool
+	static function ensureToken(): bool
 	{
+		$key = "token";
 		$ex = null;
 
-		if (!isset($_COOKIE[session_name()]))
+		$sessionName = session_name();
+
+		if (!isset($_COOKIE[$sessionName]))
 			$ex = "セッション ID がセットされていません";
 		else if (!isset($_POST[$key]))
 			$ex = "遷移情報が無効です";
@@ -104,11 +123,9 @@ class Auth
 		else if ($_POST[$key] != $_SESSION[self::SESSION_TOKEN])
 			$ex = "リクエストが無効です";
 
-		if ($ex)
-			if ($throw)
-				throw new ApplicationException($ex, 403);
-			else
-				return false;
+		if ($ex !== null) {
+			throw new ApplicationException($ex, 403);
+		}
 
 		return true;
 	}
@@ -124,8 +141,9 @@ class Auth
 
 	static function resetSession(bool $deleteOld = true): void
 	{
-		if (self::isSessionEnabled())
+		if (self::isSessionEnabled()) {
 			session_regenerate_id($deleteOld);
+		}
 
 		self::$isAdmin = false;
 	}
@@ -155,16 +173,19 @@ class Auth
 
 	static function hasSession(bool $hasAdminOnly = false): bool
 	{
-		if ($hasAdminOnly && self::$isAdmin)
+		if ($hasAdminOnly && self::$isAdmin) {
 			return self::$isAdmin;
-		else
-			return self::isSessionEnabled()
+		} else {
+			$result = self::isSessionEnabled()
 				&& isset($_SESSION[self::SESSION_PASSWORD])
 				&& (!$hasAdminOnly
 					|| self::$isAdmin = isset($_SESSION[self::SESSION_IS_ADMIN])
 					&& $_SESSION[self::SESSION_IS_ADMIN]
 					&& !empty(Configuration::$instance->adminHash ?? "")
 					&& Util::hashEquals(Configuration::$instance->adminHash ?? "", $_SESSION[self::SESSION_PASSWORD]) !== false);
+			
+			return $result;
+		}
 	}
 
 	static function cleanSession(bool $clearToken = true): void
@@ -197,21 +218,37 @@ class Auth
 	{
 		self::useSession(true);
 
-		if (self::hasSession($admin))
+		if (self::hasSession($admin)) {
 			return $_SESSION[self::SESSION_PASSWORD];
-		else if (isset($_POST["password"]) && is_string($_POST["password"])) {
-			if ($ensureToken)
+		} else if (isset($_POST["password"]) && is_string($_POST["password"])) {
+			if ($ensureToken) {
 				self::ensureToken();
+			}
 
-			self::clearToken();
-			self::resetSession();
+			// セッション再生成は認証成功が確定してから行う
+			// ここではパスワードを一時保存して、呼び出し側で検証後に resetSession() を行う
 			$_SESSION[self::SESSION_IS_ADMIN] = $admin;
-			$_SESSION[self::SESSION_FINGERPRINT] = self::createFingerprint();
 
-			return $_SESSION[self::SESSION_PASSWORD] = $_POST["password"];
+			return $_POST["password"];
 		} else {
 			self::loginError();
 			return false;
+		}
+	}
+
+	static function finalizeLogin(string $password): void
+	{
+		self::clearToken();
+		self::resetSession();
+		$_SESSION[self::SESSION_PASSWORD] = $password;
+		$_SESSION[self::SESSION_FINGERPRINT] = self::createFingerprint();
+		self::createToken();
+		
+		// セッションクッキーを最も基本的な形で設定
+		$sessionName = session_name();
+		$sessionId = session_id();
+		if ($sessionName !== false && $sessionId !== false) {
+			setcookie($sessionName, $sessionId, 0, '/');
 		}
 	}
 
@@ -220,10 +257,10 @@ class Auth
 	 */
 	static function loginError(string $error = ""): void
 	{
-		self::cleanSession();
+		self::cleanSession(false);
 		unset($_SESSION[self::SESSION_PASSWORD]);
 		unset($_SESSION[self::SESSION_IS_ADMIN]);
-		self::createToken();
+		
 		Visualizer::$data = $error;
 		Visualizer::noCache();
 

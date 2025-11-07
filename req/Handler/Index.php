@@ -31,7 +31,7 @@ class IndexHandler extends Handler
 
 		$subject = intval($_subject);
 
-		Auth::cleanSession(!Auth::hasSession(true));
+		Auth::cleanSession(false); // トークンはクリアしない
 
 		if (!Auth::hasToken())
 			Auth::createToken();
@@ -715,10 +715,26 @@ class IndexHandler extends Handler
 		Auth::$caption = "管理者ログイン";
 		$password = Auth::login(true);
 
-		if ($password !== false && Util::hashEquals(Configuration::$instance->adminHash ?? "", $password) === false)
+		if ($password !== false && Util::hashEquals(Configuration::$instance->adminHash ?? "", $password) === false) {
 			Auth::loginError("管理者パスワードが一致しません");
-		else
-			return Visualizer::redirect(isset($_GET["redir"]) && is_string($_GET["redir"]) ? $_GET["redir"] : "");
+		} else if ($password !== false) {
+			// パスワード検証成功後にセッション再生成を行う
+			Auth::finalizeLogin($password);
+			
+			// セッションデータを明示的に保存してからリダイレクト
+			session_write_close();
+			
+			// すべての場合でリダイレクトを使用 (URL パスを正しくするため)
+			$redirectUrl = isset($_GET["redir"]) && is_string($_GET["redir"]) ? $_GET["redir"] : "";
+			if (empty($redirectUrl)) {
+				// リダイレクト先が指定されていない場合はトップページにリダイレクト
+				$redirectUrl = "/";
+			}
+			
+			return Visualizer::redirect($redirectUrl);
+		}
+		
+		return false; // ログインが完了しなかった場合
 	}
 
 	function logout(): bool
