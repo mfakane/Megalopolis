@@ -231,6 +231,7 @@ class Auth
 
 			return $_POST["password"];
 		} else {
+			if (!self::hasToken()) self::createToken();
 			self::loginError();
 			return false;
 		}
