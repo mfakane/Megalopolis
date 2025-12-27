@@ -39,14 +39,14 @@ class IndexHandler extends Handler
 		$dh = App::openDB();
 		$idh = App::openDB(App::INDEX_DATABASE);
 
-		if ($admin = self::param("admin", "")) {
+		if ($admin = self::postParam("admin", "")) {
 			Auth::ensureToken();
 			Auth::createToken();
 
 			if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
 				Auth::loginError("管理者パスワードが一致しません");
 
-			$ids = array_map("intval", self::paramAsArray("id", []));
+			$ids = array_map("intval", self::postParamAsArray("id", []));
 			$dh->withTransactionCombo(
 				$idh,
 				function ($db, $idb) use ($admin, $ids, $subject) {
@@ -266,14 +266,14 @@ class IndexHandler extends Handler
 		if (!Auth::hasToken())
 			Auth::createToken();
 
-		if (($admin = self::param("admin", "")) && $entries) {
+		if (($admin = self::postParam("admin", "")) && $entries) {
 			Auth::ensureToken();
 			Auth::createToken();
 
 			if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
 				Auth::loginError("管理者パスワードが一致しません");
 
-			$ids = array_map("intval", self::paramAsArray("id", []));
+			$ids = array_map("intval", self::postParamAsArray("id", []));
 			$rt["count"] -= $dh->withTransactionCombo(
 				$idh,
 				function ($db, $idb) use ($admin, $ids, $entries) {
