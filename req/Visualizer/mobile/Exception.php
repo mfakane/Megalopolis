@@ -1,10 +1,11 @@
 <?php
-$c = &Configuration::$instance;
+namespace Megalopolis;
+
 ?>
-<? Visualizer::doctype() ?>
+<?php Visualizer::doctype() ?>
 <html lang="ja">
 <head>
-	<? Visualizer::head() ?>
+	<?php Visualizer::head() ?>
 	<title>エラー</title>
 </head>
 <body>
@@ -15,7 +16,7 @@ $c = &Configuration::$instance;
 		<div data-role="content">
 			<div class="inset">
 				<div>
-					<?+Visualizer::$data->getMessage() ?>
+					<?=Visualizer::escapeOutput(Visualizer::$data->getMessage()) ?>
 				</div>
 			</div>
 		</div>

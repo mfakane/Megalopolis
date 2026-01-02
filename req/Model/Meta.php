@@ -1,31 +1,31 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class Meta
 {
-	const DATA_VERSION = "dataVersion";
-	const DATA_VERSION_VALUE_LATEST = "1";
+	const string DATA_VERSION = "dataVersion";
+	const string DATA_VERSION_VALUE_LATEST = "1";
 	
-	static $meta = null;
-	static $metaTableSchema = array
+	static ?array $meta = null;
+	static array $metaTableSchema = array
 	(
 		"name" => "varchar(255) primary key not null",
 		"value" => "varchar(255)"
 	);
 	
-	private static function query(PDO $db, array $names = array())
+	private static function query(PDO $db, array $names = array()): void
 	{
-		$st = Util::ensureStatement($db, $db->prepare("select * from " . App::META_TABLE . ($names ? " where name in (" . implode(", ", array_fill(0, count($names), "?")) . ")" : null)));
+		$st = Util::ensureStatement($db, $db->prepare("select * from " . App::META_TABLE . ($names ? " where name in (" . implode(", ", array_fill(0, count($names), "?")) . ")" : "")));
 		Util::executeStatement($st, $names);
 		
-		foreach ($st->fetchAll() as $i)
-			self::$meta[$i["name"]] = $i["value"];
+		if ($st)
+			foreach ($st->fetchAll() as $i)
+				self::$meta[$i["name"]] = $i["value"];
 	}
 	
-	/**
-	 * @param string $name
-	 * @param string $defaultValue
-	 * @return string
-	 */
-	static function get(PDO $db, $name, $defaultValue = null)
+	static function get(PDO $db, string $name, ?string $defaultValue = null): ?string
 	{
 		if (!isset(self::$meta[$name]))
 			self::query($db, array($name));
@@ -33,10 +33,7 @@ class Meta
 		return isset(self::$meta[$name]) ? self::$meta[$name] : $defaultValue;
 	}
 	
-	/**
-	 * @param string $name
-	 */
-	static function set(PDO $db, $name, $value)
+	static function set(PDO $db, string $name, ?string $value): void
 	{
 		if (isset(self::$meta[$name]) && self::$meta[$name] === $value)
 			return;
@@ -64,14 +61,12 @@ class Meta
 		self::$meta[$name] = $value;
 	}
 	
-	static function ensureTable(PDO $db)
+	static function ensureTable(PDO $db): void
 	{
 		if (!Util::hasTable($db, App::META_TABLE))
 		{
-			$db->beginTransaction();
 			Util::createTableIfNotExists($db, self::$metaTableSchema, App::META_TABLE);
 			self::set($db, self::DATA_VERSION, self::DATA_VERSION_VALUE_LATEST);
-			$db->commit();
 		}
 		
 		self::query($db, array

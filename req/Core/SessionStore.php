@@ -1,122 +1,139 @@
 <?php
-class SessionStore
+
+namespace Megalopolis;
+
+use \PDO;
+
+class SessionStore implements \SessionHandlerInterface
 {
-	static $sessionStoreSchema = array
-	(
+	static array $sessionStoreSchema = array(
 		"name" => "varchar(255) primary key not null",
 		"id" => "varchar(255) primary key not null",
 		"lastUpdate" => "bigint not null",
 		"data" => "text",
 	);
-	
-	/**
-	 * @var SessionStore
-	 */
-	static $instance;
-	private $db;
-	private $sessionName;
-	
-	static function useSessionStore()
+
+	static SessionStore $instance;
+	private ?DataStoreHandle $dh = null;
+	private ?string $sessionName = null;
+
+	static function useSessionStore(): void
 	{
-		self::$instance = new SessionStore();
+		self::$instance = new self();
 		self::$instance->apply();
 	}
-	
-	function open($savePath, $sessionName)
+
+	#[\Override]
+	function open(string $path, string $name): bool
 	{
-		$this->db = App::openDB();
-		$this->sessionName = $sessionName;
-		
-		Util::createTableIfNotExists($this->db, self::$sessionStoreSchema, App::SESSION_STORE_TABLE, array
-		(
+		$this->dh = App::openDB();
+		$this->sessionName = $name;
+
+		$this->dh->execute(fn($db) => Util::createTableIfNotExists($db, self::$sessionStoreSchema, App::SESSION_STORE_TABLE, array(
 			App::SESSION_STORE_TABLE . "LastUpdateIndex" => array("lastUpdate")
-		));
-		
+		)));
+
 		return true;
 	}
-	
-	function close()
+
+	#[\Override]
+	function close(): bool
 	{
-		App::closeDB($this->db);
-		
+		if ($this->dh)
+			$this->dh->close();
+
+		$this->dh = null;
+
 		return true;
 	}
-	
-	function read($sessionId)
+
+	#[\Override]
+	function read(string $id): string
 	{
-		$st = Util::ensureStatement($this->db, $this->db->prepare(sprintf
-		('
+		if (!$this->dh)
+			return "";
+
+		$rt = $this->dh->execute(function ($db) use ($id) {
+			$st = Util::ensureStatement($db, $db->prepare(sprintf(
+				'
 			select * from %s
 			where name = ? and id = ?',
-			App::SESSION_STORE_TABLE
-		)));
-		Util::executeStatement($st, array($this->sessionName, $sessionId));
-		$rt = $st->fetchAll();
-		
+				App::SESSION_STORE_TABLE
+			)));
+			Util::executeStatement($st, array($this->sessionName, $id));
+			return $st?->fetchAll() ?? [];
+		});
+
+
 		if (count($rt))
 			return $rt[0]["data"];
 		else
 			return "";
 	}
-	
-	function write($sessionId, $data)
+
+	#[\Override]
+	function write(string $id, string $data): bool
 	{
-		Util::executeStatement(Util::ensureStatement($this->db, $this->db->prepare(sprintf
-		('
+		if (!$this->dh)
+			return false;
+
+		$this->dh->execute(fn($db) => Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf(
+			'
 			replace into %s(name, id, lastUpdate, data) values(?, ?, ?, ?)',
 			App::SESSION_STORE_TABLE
-		))), array
-		(
+		))), array(
 			$this->sessionName,
-			$sessionId,
+			$id,
 			time(),
 			$data
-		));
-		
+		)));
+
 		return true;
 	}
-	
-	function destroy($sessionId)
+
+	#[\Override]
+	function destroy(string $id): bool
 	{
-		Util::executeStatement(Util::ensureStatement($this->db, $this->db->prepare(sprintf
-		('
+		if (!$this->dh)
+			return false;
+
+		$this->dh->execute(fn($db) => Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf(
+			'
 			delete from %s where name = ? and id = ?',
 			App::SESSION_STORE_TABLE
-		))), array
-		(
+		))), array(
 			$this->sessionName,
-			$sessionId
-		), false);
-		
+			$id
+		), false));
+
 		return true;
 	}
-	
-	function gc($lifetime)
+
+	#[\Override]
+	function gc(int $max_lifetime): false|int
 	{
-		Util::executeStatement(Util::ensureStatement($this->db, $this->db->prepare(sprintf
-		('
-			delete from %s where lastUpdate <= %d',
-			App::SESSION_STORE_TABLE,
-			time() - $lifetime
-		))), null, false);
-		
-		return true;
+		if (!$this->dh)
+			return false;
+
+		$rt = $this->dh->execute(function ($db) use ($max_lifetime) {
+			$st = Util::ensureStatement($db, $db->prepare(sprintf(
+				'delete from %s where lastUpdate <= %d',
+				App::SESSION_STORE_TABLE,
+				time() - $max_lifetime
+			)));
+			Util::executeStatement($st, null, false);
+
+			return $st?->rowCount() ?? 0;
+		});
+
+		return $rt;
 	}
-	
-	function apply()
+
+	function apply(): void
 	{
 		ini_set("session.serialize_handler", "php");
-		
-		session_set_save_handler
-		(
-			array($this, 'open'),
-			array($this, 'close'),
-			array($this, 'read'),
-			array($this, 'write'),
-			array($this, 'destroy'),
-			array($this, 'gc')
-		);
+
+		session_set_save_handler($this);
 		register_shutdown_function('session_write_close');
 	}
 }
-?>

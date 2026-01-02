@@ -1,7 +1,11 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class Comment
 {
-	static $commentSchema = array
+	static array $commentSchema = array
 	(
 		"entryID" => "bigint primary key not null",
 		"id" => "bigint primary key not null",
@@ -15,38 +19,78 @@ class Comment
 		"evaluation" => "bigint"
 	);
 	
-	public $entryID = 0;
-	public $id = 0;
-	public $name = null;
-	public $mail = null;
-	public $body = null;
-	public $host = null;
-	public $dateTime = 0;
+	public int $entryID = 0;
+	public int $id = 0;
+	public ?string $name = null;
+	public ?string $mail = null;
+	public ?string $body = null;
+	public ?string $host = null;
+	public int $dateTime = 0;
 	
-	public $hash = null;
+	public ?string $hash = null;
 	
-	/**
-	 * @var Evaluation
-	 */
-	public $evaluation = null;
+	public ?Evaluation $evaluation = null;
 	
-	public $loaded = false;
-	
-	function __construct(PDO $db = null)
+	public bool $loaded = false;
+
+	private function __construct(int $id)
 	{
-		if ($db)
-		{
-			$this->id = time();
-			$this->dateTime = time();
-		}
+		$this->id = $id;
+	}
+
+	/**
+	 * @param array{
+	 * entryID: int,
+	 * id: int,
+	 * name?: ?string,
+	 * mail?: ?string,
+	 * body?: ?string,
+	 * host?: ?string,
+	 * dateTime?: int,
+	 * hash?: ?string,
+	 * evaluation?: int,
+	 * } $data
+	 */
+	static function fromArray(array $data, ?Evaluation $evaluation = null): Comment
+	{
+		$comment = new Comment($data["id"]);
+		$comment->entryID = $data["entryID"];
+		
+		if (isset($data["name"])) $comment->name = $data["name"];
+		if (isset($data["mail"])) $comment->mail = $data["mail"];
+		if (isset($data["body"])) $comment->body = $data["body"];
+		if (isset($data["host"])) $comment->host = $data["host"];
+		if (isset($data["dateTime"])) $comment->dateTime = $data["dateTime"];
+		if (isset($data["hash"])) $comment->hash = $data["hash"];
+		if (isset($data["evaluation"])) $comment->evaluation = $evaluation;
+		
+		return $comment;
+	}
+
+	static function forEntry(ThreadEntry &$entry): Comment
+	{
+		$id = time();
+		$comment = new Comment($id);
+		$comment->dateTime = $id;
+		$comment->entryID = $entry->id;
+		
+		return $comment;
+	}
+
+	static function forDateTime(int $dateTime): Comment
+	{
+		$comment = new Comment($dateTime);
+		$comment->dateTime = $dateTime;
+		
+		return $comment;
 	}
 	
 	/**
-	 * @return array
+	 * @return array{id: int, name: ?string, mail: ?string, body: ?string, dateTime: int, evaluation: ?int}
 	 */
-	function toArray()
+	function toArray(): array
 	{
-		$c = &Configuration::$instance;
+		$c = Configuration::$instance;
 		
 		return array
 		(
@@ -60,23 +104,22 @@ class Comment
 	}
 	
 	/**
-	 * @param int $entryID
-	 * @return array of Comment
+	 * @param ?Evaluation[] $evals
+	 * @return array<int, Comment>
 	 */
-	static function getCommentsFromEntryID(PDO $db, $entryID, $evals = null)
+	static function getCommentsFromEntryID(PDO $db, int $entryID, $evals = null): array
 	{
 		$rt = array();
 		
 		if (is_null($evals))
 			$evals = Evaluation::getEvaluationsFromEntryID($db, $entryID);
 		
-		foreach (self::query($db, sprintf
+		foreach (self::query($db, $evals, sprintf
 		('
 			where entryID = %d',
 			$entryID
 		)) as $i)
 		{
-			$i->evaluation = isset($evals[$i->evaluation]) ? $evals[$i->evaluation] : null;
 			$i->loaded = true;
 			$rt[$i->id] = $i;
 		}
@@ -85,10 +128,10 @@ class Comment
 	}
 	
 	/**
-	 * @param string $options [optional]
-	 * @return array of ThreadEntry
+	 * @param array<int, Evaluation> $evals
+	 * @return Comment[]
 	 */
-	private static function query(PDO $db, $options = "")
+	private static function query(PDO $db, ?array $evals, string $options = ""): array
 	{
 		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
@@ -98,26 +141,43 @@ class Comment
 			trim($options)
 		)));
 		Util::executeStatement($st);
-		
-		return $st->fetchAll(PDO::FETCH_CLASS, "Comment");
-	}
-	
-	function save(PDO $db)
-	{
-		$ev = $this->evaluation;
-		
-		if ($this->evaluation)
+
+		/** @var Comment[] */
+		$rt = [];
+
+		foreach ($st?->fetchAll() ?? [] as $record)
 		{
-			$this->evaluation->save($db);
-			$this->evaluation = $ev->id;
+			$comment = self::fromArray($record);
+			$comment->evaluation = isset($evals[$record["evaluation"]]) ? $evals[$record["evaluation"]] : null;
+			$rt[] = $comment;
 		}
-		
-		Util::saveToTable($db, $this, self::$commentSchema, App::COMMENT_TABLE);
-		$this->loaded = true;
-		$this->evaluation = $ev;
+
+		return $rt;
 	}
 	
-	function delete(PDO $db)
+	function save(PDO $db): void
+	{
+		if ($this->evaluation)
+			$this->evaluation->save($db);
+		
+		
+		$entity = [
+			"entryID" => $this->entryID,
+			"id" => $this->id,
+			"name" => $this->name,
+			"mail" => $this->mail,
+			"body" => $this->body,
+			"host" => $this->host,
+			"dateTime" => $this->dateTime,
+			"hash" => $this->hash,
+			"evaluation" => $this->evaluation?->id,
+		];
+		Util::saveToTable($db, $entity, App::COMMENT_TABLE);
+
+		$this->loaded = true;
+	}
+	
+	function delete(PDO $db): void
 	{
 		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf
 		('
@@ -132,11 +192,8 @@ class Comment
 		$this->loaded = false;
 	}
 	
-	static function ensureTable(PDO $db)
+	static function ensureTable(PDO $db): void
 	{
-		$db->beginTransaction();
 		Util::createTableIfNotExists($db, self::$commentSchema, App::COMMENT_TABLE);
-		$db->commit();
 	}
 }
-?>

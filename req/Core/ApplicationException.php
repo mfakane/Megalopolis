@@ -1,12 +1,14 @@
 <?php
-class ApplicationException extends Exception
+namespace Megalopolis;
+
+class ApplicationException extends \Exception
 {
-	public $httpCode;
-	public $data;
+	public int $httpCode;
+	public ?array $data = null;
 	
-	function __construct($message, $httpCode = 500)
+	function __construct(string $message, int $httpCode = 500, ?\Throwable $previous = null)
 	{
-		parent::__construct($message);
+		parent::__construct($message, $httpCode, $previous);
 		$this->httpCode = $httpCode;
 	}
 }

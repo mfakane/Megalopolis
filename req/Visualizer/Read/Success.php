@@ -1,8 +1,10 @@
 <?php
-$h = ReadHandler::$instance;
-$c = &Configuration::$instance;
-$d = &Visualizer::$data;
+namespace Megalopolis;
+
+$c = Configuration::$instance;
 Visualizer::doctype();
+
+$verb = "";
 
 switch (App::$actionName)
 {
@@ -22,18 +24,18 @@ switch (App::$actionName)
 ?>
 <html lang="ja">
 <head>
-	<? Visualizer::head() ?>
+	<?php Visualizer::head() ?>
 	<meta name="robots" content="noindex,nofollow,noarchive" />
-	<title><?+$c->title ?></title>
+	<title><?=Visualizer::escapeOutput($c->title) ?></title>
 </head>
 <body>
-	<? Visualizer::header("完了") ?>
+	<?php Visualizer::header("完了") ?>
 	<section class="success">
 		<p>
-			<?+$verb ?>に成功しました
+			<?=Visualizer::escapeOutput($verb) ?>に成功しました
 		</p>
-		<a href="<?+Visualizer::actionHref() ?>">ホームへ戻る</a>
+		<a href="<?=Visualizer::escapeOutput(Visualizer::actionHref()) ?>">ホームへ戻る</a>
 	</section>
-	<? Visualizer::footer() ?>
+	<?php Visualizer::footer() ?>
 </body>
 </html>

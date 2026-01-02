@@ -1,9 +1,9 @@
 <?php
-$c = &Configuration::$instance;
-$h = &IndexHandler::$instance;
-$d = &Visualizer::$data;
+namespace Megalopolis;
 
-function convert($s)
+$c = Configuration::$instance;
+
+function convert(string $s): string
 {
 	return addcslashes(addslashes($s), '$\\');
 }
@@ -39,14 +39,14 @@ define("BBQ_DENY_READ", <?=$c->useBBQ & Configuration::BBQ_READ ? "true" : "fals
 define("BBQ_DENY_WRITE", <?=$c->useBBQ & Configuration::BBQ_WRITE ? "true" : "false" ?>);
 define("DEFAULT_NAME", "<?=convert($c->defaultName) ?>");
 define("ADMIN_ONLY", <?=$c->adminOnly ? "true" : "false" ?>);
-define("COMMON_POST_PASS", "<?=convert($c->postPassword) ?>");
-define("COMMON_PASS", "<?=convert($c->postPassword) ?>");
+define("COMMON_POST_PASS", "");
+define("COMMON_PASS", "");
 define("USE_ANONY_COMMON_PASS", true);
 define("REQUIRE_COMMENT_PASS", <?=$c->requirePassword[Configuration::ON_COMMENT] ? "true" : "false" ?>);
 define("EMPTY_COMMENT_PASS_DELETABLE", true);
 define("USE_CRYPT", false);
-$foregrounds = array(<?=$c->foregroundEnabled ? '"", ' . implode(", ", array_map(create_function('$_', 'return "\"" . convert($_) . "\"";'), $c->foregroundMap)) : null ?>);
-$backgrounds = array(<?=$c->backgroundEnabled || $c->backgroundImageEnabled ? '"", ' . implode(", ", array_map(create_function('$_', 'return "\"" . convert($_) . "\"";'), array_merge($c->backgroundMap, $c->backgroundImageMap))) : null ?>);
+$foregrounds = array(<?=$c->foregroundEnabled ? '"", ' . implode(", ", array_map(function($_) { return "\"" . convert($_) . "\""; }, $c->foregroundMap)) : null ?>);
+$backgrounds = array(<?=$c->backgroundEnabled || $c->backgroundImageEnabled ? '"", ' . implode(", ", array_map(function($_) { return "\"" . convert($_) . "\""; }, array_merge($c->backgroundMap, $c->backgroundImageMap))) : null ?>);
 $tg = array();
 $ng = array();
 $ng_comment = array();

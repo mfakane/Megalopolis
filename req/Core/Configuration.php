@@ -1,93 +1,103 @@
 <?php
+namespace Megalopolis;
+
 class Configuration
 {
-	/**
-	 * @var Configuration
-	 */
-	static $instance;
+	static Configuration $instance;
 	
-	const LINK_AUTO = 0;
-	const LINK_REWRITE = 1;
-	const LINK_PATH = 2;
-	const LINK_QUERY = 3;
-	const ORDER_ASCEND = Board::ORDER_ASCEND;
-	const ORDER_DESCEND = Board::ORDER_DESCEND;
-	const RATE_FIVE = 0;
-	const RATE_AVERAGE = 1;
-	const BBQ_NONE = 0;
-	const BBQ_READ = 1;
-	const BBQ_WRITE = 2;
-	const BBQ_READWRITE = 3;
-	const ON_ENTRY = "Entry";
-	const ON_COMMENT = "Comment";
-	const ON_SUBJECT = "Subject";
-	const ON_AUTHOR = "Author";
-	const ON_TAG = "Tag";
-	const LIST_DOUBLE = 0;
-	const LIST_SINGLE = 1;
-	const EVAL_BOTH = -1;
-	const EVAL_POINT = 0;
-	const EVAL_COMMENT = 1;
-	
-	public $debug = false;
-	
+	const int LINK_AUTO = 0;
+	const int LINK_REWRITE = 1;
+	const int LINK_PATH = 2;
+	const int LINK_QUERY = 3;
+	const int ORDER_ASCEND = Board::ORDER_ASCEND;
+	const int ORDER_DESCEND = Board::ORDER_DESCEND;
+	const int RATE_FIVE = 0;
+	const int RATE_AVERAGE = 1;
+	const int BBQ_NONE = 0;
+	const int BBQ_READ = 1;
+	const int BBQ_WRITE = 2;
+	const int BBQ_READWRITE = 3;
+	const string ON_ENTRY = "Entry";
+	const string ON_COMMENT = "Comment";
+	const string ON_SUBJECT = "Subject";
+	const string ON_AUTHOR = "Author";
+	const string ON_TAG = "Tag";
+	const int LIST_DOUBLE = 0;
+	const int LIST_SINGLE = 1;
+	const int EVAL_BOTH = -1;
+	const int EVAL_POINT = 0;
+	const int EVAL_COMMENT = 1;
+
+	public bool $debug = false;
+
 	/*
 	 * 全体に関する設定
 	 */
-	public $title = "Megalopolis";
-	public $adminHash = null;
-	public $utilsEnabled = false;
-	public $htaccessAutoConfig = false;
-	public $linkType = self::LINK_AUTO;
-	public $useOutputCompression = true;
-	public $useBBQ = self::BBQ_NONE;
-	public $denyRead = array();
-	public $denyWrite = array();
-	public $allowRead = array();
-	public $allowWrite = array();
-	public $denyWriteFromMobileWithoutID = false;
-	public $useSearch = true;
-	public $customSearch = null;
-	public $registerBodyToSearchIndex = true;
-	public $maximumSearchIndexLength = 1024;
-	public $mysqlSearchNgramLength = 4;
-	public $mysqlSearchUseHeadMatching = false;
+	public string $title = "Megalopolis";
+	public ?string $adminHash = null;
+	public bool $utilsEnabled = false;
+	public bool $htaccessAutoConfig = false;
+	/** @var Configuration::LINK_* */
+	public int $linkType = self::LINK_AUTO;
+	public bool $useOutputCompression = true;
+	/** @var Configuration::BBQ_* */
+	public int $useBBQ = self::BBQ_NONE;
+	/** @var string[] */
+	public array $denyRead = array();
+	/** @var string[] */
+	public array $denyWrite = array();
+	/** @var string[] */
+	public array $allowRead = array();
+	/** @var string[] */
+	public array $allowWrite = array();
+	public bool $denyWriteFromMobileWithoutID = false;
+	public bool $useSearch = true;
+	/** @var ?array{0: string, 1: string, 2?: array<string, string>} */
+	public ?array $customSearch = null;
+	public bool $registerBodyToSearchIndex = true;
+	public int $maximumSearchIndexLength = 1024;
+	public int $mysqlSearchNgramLength = 4;
+	public bool $mysqlSearchUseHeadMatching = false;
 	
 	/*
 	 * データストアに関する設定
 	 */
-	/**
-	 * @var DataStore
-	 */
-	public $dataStore;
-	public $storeSessionIntoDataStore = true;
+	public ?DataStore $dataStore = null;
+
+	/** @deprecated */
+	public bool $storeSessionIntoDataStore = false;
 	
 	/*
 	 * 評価に関する設定
 	 */
-	public $useComments = true;
-	public $pointMap = array();
-	public $commentPointMap = array();
+	public bool $useComments = true;
+	/** @var int[] */
+	public array $pointMap = array();
+	/** @var int[] */
+	public array $commentPointMap = array();
 	
 	/*
 	 * 投稿に関する設定
 	 */
-	public $adminOnly = false;
-	public $defaultName = "名前が無い程度の能力";
-	public $requireName = array
+	public bool $adminOnly = false;
+	public string $defaultName = "名前が無い程度の能力";
+	/** @var array<(Configuration::ON_ENTRY | Configuration::ON_COMMENT), bool> */
+	public array $requireName = array
 	(
 		self::ON_ENTRY => true,
 		self::ON_COMMENT => true,
 	);
-	public $requirePassword = array
+	/** @var array<(Configuration::ON_ENTRY | Configuration::ON_COMMENT), bool> */
+	public array $requirePassword = array
 	(
 		self::ON_ENTRY => true,
 		self::ON_COMMENT => true,
 	);
-	public $postPassword = null; 
-	public $maxTags = 10;
-	public $foregroundEnabled = true;
-	public $foregroundMap = array
+	public ?string $postPassword = null; 
+	public int $maxTags = 10;
+	public bool $foregroundEnabled = true;
+	/** @var string[] */
+	public array $foregroundMap = array
 	(
 		"#0c0c0c",
 		"#05057f",
@@ -95,8 +105,9 @@ class Configuration
 		"#7f7f05",
 		"#7f0505",
 	);
-	public $backgroundEnabled = true;
-	public $backgroundMap = array
+	public bool $backgroundEnabled = true;
+	/** @var string[] */
+	public array $backgroundMap = array
 	(
 		"#f5f5f5",
 		"#f5f5ff",
@@ -104,10 +115,12 @@ class Configuration
 		"#fffff5",
 		"#fff5f5",
 	);
-	public $backgroundImageEnabled = false;
-	public $backgroundImageMap = array();
-	public $borderEnabled = true;
-	public $borderMap = array
+	public bool $backgroundImageEnabled = false;
+	/** @var string[] */
+	public array $backgroundImageMap = array();
+	public bool $borderEnabled = true;
+	/** @var string[] */
+	public array $borderMap = array
 	(
 		"#0c0c0c",
 		"#05057f",
@@ -115,11 +128,15 @@ class Configuration
 		"#7f7f05",
 		"#7f0505",
 	);
-	public $subjectSplitting = 100;
-	public $disallowedWordsForEntry = array();
-	public $disallowedWordsForComment = array();
-	public $disallowedWordsForName = array();
-	public $allowedTags = array
+	public int $subjectSplitting = 100;
+	/** @var string[] */
+	public array $disallowedWordsForEntry = array();
+	/** @var string[] */
+	public array $disallowedWordsForComment = array();
+	/** @var string[] */
+	public array $disallowedWordsForName = array();
+	/** @var string[] */
+	public array $allowedTags = array
 	(
 		"a",
 		"abbr",
@@ -198,7 +215,8 @@ class Configuration
 		"var",
 		"wbr",
 	);
-	public $disallowedTags = array
+	/** @var string[] */
+	public array $disallowedTags = array
 	(
 		"html" => "div",
 		"body" => "div",
@@ -257,113 +275,136 @@ class Configuration
 		"plaintext",
 		"xmp",
 	);
-	public $disallowedAttributes = array
+	/** @var string[] */
+	public array $disallowedAttributes = array
 	(
 		"regex:on.*"
 	);
-	public $showDisallowedWords = false;
-	public $ignoreDisallowedWordsWhenAdmin = true;
-	public $minBodySize = 0;
-	public $maxBodySize = 0;
-	public $useSummary = true;
-	public $maxSummaryLines = 0;
-	public $maxSummarySize = 0;
+	public bool $showDisallowedWords = false;
+	public bool $ignoreDisallowedWordsWhenAdmin = true;
+	public int $minBodySize = 0;
+	public int $maxBodySize = 0;
+	public bool $useSummary = true;
+	public int $maxSummaryLines = 0;
+	public int $maxSummarySize = 0;
 	
 	/*
 	 * 表示に関する設定
 	 */
-	public $skin = null;
-	public $subjectOrder = self::ORDER_DESCEND;
-	public $rateType = self::RATE_AVERAGE;
-	public $searchPaging = 30;
-	public $tagListing = 100;
-	public $maxHistory = 30;
-	public $head = null;
-	public $notes = null;
-	public $showFooterVersion = true;
-	public $footers = array();
-	public $listType = self::LIST_DOUBLE;
-	public $updatePeriod = 3;
-	public $showHeaderInsideBorder = false;
-	public $showCommentsOnLastPageOnly = true;
-	public $defaultEvaluator = self::EVAL_POINT;
-	public $showTitle = array
+	public ?string $skin = null;
+	/** @var Configuration::ORDER_* */
+	public int $subjectOrder = self::ORDER_DESCEND;
+	/** @var Configuration::RATE_* */
+	public int $rateType = self::RATE_AVERAGE;
+	public int $searchPaging = 30;
+	public int $tagListing = 100;
+	public int $maxHistory = 30;
+	public ?string $head = null;
+	public ?string $notes = null;
+	public bool $showFooterVersion = true;
+	/** @var string[] */
+	public array $footers = array();
+	/** @var Configuration::LIST_* */
+	public int $listType = self::LIST_DOUBLE;
+	public int $updatePeriod = 3;
+	public bool $showHeaderInsideBorder = false;
+	public bool $showCommentsOnLastPageOnly = true;
+	/** @var Configuration::EVAL_* */
+	public int $defaultEvaluator = self::EVAL_POINT;
+	/** @var bool[] */
+	public array $showTitle = array
 	(
 		self::ON_SUBJECT => true,
 	);
-	public $showName = array
+	/** @var bool[] */
+	public array $showName = array
 	(
 		self::ON_SUBJECT => true,
 		self::ON_ENTRY => true,
 		self::ON_COMMENT => true,
 	);
-	public $showTags = array
+	/** @var bool[] */
+	public array $showTags = array
 	(
 		self::ON_SUBJECT => true,
 		self::ON_ENTRY => true,
 	);
-	public $showSummary = array
+	/** @var bool[] */
+	public array $showSummary = array
 	(
 		self::ON_SUBJECT => true,
 		self::ON_ENTRY => true,
 	);
-	public $showReadCount = array
+	/** @var bool[] */
+	public array $showReadCount = array
 	(
 		self::ON_SUBJECT => false,
 		self::ON_ENTRY => true,
 	);
-	public $showPoint = array
+	/** @var bool[] */
+	public array $showPoint = array
 	(
 		self::ON_SUBJECT => true,
 		self::ON_ENTRY => true,
 		self::ON_COMMENT => true,
 	);
-	public $showRate = array
+	/** @var bool[] */
+	public array $showRate = array
 	(
 		self::ON_SUBJECT => true,
 		self::ON_ENTRY => true,
 	);
-	public $showComment = array
+	/** @var bool[] */
+	public array $showComment = array
 	(
 		self::ON_SUBJECT => true,
 		self::ON_ENTRY => true,
 	);
-	public $showSize = array
+	/** @var bool[] */
+	public array $showSize = array
 	(
 		self::ON_SUBJECT => true,
 		self::ON_ENTRY => true,
 	);
-	public $showPages = array
+	/** @var bool[] */
+	public array $showPages = array
 	(
 		self::ON_SUBJECT => true,
 		self::ON_ENTRY => true,
 	);
-	public $showTweetButton = false;
-	public $entryTweetButtonText = null;
-	public $entryTweetButtonHashtags = null;
-	public $tagTweetButtonText = null;
-	public $tagTweetButtonHashtags = null;
-	public $authorTweetButtonText = null;
-	public $authorTweetButtonHashtags = null;
+	/** @var bool[]|null */
+	public ?array $showTweetButton = null;
+	public ?string $entryTweetButtonText = null;
+	public ?string $entryTweetButtonHashtags = null;
+	public ?string $tagTweetButtonText = null;
+	public ?string $tagTweetButtonHashtags = null;
+	public ?string $authorTweetButtonText = null;
+	public ?string $authorTweetButtonHashtags = null;
 	
 	/*
 	 * ログの変換に関する設定
 	 */
-	public $convertDivision = 50;
-	public $convertOnDemand = false;
-	public $importCompositeEvalsAsCommentCount = false;
+	public int $convertDivision = 50;
+	public bool $convertOnDemand = false;
+	public bool $importCompositeEvalsAsCommentCount = false;
 	
-	function usePoints()
+	function __construct()
+	{
+		if (isset($_ENV["DEBUG_TRACE"]) && $_ENV["DEBUG_TRACE"] === "true")
+			$this->debug = true;
+	}
+
+	function usePoints(): bool
 	{
 		return !empty($this->pointMap);
 	}
 	
-	function useCommentPoints()
+	function useCommentPoints(): bool
 	{
 		return !empty($this->commentPointMap);
 	}
 	
-	function useAnyPoints()
+	function useAnyPoints(): bool
 	{
 		return $this->usePoints()
 			|| $this->useCommentPoints();

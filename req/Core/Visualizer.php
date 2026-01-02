@@ -1,18 +1,22 @@
 <?php
+namespace Megalopolis;
+
+use \Megalopolis\App;
+
 class Visualizer
 {
-	static $data;
-	static $basePath;
-	static $mode = null;
+	static mixed $data = null;
+	static string $basePath;
+	static ?string $mode = null;
 
-	const MODE_COOKIE_NAME = "VisualizerMode";
+	const string MODE_COOKIE_NAME = "VisualizerMode";
 	
-	static function isMobile()
+	static function isMobile(): bool
 	{
 		return Util::getBrowserType() == Util::BROWSER_TYPE_IPHONE;
 	}
 	
-	static function isSimple()
+	static function isSimple(): bool
 	{
 		return in_array(Util::getBrowserType(), array
 		(
@@ -23,16 +27,16 @@ class Visualizer
 		));
 	}
 	
-	static function doctype()
+	static function doctype(): void
 	{
 		echo "<!DOCTYPE html>\r\n";
 	}
 	
-	static function visualizerMode()
+	static function visualizerMode(): string
 	{
-		if (self::$mode)
+		if (isset(self::$mode))
 			return self::$mode;
-		else if (isset($_GET["visualizer"]))
+		else if (isset($_GET["visualizer"]) && is_string($_GET["visualizer"]))
 		{
 			self::$mode = Util::escapeInput($_GET["visualizer"]);
 			
@@ -49,7 +53,7 @@ class Visualizer
 			return self::$mode = self::autoVisualizerMode();
 	}
 	
-	private static function autoVisualizerMode()
+	private static function autoVisualizerMode(): string
 	{
 		if (self::isMobile())
 			return "mobile";
@@ -59,7 +63,7 @@ class Visualizer
 			return "normal";
 	}
 	
-	static function head()
+	static function head(): void
 	{
 		$type = Util::getBrowserType();
 		$isMobile = self::visualizerMode() == "mobile";
@@ -86,7 +90,7 @@ class Visualizer
 			<meta name="application-name" content="<?php self::converted(Configuration::$instance->title) ?>" />
 			<script src="http://code.jquery.com/jquery-1.8.1.min.js"></script>
 			<link href="<?php self::converted(self::actionHref("style", "style.css")) ?>" rel="stylesheet" />
-			<?php if (Configuration::$instance->skin): ?>
+			<?php if (Configuration::$instance->skin !== null): ?>
 				<link href="<?php self::converted(self::actionHref("style", Configuration::$instance->skin, "style.css")) ?>" rel="stylesheet" />
 			<?php endif ?>
 			<script src="<?php self::converted(self::actionHref("script", "base.js")) ?>"></script>
@@ -134,12 +138,7 @@ class Visualizer
 		echo Configuration::$instance->head;
 	}
 	
-	/**
-	 * @param string $title [optional]
-	 * @param array $menu [optional]
-	 * @param string $subTitle [optional]
-	 */
-	static function header($title = null, array $menu = array(), $subTitle = null)
+	static function header(?string $title = null, array $menu = array(), ?string $subTitle = null): void
 	{
 		$menu = array_reverse($menu, true);
 		$menu[""] = array("ホーム", "homeIcon.png");
@@ -150,14 +149,14 @@ class Visualizer
 				<?php self::converted(Configuration::$instance->title) ?>
 			</a>
 			<?php if ((Configuration::$instance->showTitle[Configuration::ON_SUBJECT] && Configuration::$instance->useSearch) || Configuration::$instance->customSearch || Auth::hasSession(true)): ?>
-				<form action="<?php self::converted(Configuration::$instance->customSearch ? Configuration::$instance->customSearch[0] : self::actionHref("search")) ?>" method="get">
+				<form action="<?php self::converted(isset(Configuration::$instance->customSearch) ? Configuration::$instance->customSearch[0] : self::actionHref("search")) ?>" method="get">
 					<div>
-						<input type="search" name="<?php self::converted(Configuration::$instance->customSearch ? Configuration::$instance->customSearch[1] : "query") ?>" placeholder="検索" />
+						<input type="search" name="<?php self::converted(isset(Configuration::$instance->customSearch) ? Configuration::$instance->customSearch[1] : "query") ?>" placeholder="検索" />
 						<input type="submit" value="検索" />
 						<?php
 						if (isset(Configuration::$instance->customSearch[2]))
 							foreach (Configuration::$instance->customSearch[2] as $k => $v)
-								echo '<input type="hidden" name="', self::converted($k), '" value="', self::converted($v), '" />';
+								echo '<input type="hidden" name="' . self::escapeOutput($k) . '" value="' . self::escapeOutput($v), '" />';
 						?>
 						<?php
 						if (App::$actionName == "tag" && !is_array(Visualizer::$data))
@@ -198,7 +197,7 @@ class Visualizer
 		endif;
 	}
 	
-	static function footer($backgroundColor = null)
+	static function footer(?string $backgroundColor = null): void
 	{
 		$pathInfo = trim(Util::getPathInfo(), "/");
 		$redir = Util::isEmpty($pathInfo) ? null : array("redir" => $pathInfo);
@@ -209,7 +208,7 @@ class Visualizer
 				<?php if (Configuration::$instance->showFooterVersion): ?>
 					<li>
 						<?php self::converted(App::NAME) ?>
-						<?php self::converted(App::VERSION) ?>
+						<?php self::converted((string)App::VERSION) ?>
 					</li>
 				<?php endif ?>
 				<?php foreach (Configuration::$instance->footers as $i): ?>
@@ -243,7 +242,10 @@ class Visualizer
 		<?php	
 	}
 	
-	static function pager($current, $max, $range, $link, $reverse = false, $buttons = true, $container = true)
+	/**
+	 * @param string|string[] $link
+	 */
+	static function pager(int $current, int $max, int $range, $link, bool $reverse = false, bool $buttons = true, bool $container = true): void
 	{
 		if ($max < 2)
 			return;
@@ -255,8 +257,8 @@ class Visualizer
 			Util::BROWSER_TYPE_MSIE,
 			Util::BROWSER_TYPE_MSIE_NEW
 		)) ? "#" : "";
-		$start = max(min($current - floor($range / 2), $max - $range + 1), 1);
-		$end = min(max($current - ceil($range / 2), 0) + $range, $max);
+		$start = (int)max(min((float)$current - floor($range / 2), $max - $range + 1), 1);
+		$end = (int)min((float)max((float)$current - ceil($range / 2), 0) + (float)$range, $max);
 		$isSimple = self::isSimple();
 		
 		list($prefix, $suffix) = (is_array($link) ? $link : array($link)) + array("", "");
@@ -297,10 +299,10 @@ class Visualizer
 						</li>
 					<?php endif ?>
 				<?php endif ?>
-				<?php foreach (range($reverse ? $end : max(min($current - floor($range / 2), $max - $range + 1), 1), $reverse ? $start : $end, $reverse ? -1 : 1) as $i): ?>
+				<?php foreach (range($reverse ? $end : (int)max(min((float)$current - floor($range / 2), $max - $range + 1), 1), $reverse ? $start : $end, $reverse ? -1 : 1) as $i): ?>
 					<li>
 						<a href="<?php self::converted($i == $current ? $loopback : $prefix . $i . $suffix) ?>"<?php echo $i == $current ? ' class="active"' : null ?>>
-							<?php self::converted($i) ?>
+							<?php self::converted((string)$i) ?>
 						</a>
 					</li>
 				<?php endforeach ?>
@@ -342,13 +344,13 @@ class Visualizer
 		<?php
 	}
 
-	static function submitPager($current, $max, $range, $pageParam)
+	static function submitPager(int $current, int $max, int $range, string $pageParam): void
 	{
 		if ($max < 2)
 			return;
 		
-		$start = max(min($current - floor($range / 2), $max - $range + 1), 1);
-		$end = min(max($current - ceil($range / 2), 0) + $range, $max);
+		$start = (int)max(min((float)$current - floor($range / 2), $max - $range + 1), 1);
+		$end = (int)min((float)max((float)$current - ceil($range / 2), 0) + (float)$range, $max);
 		$isSimple = self::isSimple();
 		
 		?>
@@ -368,10 +370,10 @@ class Visualizer
 					</button>
 				</li>
 			<?php endif ?>
-			<?php foreach (range(max(min($current - floor($range / 2), $max - $range + 1), 1), $end, 1) as $i): ?>
+			<?php foreach (range($start, $end, 1) as $i): ?>
 				<li>
 					<button name="<?php echo $pageParam ?>" value="<?php echo $i ?>"<?php if ($i == $current) echo ' class="active loopback"'; ?>>
-						<?php self::converted($i) ?>
+						<?php self::converted((string)$i) ?>
 					</button>
 				</li>
 			<?php endforeach ?>
@@ -394,27 +396,27 @@ class Visualizer
 	}
 	
 	/**
-	 * @param string $url [optional]
-	 * @param string $text [optional]
-	 * @param string $hashtags [optional]
-	 * @param array $keywords [optional]
+	 * @param string[] $keywords
 	 */
-	static function tweetButton($url = "", $text = null, $hashtags = "", array $keywords = array())
+	static function tweetButton(string $url = "", ?string $text = null, ?string $hashtags = null, array $keywords = array()): void
 	{
 		$params = array_filter(array
 		(
-			"text" => strtr($text, $keywords),
+			"text" => strtr($text ?? "", $keywords),
 			"url" => strtr($url, $keywords),
-			"hashtags" => strtr($hashtags, $keywords),
+			"hashtags" => strtr($hashtags ?? "", $keywords),
 		));
 		
 		?>
-		<a href="https://twitter.com/share?<?php self::converted(implode("&", array_map(create_function('$k, $v', 'return rawurlencode($k) . "=" . rawurlencode($v);'), array_keys($params), array_values($params)))) ?>" class="twitter-share-button" data-lang="ja" target="_blank">Tweet</a>
+		<a href="https://twitter.com/share?<?php self::converted(implode("&", array_map(fn($k, $v) => rawurlencode($k) . "=" . rawurlencode($v), array_keys($params), array_values($params)))) ?>" class="twitter-share-button" data-lang="ja" target="_blank">Tweet</a>
 		<script src="http://platform.twitter.com/widgets.js"></script>
 		<?php
 	}
 	
-	private static function href($arr)
+	/**
+	 * @param (null|string|array<string, ?string>)[] $arr
+	 */
+	private static function href(array $arr): string
 	{
 		static $encodeTable = array();
 		
@@ -428,24 +430,25 @@ class Visualizer
 				$href .= strpos(Util::getSuffix(), "?") !== false ? "&" : "?";
 				
 				foreach ($i as $k => $v)
-					$href .= (isset($encodeTable[$k]) ? $encodeTable[$k] : $encodeTable[$k] = str_ireplace("%2F", "%252F", urlencode($k))) . "=" . (isset($encodeTable[$v]) ? $encodeTable[$v] : $encodeTable[$v] = urlencode($v)) . "&";
+					if (!is_null($v))
+						$href .= ($encodeTable[$k] ?? ($encodeTable[$k] = str_ireplace("%2F", "%252F", urlencode($k)))) . "=" . ($encodeTable[$v] ?? ($encodeTable[$v] = urlencode($v))) . "&";
 				
 				$href = rtrim($href, "&");
 			}
 			else
-				$href .= "/" . (isset($encodeTable[$i]) ? $encodeTable[$i] : $encodeTable[$i] = str_ireplace("%2F", "%252F", urlencode($i)));
+				$href .= "/" . ($encodeTable[$i] ?? ($encodeTable[$i] = str_ireplace("%2F", "%252F", urlencode($i))));
 		
 		return trim($href, "/");
 	}
 	
-	static function actionHref()
+	static function actionHref(): string
 	{
 		$args = func_get_args();
 		
 		return self::actionHrefArray($args);
 	}
 	
-	static function actionHrefArray($args = null)
+	static function actionHrefArray(?array $args = null): string
 	{
 		if (is_null($args))
 			return self::$basePath;
@@ -457,42 +460,45 @@ class Visualizer
 		}
 	}
 	
-	static function currentHref()
+	static function currentHref(): string
 	{
 		$args = func_get_args();
 		
 		return self::currentHrefArray($args);
 	}
 	
-	static function currentHrefArray($args)
+	static function currentHrefArray(array $args): string
 	{
 		return rtrim(self::href($args), "?");
 	}
 	
-	static function absoluteHref()
+	static function absoluteHref(): string
 	{
 		return self::absoluteHrefArray(func_get_args());
 	}
 	
-	static function absoluteHrefArray($args)
+	static function absoluteHrefArray(array $args): string
 	{
 		return Util::getAbsoluteUrl(self::href($args));
 	}
 	
-	static function noCache()
+	static function noCache(): void
 	{
 		header("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
 		header("Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
 		header("Pragma: no-cache");
 	}
 	
-	static function notModified()
+	/**
+	 * @return never
+	 */
+	static function notModified(): void
 	{
 		self::statusCode(304);
 		exit;
 	}
 	
-	static function statusCode($code)
+	static function statusCode(int $code): void
 	{
 		switch ($code)
 		{
@@ -525,37 +531,28 @@ class Visualizer
 		header("HTTP/1.1 {$code}");
 		header("Status: {$code}");
 	}
-	
-	/**
-	 * @param string $s
-	 */
-	static function converted($s)
+
+	static function converted(mixed $s): void
 	{
-		if (!is_null($s))
+		if (isset($s))
 			echo self::escapeOutput($s);
 	}
 	
-	/**
-	 * @param string $s
-	 */
-	static function convertedName($s)
+	static function convertedName(?string $s): void
 	{
-		self::converted(empty($s) ? Configuration::$instance->defaultName : $s);
+		self::converted(!isset($s) || empty($s) ? Configuration::$instance->defaultName : $s);
 	}
 	
-	/**
-	 * @param string $s
-	 */
-	static function linkedName($s, $additional = "")
+	static function linkedName(?string $s, string $additional = ""): void
 	{
-		if (empty($s))
+		if (!isset($s) || empty($s))
 			self::converted(Configuration::$instance->defaultName);
 		else
 		{
 			$endsWithDigit = ctype_digit($s) || ($last = strrchr($s, "/")) !== false && ctype_digit(substr($last, 1));
 			$endsWithExtension = !$endsWithDigit && strpos($s, ".") !== false;
 			?>
-			<a href="<?php echo self::actionHref("author", $s . ($endsWithExtension ? ".html" : null), $endsWithDigit ? "1" : null) ?>">
+			<a href="<?php echo self::actionHref("author", $s . ($endsWithExtension ? ".html" : ""), $endsWithDigit ? "1" : null) ?>">
 				<?php self::converted($s) ?>
 				<?php echo $additional ?>
 			</a>
@@ -563,35 +560,28 @@ class Visualizer
 		}
 	}
 	
-	/**
-	 * @param string $s
-	 */
-	static function linkedTag($s, $additional = "")
+	static function linkedTag(string $s, string $additional = ""): void
 	{
 		$endsWithDigit = ctype_digit($s) || ($last = strrchr($s, "/")) !== false && ctype_digit(substr($last, 1));
 		$endsWithExtension = !$endsWithDigit && strpos($s, ".") !== false;
 		?>
-		<a href="<?php echo self::actionHref("tag", $s . ($endsWithExtension ? ".html" : null), $endsWithDigit ? "1" : null) ?>">
+		<a href="<?php echo self::actionHref("tag", $s . ($endsWithExtension ? ".html" : ""), $endsWithDigit ? "1" : null) ?>">
 			<?php self::converted($s) ?>
 			<?php echo $additional ?>
 		</a>
 		<?php
 	}
 	
-	/**
-	 * @param string $s
-	 */
-	static function convertedSummary($s)
+	static function convertedSummary(?string $s): void
 	{
+		if (!isset($s) || empty($s)) return;
+	
 		echo self::escapeSummary($s);
 	}
 	
-	/**
-	 * @param string $s
-	 */
-	static function escapeSummary($s)
+	static function escapeSummary(string $s): string
 	{
-		return preg_replace("/^(https?|ftp)(:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)$/", '<a href="$0">$0</a>', strtr(self::escapeOutput($s), array
+		return (string)preg_replace("/^(https?|ftp)(:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)$/", '<a href="$0">$0</a>', strtr(self::escapeOutput($s), array
 		(
 			"\r\n" => "<br />",
 			"\r" => "<br />",
@@ -599,30 +589,34 @@ class Visualizer
 		)));
 	}
 	
-	static function convertedBody(Thread $thread, $page = null, $offset = null, $length = null, $stripExcept = null)
+	static function convertedBody(?Thread $thread, ?int $page = null, ?int $offset = null, ?int $length = null, ?array $stripExcept = null): void
 	{
 		echo self::escapeBody($thread, $page, $offset, $length, $stripExcept);
 	}
 	
-	static function escapeBody(Thread $thread, $page = null, $offset = null, $length = null, $stripExcept = null)
+	static function escapeBody(?Thread $thread, ?int $page = null, ?int $offset = null, ?int $length = null, ?array $stripExcept = null): string
 	{
-		$content = $page ? $thread->page($page) : $thread->body;
-		$s = self::ensureHtml(!is_null($offset) && $length ? mb_substr($content, $offset, $length) : $content, $stripExcept);
+		if (!isset($thread)) return "";
 		
+		$content = $page !== null ? $thread->page($page) : $thread->body;
+		$s = self::ensureHtml(isset($offset) && $length !== null && isset($content) ? mb_substr($content, $offset, $length) : $content ?? "", $stripExcept);
+
 		if ($thread->convertLineBreak)
 			return self::convertLineBreak($s);
 		else
 			return $s;
 	}
 	
-	static function convertedAfterword(Thread $thread, $stripExcept = null)
+	static function convertedAfterword(?Thread $thread, ?array $stripExcept = null): void
 	{
 		echo self::escapeAfterword($thread, $stripExcept);
 	}
 	
-	static function escapeAfterword(Thread $thread, $stripExcept = null)
+	static function escapeAfterword(?Thread $thread, ?array $stripExcept = null): string
 	{
-		$s = self::ensureHtml($thread->afterword, $stripExcept);
+		if (!isset($thread)) return "";
+		
+		$s = isset($thread->afterword) ? self::ensureHtml($thread->afterword, $stripExcept) : "";
 		
 		if ($thread->convertLineBreak)
 			return self::convertLineBreak($s);
@@ -630,7 +624,7 @@ class Visualizer
 			return $s;
 	}
 	
-	static function convertLineBreak($s)
+	static function convertLineBreak(string $s): string
 	{
 		return strtr($s, array
 		(
@@ -640,100 +634,105 @@ class Visualizer
 		));
 	}
 	
-	/**
-	 * @param string $s
-	 * @return string
-	 */
-	static function escapeOutput($s)
+	static function escapeOutput(mixed $s): string
 	{
-		if (!is_null($s))
-			return htmlspecialchars($s, ENT_QUOTES, "UTF-8");
+		return isset($s)
+			? htmlspecialchars(strval($s), ENT_QUOTES, "UTF-8")
+			: "";
 	}
 	
-	private static function ensureHtml($str, $stripExcept = null)
+	private static function ensureHtml(string $str, ?array $stripExcept = null): string
 	{
-		$rt = str_get_html($str);
+		$oldHtml = \Dom\HTMLDocument::createFromString("<body>$str</body>", LIBXML_NOERROR);
+
+		$newHtml = \Dom\HTMLDocument::createFromString("<body></body>", LIBXML_NOERROR);
+
 		$disallowed = Configuration::$instance->disallowedTags;
 		$allowed = array_flip(Configuration::$instance->allowedTags);
-		$disallowedMap = array_flip(array_map(create_function('$x, $y', 'return is_int($x) ? $y : $x;'), array_keys($disallowed), array_values($disallowed)));
-		self::replaceTags($rt, $disallowed, $disallowedMap, $allowed);
-		self::ensureHtmlTagEnd($rt);
+		$disallowedMap = array_flip(array_map(function($x, $y) { return is_int($x) ? $y : $x; }, array_keys($disallowed), array_values($disallowed)));
+
+		self::replaceTags($oldHtml->body, $newHtml, $newHtml->body, $disallowed, $disallowedMap, $allowed);
 		
-		$str = $rt->save();
-		$rt->clear();
-		unset($rt);
+		$str = $newHtml->saveHtml($newHtml->body);
+		unset($oldHtml, $newHtml);
 		
 		if (!is_array($stripExcept))
 			$stripExcept = Configuration::$instance->allowedTags;
 			
 		if ($stripExcept)
 		{
-			$str = preg_replace('@<([^/\sa-zA-Z])@i', '&lt;$1', $str);
+			$str = (string)preg_replace('@<([^/\sa-zA-Z])@i', '&lt;$1', $str);
 			$str = strip_tags($str, "<" . implode("><", $stripExcept) . ">");
 		}
 		
 		return $str;
 	}
-	
-	private static function replaceTags($rt, array $disallowed, array $disallowedMap, array $allowed)
+
+	private static function replaceTags(\Dom\Node $oldNode, \Dom\HTMLDocument $newDocument, \Dom\Node $newNode, array $disallowed, array $disallowedMap, array $allowed): void
 	{
-		foreach ($rt->find("*") as $i)
+		/** @var \Dom\Node */
+		foreach ($oldNode->childNodes as $oldChildNode)
 		{
-			if (isset($disallowedMap[$i->tag]))
-				if (isset($disallowed[$i->tag]))
-					$i->tag = $disallowed[$i->tag];
+			if ($oldChildNode->nodeType == XML_ELEMENT_NODE &&
+				$oldChildNode instanceof \Dom\Element)
+			{
+				if (isset($disallowedMap[$oldChildNode->tagName]))
+					if (isset($disallowed[$oldChildNode->tagName]))
+					$oldChildNode->tagName = $disallowed[$oldChildNode->tagName];
+					else
+					{
+						$newNode->appendChild($newDocument->createTextNode(" :REPLACED: "));
+						continue;
+					}
+
+				if (!isset($allowed[$oldChildNode->tagName]))
+				{
+					/** @var \Dom\HTMLDocument */
+					$doc = $oldChildNode->ownerDocument;
+					$newNode->appendChild($newDocument->createTextNode($doc->saveHtml($oldChildNode)));
+				}
 				else
 				{
-					$i->outertext = " :REPLACED: ";
-					
-					continue;
+					$newChildNode = $newDocument->importNode($oldChildNode, false);
+					self::replaceAttributes($oldChildNode, $newDocument, $newChildNode);
+					self::replaceTags($oldChildNode, $newDocument, $newChildNode, $disallowed, $disallowedMap, $allowed);
+					$newNode->appendChild($newChildNode);
 				}
-			
-			if (!isset($allowed[$i->tag]))
-				$i->outertext = self::escapeOutput($i->outertext);
+			}
 			else
-				self::replaceTags($i, $disallowed, $disallowedMap, $allowed);
+			{
+				$newChildNode = $newDocument->importNode($oldChildNode, false);
+				self::replaceTags($oldChildNode, $newDocument, $newChildNode, $disallowed, $disallowedMap, $allowed);
+				$newNode->appendChild($newChildNode);
+			}
 		}
 	}
-	
-	private static function ensureHtmlTagEnd($rt)
+
+	private static function replaceAttributes(\Dom\Node $oldElement, \Dom\HTMLDocument $newDocument, \Dom\Node $newElement): void
 	{
-		static $selfClosingTags = array
-		(
-			"area" => true,
-			"base" => true,
-			"br" => true,
-			"col" => true,
-			"command" => true,
-			"embed" => true,
-			"hr" => true,
-			"img" => true,
-			"input" => true,
-			"keygen" => true,
-			"link" => true,
-			"meta" => true,
-			"param" => true,
-			"source" => true,
-			"track" => true,
-			"wbr" => true,
-		);
-		
-		foreach ($rt->find("*") as $i)
+		foreach (($oldElement->attributes ?? []) as $attributeName => $oldAttribute)
 		{
-			if (Util::isEmpty($i->outertext) || $i->outertext == " :REPLACED: ")
-				continue;
-			
-			foreach ($i->attr as $k => $v)
-			{
-				foreach (Configuration::$instance->disallowedAttributes as $j)
-					if (strpos($j, "regex:") === 0 &&
-						preg_match('/^' . substr($j, 6) . '$/i', $k) ||
-						$k == $j)
-						$i->$k = null;
+			$skipAttribute = false;
+
+			foreach (Configuration::$instance->disallowedAttributes as $j)
+				if (strpos($j, "regex:") === 0 &&
+					preg_match('/^' . substr($j, 6) . '$/i', $attributeName) ||
+					$attributeName == $j)
+					{
+						$skipAttribute = true;
+						break;
+					}
 				
-				if ($k == "style")
+			switch ($attributeName)
+			{
+				case "style":
 				{
-					$str = preg_replace('@/\*.*\*/@', "", preg_replace_callback('/\\\([0-9A-Fa-f]{1,6})/i', create_function('$_', '$a = intval($_[1], 16); return $a >= 32 && $a <= 126 ? chr($a) : $_[0];'), $v));
+					$str = (string)preg_replace_callback('/\\\([0-9A-Fa-f]{1,6})/i', function($x)
+					{
+						$a = intval($x[1], 16);
+						return $a >= 32 && $a <= 126 ? chr($a) : $x[0];
+					}, strval($oldAttribute->value));
+					$str = (string)preg_replace('@/\*.*\*/@', "", $str);
 					
 					foreach (explode(";", $str) as $j)
 					{
@@ -742,97 +741,30 @@ class Visualizer
 						if (preg_match("/b.+havio.+$/i", $k2) ||
 							preg_match('/\b(.+[xｘＸ][pｐＰ][rｒＲ].+[sｓＳ][sｓＳ][iｉＩ][oｏＯ].+|data:|javascript:|vbs:|vbscript:)\b/i', $v2))
 						{
-							$i->$k = null;
-							
+							$skipAttribute = true;
 							break;
 						}
 					}
+					break;
 				}
-				else if ($k == "src" || $k == "href")
-					if (preg_match('/(javascript|data|vbs|vbscript):/', $v))
-						$i->$k = null;
+				case "src":
+				case "href":
+					if (preg_match('/(javascript|data|vbs|vbscript):/', $oldAttribute->value))
+						$skipAttribute = true;
+					break;
 			}
 			
-			self::ensureHtmlTagEnd($i);
-			
-			$outertext = $i->outertext;
-			$matches = array();
-			
-			// close if unclosed tag
-			if (strstr($outertext, "/>") != "/>" && strstr($outertext, "</{$i->tag}>") != "</{$i->tag}>")
-				$outertext .= "</{$i->tag}>";
-			
-			// strip any double-closed tags
-			if (strpos($i->plaintext, "</") !== false)
-			{
-				$stack = array();
-				$html = "";
-				$idx = 0;
-				preg_match_all('@<(/?)([^\s>]*).*?(/?)>@i', $outertext, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
-				
-				if ($matches)
-				{
-					foreach ($matches as $m)
-					{
-						$tag = $m[0][0];
-						$start = $m[0][1];
-						$name = $m[2][0];
-						$isClosing = !Util::isEmpty($m[1][0]);
-						$isSelfClosed = !Util::isEmpty($m[3][0]);
-						$length = strlen($tag);
-						
-						$html .= substr($outertext, $idx, $start - $idx);
-						
-						if (!$isSelfClosed)
-							if ($isClosing)
-								if ($stack && $stack[count($stack) - 1] == $name)
-								{
-									// closed tag
-									$html .= $tag;
-									array_pop($stack);
-								}
-								else
-								{
-									// double closed tag
-									$length = 0;
-								}
-							else
-							{
-								// open tag
-								
-								if (isset($selfClosingTags[$name]))
-								{
-									$html .= substr($tag, 0, -1) . " />";
-									$length += 2;
-								}
-								else
-								{
-									$html .= $tag;
-								
-									array_push($stack, $name);
-								}
-							}
-						
-						$idx = $start + $length;
-					}
-					
-					$html .= substr($outertext, $idx);
-					
-					foreach	($stack as $j)
-					{
-						// unclosed tag
-						$html .= "</{$j}>";
-					}
-					
-					$outertext = $html;
-				}
-			}
-			
-			$i->outertext = $outertext;
+			if ($skipAttribute) continue;
+
+			$newAttribute = $newDocument->importNode($oldAttribute, true);
+			$newElement->appendChild($newAttribute);
 		}
 	}
 	
-	static function delegateParameters(array $params, array $except = array())
+	/**
+	 * @param string[] $except
+	 */
+	static function delegateParameters(array $params, array $except = array()): void
 	{
 		echo '<input type="hidden" name="encoded" value="true" />';
 		
@@ -842,24 +774,16 @@ class Visualizer
 		$except = array_flip($except) + array("encoded" => true, "encodedExcept" => true);
 		
 		foreach ($params as $k => $v)
-			if (!isset($except[$k]) && strpos($k, "Auth_") === false)
+			if (!isset($except[$k]) && is_string($k) && !is_array($v) && strpos($k, "Auth_") === false)
 				echo '<input type="hidden" name="' . Visualizer::escapeOutput($k) . '" value="' . Visualizer::escapeOutput(Util::encodeForOutput(Util::escapeInput($v))) . '" />';
 	}
 	
-	/**
-	 * @param int $time
-	 * @return string
-	 */
-	static function formatDateTime($time)
+	static function formatDateTime(int $time): string
 	{
 		return date("Y/m/d H:i:s", $time);
 	}
 	
-	/**
-	 * @param int $time
-	 * @return string
-	 */
-	static function formatShortDateTime($time)
+	static function formatShortDateTime(int $time): string
 	{
 		$now = time();
 		$minute = 60;
@@ -869,48 +793,41 @@ class Visualizer
 		$diff = $now - $time;
 		
 		if ($diff < -$day)
-			return ceil(-$day) . " 日先 " . date("H:i", $time);	
+			return (int)ceil(-$day) . " 日先 " . date("H:i", $time);	
 		else if ($diff < -$hour)
-			return ceil(-$hour) . " 時間先";	
+			return (int)ceil(-$hour) . " 時間先";	
 		else if ($diff < -$minute)
-			return ceil(-$diff / $minute) . " 分先";	
+			return (int)ceil(-$diff / $minute) . " 分先";	
 		else if ($diff < 0)
-			return ceil(-$diff) . " 秒先";
+			return (int)ceil(-$diff) . " 秒先";
 		else if ($diff < $minute)
-			return floor($diff) . " 秒前";	
+			return (int)floor($diff) . " 秒前";	
 		else if ($diff < $hour)
-			return floor($diff / $minute) . " 分前";
+			return (int)floor($diff / $minute) . " 分前";
 		else if ($diff < $day)
-			return floor($diff / $hour) . " 時間前";
+			return (int)floor($diff / $hour) . " 時間前";
 		else if ($diff < $day * 3)
-			return floor($diff / $day) . " 日前 " . date("H:i", $time);
+			return (int)floor($diff / $day) . " 日前 " . date("H:i", $time);
 		else if ($diff < $year)
 			return date("m/d H:i", $time);
 		else
 			return date("y/m/d H:i", $time);
 	}
 
-	/**
-	 * @param string $path
-	 * @param int $status
-	 * @param string $contentType
-	 * @param string $encoding [optional]
-	 * @param string $mbencoding [optional]
-	 * @return mixed
-	 */ 
-	static function visualize($path = null, $status = null, $contentType = null, $encoding = null, $mbencoding = null)
+	static function visualize(?string $path = null, ?int $status = null, ?string $contentType = null, ?string $encoding = null, ?string $mbencoding = null): bool
 	{
+		/** @var int */
 		static $nestLevel = 0;
 		
 		Auth::commitSession();
 		
 		if ($path == null)
-			if (is_dir(APP_DIR . VISUALIZER_DIR . App::$handlerName))
+			if (is_dir(Constant::APP_DIR . Constant::VISUALIZER_DIR . App::$handlerName))
 				$path = App::$handlerName . "/" . ucfirst(App::$actionName);
 			else
 				$path = App::$handlerName;
 		
-		$basePath = APP_DIR . VISUALIZER_DIR;
+		$basePath = Constant::APP_DIR . Constant::VISUALIZER_DIR;
 		$mode = self::visualizerMode();
 		
 		if ($mode == "mobile" &&
@@ -925,48 +842,41 @@ class Visualizer
 		if (!is_file($path))
 			throw new ApplicationException("Visualizer {$path} not found");
 		
-		if ($status)
+		if (isset($status))
 			self::statusCode($status);
 		
 		self::defaultHeaders();
 		
-		if ($contentType)
+		if (isset($contentType))
 			header("Content-Type: {$contentType}");
-		else if ($encoding)
+		else if (isset($encoding))
 			header("Content-Type: text/html; charset={$encoding}");
 		else
 			header("Content-Type: text/html; charset=UTF-8");
-		
-		$table = array
-		(
-			'/<\?\+\s*(.*?)\s*\?>/s' => '<? Visualizer::converted($1) ?>',
-			'/<\?=\s*(.*?)\s*\?>/s' => '<?echo $1 ?>',
-			'/<\?\s*(.*?)\s*\?>/s' => '<?php $1 ?>',
-			'/<\?php php/' => '<?php'
-		);
-		$content = preg_replace(array_keys($table), array_values($table), file_get_contents($path));
 		
 		$start = microtime(true);
 		
 		$nestLevel++;
 		ob_start();
-		eval("?" . ">" . $content);
-		$output = ob_get_contents();
+
+		require $path;
+
+		$output = (string)ob_get_contents();
 		ob_end_clean();
 		$nestLevel--;
 		
 		if ($nestLevel == 0)
 		{
-			$output = mb_ereg_replace('[\t \r\n]+?<', '<', mb_ereg_replace('>[\t \r\n]+', '>', $output));
+			$output = (string)mb_ereg_replace('[\t \r\n]+?<', '<', (string)mb_ereg_replace('>[\t \r\n]+', '>', $output));
 
-			if ($mbencoding)
-				$output = mb_convert_encoding($output, $mbencoding, "UTF8");
+			if (isset($mbencoding))
+				$output = (string)mb_convert_encoding($output, $mbencoding, "UTF8");
 			
 			$output = strtr($output, array
 			(
 				"<!DOCTYPE html>" => "<!DOCTYPE html>\r\n",
-				"__RENDER_TIME__" => round((microtime(true) - $start) * 1000, 2) . "ms",
-				"__PROCESS_TIME__" => round(($start - App::$startTime) * 1000, 2) . "ms"
+				"__RENDER_TIME__" => sprintf("%.2f", (microtime(true) - $start) * 1000.0) . "ms",
+				"__PROCESS_TIME__" => sprintf("%.2f", ($start - App::$startTime) * 1000.0) . "ms"
 			));
 		}
 		
@@ -974,53 +884,47 @@ class Visualizer
 			self::echoWithCompression($output);
 		else
 			echo $output;
-		
+
 		return true;
 	}
 	
-	/**
-	 * @param mixed $obj
-	 */
-	static function json($obj)
+	static function json(mixed $obj): bool
 	{
 		self::defaultHeaders();
 		header("Content-Type: application/json");
 		
 		Auth::commitSession();
-		self::echoWithCompression(json_encode($obj));
+		self::echoWithCompression((string)json_encode($obj));
 		
 		return true;
 	}
 	
 	/**
-	 * @param mixed $obj
+	 * @param string[][] $obj
 	 */
-	static function csv($obj)
+	static function csv(array $obj): bool
 	{
 		self::defaultHeaders();
 		header("Content-Type: text/csv; charset=Shift_JIS; header=present");
 		
 		$s = fopen("php://output", 'w');
-		mb_http_output("Windows-31J");
+		if ($s === false) throw new ApplicationException("Failed to open php://output");
+
+		assert(mb_http_output("Windows-31J"));
 		
 		foreach ($obj as $i)
-			fputcsv($s, array_map(create_function('$_', 'return mb_convert_encoding($_, "Windows-31J", "UTF-8");'), $i));
+			fputcsv($s, array_map(fn($_) => mb_convert_encoding($_, "Windows-31J", "UTF-8"), $i));
 		
 		fclose($s);
 		
 		return true;
 	}
 	
-	/**
-	 * @param string $path
-	 * @param int $status
-	 * @return mixed
-	 */ 
-	static function redirect($path = "", $status = null)
+	static function redirect(string $path = "", ?int $status = null): bool
 	{
 		Auth::commitSession();
 		
-		if ($status)
+		if (isset($status))
 			self::statusCode($status);
 		
 		header("Location: " . Util::getAbsoluteUrl($path));
@@ -1028,28 +932,22 @@ class Visualizer
 		return true;
 	}
 	
-	/**
-	 * @param string $content
-	 * @param string $encoding
-	 * @param string $mbencoding
-	 * @return mixed
-	 */ 
-	static function text($content, $encoding = "UTF-8", $mbencoding = null)
+	static function text(string $content, string $encoding = "UTF-8", ?string $mbencoding = null): bool
 	{
 		Auth::commitSession();
 		
-		if (!$mbencoding)
+		if (!isset($mbencoding))
 			$mbencoding = $encoding;
 		
-		mb_http_output($mbencoding);
+		assert(mb_http_output($mbencoding));
 		self::defaultHeaders();
 		header("Content-Type: text/plain; charset={$encoding}");
-		self::echoWithCompression(mb_convert_encoding($content, $mbencoding, "UTF-8"));
+		self::echoWithCompression((string)mb_convert_encoding($content, $mbencoding, "UTF-8"));
 		
 		return true;
 	}
 	
-	private static function echoWithCompression($output)
+	private static function echoWithCompression(string $output): void
 	{
 		if (Configuration::$instance->useOutputCompression &&
 			!headers_sent() &&
@@ -1065,7 +963,7 @@ class Visualizer
 		echo $output;
 	}
 	
-	private static function defaultHeaders()
+	private static function defaultHeaders(): void
 	{
 		header("X-Content-Type-Options: nosniff");
 		header("X-Frame-Options: SAMEORIGIN");
@@ -1075,7 +973,7 @@ class Visualizer
 		header("X-Content-Security-Policy: {$csp}");
 		
 		if (Util::getBrowserType() == Util::BROWSER_TYPE_WEBKIT &&
-			strpos($ua = $_SERVER["HTTP_USER_AGENT"], "Safari") !== false &&
+			strpos($ua = $_SERVER["HTTP_USER_AGENT"] ?? "", "Safari") !== false &&
 			!preg_match('/Version\/[1-5]\./', $ua))
 			header("X-WebKit-CSP: {$csp}");
 		
@@ -1084,5 +982,5 @@ class Visualizer
 	}
 }
 
-Visualizer::$basePath = rtrim(dirname(mb_strstr(Util::getPhpSelf(), Util::INDEX_FILE_NAME, true) . Util::INDEX_FILE_NAME), "/") . "/";
+Visualizer::$basePath = rtrim(dirname((string)mb_strstr(Util::getPhpSelf(), Util::INDEX_FILE_NAME, true) . Util::INDEX_FILE_NAME), "/") . "/";
 ?>

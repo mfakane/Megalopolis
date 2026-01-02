@@ -1,122 +1,96 @@
 <?php
+namespace Megalopolis;
+
+use \Exception;
+use \PDO;
+
 class App
 {
-	const NAME = "Megalopolis";
-	const VERSION = 47;
-	const MEGALITH_VERSION = 50;
+	const string NAME = "Megalopolis";
+	const int VERSION = 47;
+	const int MEGALITH_VERSION = 50;
 
-	const META_TABLE = "meta";
-	const SUBJECT_TABLE = "subject";
-	const THREAD_ENTRY_TABLE = "threadEntry";
-	const THREAD_EVALUATION_TABLE = "threadEvaluation";
-	const THREAD_TAG_TABLE = "threadTag";
-	const THREAD_TABLE = "thread";
-	const THREAD_STYLE_TABLE = "threadStyle";
-	const THREAD_PASSWORD_TABLE = "threadPassword";
-	const COMMENT_TABLE = "comment";
-	const EVALUATION_TABLE = "evaluation";
-	const AUTHOR_TABLE = "author";
-	const TAG_TABLE = "tags";
-	const SESSION_STORE_TABLE = "sessionStore";
-	const INDEX_DATABASE = "search";
+	const string META_TABLE = "meta";
+	const string SUBJECT_TABLE = "subject";
+	const string THREAD_ENTRY_TABLE = "threadEntry";
+	const string THREAD_EVALUATION_TABLE = "threadEvaluation";
+	const string THREAD_TAG_TABLE = "threadTag";
+	const string THREAD_TABLE = "thread";
+	const string THREAD_STYLE_TABLE = "threadStyle";
+	const string THREAD_PASSWORD_TABLE = "threadPassword";
+	const string COMMENT_TABLE = "comment";
+	const string EVALUATION_TABLE = "evaluation";
+	const string AUTHOR_TABLE = "author";
+	const string TAG_TABLE = "tags";
+	const string SESSION_STORE_TABLE = "sessionStore";
+	const string INDEX_DATABASE = "search";
 
-	static $handler;
-	static $handlerName;
-	static $actionName;
-	static $handlerType = "html";
-	static $pathInfo = array();
-	static $startTime;
+	static ?Handler $handler;
+	static string $handlerName;
+	static string $actionName;
+	static string $handlerType = "html";
+	/** @var string[] */
+	static array $pathInfo = array();
+	static float $startTime;
 
-	/**
-	 * @param bool $cond [optional]
-	 * @param string $desc [optional]
-	 */
-	static function precondition($cond = true, $desc = null)
+	static function precondition(bool $cond = true, ?string $desc = null): void
 	{
 		if ($desc == null)
 		{
-			self::precondition(version_compare(PHP_VERSION, "5.2.5", ">="), "PHP 5.2.5");
+			self::precondition(version_compare(PHP_VERSION, "8.0.0", ">="), "PHP 8.0.0");
 			self::precondition(extension_loaded("mbstring"), "mbstring");
 			self::precondition(extension_loaded("pdo"), "PDO");
 			self::precondition(in_array(Util::HASH_ALGORITHM, hash_algos()), "hash_algos() " . Util::HASH_ALGORITHM);
 
-			mb_language("Japanese");
+			assert(mb_language("Japanese"));
 			mb_internal_encoding("UTF-8");
-			mb_http_output("UTF-8");
-			mb_regex_encoding("UTF-8");
+			assert(mb_http_output("UTF-8"));
+			assert(mb_regex_encoding("UTF-8"));
 			ignore_user_abort(true);
-
-			if (!function_exists("lcfirst"))
-			{
-				function lcfirst($str)
-				{
-					$str[0] = strtolower($str[0]);
-
-					return $str;
-				}
-
-			}
-
-			if (!function_exists("ctype_digit"))
-			{
-				function ctype_digit($str)
-				{
-					return preg_match('/^[0-9]+$/', $str);
-				}
-
-			}
 		}
 		else if (!$cond)
 			throw new ApplicationException("Precondition {$desc} failed.");
 	}
 
-	static function stripMagicQuotesSlashes()
+	/**
+	 * @template T of string|list<string>|array
+	 * @param T $arg
+	 * @return (T is string ? string : string[]|array)
+	 */
+	private static function stripSlashesRecursive($arg): string|array
 	{
-		if (get_magic_quotes_gpc())
-		{
-			$_GET = self::stripSlashesRecursive($_GET);
-			$_POST = self::stripSlashesRecursive($_POST);
-			$_REQUEST = self::stripSlashesRecursive($_REQUEST);
-			$_COOKIE = self::stripSlashesRecursive($_COOKIE);
-		}
-	}
-
-	private static function stripSlashesRecursive($arg)
-	{
-		if (is_array($arg))
-			return array_map(array("self", "stripSlashesRecursive"), $arg);
-		else
+		if (is_string($arg))
 			return stripslashes($arg);
+		else
+			return array_map(fn(string|array $x) => self::stripSlashesRecursive($x), $arg);
 	}
 
-	private static function isBBQed()
+	private static function isBBQed(): bool
 	{
-		return substr_count($_SERVER["REMOTE_ADDR"], ".") == 3 && gethostbyname(implode(".", array_reverse(explode(".", $_SERVER["REMOTE_ADDR"]))) . ".niku.2ch.net") == "127.0.0.2";
+		return isset($_SERVER["REMOTE_ADDR"]) && substr_count($_SERVER["REMOTE_ADDR"], ".") == 3 && gethostbyname(implode(".", array_reverse(explode(".", $_SERVER["REMOTE_ADDR"]))) . ".niku.2ch.net") == "127.0.0.2";
 	}
 
-	private static function matchesAddress($arr)
+	/**
+	 * @param string[] $arr
+	 */
+	private static function matchesAddress($arr): bool
 	{
-		$addr = $_SERVER["REMOTE_ADDR"];
+		$addr = $_SERVER["REMOTE_ADDR"] ?? null;
 		$host = Util::getRemoteHost();
 
 		foreach ($arr as $i)
-			if (Util::wildcard($i, $addr) || Util::wildcard($i, $host))
+			if ($addr !== null && Util::wildcard($i, $addr) || $host !== null && Util::wildcard($i, $host))
 				return true;
 
 		return false;
 	}
 
-	private static function sCRYed()
-	{
-		// ススススクライド
-	}
-
-	static function main()
+	static function main(): void
 	{
 		try
 		{
-			if (!is_writable(DATA_DIR))
-				throw new ApplicationException(DATA_DIR . " が書き込み可能ではありません");
+			if (!is_writable(Constant::DATA_DIR))
+				throw new ApplicationException(Constant::DATA_DIR . " が書き込み可能ではありません");
 			
 			if ($_POST)
 			{
@@ -148,12 +122,12 @@ class App
 			}
 
 			self::rewriteHtaccess();
-			Util::unencodeInputs();
+			Util::decodeInputs();
 			self::resolve(Util::getPathInfo());
 		}
-		catch (Exception $ex)
+		catch (ApplicationException $ex)
 		{
-			Visualizer::statusCode(is_a($ex, "ApplicationException") ? $ex->httpCode : 500);
+			Visualizer::statusCode($ex->httpCode);
 			Visualizer::noCache();
 			Visualizer::$data = $ex;
 
@@ -162,15 +136,29 @@ class App
 			else
 				Visualizer::visualize("Exception");
 		}
+		catch (Exception $ex)
+		{
+			Visualizer::statusCode(500);
+			Visualizer::noCache();
+			Visualizer::$data = $ex;
+
+			if (self::$handlerType == "json" || strstr(Util::getPathInfo(), ".json") == ".json")
+				Visualizer::json(array("error" => $ex->getMessage(), "data" => null));
+			else
+				Visualizer::visualize("Exception");
+		}
 	}
 
-	private static function rewriteHtaccess()
+	private static function rewriteHtaccess(): void
 	{
-		if (Configuration::$instance->htaccessAutoConfig && !trim(Util::getPathInfo(), "/") && is_file($htaccess = ".htaccess") && is_writable($htaccess))
+		if (Configuration::$instance->htaccessAutoConfig && !trim(Util::getPathInfo(), "/") && is_file($htaccess = ".htaccess") && is_writable($htaccess) && isset($_SERVER["SCRIPT_NAME"]))
 		{
 			$base = dirname($_SERVER["SCRIPT_NAME"]);
 			$content = file_get_contents($htaccess);
-			$newcontent = preg_replace('/(RewriteRule \^\(\.\+\)\$) .*/', '$1 /' . trim($base, "/") . '/' . Util::INDEX_FILE_NAME . '?path=\$1 [QSA]', $content);
+			if ($content === false) return;
+			
+			$target = "/" . trim(trim($base, "/") . "/" . Util::INDEX_FILE_NAME, "/");
+			$newcontent = (string)preg_replace('/(RewriteRule \^\(\.\+\)\$) .*/', '$1 ' . $target . '?path=\$1 [QSA]', $content);
 
 			if ($content != $newcontent)
 				file_put_contents($htaccess, $newcontent, LOCK_EX);
@@ -178,33 +166,35 @@ class App
 	}
 
 	/**
-	 * @param string $pathInfo
 	 * @return mixed
 	 */
-	static function resolve($pathInfo)
+	static function resolve(string $pathInfo)
 	{
 		$pathInfo = explode("/", trim($pathInfo, "/"));
 
-		if ($pathInfo && Util::isEmpty($pathInfo[0]))
+		if (isset($pathInfo[0]) && Util::isEmpty($pathInfo[0]))
 			array_shift($pathInfo);
 
-		if ($pathInfo && ($idx = mb_strrpos($pathInfo[count($pathInfo) - 1], ".")) !== false)
+		if (isset($pathInfo[0]) && ($idx = mb_strrpos($pathInfo[count($pathInfo) - 1], ".")) !== false)
 		{
-			$last = &$pathInfo[count($pathInfo) - 1];
+			$last = $pathInfo[count($pathInfo) - 1];
+
 			self::$handlerType = mb_substr($last, $idx + 1);
 			$last = mb_substr($last, 0, $idx);
+
+			$pathInfo[count($pathInfo) - 1] = $last;
 		}
 
-		self::load(HANDLER_DIR . "Index");
+		self::load(Constant::HANDLER_DIR . "Index");
 		self::$handlerName = "Index";
 		self::$handler = new IndexHandler();
-		IndexHandler::$instance = &self::$handler;
+		IndexHandler::$instance = self::$handler;
 
-		$callbackName = self::$actionName = DEFAULT_ACTION;
+		$callbackName = self::$actionName = Constant::DEFAULT_ACTION;
 
 		foreach (array("", "_") as $i)
-			if ($pathInfo)
-				if ($pathInfo && is_callable(array(self::$handler, $i . $pathInfo[0])))
+			if (isset($pathInfo[0]))
+				if (is_callable(array(self::$handler, $i . $pathInfo[0])))
 					$callbackName = $i . (self::$actionName = array_shift($pathInfo));
 				else if (is_callable(array(self::$handler, $i . $pathInfo[count($pathInfo) - 1])))
 					$callbackName = $i . (self::$actionName = array_pop($pathInfo));
@@ -214,58 +204,77 @@ class App
 
 		return call_user_func_array($callback, $pathInfo);
 	}
-
-	static function load($name)
+	
+	/**
+	 * @param string[]|string $name
+	 */
+	static function load(array|string $name): void
 	{
 		if (is_array($name))
-			array_walk($name, array("App", "load"));
-		else if (is_file($file = APP_DIR . "{$name}.php"))
+			array_walk($name, fn(string $x) => self::load($x));
+		else if (is_file($file = Constant::APP_DIR . "{$name}.php"))
 			require $file;
 		else
 			throw new ApplicationException("{$name} not found");
 	}
 
 	/**
-	 * @param string $name
-	 * @param string $action
+	 * @param string[] $args
 	 * @return mixed
 	 */
-	static function callHandler($name, $action, array $args)
+	static function callHandler(string $name, string $action, array $args): bool
 	{
-		$handlerName = (App::$handlerName = ucfirst($name)) . "Handler";
-		self::load(HANDLER_DIR . App::$handlerName);
-		self::$handler = new $handlerName;
-		eval($handlerName . '::$instance = &self::$handler;');
+		$cast = fn(mixed $orig): Handler => $orig;
+
+		$handlerName = "\\Megalopolis\\" . (App::$handlerName = ucfirst($name)) . "Handler";
+		self::load(Constant::HANDLER_DIR . App::$handlerName);
+
+		if (class_exists($handlerName))
+			self::$handler = $cast(new $handlerName);
+		else
+			throw new ApplicationException("{$handlerName} not found");
+
+		eval($handlerName . '::$instance = self::$handler;');
 
 		return call_user_func_array(array(self::$handler, $action), $args);
 	}
 
-	/**
-	 * @param string $name
-	 * @return PDO
-	 */
-	static function openDB($name = "data")
+	static function openDB(string $name = "data"): DataStoreHandle
 	{
-		return Configuration::$instance->dataStore->open($name);
-	}
+		$dataStore = Configuration::$instance->dataStore;
+		if (!$dataStore) throw new ApplicationException("データベースが開けません");
 
-	/**
-	 * @param bool $vacuum [optional]
-	 * @param bool $commitTransaction [optional]
-	 */
-	static function closeDB(PDO &$db, $vacuum = false)
-	{
-		return Configuration::$instance->dataStore->close($db, $vacuum);
+		return new DataStoreHandle($dataStore, $dataStore->open($name));
 	}
-
 }
 
 App::$startTime = microtime(true);
-App::load(array("Library/simple_html_dom", CORE_DIR . "ApplicationException"));
-App::load(CORE_DIR . "Util");
+App::load(Constant::CORE_DIR . "Util");
 App::precondition();
-App::stripMagicQuotesSlashes();
-App::load(array(CORE_DIR . "Auth", CORE_DIR . "Configuration", CORE_DIR . "Cookie", CORE_DIR . "DataStore", CORE_DIR . "Handler", CORE_DIR . "SessionStore", CORE_DIR . "Visualizer", MODEL_DIR . "Board", MODEL_DIR . "Comment", MODEL_DIR . "Evaluation", MODEL_DIR . "Meta", MODEL_DIR . "SearchIndex", MODEL_DIR . "SearchIndex/Classic", MODEL_DIR . "SearchIndex/SQLite", MODEL_DIR . "SearchIndex/MySQL", MODEL_DIR . "Statistics", MODEL_DIR . "ThreadEntry", MODEL_DIR . "Thread"));
+
+$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . "/..");
+$dotenv->safeLoad();
+
+App::load(array(
+	Constant::CORE_DIR . "Auth",
+	Constant::CORE_DIR . "Configuration",
+	Constant::CORE_DIR . "Cookie",
+	Constant::CORE_DIR . "DataStore",
+	Constant::CORE_DIR . "Handler",
+	Constant::CORE_DIR . "SessionStore",
+	Constant::CORE_DIR . "Visualizer",
+	Constant::MODEL_DIR . "Board",
+	Constant::MODEL_DIR . "Comment",
+	Constant::MODEL_DIR . "Evaluation",
+	Constant::MODEL_DIR . "Meta",
+	Constant::MODEL_DIR . "SearchIndex",
+	Constant::MODEL_DIR . "SearchIndex/Classic",
+	Constant::MODEL_DIR . "SearchIndex/SQLite",
+	Constant::MODEL_DIR . "SearchIndex/MySQL",
+	Constant::MODEL_DIR . "Statistics",
+	Constant::MODEL_DIR . "ThreadEntry",
+	Constant::MODEL_DIR . "Thread"
+));
 App::load("../config");
 
 if (!Configuration::$instance->dataStore)

@@ -1,8 +1,12 @@
 <?php
+namespace Megalopolis;
+
+use \PDO;
+
 class SQLiteSearchIndex extends SearchIndex
 {
-	const INDEX_TABLE = "searchIndex2";
-	static $searchIndexSchema = array
+	const string INDEX_TABLE = "searchIndex2";
+	static array $searchIndexSchema = array
 	(
 		"docid" => "bigint primary key not null",
 		"title" => "varchar(2048) fulltext",
@@ -13,19 +17,23 @@ class SQLiteSearchIndex extends SearchIndex
 		"tag" => "varchar(2048) fulltext"
 	);
 	
-	function registerThread(PDO $idb, Thread $thread, $removeExisting)
+	#[\Override]
+	function registerThread(PDO $idb, Thread $thread, bool $removeExisting): void
 	{
+		if ($thread->id === 0)
+			return;
+
 		if ($removeExisting)
 			self::unregister($idb, $thread->id);
 		
 		$words = array_filter(array
 		(
-			"title" => $this->getWords($thread->entry->title),
-			"name" => $this->getWords($thread->entry->name),
-			"summary" => $this->getWords($thread->entry->summary),
-			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords($thread->body) : null,
-			"afterword" => $this->getWords($thread->afterword),
-			"tag" => call_user_func_array(array("SearchIndex", "getWords"), $thread->entry->tags)
+			"title" => $this->getWords([$thread->entry->title]),
+			"name" => $this->getWords([$thread->entry->name]),
+			"summary" => $this->getWords([$thread->entry->summary]),
+			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([$thread->body]) : null,
+			"afterword" => $this->getWords([$thread->afterword]),
+			"tag" => SearchIndex::getWords($thread->entry->tags)
 		));
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
@@ -38,12 +46,13 @@ class SQLiteSearchIndex extends SearchIndex
 			self::INDEX_TABLE,
 			implode(", ", array_keys($words)),
 			$thread->id,
-			implode(", ", array_map(create_function('$_', 'return ":{$_}";'), array_keys($words)))
+			implode(", ", array_map(function($_) { return ":{$_}"; }, array_keys($words)))
 		)));
-		Util::executeStatement($st, array_map(create_function('$_', 'return implode(" ", $_);'), $words));
+		Util::executeStatement($st, array_map(function($_) { return implode(" ", $_); }, $words));
 	}
 	
-	function unregisterThread(PDO $idb, array $ids)
+	#[\Override]
+	function unregisterThread(PDO $idb, array $ids): void
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
@@ -54,8 +63,9 @@ class SQLiteSearchIndex extends SearchIndex
 		)));
 		Util::executeStatement($st);
 	}
-	
-	function searchThread(PDO $idb, array $query, array $type = null, array $ids = null)
+
+	#[\Override]
+	function searchThread(PDO $idb, array $query, ?array $type = null, ?array $ids = null): array
 	{
 		if (!$query)
 			return array();
@@ -72,7 +82,7 @@ class SQLiteSearchIndex extends SearchIndex
 				$prefix = "-";
 			}
 			
-			if ($words = $this->getWords(array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($i) >= $this->gramLength), $i))
+			if ($words = $this->getWords([array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($i) >= $this->gramLength), $i]))
 			{
 				$currentWord = array();
 				
@@ -98,28 +108,24 @@ class SQLiteSearchIndex extends SearchIndex
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
 			select docid from
-			(' . implode(" union ", array_map(create_function('$_', 'return "select docid from %2\$s where {$_} match ?";'), $targetColumns)) . ') %s',
-			is_array($ids) ? "where docid in (" . ($ids ? implode(", ", $ids) : -1) . ")" : null,
+			(' . implode(" union ", array_map(function($_) { return "select docid from %2\$s where {$_} match ?"; }, $targetColumns)) . ') %1$s',
+			is_array($ids) ? "where docid in (" . ($ids ? implode(", ", $ids) : -1) . ")" : "",
 			self::INDEX_TABLE
 		)));
 		
 		Util::executeStatement($st, array_fill(0, count($targetColumns), implode(" ", $queryArguments)));
 		
-		return $st->fetchAll(PDO::FETCH_COLUMN, 0);
+		return $st?->fetchAll(PDO::FETCH_COLUMN, 0) ?? array();
 	}
-	
-	function ensureTableExists(PDO $idb)
+
+	#[\Override]
+	function ensureTableExists(PDO $idb): void
 	{
-		$idb->beginTransaction();
 		Util::createFullTextTableIfNotExists($idb, self::$searchIndexSchema, self::INDEX_TABLE);
-		$idb->commit();
 	}
-	
-	/**
-	 * @param int $id
-	 * @return array|int
-	 */
-	function getExistingThread(PDO $idb)
+
+	#[\Override]
+	function getExistingThread(PDO $idb): array
 	{
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
@@ -129,7 +135,7 @@ class SQLiteSearchIndex extends SearchIndex
 		)));
 		Util::executeStatement($st);
 		
-		return array_map("intval", $st->fetchAll(PDO::FETCH_COLUMN, 0));
+		return array_map("intval", $st?->fetchAll(PDO::FETCH_COLUMN, 0) ?? array());
 	}
 }
 ?>

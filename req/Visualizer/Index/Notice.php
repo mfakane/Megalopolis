@@ -1,20 +1,20 @@
 <?php
-$c = &Configuration::$instance;
-$h = &IndexHandler::$instance;
-$d = &Visualizer::$data;
+namespace Megalopolis;
 
-$isAdmin = Auth::hasSession(true);
+$c = Configuration::$instance;
+$d = Visualizer::$data;
+
 Visualizer::doctype();
 ?>
 <html lang="ja">
 <head>
-	<? Visualizer::head() ?>
+	<?php Visualizer::head() ?>
 	<title>
-		<?+$c->title ?>
+		<?=Visualizer::escapeOutput($c->title) ?>
 	</title>
 </head>
 <body class="index">
-	<? require $d ?>
-	<? Visualizer::footer() ?>
+	<?php require $d ?>
+	<?php Visualizer::footer() ?>
 </body>
 </html>

@@ -1,0 +1,13 @@
+{
+    "require-dev": {
+        "vimeo/psalm": "^6.10"
+    },
+    "autoload": {
+		"psr-4": {
+			"Megalopolis\\": "req/Core/"
+		}
+	},
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    }
+}
