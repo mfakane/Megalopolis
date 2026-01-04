@@ -1,9 +1,0 @@
-input[type="submit"], input[type="reset"], input[type="button"], button
-{
-	padding: 1px 5px 1px 5px;
-}
-
-body>header form input[name="query"]:-moz-placeholder
-{
-	color: #666666;
-}

@@ -43,7 +43,6 @@ Visualizer::doctype();
 			作者: <?php Visualizer::convertedName($h->entry->name) ?>
 		<?php endif ?>
 	</title>
-	<script src="<?=Visualizer::escapeOutput(Visualizer::actionHref("script", "taketori", "taketori.js")) ?>"></script>
 	<script src="<?=Visualizer::escapeOutput(Visualizer::actionHref("script", "Read", "Index.js")) ?>"></script>
 	<style>
 		html
@@ -156,7 +155,7 @@ Visualizer::doctype();
 	<?php else: ?>
 		<?php Visualizer::pager($h->page ?? 1, $h->entry->pageCount, 10, array(Visualizer::actionHref($h->subject, $h->entry->id) . "/", "#body")) ?>
 	<?php endif ?>
-	<section id="body" data-style-path="<?=Visualizer::escapeOutput(Visualizer::$basePath) ?>style/<?=Visualizer::escapeOutput($c->skin !== null && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null) ?>" data-writing-mode="<?=intval($h->thread->writingMode) ?>" data-force-taketori="<?=$h->forceTaketori ? "true" : "false" ?>">
+	<section id="body" data-style-path="<?=Visualizer::escapeOutput(Visualizer::$basePath) ?>style/<?=Visualizer::escapeOutput($c->skin !== null && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null) ?>" data-writing-mode="<?=intval($h->thread->writingMode) ?>">
 		<div id="verticalWrapper">
 			<div id="contentWrapper">
 				<?php if ($h->page == 1 && $c->showHeaderInsideBorder): ?>

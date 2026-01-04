@@ -374,8 +374,6 @@ $(function()
 		var writingMode = content.data("writingMode");
 		var vertical =
 		{
-			taketori: null,
-			forceTaketori: content.data("forceTaketori"),
 			isVertical: null,
 			originalHtml: null,
 			bodyWidth: null,
@@ -417,17 +415,6 @@ $(function()
 				content.height(vertical.verticalBodyWidth ? vertical.verticalBodyWidth + 24 : $(window).height() - 256);
 			else
 				content.height("auto");
-			
-			if (!vertical.taketori && window.opera)
-				if (vertical.isVertical)
-				{
-					var ow = Math.floor(content.outerWidth());
-					var oh = Math.floor(content.outerHeight());
-					
-					wrapper.width(oh - 2).height(ow).css("right", -oh + "px");
-				}
-				else
-					wrapper.width("auto").height("auto").css("right", "");
 		};
 		var toggleVertical = function(onLoad, setVertical)
 		{
@@ -454,83 +441,60 @@ $(function()
 						}
 					}
 					
-					if (vertical.taketori)
-						vertical.taketori.toggleAll();
-					else if (!$.browser.msie && !megalopolis.isWebKit() && (vertical.forceTaketori || $.browser.mozilla || navigator.platform.indexOf("Win") == -1))
-					{
-						vertical.taketori = new Taketori()
-							.set
-							({
-								fontFamily: "sans-serif",
-								height: vertical.verticalBodyWidth ? vertical.verticalBodyWidth + 16 + "px" : ($(window).height() - 256 - 8) + "px"
-							})
-							.element("#contentWrapper");
-						vertical.taketori.ttbDisabled = false;
-						vertical.taketori.deleteCookie("TTB_DISABLED");
-						vertical.taketori.toVertical(onLoad ? true : false);
-					}
-					else
-					{
-						if (!window.opera)
+					if (!vertical.originalHtml)
+						vertical.originalHtml =
 						{
-							if (!vertical.originalHtml)
-								vertical.originalHtml =
-								{
-									summary: $("#summary").html(),
-									contentBody: $("#contentBody").html(),
-									afterwordBody: $("#afterwordBody").html()
-								};
+							summary: $("#summary").html(),
+							contentBody: $("#contentBody").html(),
+							afterwordBody: $("#afterwordBody").html()
+						};
+					
+					var set = $("#summary, #contentBody, #afterwordBody")
+						.find("*")
+						.filter(function() { return $(this).attr("style"); })
+						.each(function()
+						{
+							var elem = $(this);
+							var style = elem[0].style;
 							
-							var set = $("#summary, #contentBody, #afterwordBody")
-								.find("*")
-								.filter(function() { return $(this).attr("style"); })
-								.each(function()
-								{
-									var elem = $(this);
-									var style = elem[0].style;
-									
-									$.each
-									({
-										"margin": "",
-										"marginRight": style.marginTop || elem.css("marginTop") || "",
-										"marginBottom": style.marginRight || elem.css("marginRight") || "",
-										"marginLeft": style.marginBottom || elem.css("marginBottom") || "",
-										"marginTop": style.marginLeft || elem.css("marginLeft") || "",
-										"padding": "",
-										"paddingRight": style.paddingTop || elem.css("paddingTop") || "",
-										"paddingBottom": style.paddingRight || elem.css("paddingRight") || "",
-										"paddingLeft": style.paddingBottom || elem.css("paddingBottom") || "",
-										"paddingTop": style.paddingLeft || elem.css("paddingLeft") || "",
-										"border": "",
-										"borderRight": style.borderTop || elem.css("borderTop") || "",
-										"borderBottom": style.borderRight || elem.css("borderRight") || "",
-										"borderLeft": style.borderBottom || elem.css("borderBottom") || "",
-										"borderTop": style.borderLeft || elem.css("borderLeft") || "",
-										"width": style.height || "auto",
-										"height": style.width || "auto"
-									}, function(k, v)
-									{
-										style[k] = v;
-										elem.css(k, v);
-									});
-								});
 							$.each
 							({
-								summary: $("#summary").html(),
-								contentBody: $("#contentBody").html(),
-								afterwordBody: $("#afterwordBody").html()
+								"margin": "",
+								"marginRight": style.marginTop || elem.css("marginTop") || "",
+								"marginBottom": style.marginRight || elem.css("marginRight") || "",
+								"marginLeft": style.marginBottom || elem.css("marginBottom") || "",
+								"marginTop": style.marginLeft || elem.css("marginLeft") || "",
+								"padding": "",
+								"paddingRight": style.paddingTop || elem.css("paddingTop") || "",
+								"paddingBottom": style.paddingRight || elem.css("paddingRight") || "",
+								"paddingLeft": style.paddingBottom || elem.css("paddingBottom") || "",
+								"paddingTop": style.paddingLeft || elem.css("paddingLeft") || "",
+								"border": "",
+								"borderRight": style.borderTop || elem.css("borderTop") || "",
+								"borderBottom": style.borderRight || elem.css("borderRight") || "",
+								"borderLeft": style.borderBottom || elem.css("borderBottom") || "",
+								"borderTop": style.borderLeft || elem.css("borderLeft") || "",
+								"width": style.height || "auto",
+								"height": style.width || "auto"
 							}, function(k, v)
 							{
-								if (v)
-									$("#" + k).html(v);
+								style[k] = v;
+								elem.css(k, v);
 							});
-						}
-						
-						$("#body").addClass("vertical");
-					}
+						});
+					$.each
+					({
+						summary: $("#summary").html(),
+						contentBody: $("#contentBody").html(),
+						afterwordBody: $("#afterwordBody").html()
+					}, function(k, v)
+					{
+						if (v)
+							$("#" + k).html(v);
+					});
+					
+					$("#body").addClass("vertical");
 				}
-				else if (vertical.taketori)
-					vertical.taketori.toggleAll();
 				else
 				{
 					$("#body").removeClass("vertical");
@@ -576,9 +540,6 @@ $(function()
 					separator: true,
 					click: function(sender)
 					{
-						if (vertical.taketori && $("#contentWrapper").hasClass("taketori-in-progress"))
-							return;
-						
 						var rt = megalopolis.mainCookie("Vertical", vertical.isVertical ? "no" : "yes");
 						
 						toggleVertical();

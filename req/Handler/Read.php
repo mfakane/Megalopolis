@@ -11,7 +11,6 @@ class ReadHandler extends Handler
 	public ?int $subject = null;
 	public ?Thread $thread = null;
 	public ?int $page = null;
-	public bool $forceTaketori = false;
 
 	/** @psalm-suppress PropertyNotSetInConstructor */
 	public ?ThreadEntry $entry {
@@ -63,8 +62,6 @@ class ReadHandler extends Handler
 
 		if (Util::isCachedByBrowser($thread->entry->getLatestLastUpdate(), $page . Cookie::getCookie(Cookie::MOBILE_VERTICAL_KEY, "") . $thread->entry->readCount))
 			Visualizer::notModified();
-
-		$this->forceTaketori = boolval(preg_match('/<\s*font|font:\s*|font-family:\s*/i', $thread->body ?? ""));
 
 		if (isset($_POST["admin"]) && is_string($_POST["admin"])) {
 			Auth::ensureToken();
@@ -187,8 +184,6 @@ class ReadHandler extends Handler
 			$_page !== null ||
 			$_POST && self::param("preview", null, true) == "true" && !Visualizer::$data
 		) {
-			$this->forceTaketori = boolval(preg_match('/<\s*font|font:\s*|font-family:\s*/i', $thread->body ?? ""));
-
 			return Visualizer::visualize("Read/Index");
 		}
 

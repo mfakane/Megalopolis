@@ -65,7 +65,6 @@ class Visualizer
 	
 	static function head(): void
 	{
-		$type = Util::getBrowserType();
 		$isMobile = self::visualizerMode() == "mobile";
 		$isSimple = self::visualizerMode() == "simple";
 		
@@ -97,43 +96,6 @@ class Visualizer
 		<?php endif ?>
 		<link href="<?php self::converted(self::absoluteHref()) ?>" rel="home" />
 		<?php
-		
-		if (!$isMobile && !$isSimple)
-			if (in_array($type, array(Util::BROWSER_TYPE_MSIE6, Util::BROWSER_TYPE_MSIE7, Util::BROWSER_TYPE_MSIE_NEW, Util::BROWSER_TYPE_MSIE)))
-			{
-				?>
-				<meta name="msapplication-starturl" content="<?php self::converted(self::absoluteHref()) ?>" />
-				<?php if (!Configuration::$instance->adminOnly): ?>
-					<meta name="msapplication-task" content="name=新規投稿;action-uri=<?php self::converted(self::absoluteHref("new")) ?>;icon-uri=<?php self::converted(self::absoluteHref("style", "addTaskIcon.png")) ?>" />
-				<?php endif ?>
-				<meta name="msapplication-task" content="name=おまかせ表示;action-uri=<?php self::converted(self::absoluteHref("random")) ?>;icon-uri=<?php self::converted(self::absoluteHref("style", "refreshTaskIcon.png")) ?>" />
-				<?php if (Configuration::$instance->useSearch): ?>
-					<meta name="msapplication-task" content="name=詳細検索;action-uri=<?php self::converted(self::absoluteHref("search")) ?>;icon-uri=<?php self::converted(self::absoluteHref("style", "searchTaskIcon.png")) ?>" />
-				<?php endif ?>
-				<!--[if lt IE 9]>
-				<script src="<?php self::converted(self::actionHref("script", "html5.js")) ?>"></script>
-				<![endif]-->
-				<link href="<?php self::converted(self::actionHref("style", "trident.css")) ?>" rel="stylesheet" />
-				<?php
-			}
-			else if (in_array($type, array(Util::BROWSER_TYPE_WEBKIT, Util::BROWSER_TYPE_IPHONE, Util::BROWSER_TYPE_IPAD)))
-			{
-				?>
-				<link href="<?php self::converted(self::actionHref("style", "webkit.css")) ?>" rel="stylesheet" />
-				<?php
-			}
-			else if (in_array($type, array(Util::BROWSER_TYPE_FIREFOX, Util::BROWSER_TYPE_FIREFOX2, Util::BROWSER_TYPE_GECKO)))
-			{
-				?>
-				<link href="<?php self::converted(self::actionHref("style", "gecko.css")) ?>" rel="stylesheet" />
-				<?php
-			}
-			else if ($type == Util::BROWSER_TYPE_PRESTO)
-			{
-				?>
-				<link href="<?php self::converted(self::actionHref("style", "presto.css")) ?>" rel="stylesheet" />
-				<?php
-			}
 		
 		echo Configuration::$instance->head;
 	}
