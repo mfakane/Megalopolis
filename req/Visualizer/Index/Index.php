@@ -50,7 +50,7 @@ Visualizer::doctype();
 		"new" => !$c->adminOnly || $isAdmin ? array("新規投稿", "addIcon.png") : null,
 		(App::$actionName == "index" ? "random" : implode("/", array(App::$actionName, rawurlencode($d), "random"))) => array("おまかせ表示", "refreshIcon.png"),
 		"search" => $c->useSearch ? array("詳細検索", "detailsIcon.png") : null,
-		"?visualizer=auto" => Visualizer::isMobile() ? array("携帯表示", "") : null
+		"?visualizer=auto" => Visualizer::isSimple() ? array("携帯表示", "") : null
 	);
 	
 	Visualizer::header

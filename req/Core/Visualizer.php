@@ -11,15 +11,11 @@ class Visualizer
 
 	const string MODE_COOKIE_NAME = "VisualizerMode";
 	
-	static function isMobile(): bool
-	{
-		return Util::getBrowserType() == Util::BROWSER_TYPE_IPHONE;
-	}
-	
 	static function isSimple(): bool
 	{
 		return in_array(Util::getBrowserType(), array
 		(
+			Util::BROWSER_TYPE_IPHONE,
 			Util::BROWSER_TYPE_ANDROIDMOBILE,
 			Util::BROWSER_TYPE_PSP,
 			Util::BROWSER_TYPE_3DS,
@@ -55,9 +51,7 @@ class Visualizer
 	
 	private static function autoVisualizerMode(): string
 	{
-		if (self::isMobile())
-			return "mobile";
-		else if (self::isSimple())
+		if (self::isSimple())
 			return "simple";
 		else
 			return "normal";
@@ -65,24 +59,11 @@ class Visualizer
 	
 	static function head(): void
 	{
-		$isMobile = self::visualizerMode() == "mobile";
 		$isSimple = self::visualizerMode() == "simple";
 		
 		?>
 		<meta charset="UTF-8" />
-		<?php if ($isMobile): ?>
-			<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width" />
-			<meta name="format-detection" content="telephone=no" />
-			<meta name="apple-mobile-web-app-capable" content="yes" />
-			<link href="<?php self::converted(self::actionHref("style", "splash.png")) ?>" rel="apple-touch-startup-image" type="image/png" />
-			<link href="<?php self::converted(self::actionHref("style", "iosIcon.png")) ?>" rel="apple-touch-icon" type="image/png" />
-			<link href="http://code.jquery.com/mobile/1.2.0-beta.1/jquery.mobile-1.2.0-beta.1.min.css" rel="stylesheet" />
-			<link href="<?php self::converted(self::actionHref("style", "mobile", "mobile.css")) ?>" rel="stylesheet" />
-			<script src="http://code.jquery.com/jquery-1.8.1.min.js"></script>
-			<script src="<?php self::converted(self::actionHref("script", "base.js")) ?>"></script>
-			<script src="<?php self::converted(self::actionHref("script", "mobile", "base.js")) ?>"></script>
-			<script src="http://code.jquery.com/mobile/1.2.0-beta.1/jquery.mobile-1.2.0-beta.1.min.js"></script>
-		<?php elseif ($isSimple): ?>
+		<?php if ($isSimple): ?>
 			<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width" />
 			<link href="<?php self::converted(self::actionHref("style", "simple", "simple.css")) ?>" rel="stylesheet" />
 		<?php else: ?>
