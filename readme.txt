@@ -264,7 +264,6 @@ Megalopolis は作品集や作品閲覧など一部のページで Last-Modified
 注意
 ----
 
-* 縦書き表示は IE もしくは Mac 上の Safari において一番きれいに表示されます。
 * .htaccess などでアクセスの制限が可能な環境の場合、セキュリティなどの理由により
   store/ や req/、Megalith/ 以下へのアクセスを制限することを推奨します。
   付属の .htaccess では既定で *.sqlite ファイルへのアクセスを制限する設定がなされています。
@@ -293,10 +292,14 @@ Do What The Fuck You Want To Public License, Version 2 (WTFPL) および自ら�
 ライブラリ
 ----------
 
-* jQuery http://jquery.com/ および jQuery Mobile http://jquerymobile.com/ を使用しています。
-* Simple HTML Parser http://sourceforge.net/projects/simplehtmldom/ を使用しています。
-* 一部の PC 向けに縦書きエンジンとして 竹取 JS http://taketori.org/js.html を使用しています。
-* 携帯向けに ChocolateChip-UI http://www.chocolatechip-ui.com/ のアイコンを使用しています。
+本プロジェクトは以下のライブラリを使用しています:
+
+* jQuery http://jquery.com/
+* vlucas/phpdotenv (BSD-3-Clause) - 環境変数管理 (開発時のみ)
+* vimeo/psalm (MIT) - 静的解析ツール (開発時のみ)
+
+これらのライブラリおよびその依存関係の詳細なライセンス情報は
+vendor/ ディレクトリ内の各パッケージに含まれています。
 
 連絡先
 ------
