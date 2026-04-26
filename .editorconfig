@@ -7,3 +7,11 @@ tab_width = 4
 indent_size = 4
 indent_style = tab
 insert_final_newline = true
+
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[*.nix]
+indent_style = space
+indent_size = 2

@@ -1,3 +1,4 @@
 {
-    "php.version": "8.4",
+	"php.version": "8.4",
+	"nixEnvSelector.nixFile": "${workspaceFolder}/flake.nix",
 }
