@@ -1,0 +1,58 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g. r47)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  # make zip file containing scripts, assets, and composer deps
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      ZIP_NAME: "megalopolis-${{ github.event.inputs.version }}.zip"
+      ARTIFACT_NAME: "megalopolis-${{ github.event.inputs.version }}"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+    
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring
+
+      - name: Install composer dependencies
+        run: composer install --no-dev --optimize-autoloader
+      
+      - name: Create release zip
+        run: |
+          zip -r $ZIP_NAME \
+            req \
+            script \
+            store \
+            style \
+            vendor \
+            .htaccess \
+            changelog.txt \
+            composer.json \
+            composer.lock \
+            config.php \
+            index.php \
+            readme.txt \
+            THIRD_PARTY_LICENSES.txt
+          echo "Created $ZIP_NAME"
+
+      - name: Upload zip
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ZIP_NAME }}
+          archive: false # because we already have a zip file, we don't want to zip it again
