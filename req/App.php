@@ -7,6 +7,7 @@ use \PDO;
 class App
 {
 	const string NAME = "Megalopolis";
+	const string VERSION_PREFIX = "rc";
 	const int VERSION = 48;
 	const int MEGALITH_VERSION = 50;
 

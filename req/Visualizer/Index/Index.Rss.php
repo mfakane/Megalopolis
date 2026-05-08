@@ -1,4 +1,5 @@
 <?php
+
 namespace Megalopolis;
 
 $c = Configuration::$instance;
@@ -12,25 +13,25 @@ else if (App::$actionName == "author")
 else
 	$title = $h->subject == $h->subjectCount ? "最新作品集" : "作品集 {$h->subject}";
 ?>
-<?='<?xml version="1.0" encoding="UTF-8"?>' ?>
+<?= '<?xml version="1.0" encoding="UTF-8"?>' ?>
 <rss version="2.0">
 	<channel>
-		<title><?=Visualizer::escapeOutput($c->title) ?> - <?=Visualizer::escapeOutput($title) ?></title>
-		<link><?=Visualizer::escapeOutput(Visualizer::absoluteHref()) ?></link>
+		<title><?= Visualizer::escapeOutput($c->title) ?> - <?= Visualizer::escapeOutput($title) ?></title>
+		<link><?= Visualizer::escapeOutput(Visualizer::absoluteHref()) ?></link>
 		<language>ja-JP</language>
-		<description><?=Visualizer::escapeOutput($c->notes) ?></description>
-		<generator><?=Visualizer::escapeOutput(App::NAME) ?> <?=Visualizer::escapeOutput(App::VERSION) ?></generator>
+		<description><?= Visualizer::escapeOutput($c->notes) ?></description>
+		<generator><?= Visualizer::escapeOutput(App::NAME) ?> <?php self::converted(App::VERSION_PREFIX) ?><?= Visualizer::escapeOutput(App::VERSION) ?></generator>
 		<?php if (count($h->entries ?? [])): ?>
 			<?php if ($h->lastUpdate !== null): ?>
-				<lastBuildDate><?=Visualizer::escapeOutput(date("r", $h->lastUpdate)) ?></lastBuildDate>
+				<lastBuildDate><?= Visualizer::escapeOutput(date("r", $h->lastUpdate)) ?></lastBuildDate>
 			<?php endif ?>
 			<?php foreach ($h->entries ?? [] as $i): ?>
 				<item>
 					<?php if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
-						<title><?=Visualizer::escapeOutput($i->title) ?></title>
+						<title><?= Visualizer::escapeOutput($i->title) ?></title>
 					<?php endif ?>
-					<link><?=Visualizer::escapeOutput(Visualizer::absoluteHref($i->subject, $i->id)) ?></link>
-					<pubDate><?=Visualizer::escapeOutput(date("r", $i->dateTime)) ?></pubDate>
+					<link><?= Visualizer::escapeOutput(Visualizer::absoluteHref($i->subject, $i->id)) ?></link>
+					<pubDate><?= Visualizer::escapeOutput(date("r", $i->dateTime)) ?></pubDate>
 					<?php if ($c->showName[Configuration::ON_SUBJECT]): ?>
 						<author><?php Visualizer::convertedName($i->name) ?></author>
 					<?php endif ?>
@@ -39,7 +40,7 @@ else
 					<?php endif ?>
 					<?php if ($c->showTags[Configuration::ON_SUBJECT]): ?>
 						<?php foreach ($i->tags as $j): ?>
-							<category domain="<?=Visualizer::escapeOutput(Visualizer::absoluteHref("tag", $j . (strpos($j, ".") !== false ? ".html" : ""))) ?>"><?=Visualizer::escapeOutput($j) ?></category>
+							<category domain="<?= Visualizer::escapeOutput(Visualizer::absoluteHref("tag", $j . (strpos($j, ".") !== false ? ".html" : ""))) ?>"><?= Visualizer::escapeOutput($j) ?></category>
 						<?php endforeach ?>
 					<?php endif ?>
 				</item>

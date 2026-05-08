@@ -151,7 +151,7 @@ class Visualizer
 				<?php if (Configuration::$instance->showFooterVersion): ?>
 					<li>
 						<?php self::converted(App::NAME) ?>
-						<?php self::converted((string)App::VERSION) ?>
+						<?php self::converted(App::VERSION_PREFIX) ?><?php self::converted((string)App::VERSION) ?>
 					</li>
 				<?php endif ?>
 				<?php foreach (Configuration::$instance->footers as $i): ?>
