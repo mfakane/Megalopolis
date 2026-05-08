@@ -7,7 +7,7 @@ use \PDO;
 class App
 {
 	const string NAME = "Megalopolis";
-	const int VERSION = 47;
+	const int VERSION = 48;
 	const int MEGALITH_VERSION = 50;
 
 	const string META_TABLE = "meta";
