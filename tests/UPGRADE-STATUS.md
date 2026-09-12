@@ -1,5 +1,9 @@
 # 2016 database upgrade verification
 
+The first sections retain the original failing checkpoint. See
+[verification after the exception fix](#verification-after-the-exception-fix)
+for the subsequent passing upgrade and restoration runs.
+
 Recorded on 2026-09-12 against the working checkout after `e65499f`. This change
 adds tests only: no application file or original 10,000-work fixture was changed.
 
@@ -79,3 +83,48 @@ both upgrade commands and the full JSON comparison before a final release.
 Production web-server behavior, concurrent writers, custom configuration,
 other historical schemas and the previously reported static-analysis findings
 remain outside this verification.
+
+## Verification after the exception fix
+
+On 2026-09-12, after `dcfa7c2`, `DataStoreHandle::withTransaction()` was changed
+to rethrow an existing `ApplicationException` after the existing rollback and
+transaction-state cleanup. The same exception instance retains its HTTP code,
+attached data and original cause. Unexpected Throwables still become HTTP 500
+with their cause attached. No schema, fixture, handler or integration-test
+expectation was changed.
+
+The new `tests/Unit/DataStoreHandleTest.php` exercises the real inherited
+transaction methods against in-memory PDO SQLite connections, without the App
+bootstrap or mocked transaction methods. It checks codes 400/401/403/404/500,
+exception identity/data/cause, actual UPDATE/INSERT rollback, a caught inner
+savepoint failure, combined handles with shared or independent connections,
+reuse after failure, and genuine SQL/PHP errors remaining 500. Shared-connection
+and independent-store scenarios are explicit; these tests do not assert atomic
+commit across arbitrary databases or rollback support for MyISAM tables.
+
+Before the production fix, **8 of the 11 new tests failed** on exception identity,
+while the rollback and unexpected-error checks reached before those assertions
+passed. After the fix, the same tests pass with **11 tests / 80 assertions**.
+
+| Command | Unit | Upgrade operations | Backup restoration |
+| --- | --- | --- | --- |
+| `bash compat/upgrade.sh 5.7.17` | 123 passed / 20,663 assertions | 18 passed / 505 assertions | 2 passed / 129 assertions |
+| `bash compat/upgrade.sh 5.6.35` | 123 passed / 20,663 assertions | 18 passed / 505 assertions | 2 passed / 129 assertions |
+
+Both commands include SQLite and exit zero, with no errors, failures or skips.
+All ten previously failing status assertions per run now pass unchanged. The
+pre-upgrade backup checksums still match after restoring into fresh stores.
+Artifacts are in `test-results/upgrade-hTo9a8aF/` (5.7.17) and
+`test-results/upgrade-jdbNXwLD/` (5.6.35); those disposable projects were removed.
+
+The existing `bash compat/test.sh quick` also passed with **1,325 tests and
+392,954 assertions**, zero errors/failures/skips, in
+`test-results/run-KdhkCPPg/`. It read all 10,000 works on each backend and ran
+the subject and quick work JSON comparisons. All seven original fixture-export
+checksums still pass. The full live JSON mode was not rerun for this fix.
+
+Project-wide Psalm still reports 72 findings. A before/after comparison of
+file, line, issue type and message is identical; the exception fix adds no
+findings and does not resolve the pre-existing ones. The full live JSON mode,
+production web-server checks and concurrent-write verification remain separate
+release checks, not implied by these passing upgrade tests.

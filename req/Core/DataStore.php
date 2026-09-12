@@ -593,6 +593,8 @@ class DataStoreHandle
 		} catch (\Throwable $e) {
 			if ($this->db->inTransaction()) $this->store->rollBackOrToSavepoint($this->db);
 			$this->inLocalTransaction = false;
+			if ($e instanceof ApplicationException)
+				throw $e;
 			throw new ApplicationException($e->getMessage(), 500, $e);
 		}
 	}

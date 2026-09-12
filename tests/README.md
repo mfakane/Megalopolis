@@ -20,7 +20,7 @@ reuse Docker's cache. Run from any directory using the script's absolute path.
 
 | Suite | Quick | Full |
 | --- | --- | --- |
-| Unit | Frozen input SHA-256, manifest coverage, JSON/HTML negative cases, renderer and reviewed-exception contracts | Same |
+| Unit | Frozen input SHA-256, manifest coverage, JSON/HTML negative cases, renderer, reviewed HTML contracts, application-exception preservation and real rollback | Same |
 | Database | All 10,000 works, both backends, opened twice through current models | Same |
 | JSON subjects | All 100 subjects, both versions and backends | Same |
 | JSON works | First 400 (all text/HTML pairs) plus last work, both backends | All 10,000, both backends |
@@ -139,6 +139,6 @@ under concurrent writes, multi-user races, external plugins, or arbitrary
 historical schema variants. The obsolete runtimes are offline compatibility
 tools and must not be exposed publicly or used as production recommendations.
 
-See [the recorded upgrade results and remaining HTTP-status defect](UPGRADE-STATUS.md)
-before interpreting CI failures. This new gate intentionally fails until the
-application preserves the expected 401/403/404 responses.
+See [the recorded upgrade results and exception-propagation fix](UPGRADE-STATUS.md).
+The report retains the original failing checkpoint and the subsequent passing
+verification; the expected 401/403/404 responses were not relaxed.
