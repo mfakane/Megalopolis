@@ -45,6 +45,7 @@ COPY php.ini /opt/php52/etc/php.ini
 # Use the application's configuration hook to run the CLI fixture checks after
 # the original r46 bootstrap has loaded its classes, before the web dispatcher.
 COPY fixture.php /opt/megalopolis-r46/config.php
+COPY generate.php corpus.php /opt/php52/fixtures/
 
 ENV PATH="/opt/php52/bin:${PATH}"
 WORKDIR /opt/megalopolis-r46

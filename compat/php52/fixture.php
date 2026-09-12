@@ -102,6 +102,7 @@ function compatDatabase($driver)
 try
 {
     set_error_handler('compatError');
+    $mode = isset($_SERVER['argv'][1]) ? $_SERVER['argv'][1] : 'all';
     compatCheck(PHP_SAPI === 'cli' && PHP_VERSION === '5.2.5', 'Requires PHP 5.2.5 CLI');
     compatCheck(App::VERSION === 46, 'Requires Megalopolis r46');
     foreach (array('PDO', 'pdo_sqlite', 'pdo_mysql', 'mbstring', 'hash', 'pcre') as $extension)
@@ -112,9 +113,13 @@ try
     $memory = new PDO('sqlite::memory:');
     compatCheck((int) $memory->query('SELECT 20 + 22')->fetchColumn() === 42, 'SQLite PDO query');
     $memory = null;
+    if ($mode === 'generate')
+    {
+        require '/opt/php52/fixtures/generate.php';
+        compatGenerateMain($_SERVER['argv']);
+        exit(0);
+    }
     echo "PASS PHP 5.2.5 CLI, PDO SQLite/MySQL, mbstring; SQLite SELECT = 42\n";
-
-    $mode = isset($_SERVER['argv'][1]) ? $_SERVER['argv'][1] : 'all';
     compatCheck(in_array($mode, array('all', 'sqlite', 'mysql')), 'Usage: php index.php [all|sqlite|mysql]');
     foreach ($mode == 'all' ? array('sqlite', 'mysql') : array($mode) as $driver)
         compatDatabase($driver);

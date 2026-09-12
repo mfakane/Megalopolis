@@ -4,6 +4,11 @@ This environment generates legacy database fixtures for compatibility tests.
 PHP 5.2.5 and MySQL 5.7 are obsolete; use only disposable test data here. The
 Compose services publish no ports and use dedicated named volumes.
 
+The 10,000-work corpus is generated and verified. For the next phase, see the
+[r46/rc48 JSON API comparison handoff](API-COMPARISON.md), including fixed inputs,
+export checksums, completed checks and remaining work. HTTP comparison is not
+implemented by this fixture environment.
+
 From the repository root, with Docker Engine and Docker Compose v2 or later:
 
 ```sh
@@ -69,8 +74,95 @@ docker compose -f compose.compat.yml exec -T mysql sh -c \
 docker compose -f compose.compat.yml stop mysql
 ```
 
-The dump includes r46's schema, triggers and sample data. These fixtures contain
+The dump includes r46's schema, triggers and sample data. These smoke fixtures contain
 one sample thread and session; they are not a comprehensive migration dataset.
+
+## Generate 10,000 works
+
+Use a separate Compose project so its databases and volumes are independent of
+the smoke fixtures. The generator requires empty application tables and refuses
+to overwrite an existing corpus, including an interrupted generation.
+
+```sh
+docker compose -p megalopolis-r46-large -f compose.compat.yml run --build \
+  --name megalopolis-r46-large-generator php52 index.php generate all
+```
+
+This creates **100 subjects (作品集), exactly 100 works each**, on both SQLite
+and MySQL, using r46's `Thread::save()` and `SearchIndex::register()`. Each work
+has a unique ID/title, three tags, style settings and a search document. There
+are 200 synthetic authors. Comments, evaluations and sessions are empty.
+
+The corpus is deterministic: IDs `1195084801`–`1195094800`, timestamps, text,
+and distribution are fixed. `corpus.php` defines 20 character cases and 20 HTML
+cases. Every combination appears 25 times. Coverage includes:
+
+- Japanese, half/full width, variant kanji, combining characters, Latin, Greek,
+  Cyrillic, Arabic, Hebrew, Devanagari, Hangul, Chinese, symbols, quotes,
+  entities, spaces and invisible/directional characters.
+- SQLite includes emoji, supplementary kanji (`𠮷` etc.), ZWJ emoji and other
+  four-byte UTF-8 characters. MySQL uses explicit BMP substitutes for that case
+  because r46's tables and connection use legacy `utf8`. The schema is not
+  converted to `utf8mb4`; the two corpora intentionally differ in these 500
+  works. The other 9,500 payload hashes match between the two databases.
+- Paragraphs, inline formatting, ruby, headings, lists, quotations, pre/code,
+  tables, links, images, styles/legacy tags, entities, comments, malformed HTML,
+  custom/SVG/MathML tags, forms, and script/event-handler markers.
+- Mixed LF/CRLF/CR, NULL versus empty summaries/afterwords, long bodies over
+  64 KiB, and 500 three-page works using r46's `<split/>` delimiters.
+
+These are raw **database** fixtures: web form validation and HTML sanitization
+are not invoked. The script/event-handler examples contain only test markers;
+consuming UI tests should treat the contents as untrusted HTML. Links use
+`example.invalid`; image paths refer to nonexistent local fixture files.
+
+One PHP process writes each subject to bound r46's `create_function()` memory
+growth and reset its per-request caches. Generation uses transactions per
+subject (MySQL's MyISAM search index remains nontransactional). Interrupted
+output is preserved and is not marked complete; start with fresh volumes to
+regenerate rather than resuming a partially written subject.
+
+After generation, a fresh process checks every work's stored bytes against a
+SHA-256 computed **before insertion**, including title, name, summary, body,
+afterword and ordered tags. It also checks all subject/table counts, trigger-
+maintained author/tag counts, style/page settings, all search document IDs,
+the 400-case distribution and SQLite integrity.
+
+Export the verified corpus (the generator container is retained for copying):
+
+```sh
+mkdir -p r46-fixtures/large
+docker cp megalopolis-r46-large-generator:/fixtures/. r46-fixtures/large/
+docker compose -p megalopolis-r46-large -f compose.compat.yml exec -T mysql sh -c \
+  'MYSQL_PWD="$MYSQL_PASSWORD" exec mysqldump --user="$MYSQL_USER" --no-tablespaces --set-gtid-purged=OFF --triggers "$MYSQL_DATABASE"' \
+  > r46-fixtures/large/mysql.sql
+docker compose -p megalopolis-r46-large -f compose.compat.yml stop mysql
+```
+
+`data.sqlite`, `search.sqlite` and `mysql.sql` contain the datasets.
+`large-{sqlite,mysql}.tsv` records each work's ID, subject, case names, body byte
+length, page count and payload SHA-256. A `.partial` suffix means verification
+has not completed. The matching `large-*-summary.txt` files describe the
+verified dimensions, Unicode profile and manifest checksum.
+
+For independent PHP 8.4 checks, hash the following ordered values: title, name,
+summary, body, afterword, tag at position 0, tag at position 1, tag at position 2.
+Feed each NULL as ASCII `N;`; feed each UTF-8 byte string as
+`S<byte-length>:<bytes>;` into SHA-256, with no separator between fields beyond
+this framing. SQL NULL and an empty string (`S0:;`) are different.
+
+To verify again without regenerating works:
+
+```sh
+docker compose -p megalopolis-r46-large -f compose.compat.yml run --rm --no-deps php52 index.php generate sqlite verify
+docker compose -p megalopolis-r46-large -f compose.compat.yml run --rm php52 index.php generate mysql verify
+docker compose -p megalopolis-r46-large -f compose.compat.yml stop mysql
+```
+
+Use `generate sqlite` or `generate mysql` to generate only one database. A new
+generation needs a fresh project/container name, or removal of the previous
+project's generated data after export with
+`docker compose -p megalopolis-r46-large -f compose.compat.yml down --remove-orphans -v`.
 
 ## Individual checks and cleanup
 
