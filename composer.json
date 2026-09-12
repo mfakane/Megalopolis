@@ -10,7 +10,8 @@
         "test": "phpunit --testsuite unit",
         "test:db": "bash compat/test.sh db",
         "test:compat": "bash compat/test.sh",
-        "test:compat:full": "bash compat/test.sh full"
+        "test:compat:full": "bash compat/test.sh full",
+        "test:upgrade": "bash compat/upgrade.sh"
     },
     "autoload": {
 		"psr-4": {

@@ -9,10 +9,12 @@ composer test                    # local unit tests + immutable fixture checks
 bash compat/test.sh             # Docker only; no host PHP/Composer required
 bash compat/test.sh db          # DB upgrade/preservation, without API comparison
 bash compat/test.sh full        # compare every work's JSON API response
+bash compat/upgrade.sh          # writes/auth/search/restore, MySQL 5.7.17 + old SQLite
+bash compat/upgrade.sh 5.6.35    # same scenarios, MySQL 5.6.35 + old SQLite
 ```
 
 The equivalent Composer aliases are `composer test:db`, `composer test:compat` and
-`composer test:compat:full`. Docker Compose v2 and Linux amd64 image support are
+`composer test:compat:full`, and `composer test:upgrade`. Docker Compose v2 and Linux amd64 image support are
 required. The first run builds PHP 5.2.5 and downloads dependencies; later builds
 reuse Docker's cache. Run from any directory using the script's absolute path.
 
@@ -39,7 +41,8 @@ are not used or modified. `test-results/run-*/` retains JUnit, mismatch JSON and
 container logs. A killed host or `kill -9` cannot run the cleanup trap; use the
 project name in the log to remove that specific abandoned project.
 
-Only GET requests run in the isolated network; no host ports are published. A
+The read-comparison suite sends only GET requests; the separate upgrade suite
+also sends form POSTs to the current application. No host ports are published. A
 small CGI gateway serves the original r46 front controller. Current code uses
 PHP's development server. Apache and GD are not installed. JSON/session/CGI are
 enabled only in the optional historical HTTP build; the default fixture-only
@@ -78,14 +81,64 @@ silently normalize a failing field. Intentional API changes require an explicitl
 reviewed contract change with a narrow regression test. Failed historical HTTP
 requests are errors, never accepted as an empty or matching JSON result.
 
-This initial suite covers legacy work/subject reads and payload preservation,
-not every application behavior. The fixture has no comments/evaluations, so their
-nonempty cases, authentication, posting, search result semantics and write-after-
-migration need separate tests. Passing this suite is evidence for the covered
-contract, not a proof of all possible database upgrade paths.
+The large fixture covers legacy work/subject reads and payload preservation.
+The separate small fixture adds the nonempty response and write scenarios below.
+Passing these suites is evidence for the covered contracts, not a proof of every
+possible database upgrade path.
 
 See [the initial compatibility findings](BASELINE-STATUS.md) before interpreting
 JSON failures: r46's own JSON encoder is not a universally correct oracle.
 The [rendering repair verification](REPAIR-STATUS.md) records the subsequent full
 run, the individually reviewed HTML differences, and the verification after
 those explicit exceptions were approved.
+
+## Upgrade operations and restoration on 2016 databases
+
+`compose.upgrade.yml` isolates destructive test operations from both the large
+corpus and the user's exports. Every invocation restores the frozen
+[small r46 fixture](Fixtures/r46-upgrade/README.md), using SQLite 3.15.2 for the
+historical runtime and actual MySQL 5.7.17 or 5.6.35 for both application versions.
+The current PHP 8.4 image uses its current bundled SQLite library: the old
+SQLite *file* is carried forward, not an old SQLite server. These are specific
+late-2016 versions, not coverage of all 2016 installations or MySQL 5.5.
+
+The `upgrade` suite checks old work/comment/evaluation values, counters and hashes
+against pre-insertion expectations; repeated opening; nonempty JSON responses;
+native, SHA-1 and DES work keys; native comment and administrator keys; real
+CSRF/session-cookie handling; new posting, editing, key rotation and deletion;
+comment/evaluation addition and removal; duplicate evaluation rejection; and
+full-text/tag searches after changes. Wrong credentials and invalid submissions
+must not change stored data. Each mutation scenario owns a different work.
+
+Only fixture seeding and a read-only model projection use test adapters. **Every
+operation under test goes through the real front controller and HTTP routes**;
+no direct SQL mutation or authentication bypass substitutes for these actions.
+The projection is installed only by the isolated Docker configuration and is
+never a production route. Current successful output is not used to bless old
+inputs or weaken expectations.
+
+Before either application opens a store, the runner copies the closed SQLite
+data/search files and takes a real MySQL logical backup. After the operation
+suite it restores those backups into **separate empty volumes**, then executes
+the `restore` suite even if an operation failed. All six original works,
+comments, evaluations and hashes must return unchanged; original search terms
+and old editing credentials must work, while new terms must not be present.
+Restoration is a pre-upgrade rollback rehearsal, not reverse schema migration
+or a claim that r46 can read a database already changed by future versions.
+
+Use the script again for every run; rerunning these stateful suites against used
+volumes is unsupported. `upgrade` and `restore` cannot run standalone without
+the harness. CI runs both MySQL versions on pushes/PRs. Local artifacts under
+`test-results/upgrade-*/` include JUnit, HTTP request/response records (synthetic
+test keys included), runtime versions in projection responses, pre-upgrade
+backups and their checksums, and container/cleanup logs. Only the generated
+project's containers and volumes are removed; backups and frozen inputs remain.
+
+This does not test a production web server, custom configuration, online backups
+under concurrent writes, multi-user races, external plugins, or arbitrary
+historical schema variants. The obsolete runtimes are offline compatibility
+tools and must not be exposed publicly or used as production recommendations.
+
+See [the recorded upgrade results and remaining HTTP-status defect](UPGRADE-STATUS.md)
+before interpreting CI failures. This new gate intentionally fails until the
+application preserves the expected 401/403/404 responses.

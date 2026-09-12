@@ -35,3 +35,21 @@ jobs:
         with:
           name: r46-compatibility
           path: test-results/
+  r46-upgrade-operations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        mysql: ['5.7.17', '5.6.35']
+    steps:
+      - uses: actions/checkout@v6
+      - name: Test old keys, writes, search and backup restoration
+        env:
+          MYSQL_VERSION: ${{ matrix.mysql }}
+        run: bash compat/upgrade.sh "$MYSQL_VERSION"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: r46-upgrade-mysql-${{ matrix.mysql }}
+          path: test-results/
