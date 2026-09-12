@@ -336,6 +336,7 @@ class Util
 		return Configuration::$instance->dataStore?->createTableIfNotExists($db, $schema, $name, $index) ?? false;
 	}
 
+	/** @api Keeps the table-creation result available to custom datastore callers. */
 	static function createFullTextTableIfNotExists(PDO $db, array $schema, string $name, string $indexSuffix = "Index"): bool
 	{
 		return Configuration::$instance->dataStore?->createFullTextTableIfNotExists($db, $schema, $name, $indexSuffix) ?? false;
@@ -1038,6 +1039,7 @@ class Util
 		return isset($str[$length - 1]) && !isset($str[$length]);
 	}
 
+	/** @api Legacy byte-length helper retained for custom handlers/templates. */
 	static function hasLength(string $str, int $length): bool
 	{
 		return isset($str[$length - 1]);

@@ -67,8 +67,10 @@ class Thread
 	/** @var Evaluation[] */
 	public array $nonCommentEvaluations = array();
 
+	/** @psalm-suppress PossiblyUnusedProperty Public lifecycle state retained for external model consumers. */
 	public bool $loaded = false;
 
+	/** @psalm-suppress PossiblyUnusedParam Retains the entry variable by reference; reassignment remains observable. */
 	function __construct(ThreadEntry &$entry)
 	{
 		$this->entry = &$entry;
@@ -221,6 +223,7 @@ class Thread
 		$this->loaded = false;
 	}
 
+	/** @psalm-suppress PossiblyUnusedParam Lookup is in memory; retain the public PDO parameter (including its name). */
 	function getCommentByID(PDO $db, int $id): ?Comment
 	{
 		$rt = array_filter($this->comments, fn(Comment $_) => $_->id === $id);
@@ -231,6 +234,7 @@ class Thread
 			return null;
 	}
 
+	/** @psalm-suppress PossiblyUnusedParam Lookup is in memory; retain the public PDO parameter (including its name). */
 	function getEvaluationByID(PDO $db, int $id): ?Evaluation
 	{
 		$rt = array_filter($this->nonCommentEvaluations, fn(Evaluation $_) => $_->id === $id);
@@ -420,6 +424,7 @@ class Thread
 	}
 
 	/**
+	 * @api Legacy bulk model access for custom tools.
 	 * @return Thread[]
 	 */
 	static function getThreadsBySubject(PDO $db, int $subject, int $order = Board::ORDER_DESCEND): array
@@ -444,6 +449,10 @@ class Thread
 	}
 }
 
+/**
+ * Legacy public data carrier retained for external model consumers.
+ * @api
+ */
 class ThreadEntity
 {
 	public int $id = 0;

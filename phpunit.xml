@@ -7,6 +7,7 @@
         <testsuite name="unit"><directory>tests/Unit</directory></testsuite>
         <testsuite name="database"><directory>tests/Database</directory></testsuite>
         <testsuite name="json"><directory>tests/JsonApi</directory></testsuite>
+        <testsuite name="feeds"><directory>tests/Feeds</directory></testsuite>
         <testsuite name="upgrade"><file>tests/Upgrade/CompatibilityTest.php</file></testsuite>
         <testsuite name="restore"><file>tests/Upgrade/RestoreTest.php</file></testsuite>
     </testsuites>

@@ -836,7 +836,9 @@ class Visualizer
 		
 		if ($nestLevel == 0)
 		{
-			$output = (string)mb_ereg_replace('[\t \r\n]+?<', '<', (string)mb_ereg_replace('>[\t \r\n]+', '>', $output));
+			// XML text whitespace is content, including trailing spaces in author names.
+			if ($contentType !== "application/atom+xml" && $contentType !== "application/rss+xml")
+				$output = (string)mb_ereg_replace('[\t \r\n]+?<', '<', (string)mb_ereg_replace('>[\t \r\n]+', '>', $output));
 
 			if (isset($mbencoding))
 				$output = (string)mb_convert_encoding($output, $mbencoding, "UTF8");

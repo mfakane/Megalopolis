@@ -4,6 +4,10 @@ namespace Megalopolis;
 
 use \PDO;
 
+/**
+ * Actions are dispatched by name through App::callHandler().
+ * @api
+ */
 class ReadHandler extends Handler
 {
 	static ReadHandler $instance;

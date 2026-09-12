@@ -7,6 +7,7 @@
         "psr-4": { "Megalopolis\\Tests\\": "tests/" }
     },
     "scripts": {
+        "analyse": "psalm --no-cache --threads=1",
         "test": "phpunit --testsuite unit",
         "test:db": "bash compat/test.sh db",
         "test:compat": "bash compat/test.sh",

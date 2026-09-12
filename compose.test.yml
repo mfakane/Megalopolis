@@ -114,7 +114,7 @@ services:
     environment:
       COMPAT_HTTP: "1"
       COMPAT_FULL: ${COMPAT_FULL:-0}
-    command: ["php", "-d", "memory_limit=512M", "vendor/bin/phpunit", "--testsuite", "${COMPAT_SUITES:-unit,database,json}", "--cache-directory", "/tmp/phpunit-cache", "--log-junit", "/results/junit.xml"]
+    command: ["php", "-d", "memory_limit=512M", "vendor/bin/phpunit", "--testsuite", "${COMPAT_SUITES:-unit,database,json,feeds}", "--cache-directory", "/tmp/phpunit-cache", "--log-junit", "/results/junit.xml"]
     volumes:
       - ${COMPAT_RESULTS:-./test-results}:/results
 

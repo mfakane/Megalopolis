@@ -64,7 +64,11 @@ class Configuration
 	 */
 	public ?DataStore $dataStore = null;
 
-	/** @deprecated */
+	/**
+	 * Legacy configuration key; no longer read by Auth::useSession().
+	 * @deprecated
+	 * @psalm-suppress PossiblyUnusedProperty Retained so old configuration files remain valid.
+	 */
 	public bool $storeSessionIntoDataStore = false;
 	
 	/*
@@ -292,7 +296,10 @@ class Configuration
 	 * 表示に関する設定
 	 */
 	public ?string $skin = null;
-	/** @var Configuration::ORDER_* */
+	/**
+	 * @var Configuration::ORDER_*
+	 * @psalm-suppress PossiblyUnusedProperty Legacy configuration key; currently not read by the built-in listing.
+	 */
 	public int $subjectOrder = self::ORDER_DESCEND;
 	/** @var Configuration::RATE_* */
 	public int $rateType = self::RATE_AVERAGE;

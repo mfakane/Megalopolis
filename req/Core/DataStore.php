@@ -14,6 +14,7 @@ abstract class DataStore
 
 	protected int $transactionCount = 0;
 
+	/** @psalm-suppress PossiblyUnusedParam The PDO variable is retained by reference, not discarded. */
 	protected function registerHandle(PDO &$db, string $name): void
 	{
 		$this->handles[$name] = &$db;
@@ -398,6 +399,7 @@ class MySQLDataStore extends DataStore
 	private string $password;
 
 	/**
+	 * @api Selected by user configuration rather than the default SQLite config.
 	 * @param string|(string|int)[] $hostAndPortOrUnixSocket
 	 */
 	function __construct(string $databaseName, $hostAndPortOrUnixSocket, string $userName, string $password)

@@ -20,6 +20,7 @@ jobs:
           php-version: '8.4'
           extensions: dom, mbstring, pdo_sqlite, pdo_mysql
       - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: composer analyse
       - run: composer test
   r46-compatibility:
     runs-on: ubuntu-latest

@@ -7,7 +7,7 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-interaction --prefer-dist --no-progress
 COPY req ./req
-COPY index.php phpunit.xml ./
+COPY index.php phpunit.xml psalm.xml ./
 COPY tests ./tests
 COPY compat/http ./compat/http
 COPY compat/http/config-current.php ./config.php

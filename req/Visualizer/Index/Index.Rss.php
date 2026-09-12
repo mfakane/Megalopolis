@@ -20,7 +20,7 @@ else
 		<link><?= Visualizer::escapeOutput(Visualizer::absoluteHref()) ?></link>
 		<language>ja-JP</language>
 		<description><?= Visualizer::escapeOutput($c->notes) ?></description>
-		<generator><?= Visualizer::escapeOutput(App::NAME) ?> <?php self::converted(App::VERSION_PREFIX) ?><?= Visualizer::escapeOutput(App::VERSION) ?></generator>
+		<generator><?= Visualizer::escapeOutput(App::NAME) ?> <?php Visualizer::converted(App::VERSION_PREFIX) ?><?= Visualizer::escapeOutput(App::VERSION) ?></generator>
 		<?php if (count($h->entries ?? [])): ?>
 			<?php if ($h->lastUpdate !== null): ?>
 				<lastBuildDate><?= Visualizer::escapeOutput(date("r", $h->lastUpdate)) ?></lastBuildDate>

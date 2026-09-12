@@ -17,7 +17,7 @@ else
 <feed xmlns="http://www.w3.org/2005/Atom">
 	<title><?= Visualizer::escapeOutput($c->title) ?> - <?= Visualizer::escapeOutput($title) ?></title>
 	<link href="<?= Visualizer::escapeOutput(Visualizer::absoluteHref()) ?>" />
-	<generator version="<?= Visualizer::escapeOutput(App::VERSION) ?>"><?= Visualizer::escapeOutput(App::NAME) ?> <?php self::converted(App::VERSION_PREFIX) ?><?= Visualizer::escapeOutput(App::VERSION) ?></generator>
+	<generator version="<?= Visualizer::escapeOutput(App::VERSION) ?>"><?= Visualizer::escapeOutput(App::NAME) ?> <?php Visualizer::converted(App::VERSION_PREFIX) ?><?= Visualizer::escapeOutput(App::VERSION) ?></generator>
 	<?php if (count($h->entries ?? [])): ?>
 		<?php if ($h->lastUpdate !== null): ?>
 			<updated><?= Visualizer::escapeOutput(date("c", $h->lastUpdate)) ?></updated>

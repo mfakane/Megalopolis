@@ -4,6 +4,10 @@ namespace Megalopolis;
 
 use \PDO;
 
+/**
+ * Administrator routes are dispatched by name through App::callHandler().
+ * @api
+ */
 class UtilHandler extends Handler
 {
 	static UtilHandler $instance;

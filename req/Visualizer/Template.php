@@ -5,6 +5,7 @@ class Template
 {
 	/**
 	 * @param array<string, int> $visibility
+	 * @psalm-suppress PossiblyUnusedParam Retain the entry parameter for existing custom template callers.
 	 */
 	static function entryInfo(int &$idx, ThreadEntry $i, array $visibility, string $label, string $member, mixed $value): void
 	{
@@ -32,6 +33,7 @@ class Template
 
 	/**
 	 * @param array<string, int> $visibility
+	 * @psalm-suppress PossiblyUnusedParam Retain the entry parameter for existing custom template callers.
 	 */
 	static function entryInfoSingle(ThreadEntry $i, array $visibility, string $member, mixed $value): void
 	{

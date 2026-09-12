@@ -5,6 +5,8 @@ fixed rc48 download. The historical reference is pinned r46 on PHP 5.2.5.
 
 ```sh
 composer install
+composer analyse                 # Psalm, same scope/error level as psalm.xml
+bash compat/analyse.sh           # same analysis in Docker; no host PHP needed
 composer test                    # local unit tests + immutable fixture checks
 bash compat/test.sh             # Docker only; no host PHP/Composer required
 bash compat/test.sh db          # DB upgrade/preservation, without API comparison
@@ -24,11 +26,14 @@ reuse Docker's cache. Run from any directory using the script's absolute path.
 | Database | All 10,000 works, both backends, opened twice through current models | Same |
 | JSON subjects | All 100 subjects, both versions and backends | Same |
 | JSON works | First 400 (all text/HTML pairs) plus last work, both backends | All 10,000, both backends |
+| Current RSS/Atom | First and last subjects, both backends; valid XML, generator, 100 ordered work links, frozen title/name/tag expectations | Same |
 
-`database` and `json` are integration suites; invoking them without the Docker
+`database`, `json` and `feeds` are integration suites; invoking them without the Docker
 harness is an error, not a skip. Plain `vendor/bin/phpunit` includes these suites;
 use `composer test` for the local-only checks. GitHub Actions runs quick coverage
-on pushes/PRs; a manual run can select full coverage.
+on pushes/PRs; a manual run can select full coverage. The unit job also requires
+`composer analyse` to pass. See [the static-analysis policy](STATIC-ANALYSIS.md)
+for retained legacy APIs and narrowly documented unused-code exceptions.
 
 ## Isolation and evidence
 

@@ -2,8 +2,8 @@
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 case "${1:-quick}" in
-    quick) export COMPAT_FULL=0 COMPAT_SUITES=unit,database,json ;;
-    full) export COMPAT_FULL=1 COMPAT_SUITES=unit,database,json ;;
+    quick) export COMPAT_FULL=0 COMPAT_SUITES=unit,database,json,feeds ;;
+    full) export COMPAT_FULL=1 COMPAT_SUITES=unit,database,json,feeds ;;
     db) export COMPAT_FULL=0 COMPAT_SUITES=unit,database ;;
     *) echo 'Usage: bash compat/test.sh [quick|full|db]' >&2; exit 2 ;;
 esac
