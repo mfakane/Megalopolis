@@ -1,0 +1,37 @@
+services:
+  php52:
+    platform: linux/amd64
+    build:
+      context: ./compat/php52
+    environment:
+      COMPAT_MYSQL_HOST: mysql
+      COMPAT_MYSQL_DATABASE: megalopolis_r46
+      COMPAT_MYSQL_USER: fixture
+      COMPAT_MYSQL_PASSWORD: fixture
+    volumes:
+      - php52-fixtures:/fixtures
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:5.7.44
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD: fixture-root
+      MYSQL_DATABASE: megalopolis_r46
+      MYSQL_USER: fixture
+      MYSQL_PASSWORD: fixture
+    command: ["--character-set-server=utf8", "--collation-server=utf8_unicode_ci", "--sql-mode=NO_ENGINE_SUBSTITUTION"]
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysql --protocol=TCP -h 127.0.0.1 -u$$MYSQL_USER $$MYSQL_DATABASE -e 'SELECT 1'"]
+      interval: 2s
+      timeout: 5s
+      retries: 60
+      start_period: 20s
+    volumes:
+      - php52-mysql:/var/lib/mysql
+
+volumes:
+  php52-fixtures:
+  php52-mysql:
