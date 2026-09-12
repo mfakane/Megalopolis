@@ -48,4 +48,39 @@ final class Fixtures
         }
         return hash_final($hash);
     }
+
+    /** Independent, immutable r46 oracle; never reads the candidate database. */
+    public static function sqlitePayload(int $id): array
+    {
+        static $database = null;
+        static $payloads = [];
+        if ($database === null) {
+            $path = tempnam(sys_get_temp_dir(), 'r46-oracle-');
+            $input = gzopen(self::path('data.sqlite'), 'rb');
+            $output = fopen($path, 'wb');
+            stream_copy_to_stream($input, $output);
+            gzclose($input);
+            fclose($output);
+            register_shutdown_function(static function () use ($path): void { unlink($path); });
+            if (hash_file('sha256', $path) !== self::HASHES['data.sqlite']) {
+                throw new \RuntimeException('Frozen r46 SQLite oracle has changed');
+            }
+            $database = new \PDO('sqlite:' . $path, null, null, [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]);
+            $database->exec('PRAGMA query_only = ON');
+        }
+        if (!isset($payloads[$id])) {
+            $query = $database->prepare('SELECT e.title, e.name, e.summary, t.body, t.afterword
+                FROM threadEntry e JOIN thread t ON t.id = e.id WHERE e.id = ?');
+            $query->execute([$id]);
+            $row = $query->fetch(\PDO::FETCH_ASSOC);
+            if ($row === false) {
+                throw new \RuntimeException('No frozen r46 work: ' . $id);
+            }
+            $query = $database->prepare('SELECT tag FROM threadTag WHERE id = ? ORDER BY position');
+            $query->execute([$id]);
+            $row['tags'] = $query->fetchAll(\PDO::FETCH_COLUMN);
+            $payloads[$id] = $row;
+        }
+        return $payloads[$id];
+    }
 }

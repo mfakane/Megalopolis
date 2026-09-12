@@ -18,7 +18,7 @@ reuse Docker's cache. Run from any directory using the script's absolute path.
 
 | Suite | Quick | Full |
 | --- | --- | --- |
-| Unit | Frozen input SHA-256, manifest coverage, strict JSON comparator negative cases | Same |
+| Unit | Frozen input SHA-256, manifest coverage, JSON/HTML negative cases, renderer and reviewed-exception contracts | Same |
 | Database | All 10,000 works, both backends, opened twice through current models | Same |
 | JSON subjects | All 100 subjects, both versions and backends | Same |
 | JSON works | First 400 (all text/HTML pairs) plus last work, both backends | All 10,000, both backends |
@@ -53,8 +53,16 @@ for the current store, allowing real migrations to run. Two independent requests
 check that reopening the upgraded database preserves the payload again.
 
 JSON tests call real HTTP routes, require HTTP 200 and `application/json`, decode
-strictly, and compare all returned fields. Only object-key order is ignored;
-array order, number/string/null types and HTML bytes are compared. Current raw work
+strictly, and compare all returned fields. Object-key order is ignored;
+array order and number/string/null types are compared strictly. Current raw
+strings must preserve the source bytes; comparison permits only the explicitly
+identified historical PHP 5.2 JSON encoder defect described in
+[the comparison policy](COMPARISON-POLICY.md). Formatted HTML is
+checked for exact DOM structure, text and attribute values, allowing equivalent
+HTML syntax spellings, not arbitrary missing content or tags. Individually
+[reviewed r46 HTML defects](HTML-EXCEPTIONS.md) require exact source templates
+and separate expected outputs for both versions; current output is checked even
+when both versions agree on an old defect. Current raw work
 payloads additionally have an independent manifest oracle, checked before the
 comparison assertion, so two equally broken
 implementations cannot pass merely by agreeing. Subject coverage checks all IDs
@@ -78,3 +86,6 @@ contract, not a proof of all possible database upgrade paths.
 
 See [the initial compatibility findings](BASELINE-STATUS.md) before interpreting
 JSON failures: r46's own JSON encoder is not a universally correct oracle.
+The [rendering repair verification](REPAIR-STATUS.md) records the subsequent full
+run, the individually reviewed HTML differences, and the verification after
+those explicit exceptions were approved.

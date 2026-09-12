@@ -1,5 +1,8 @@
 # Initial compatibility findings
 
+This is the initial checkpoint. See [the subsequent repair verification](REPAIR-STATUS.md)
+for the rendering fixes, full JSON run and remaining differences.
+
 Recorded on 2026-09-12 against the application at `a211aa9` (rc48 application
 code, with fixture tooling). This test-suite change does **not** modify `req/` or
 `index.php`. Runtime evidence: PHP 5.2.5 / PHP 8.4.25, SQLite 3.40.1 and MySQL

@@ -6,6 +6,9 @@ namespace Megalopolis\Tests\JsonApi;
 use Megalopolis\Tests\Support\Fixtures;
 use Megalopolis\Tests\Support\Http;
 use Megalopolis\Tests\Support\JsonContract;
+use Megalopolis\Tests\Support\LegacyJsonEncoding;
+use Megalopolis\Tests\Support\HtmlContract;
+use Megalopolis\Tests\Support\LegacyHtml;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -74,8 +77,62 @@ final class R46CompatibilityTest extends TestCase
         $old = Http::json('baseline-' . $driver, $path);
         $current = Http::json('candidate-' . $driver, $path);
         $diff = JsonContract::differences($old, $current);
-        if ($diff !== []) {
+        $accepted = [];
+        $htmlContract = isset($current->entry->id) && is_int($current->entry->id)
+            && ($old->entry->id ?? null) === $current->entry->id
+            ? LegacyHtml::forWork($driver, $current->entry->id, [
+                'title' => $current->entry->title, 'name' => $current->entry->name,
+                'summary' => $current->entry->summary, 'body' => $current->body,
+                'afterword' => $current->afterword, 'tags' => $current->tags,
+            ]) : null;
+        // Always enforce the independent current expectation, even if both
+        // implementations agree on the same historical content loss.
+        if ($htmlContract !== null && (!is_string($current->formattedBody[0] ?? null)
+            || !HtmlContract::equivalent($htmlContract['current'], $current->formattedBody[0]))) {
+            $diff['$.formattedBody[0]'] = ['expected' => $htmlContract['current'],
+                'actual' => $current->formattedBody[0] ?? null, 'reason' => 'reviewed-current-html-contract'];
+        }
+        foreach (LegacyJsonEncoding::rawFields($driver, $old, $current) as $field => $values) {
+            self::assertSame($values['source'], $values['actual'], 'Frozen SQLite raw oracle: ' . $field);
+            if (isset($diff[$field]) && LegacyJsonEncoding::acceptsRaw(
+                $values['expected'], $values['actual'], $values['source'])) {
+                $accepted[$field] = 'php52-json-supplementary-corruption';
+                unset($diff[$field]);
+            }
+        }
+        $unicodeSource = $driver === 'sqlite' && isset($current->entry->id)
+            && is_int($current->entry->id) && $old->entry->id === $current->entry->id
+            && (Fixtures::manifest('sqlite')[$current->entry->id]['text'] ?? '') === 'supplementary'
+            ? Fixtures::sqlitePayload($current->entry->id) : null;
+        if ($unicodeSource !== null) {
+            foreach ($current->formattedBody as $html) {
+                self::assertFalse(LegacyJsonEncoding::introducesCorruption($html, $unicodeSource['body']));
+            }
+            self::assertFalse(LegacyJsonEncoding::introducesCorruption(
+                $current->formattedAfterword, $unicodeSource['afterword'] ?? ''));
+        }
+        foreach ($diff as $field => $values) {
+            if (!preg_match('/^\$\.(formattedBody\[\d+\]|formattedAfterword)$/', $field)
+                || !is_string($values['expected'] ?? null) || !is_string($values['actual'] ?? null)) {
+                continue;
+            }
+            if ($field === '$.formattedBody[0]' && $htmlContract !== null
+                && LegacyHtml::accepts($htmlContract, $values['expected'], $values['actual'])) {
+                $accepted[$field] = $htmlContract['rule'];
+                unset($diff[$field]);
+            } elseif (HtmlContract::equivalent($values['expected'], $values['actual'])) {
+                $accepted[$field] = 'equivalent-html-tree';
+                unset($diff[$field]);
+            } elseif ($unicodeSource !== null && LegacyJsonEncoding::acceptsHtml(
+                $values['expected'], $values['actual'],
+                $unicodeSource[$field === '$.formattedAfterword' ? 'afterword' : 'body'] ?? '')) {
+                $accepted[$field] = 'php52-json-supplementary-corruption-in-html';
+                unset($diff[$field]);
+            }
+        }
+        if ($diff !== [] || $accepted !== []) {
             Http::artifact($driver . '-' . $route, ['route' => $route, 'differences' => $diff,
+                'accepted' => $accepted,
                 'r46' => Http::response('baseline-' . $driver),
                 'current' => Http::response('candidate-' . $driver)]);
         }
