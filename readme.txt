@@ -297,6 +297,7 @@ Do What The Fuck You Want To Public License, Version 2 (WTFPL) および自ら�
 * jQuery http://jquery.com/
 * vlucas/phpdotenv (BSD-3-Clause) - 環境変数管理 (開発時のみ)
 * vimeo/psalm (MIT) - 静的解析ツール (開発時のみ)
+* phpunit/phpunit (BSD-3-Clause) - 単体テストフレームワーク (開発時のみ)
 
 これらのライブラリおよびその依存関係の詳細なライセンス情報は
 vendor/ ディレクトリ内の各パッケージに含まれています。
