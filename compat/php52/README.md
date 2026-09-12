@@ -4,10 +4,11 @@ This environment generates legacy database fixtures for compatibility tests.
 PHP 5.2.5 and MySQL 5.7 are obsolete; use only disposable test data here. The
 Compose services publish no ports and use dedicated named volumes.
 
-The 10,000-work corpus is generated and verified. For the next phase, see the
-[r46/rc48 JSON API comparison handoff](API-COMPARISON.md), including fixed inputs,
-export checksums, completed checks and remaining work. HTTP comparison is not
-implemented by this fixture environment.
+The 10,000-work corpus is generated and verified. The separate
+[PHPUnit compatibility suite](../../tests/README.md) restores committed r46 DB
+snapshots and tests the current checkout's models and JSON API:
+`bash compat/test.sh` (or `bash compat/test.sh full`). The
+[original handoff](API-COMPARISON.md) records the fixture-generation checkpoint.
 
 From the repository root, with Docker Engine and Docker Compose v2 or later:
 

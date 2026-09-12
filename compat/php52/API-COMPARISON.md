@@ -1,8 +1,14 @@
-# Handoff: r46 versus rc48 JSON API comparison
+# Historical checkpoint: r46 versus rc48 JSON API comparison
 
-The fixture generation phase is complete. HTTP serving and API comparison have
-not been implemented or run. This document records the inputs, existing evidence
-and requirements for that next phase.
+The reusable implementation is now documented in [tests/README.md](../../tests/README.md).
+Run `bash compat/test.sh` or `bash compat/test.sh full`. It tests the **current
+checkout** against fixed r46 inputs, so it also applies after rc48 and future
+schema changes. Compressed baseline exports are checked into `tests/Fixtures/r46/`;
+a fresh clone no longer needs to generate 10,000 works before testing.
+
+The remainder records the fixture-generation handoff at commit `a211aa9`, before
+HTTP serving and comparison were implemented. Its unchecked tasks describe that
+historical checkpoint, not the current suite's execution results or guarantees.
 
 ## Fixed inputs
 

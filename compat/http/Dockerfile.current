@@ -1,0 +1,17 @@
+FROM composer:2 AS composer
+FROM php:8.4-cli-bookworm
+RUN apt-get update && apt-get install -y --no-install-recommends unzip \
+    && rm -rf /var/lib/apt/lists/* && docker-php-ext-install pdo_mysql
+COPY --from=composer /usr/bin/composer /usr/local/bin/composer
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-interaction --prefer-dist --no-progress
+COPY req ./req
+COPY index.php phpunit.xml ./
+COPY tests ./tests
+COPY compat/http ./compat/http
+COPY compat/http/config-current.php ./config.php
+RUN mkdir -p store /results && chown -R 1000:1000 store /results
+ENV XDEBUG_MODE=off
+USER 1000:1000
+CMD ["php", "-d", "display_errors=stderr", "-d", "date.timezone=UTC", "-S", "0.0.0.0:8080", "compat/http/router.php"]

@@ -5,3 +5,5 @@ store/*.sqlite
 .direnv/
 .env
 /r46-fixtures/
+/.phpunit.cache/
+/test-results/

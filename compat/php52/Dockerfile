@@ -12,16 +12,19 @@ RUN curl -fL --retry 3 https://museum.php.net/php5/php-5.2.5.tar.bz2 -o php.tar.
     && tar -xjf php.tar.bz2
 
 WORKDIR /usr/src/php-5.2.5
+ARG HTTP_TESTS=0
 # GCC now defaults to -fno-common and C99 inline semantics; PHP 5.2 predates both.
-RUN CFLAGS='-O2 -fcommon -fgnu89-inline' ./configure \
+RUN if [ "$HTTP_TESTS" = 1 ]; then compat_sapi='--enable-cgi --enable-json --enable-session'; else compat_sapi='--disable-cgi'; fi \
+    && CFLAGS='-O2 -fcommon -fgnu89-inline' ./configure \
         --prefix=/opt/php52 \
         --with-config-file-path=/opt/php52/etc \
-        --disable-all --disable-cgi --enable-cli --without-pear \
+        --disable-all $compat_sapi --enable-cli --without-pear \
         --enable-pdo --with-pdo-sqlite=/usr --with-pdo-mysql=/usr/bin/mysql_config \
         --enable-mbstring --enable-hash --with-pcre-regex \
     && make -j2 \
     && make install-cli \
-    && strip /opt/php52/bin/php
+    && strip /opt/php52/bin/php \
+    && if [ "$HTTP_TESTS" = 1 ]; then cp sapi/cgi/php-cgi /opt/php52/bin/; strip /opt/php52/bin/php-cgi; fi
 
 WORKDIR /usr/src
 # r46, independent of the branch used to build this compatibility environment.
@@ -39,7 +42,7 @@ RUN apt-get update \
     && mkdir /fixtures \
     && chown 1000:1000 /fixtures
 
-COPY --from=build /opt/php52/bin/php /opt/php52/bin/php
+COPY --from=build /opt/php52/bin/ /opt/php52/bin/
 COPY --from=build /opt/megalopolis-r46 /opt/megalopolis-r46
 COPY php.ini /opt/php52/etc/php.ini
 # Use the application's configuration hook to run the CLI fixture checks after

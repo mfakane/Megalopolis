@@ -1,0 +1,125 @@
+# No host ports. Every run uses a new project and disposable databases.
+x-current: &current
+  image: ${COMPOSE_PROJECT_NAME}-current
+  build:
+    context: .
+    dockerfile: compat/http/Dockerfile.current
+  healthcheck:
+    test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8080/__compat/health') === 'ready' ? 0 : 1);"]
+    interval: 2s
+    timeout: 5s
+    retries: 60
+
+x-legacy: &legacy
+  image: ${COMPOSE_PROJECT_NAME}-legacy
+  platform: linux/amd64
+  build:
+    context: ./compat/http
+    dockerfile: Dockerfile.legacy
+    args:
+      LEGACY_IMAGE: ${COMPOSE_PROJECT_NAME}-php52-http-base
+  healthcheck:
+    test: ["CMD", "python3", "-c", "import urllib.request; assert urllib.request.urlopen('http://127.0.0.1:8080/__compat/health').read() == b'ready'"]
+    interval: 2s
+    timeout: 5s
+    retries: 60
+
+x-mysql: &mysql
+  image: mysql:5.7.44
+  platform: linux/amd64
+  environment:
+    MYSQL_ROOT_PASSWORD: fixture-root
+    MYSQL_DATABASE: megalopolis_r46
+    MYSQL_USER: fixture
+    MYSQL_PASSWORD: fixture
+  command: ["--character-set-server=utf8", "--collation-server=utf8_unicode_ci", "--sql-mode=NO_ENGINE_SUBSTITUTION"]
+  healthcheck:
+    test: ["CMD-SHELL", "test \"$$(MYSQL_PWD=$$MYSQL_PASSWORD mysql --protocol=TCP -h 127.0.0.1 -u$$MYSQL_USER $$MYSQL_DATABASE -Nse 'SELECT COUNT(*) FROM thread')\" = 10000"]
+    interval: 2s
+    timeout: 5s
+    retries: 90
+    start_period: 20s
+
+services:
+  php52-http-base:
+    image: ${COMPOSE_PROJECT_NAME}-php52-http-base
+    platform: linux/amd64
+    profiles: [build]
+    build:
+      context: ./compat/php52
+      args:
+        HTTP_TESTS: "1"
+
+  seed:
+    image: ${COMPOSE_PROJECT_NAME}-current
+    user: "0:0"
+    command: ["php", "compat/http/seed.php"]
+    volumes:
+      - baseline-sqlite:/baseline
+      - candidate-sqlite:/candidate
+
+  baseline-sqlite:
+    <<: *legacy
+    environment:
+      COMPAT_DRIVER: sqlite
+    volumes:
+      - baseline-sqlite:/fixtures
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+
+  candidate-sqlite:
+    <<: *current
+    environment:
+      COMPAT_DRIVER: sqlite
+    volumes:
+      - candidate-sqlite:/fixtures
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+
+  baseline-mysql:
+    <<: *legacy
+    environment:
+      COMPAT_DRIVER: mysql
+      COMPAT_MYSQL_HOST: mysql-baseline
+    depends_on:
+      mysql-baseline:
+        condition: service_healthy
+
+  candidate-mysql:
+    <<: *current
+    environment:
+      COMPAT_DRIVER: mysql
+      COMPAT_MYSQL_HOST: mysql-candidate
+    depends_on:
+      mysql-candidate:
+        condition: service_healthy
+
+  mysql-baseline:
+    <<: *mysql
+    volumes:
+      - mysql-baseline:/var/lib/mysql
+      - ./tests/Fixtures/r46/mysql.sql.gz:/docker-entrypoint-initdb.d/r46.sql.gz:ro
+
+  mysql-candidate:
+    <<: *mysql
+    volumes:
+      - mysql-candidate:/var/lib/mysql
+      - ./tests/Fixtures/r46/mysql.sql.gz:/docker-entrypoint-initdb.d/r46.sql.gz:ro
+
+  tests:
+    image: ${COMPOSE_PROJECT_NAME}-current
+    profiles: [test]
+    environment:
+      COMPAT_HTTP: "1"
+      COMPAT_FULL: ${COMPAT_FULL:-0}
+    command: ["php", "-d", "memory_limit=512M", "vendor/bin/phpunit", "--testsuite", "${COMPAT_SUITES:-unit,database,json}", "--cache-directory", "/tmp/phpunit-cache", "--log-junit", "/results/junit.xml"]
+    volumes:
+      - ${COMPAT_RESULTS:-./test-results}:/results
+
+volumes:
+  baseline-sqlite:
+  candidate-sqlite:
+  mysql-baseline:
+  mysql-candidate:
