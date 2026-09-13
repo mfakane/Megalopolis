@@ -38,7 +38,7 @@ class App
 	{
 		if ($desc == null)
 		{
-			self::precondition(version_compare(PHP_VERSION, "8.0.0", ">="), "PHP 8.0.0");
+			self::precondition(version_compare(PHP_VERSION, "8.4.0", ">="), "PHP 8.4.0");
 			self::precondition(extension_loaded("mbstring"), "mbstring");
 			self::precondition(extension_loaded("pdo"), "PDO");
 			self::precondition(in_array(Util::HASH_ALGORITHM, hash_algos()), "hash_algos() " . Util::HASH_ALGORITHM);
