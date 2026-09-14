@@ -1,6 +1,10 @@
 <?php
 namespace Megalopolis;
 
+/**
+ * Legacy text routes are dispatched by name through App::callHandler().
+ * @api
+ */
 class MegalithHandler extends Handler
 {
 	static MegalithHandler $instance;

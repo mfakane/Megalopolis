@@ -1,0 +1,9 @@
+*
+!composer.json
+!composer.lock
+!index.php
+!phpunit.xml
+!psalm.xml
+!req/**
+!tests/**
+!compat/http/**

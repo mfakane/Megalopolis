@@ -53,19 +53,6 @@ class App
 			throw new ApplicationException("Precondition {$desc} failed.");
 	}
 
-	/**
-	 * @template T of string|list<string>|array
-	 * @param T $arg
-	 * @return (T is string ? string : string[]|array)
-	 */
-	private static function stripSlashesRecursive($arg): string|array
-	{
-		if (is_string($arg))
-			return stripslashes($arg);
-		else
-			return array_map(fn(string|array $x) => self::stripSlashesRecursive($x), $arg);
-	}
-
 	private static function isBBQed(): bool
 	{
 		return isset($_SERVER["REMOTE_ADDR"]) && substr_count($_SERVER["REMOTE_ADDR"], ".") == 3 && gethostbyname(implode(".", array_reverse(explode(".", $_SERVER["REMOTE_ADDR"]))) . ".niku.2ch.net") == "127.0.0.2";
@@ -167,6 +154,8 @@ class App
 	}
 
 	/**
+	 * Public dispatcher: callers may use the handler's return value.
+	 * @api
 	 * @return mixed
 	 */
 	static function resolve(string $pathInfo)
@@ -235,7 +224,7 @@ class App
 		else
 			throw new ApplicationException("{$handlerName} not found");
 
-		eval($handlerName . '::$instance = self::$handler;');
+		$handlerName::$instance = self::$handler;
 
 		return call_user_func_array(array(self::$handler, $action), $args);
 	}

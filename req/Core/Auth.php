@@ -93,6 +93,7 @@ class Auth
 			&& !empty($_SESSION[self::SESSION_TOKEN]);
 	}
 
+	/** @api Returns the token for callers rendering their own forms. */
 	static function createToken(): string
 	{
 		$token = hash("sha1", mt_rand() . self::createFingerprint());
@@ -107,6 +108,7 @@ class Auth
 		}
 	}
 
+	/** @api Retains the success return value for custom handlers. */
 	static function ensureToken(): bool
 	{
 		$key = "token";
@@ -200,6 +202,7 @@ class Auth
 		self::$isAdmin = false;
 	}
 
+	/** @api Legacy validation helper retained for custom handlers. */
 	static function ensureSessionID(string $key = "sessionID", bool $throw = true): bool
 	{
 		if (

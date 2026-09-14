@@ -37,10 +37,12 @@ abstract class SearchIndex
 		return null;
 	}
 	
+	/** @api Legacy extension hook; subclasses may implement attachment. */
 	function attachIndexCore(PDO $idb): void
 	{
 	}
 	
+	/** @api Legacy extension hook paired with attachIndexCore(). */
 	function detachIndexCore(PDO $idb): void
 	{
 	}

@@ -1,0 +1,56 @@
+name: Tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Compare all 10,000 work JSON responses per backend
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom, mbstring, pdo_sqlite, pdo_mysql
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: composer analyse
+      - run: composer test
+  r46-compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - name: Restore r46 databases and test current checkout
+        env:
+          FULL: ${{ inputs.full }}
+        run: bash compat/test.sh "$([ "$FULL" = true ] && echo full || echo quick)"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: r46-compatibility
+          path: test-results/
+  r46-upgrade-operations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        mysql: ['5.7.17', '5.6.35']
+    steps:
+      - uses: actions/checkout@v6
+      - name: Test old keys, writes, search and backup restoration
+        env:
+          MYSQL_VERSION: ${{ matrix.mysql }}
+        run: bash compat/upgrade.sh "$MYSQL_VERSION"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: r46-upgrade-mysql-${{ matrix.mysql }}
+          path: test-results/

@@ -1,0 +1,151 @@
+# Separate from the 10,000-work read-only comparison. No published host ports.
+x-current: &current
+  image: ${COMPOSE_PROJECT_NAME}-current
+  build:
+    context: .
+    dockerfile: compat/http/Dockerfile.current
+  healthcheck:
+    test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8080/__compat/health') === 'ready' ? 0 : 1);"]
+    interval: 2s
+    timeout: 5s
+    retries: 60
+x-legacy: &legacy
+  image: ${COMPOSE_PROJECT_NAME}-sqlite2016
+  healthcheck:
+    test: ["CMD", "python3", "-c", "import urllib.request; assert urllib.request.urlopen('http://127.0.0.1:8080/__compat/health').read() == b'ready'"]
+    interval: 2s
+    timeout: 5s
+    retries: 60
+x-mysql: &mysql
+  image: mysql:${UPGRADE_MYSQL_VERSION:-5.7.17}
+  platform: linux/amd64
+  environment:
+    MYSQL_ROOT_PASSWORD: fixture-root
+    MYSQL_DATABASE: megalopolis_r46
+    MYSQL_USER: fixture
+    MYSQL_PASSWORD: fixture
+  command: ["--character-set-server=utf8", "--collation-server=utf8_unicode_ci", "--sql-mode=NO_ENGINE_SUBSTITUTION"]
+  healthcheck:
+    test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysql --protocol=TCP -h127.0.0.1 -u$$MYSQL_USER $$MYSQL_DATABASE -e 'SELECT 1'"]
+    interval: 2s
+    timeout: 5s
+    retries: 90
+    start_period: 15s
+services:
+  php52-http-base:
+    image: ${COMPOSE_PROJECT_NAME}-php52-http-base
+    profiles: [build]
+    build:
+      context: ./compat/php52
+      args:
+        HTTP_TESTS: "1"
+  legacy-base:
+    image: ${COMPOSE_PROJECT_NAME}-legacy
+    profiles: [build]
+    build:
+      context: ./compat/http
+      dockerfile: Dockerfile.legacy
+      args:
+        LEGACY_IMAGE: ${COMPOSE_PROJECT_NAME}-php52-http-base
+  sqlite2016:
+    image: ${COMPOSE_PROJECT_NAME}-sqlite2016
+    profiles: [build]
+    build:
+      context: ./compat/http/upgrade
+      dockerfile: Dockerfile.sqlite2016
+      args:
+        LEGACY_IMAGE: ${COMPOSE_PROJECT_NAME}-legacy
+  seed:
+    image: ${COMPOSE_PROJECT_NAME}-current
+    user: "0:0"
+    profiles: [tools]
+    command: ["php", "compat/http/upgrade/stores.php", "seed"]
+    volumes:
+      - baseline-sqlite:/baseline
+      - candidate-sqlite:/candidate
+      - restored-sqlite:/restored
+      - ${UPGRADE_RESULTS:-./test-results}:/results
+  baseline-sqlite:
+    <<: *legacy
+    environment: {COMPAT_DRIVER: sqlite, COMPAT_UPGRADE: "1"}
+    volumes:
+      - baseline-sqlite:/fixtures
+      - ./tests/Fixtures/r46-upgrade:/upgrade-fixture:ro
+  candidate-sqlite:
+    <<: *current
+    environment: {COMPAT_DRIVER: sqlite, COMPAT_UPGRADE: "1"}
+    volumes:
+      - candidate-sqlite:/fixtures
+      - ./tests/Fixtures/r46-upgrade:/upgrade-fixture:ro
+  baseline-mysql:
+    <<: *legacy
+    environment: {COMPAT_DRIVER: mysql, COMPAT_MYSQL_HOST: mysql-baseline, COMPAT_UPGRADE: "1"}
+    volumes:
+      - ./tests/Fixtures/r46-upgrade:/upgrade-fixture:ro
+  candidate-mysql:
+    <<: *current
+    environment: {COMPAT_DRIVER: mysql, COMPAT_MYSQL_HOST: mysql-candidate, COMPAT_UPGRADE: "1"}
+    volumes:
+      - ./tests/Fixtures/r46-upgrade:/upgrade-fixture:ro
+  mysql-baseline:
+    <<: *mysql
+    volumes:
+      - mysql-baseline:/var/lib/mysql
+      - ./tests/Fixtures/r46-upgrade/mysql-${UPGRADE_MYSQL_VERSION:-5.7.17}.sql.gz:/docker-entrypoint-initdb.d/r46.sql.gz:ro
+  mysql-candidate:
+    <<: *mysql
+    volumes:
+      - mysql-candidate:/var/lib/mysql
+      - ./tests/Fixtures/r46-upgrade/mysql-${UPGRADE_MYSQL_VERSION:-5.7.17}.sql.gz:/docker-entrypoint-initdb.d/r46.sql.gz:ro
+  restored-sqlite:
+    <<: *current
+    profiles: [restore]
+    environment: {COMPAT_DRIVER: sqlite, COMPAT_UPGRADE: "1"}
+    volumes:
+      - restored-sqlite:/fixtures
+      - ./tests/Fixtures/r46-upgrade:/upgrade-fixture:ro
+  restored-mysql:
+    <<: *current
+    profiles: [restore]
+    environment: {COMPAT_DRIVER: mysql, COMPAT_MYSQL_HOST: mysql-restored, COMPAT_UPGRADE: "1"}
+    volumes:
+      - ./tests/Fixtures/r46-upgrade:/upgrade-fixture:ro
+  mysql-restored:
+    <<: *mysql
+    profiles: [restore]
+    volumes:
+      - mysql-restored:/var/lib/mysql
+      - ${UPGRADE_RESULTS:-./test-results}/pre-upgrade.sql.gz:/docker-entrypoint-initdb.d/backup.sql.gz:ro
+  tests:
+    image: ${COMPOSE_PROJECT_NAME}-current
+    profiles: [test]
+    environment:
+      COMPAT_HTTP: "1"
+      COMPAT_UPGRADE: "1"
+      UPGRADE_MYSQL_VERSION: ${UPGRADE_MYSQL_VERSION:-5.7.17}
+    volumes:
+      - ${UPGRADE_RESULTS:-./test-results}:/results
+    command: ["vendor/bin/phpunit", "--testsuite", "upgrade", "--cache-directory", "/tmp/phpunit-cache", "--log-junit", "/results/upgrade.xml"]
+  generate:
+    image: ${COMPOSE_PROJECT_NAME}-sqlite2016
+    profiles: [generate]
+    entrypoint: ["php"]
+    command: ["index.php"]
+    environment: {COMPAT_DRIVER: sqlite}
+    volumes:
+      - ${UPGRADE_GENERATED:-./test-results}:/fixtures
+      - ./compat/http/upgrade/generate-r46.php:/opt/megalopolis-r46/config.php:ro
+      - ./compat/http/upgrade/project.php:/opt/megalopolis-r46/upgrade-project.php:ro
+  mysql-generate:
+    <<: *mysql
+    profiles: [generate]
+    volumes:
+      - mysql-generate:/var/lib/mysql
+volumes:
+  baseline-sqlite:
+  candidate-sqlite:
+  restored-sqlite:
+  mysql-baseline:
+  mysql-candidate:
+  mysql-restored:
+  mysql-generate:

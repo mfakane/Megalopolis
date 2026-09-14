@@ -1,0 +1,6 @@
+*
+!Dockerfile
+!php.ini
+!fixture.php
+!generate.php
+!corpus.php

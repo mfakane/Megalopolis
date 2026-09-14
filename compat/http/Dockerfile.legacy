@@ -1,0 +1,11 @@
+ARG LEGACY_IMAGE
+FROM ${LEGACY_IMAGE}
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends python3 \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p store && chown 1000:1000 store
+COPY config-legacy.php /opt/megalopolis-r46/config.php
+COPY settings.php gateway.py runtime.php /harness/
+COPY upgrade /harness/upgrade
+USER 1000:1000
+ENTRYPOINT ["python3", "/harness/gateway.py"]

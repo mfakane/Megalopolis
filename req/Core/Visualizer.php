@@ -541,7 +541,8 @@ class Visualizer
 	{
 		if (!isset($thread)) return "";
 		
-		$content = $page !== null ? $thread->page($page) : $thread->body;
+		// r46's JSON API passes zero for the whole body, then one-based pages.
+		$content = $page !== null && $page !== 0 ? $thread->page($page) : $thread->body;
 		$s = self::ensureHtml(isset($offset) && $length !== null && isset($content) ? mb_substr($content, $offset, $length) : $content ?? "", $stripExcept);
 
 		if ($thread->convertLineBreak)
@@ -586,9 +587,11 @@ class Visualizer
 	
 	private static function ensureHtml(string $str, ?array $stripExcept = null): string
 	{
-		$oldHtml = \Dom\HTMLDocument::createFromString("<body>$str</body>", LIBXML_NOERROR);
+		// Preserve CR/CRLF in text instead of HTML parser newline normalization.
+		$str = str_replace("\r", '&#13;', $str);
+		$oldHtml = \Dom\HTMLDocument::createFromString("<!doctype html><html><body>$str</body></html>", LIBXML_NOERROR, "UTF-8");
 
-		$newHtml = \Dom\HTMLDocument::createFromString("<body></body>", LIBXML_NOERROR);
+		$newHtml = \Dom\HTMLDocument::createFromString("<!doctype html><html><body></body></html>", LIBXML_NOERROR, "UTF-8");
 
 		$disallowed = Configuration::$instance->disallowedTags;
 		$allowed = array_flip(Configuration::$instance->allowedTags);
@@ -596,19 +599,30 @@ class Visualizer
 
 		self::replaceTags($oldHtml->body, $newHtml, $newHtml->body, $disallowed, $disallowedMap, $allowed);
 		
-		$str = $newHtml->saveHtml($newHtml->body);
-		unset($oldHtml, $newHtml);
-		
-		if (!is_array($stripExcept))
-			$stripExcept = Configuration::$instance->allowedTags;
-			
 		if ($stripExcept)
-		{
-			$str = (string)preg_replace('@<([^/\sa-zA-Z])@i', '&lt;$1', $str);
-			$str = strip_tags($str, "<" . implode("><", $stripExcept) . ">");
-		}
+			self::stripElements($newHtml->body, array_flip($stripExcept));
+
+		// The tree is already sanitized. Running strip_tags on serialized HTML
+		// corrupts attribute values (e.g. >) and can expose markup inside comments.
+		$str = '';
+		foreach ($newHtml->body->childNodes as $child)
+			$str .= $newHtml->saveHtml($child);
 		
 		return $str;
+	}
+
+	private static function stripElements(\Dom\Node $node, array $keep): void
+	{
+		foreach (iterator_to_array($node->childNodes) as $child)
+		{
+			self::stripElements($child, $keep);
+			if ($child instanceof \Dom\Element && !isset($keep[$child->localName]))
+			{
+				while ($child->firstChild)
+					$node->insertBefore($child->firstChild, $child);
+				$node->removeChild($child);
+			}
+		}
 	}
 
 	private static function replaceTags(\Dom\Node $oldNode, \Dom\HTMLDocument $newDocument, \Dom\Node $newNode, array $disallowed, array $disallowedMap, array $allowed): void
@@ -619,16 +633,18 @@ class Visualizer
 			if ($oldChildNode->nodeType == XML_ELEMENT_NODE &&
 				$oldChildNode instanceof \Dom\Element)
 			{
-				if (isset($disallowedMap[$oldChildNode->tagName]))
-					if (isset($disallowed[$oldChildNode->tagName]))
-					$oldChildNode->tagName = $disallowed[$oldChildNode->tagName];
+				// tagName is HTML-uppercased and readonly in the modern DOM API.
+				$name = $oldChildNode->localName;
+				if (isset($disallowedMap[$name]))
+					if (isset($disallowed[$name]))
+						$name = $disallowed[$name];
 					else
 					{
 						$newNode->appendChild($newDocument->createTextNode(" :REPLACED: "));
 						continue;
 					}
 
-				if (!isset($allowed[$oldChildNode->tagName]))
+				if ($oldChildNode->namespaceURI !== 'http://www.w3.org/1999/xhtml' || !isset($allowed[$name]))
 				{
 					/** @var \Dom\HTMLDocument */
 					$doc = $oldChildNode->ownerDocument;
@@ -636,11 +652,17 @@ class Visualizer
 				}
 				else
 				{
-					$newChildNode = $newDocument->importNode($oldChildNode, false);
-					self::replaceAttributes($oldChildNode, $newDocument, $newChildNode);
+					// Even a shallow import copies attributes, including rejected ones.
+					// Start with an empty element and copy only validated attributes.
+					$newChildNode = $newDocument->createElement($name);
+					self::replaceAttributes($oldChildNode, $newChildNode);
 					self::replaceTags($oldChildNode, $newDocument, $newChildNode, $disallowed, $disallowedMap, $allowed);
 					$newNode->appendChild($newChildNode);
 				}
+			}
+			else if ($oldChildNode->nodeType === XML_COMMENT_NODE)
+			{
+				$newNode->appendChild($newDocument->createTextNode(" :REPLACED: "));
 			}
 			else
 			{
@@ -651,16 +673,17 @@ class Visualizer
 		}
 	}
 
-	private static function replaceAttributes(\Dom\Node $oldElement, \Dom\HTMLDocument $newDocument, \Dom\Node $newElement): void
+	private static function replaceAttributes(\Dom\Element $oldElement, \Dom\Element $newElement): void
 	{
-		foreach (($oldElement->attributes ?? []) as $attributeName => $oldAttribute)
+		foreach ($oldElement->attributes as $oldAttribute)
 		{
-			$skipAttribute = false;
+			$attributeName = strtolower($oldAttribute->name);
+			$skipAttribute = $oldAttribute->namespaceURI !== null;
 
 			foreach (Configuration::$instance->disallowedAttributes as $j)
-				if (strpos($j, "regex:") === 0 &&
-					preg_match('/^' . substr($j, 6) . '$/i', $attributeName) ||
-					$attributeName == $j)
+				if ((strpos($j, "regex:") === 0 &&
+					preg_match('/^' . substr($j, 6) . '$/i', $attributeName)) ||
+					$attributeName == strtolower($j))
 					{
 						$skipAttribute = true;
 						break;
@@ -670,12 +693,14 @@ class Visualizer
 			{
 				case "style":
 				{
-					$str = (string)preg_replace_callback('/\\\([0-9A-Fa-f]{1,6})/i', function($x)
+					$str = (string)preg_replace_callback('/\\\\([0-9A-Fa-f]{1,6})\s?/i', function($x)
 					{
 						$a = intval($x[1], 16);
 						return $a >= 32 && $a <= 126 ? chr($a) : $x[0];
 					}, strval($oldAttribute->value));
-					$str = (string)preg_replace('@/\*.*\*/@', "", $str);
+					$str = (string)preg_replace('@/\*.*?\*/@s', "", $str);
+					if (preg_match('/expression\s*\(|(?:javascript|data|vbs|vbscript)\s*:/i', $str))
+						$skipAttribute = true;
 					
 					foreach (explode(";", $str) as $j)
 					{
@@ -692,15 +717,16 @@ class Visualizer
 				}
 				case "src":
 				case "href":
-					if (preg_match('/(javascript|data|vbs|vbscript):/', $oldAttribute->value))
+					// HTML character references have already been decoded by the parser.
+					$url = (string)preg_replace('/[\x00-\x20\x7f]/', '', strval($oldAttribute->value));
+					if (preg_match('/^(javascript|data|vbs|vbscript):/i', $url))
 						$skipAttribute = true;
 					break;
 			}
 			
 			if ($skipAttribute) continue;
 
-			$newAttribute = $newDocument->importNode($oldAttribute, true);
-			$newElement->appendChild($newAttribute);
+			$newElement->setAttribute($attributeName, $oldAttribute->value);
 		}
 	}
 	
@@ -810,7 +836,9 @@ class Visualizer
 		
 		if ($nestLevel == 0)
 		{
-			$output = (string)mb_ereg_replace('[\t \r\n]+?<', '<', (string)mb_ereg_replace('>[\t \r\n]+', '>', $output));
+			// XML text whitespace is content, including trailing spaces in author names.
+			if ($contentType !== "application/atom+xml" && $contentType !== "application/rss+xml")
+				$output = (string)mb_ereg_replace('[\t \r\n]+?<', '<', (string)mb_ereg_replace('>[\t \r\n]+', '>', $output));
 
 			if (isset($mbencoding))
 				$output = (string)mb_convert_encoding($output, $mbencoding, "UTF8");

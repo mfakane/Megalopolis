@@ -2,6 +2,10 @@
 
 namespace Megalopolis;
 
+/**
+ * Actions are selected from URL segments by App::resolve(), including _new/_com.
+ * @api
+ */
 class IndexHandler extends Handler
 {
 	static IndexHandler $instance;

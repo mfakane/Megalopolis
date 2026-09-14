@@ -21,6 +21,7 @@ class Evaluation
 	public ?string $host = null;
 	public int $dateTime = 0;
 
+	/** @psalm-suppress PossiblyUnusedProperty Public lifecycle state retained for external model consumers. */
 	public bool $loaded = false;
 
 	function __construct(int $id)

@@ -1,0 +1,16 @@
+ARG LEGACY_IMAGE
+FROM debian:bookworm-slim AS sqlite
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /build
+RUN curl -fL --retry 3 https://www.sqlite.org/2016/sqlite-autoconf-3150200.tar.gz -o sqlite.tar.gz \
+    && echo '07b35063b9386865b78226cdaca9a299d938a87aaa8fdc4d73edb0cef30f3149  sqlite.tar.gz' | sha256sum -c - \
+    && tar -xzf sqlite.tar.gz
+WORKDIR /build/sqlite-autoconf-3150200
+RUN CFLAGS='-O2 -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_FTS3_PARENTHESIS' ./configure --prefix=/opt/sqlite2016 --disable-static \
+    && make -j2 && make install
+FROM ${LEGACY_IMAGE}
+# PDO uses SQLite's stable shared-library ABI. Assert the actual runtime below.
+COPY --from=sqlite /opt/sqlite2016/lib/ /opt/sqlite2016/lib/
+ENV LD_LIBRARY_PATH=/opt/sqlite2016/lib
+RUN php -r '$db = new PDO("sqlite::memory:"); if ($db->query("SELECT sqlite_version()")->fetchColumn() !== "3.15.2") exit(1); $db->exec("CREATE VIRTUAL TABLE f USING fts3(body)");'

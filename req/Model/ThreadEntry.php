@@ -85,6 +85,7 @@ class ThreadEntry
 	 */
 	public array $tags = array();
 
+	/** @psalm-suppress PossiblyUnusedProperty Public lifecycle state retained for external model consumers. */
 	public bool $loaded = false;
 
 	function __construct(int $id)
@@ -699,6 +700,7 @@ class ThreadEntry
 	}
 
 	/**
+	 * @api Legacy Megalith import helper retained for custom migration tools.
 	 * @return int[]
 	 */
 	static function getMegalithEntryIDsBySubject(PDO $db, int $subject): array

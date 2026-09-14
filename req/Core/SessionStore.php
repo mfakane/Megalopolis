@@ -4,6 +4,11 @@ namespace Megalopolis;
 
 use \PDO;
 
+/**
+ * Optional legacy adapter; PHP invokes the callbacks registered by apply().
+ * Not enabled by Auth::useSession(); retained for custom bootstrap code.
+ * @api
+ */
 class SessionStore implements \SessionHandlerInterface
 {
 	static array $sessionStoreSchema = array(

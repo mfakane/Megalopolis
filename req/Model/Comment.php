@@ -31,6 +31,7 @@ class Comment
 	
 	public ?Evaluation $evaluation = null;
 	
+	/** @psalm-suppress PossiblyUnusedProperty Public lifecycle state retained for external model consumers. */
 	public bool $loaded = false;
 
 	private function __construct(int $id)

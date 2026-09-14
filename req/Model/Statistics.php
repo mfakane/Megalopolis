@@ -3,6 +3,10 @@ namespace Megalopolis;
 
 use \PDO;
 
+/**
+ * Legacy statistics API retained for custom tools; not called by built-in routes.
+ * @api
+ */
 class Statistics
 {
 	public int $subject = 0;
