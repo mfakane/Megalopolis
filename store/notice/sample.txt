@@ -1,5 +1,5 @@
-<?php Visualizer::header("使い方") ?>
-<?php if (!Configuration::$instance->adminOnly): ?>
+<?php \Megalopolis\Visualizer::header("使い方") ?>
+<?php if (!\Megalopolis\Configuration::$instance->adminOnly): ?>
 	<section>
 		<h2>作品投稿について</h2>
 		<ul>
@@ -10,7 +10,7 @@
 		</ul>
 	</section>
 <?php endif ?>
-<?php if (Configuration::$instance->usePoints()): ?>
+<?php if (\Megalopolis\Configuration::$instance->usePoints()): ?>
 	<section>
 		<h2>作品への簡易評価</h2>
 		<ul>
@@ -20,7 +20,7 @@
 		</ul>
 	</section>
 <?php endif ?>
-<?php if (Configuration::$instance->useComments): ?>
+<?php if (\Megalopolis\Configuration::$instance->useComments): ?>
 	<section>
 		<h2>作品へのコメント</h2>
 		<ul>

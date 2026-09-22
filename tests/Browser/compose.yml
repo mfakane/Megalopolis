@@ -1,0 +1,12 @@
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: tests/Browser/Dockerfile
+    ports:
+      - "127.0.0.1:${BROWSER_PORT:-18080}:8080"
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8080/__browser/health') === 'ready' ? 0 : 1);"]
+      interval: 2s
+      timeout: 5s
+      retries: 60

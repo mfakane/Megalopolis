@@ -141,7 +141,7 @@ Visualizer::doctype();
 		</section>
 	</form>
 	<?php if (App::$actionName == "edit"): ?>
-		<form action="<?=Visualizer::escapeOutput(Util::withMobileUniqueIDRequestSuffix("unpost")) ?>" method="post" id="unpostForm">
+		<form action="<?=Visualizer::escapeOutput(Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "unpost"))) ?>" method="post" id="unpostForm">
 			<section>
 				<h2>作品の削除</h2>
 				<label><input type="checkbox" name="password" id="unpostCheck" value="<?=Visualizer::escapeOutput(ReadHandler::param("password")) ?>" />作品を削除する</label>

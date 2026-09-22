@@ -1,6 +1,19 @@
 $(function()
 {
 	var commentForm = $("#commentform");
+	var jsonAction = function(action)
+	{
+		action = action.replace(/#.*$/, "");
+		var match = action.match(/([?&]path=)([^&]*)/);
+
+		return match
+			? action.replace(match[0], match[1] + match[2] + ".json")
+			: action + ".json";
+	};
+	var queryAction = function(action, query)
+	{
+		return action + (action.indexOf("?") >= 0 ? "&" : "?") + query;
+	};
 	var loadPostButtons = function()
 	{
 		$("#resumeForm, #sendForm").find("button").click(function()
@@ -143,7 +156,7 @@ $(function()
 				$.ajax
 				({
 					type: "POST",
-					url: form.attr("action").replace(/#.*$/, "").replace(/(\?.*)|$/, ".json$1"),
+					url: jsonAction(form.attr("action")),
 					dataType: "json",
 					data:
 					{
@@ -166,7 +179,7 @@ $(function()
 										$.ajax
 										({
 											type: "POST",
-											url: form.attr("action").replace(/evaluate#.*$/, "unevaluate") + ".json?id=" + data.id,
+										url: queryAction(jsonAction(form.attr("action").replace(/evaluate#.*$/, "unevaluate")), "id=" + data.id),
 											dataType: "json",
 											data: {},
 											success: function()
@@ -231,7 +244,7 @@ $(function()
 				$.ajax
 				({
 					type: "POST",
-					url: form.attr("action").replace(/#.*$/, "").replace(/(\?.*)|$/, ".json$1"),
+					url: jsonAction(form.attr("action")),
 					dataType: "json",
 					data:
 					{
@@ -261,7 +274,7 @@ $(function()
 										$.ajax
 										({
 											type: "POST",
-											url: form.attr("action").replace(/comment#.*$/, "uncomment") + ".json?id=" + data.id,
+										url: queryAction(jsonAction(form.attr("action").replace(/comment#.*$/, "uncomment")), "id=" + data.id),
 											dataType: "json",
 											data:
 											{

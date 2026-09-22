@@ -419,7 +419,7 @@ class ReadHandler extends Handler
 				return Visualizer::json($comment->toArray() + array(
 					"num" => count($thread->comments + $thread->nonCommentEvaluations),
 					"formattedBody" => Visualizer::escapeSummary($comment->body ?? ""),
-					"deleteAction" => Util::getAbsoluteUrl() . "{$thread->subject}/{$thread->id}/uncomment?id={$comment->id}"
+					"deleteAction" => Util::getAbsoluteUrl("{$thread->subject}/{$thread->id}/uncomment?id={$comment->id}")
 				));
 			} else if (Configuration::$instance->showComment[Configuration::ON_ENTRY] && Visualizer::visualizerMode() != "simple")
 				return Visualizer::redirect("{$thread->subject}/{$thread->id}");

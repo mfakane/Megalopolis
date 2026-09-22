@@ -22,6 +22,24 @@ jobs:
       - run: composer install --no-interaction --prefer-dist --no-progress
       - run: composer analyse
       - run: composer test
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tests/Browser/package-lock.json
+      - run: npm ci --prefix tests/Browser
+      - run: npx --prefix tests/Browser playwright install --with-deps chromium
+      - run: composer test:browser
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: browser-e2e
+          path: test-results/
   r46-compatibility:
     runs-on: ubuntu-latest
     timeout-minutes: 45

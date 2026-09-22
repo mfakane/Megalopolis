@@ -20,6 +20,27 @@ The equivalent Composer aliases are `composer test:db`, `composer test:compat` a
 required. The first run builds PHP 5.2.5 and downloads dependencies; later builds
 reuse Docker's cache. Run from any directory using the script's absolute path.
 
+## Browser E2E
+
+`composer test:browser` starts an isolated PHP 8.4/SQLite application from
+`tests/Browser/`, runs the Chromium Playwright suite against the real HTML
+routes, and removes only the containers created for that run. The suite creates
+its own work through the UI, then checks normal browsing, search, history,
+author/tag pages, comments, evaluations, editing, and deletion. It does not
+use `compat/`, historical fixtures, JSON/probe routes, or direct database
+access.
+
+Install the browser dependencies once before running locally:
+
+```sh
+npm ci --prefix tests/Browser
+npx --prefix tests/Browser playwright install --with-deps chromium
+composer test:browser
+```
+
+Browser traces, screenshots, and Compose logs are retained under
+`test-results/browser-*/` when a run fails.
+
 | Suite | Quick | Full |
 | --- | --- | --- |
 | Unit | Frozen input SHA-256, manifest coverage, JSON/HTML negative cases, renderer, reviewed HTML contracts, application-exception preservation and real rollback | Same |
