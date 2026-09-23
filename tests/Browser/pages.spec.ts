@@ -227,7 +227,11 @@ test("コメントの作成、評価、削除キー認証を検証する", async
 	await page.getByLabel("名前").fill("コメント作者");
 	await page.getByLabel("削除キー").fill(commentPassword);
 	await page.locator('textarea[name="body"]').fill(comment);
+	const commentResponse = page.waitForResponse(
+		(response) => response.request().method() === "POST" && response.url().includes("/comment.json"),
+	);
 	await page.getByRole("button", { name: "送信" }).click();
+	expect((await commentResponse).status()).toBe(200);
 
 	await page.goto(detailUrl);
 	await expect(page.getByText(comment, { exact: true })).toBeVisible();
