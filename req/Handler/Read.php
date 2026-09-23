@@ -64,7 +64,16 @@ class ReadHandler extends Handler
 		Cookie::setCookie(Cookie::VIEW_HISTORY_KEY, implode(",", $history));
 		Cookie::sendCookie();
 
-		if (Util::isCachedByBrowser($thread->entry->getLatestLastUpdate(), $page . Cookie::getCookie(Cookie::MOBILE_VERTICAL_KEY, "") . $thread->entry->readCount))
+		if (Util::isCachedByBrowser(
+			$thread->entry->getLatestLastUpdate(),
+			$page . Cookie::getCookie(Cookie::MOBILE_VERTICAL_KEY, "") . implode(",", array(
+				$thread->entry->readCount,
+				$thread->entry->responseCount,
+				$thread->entry->commentCount,
+				$thread->entry->evaluationCount,
+				$thread->entry->points,
+			))
+		))
 			Visualizer::notModified();
 
 		if (isset($_POST["admin"]) && is_string($_POST["admin"])) {
