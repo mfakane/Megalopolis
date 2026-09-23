@@ -158,10 +158,12 @@ test("履歴、検索、作者、タグ、ランダム表示を対象作品と�
 	await expect(page.getByText(second.title, { exact: true })).toHaveCount(0);
 
 	await page.goto("/");
+	const availableTitles = await page.locator("article h2 a").allTextContents();
 	await page.getByRole("link", { name: "おまかせ表示" }).click();
-	const randomFirst = page.getByText(first.title, { exact: true });
-	const randomSecond = page.getByText(second.title, { exact: true });
-	expect((await randomFirst.count()) + (await randomSecond.count())).toBe(1);
+	await expect(page).toHaveURL(/path=\d+\/\d+/);
+	const randomTitle = (await page.getByRole("heading", { level: 1 }).textContent())?.trim();
+	expect(randomTitle).toBeTruthy();
+	expect(availableTitles).toContain(randomTitle);
 
 	assertNoDiagnostics(diagnostics);
 });
