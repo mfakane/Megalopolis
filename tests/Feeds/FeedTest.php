@@ -5,6 +5,7 @@ namespace Megalopolis\Tests\Feeds;
 
 use DOMDocument;
 use DOMXPath;
+use Megalopolis\App;
 use Megalopolis\Tests\Support\Fixtures;
 use Megalopolis\Tests\Support\Http;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -57,10 +58,12 @@ final class FeedTest extends TestCase
         $xpath->registerNamespace('a', 'http://www.w3.org/2005/Atom');
         $root = $format === 'atom' ? '/a:feed' : '/rss/channel';
         $prefix = $format === 'atom' ? 'a:' : '';
-        // Explicit release contract; update this expectation when changing App's version.
-        self::assertSame('Megalopolis rc48', $xpath->evaluate("string($root/{$prefix}generator)"));
+        self::assertSame(
+            App::NAME . ' ' . App::VERSION_PREFIX . App::VERSION,
+            $xpath->evaluate("string($root/{$prefix}generator)")
+        );
         if ($format === 'atom') {
-            self::assertSame('48', $xpath->evaluate("string($root/a:generator/@version)"));
+            self::assertSame((string) App::VERSION, $xpath->evaluate("string($root/a:generator/@version)"));
         } else {
             self::assertSame('2.0', $xpath->evaluate('string(/rss/@version)'));
         }
