@@ -70,7 +70,7 @@ if ($h->page < $maxPage && ($idx = mb_strrpos(mb_substr($h->thread->body ?? "", 
 				<?php if ($c->showReadCount[Configuration::ON_ENTRY]): ?>
 					閲覧: <?=Visualizer::escapeOutput($h->entry->readCount) ?>
 				<?php endif ?>
-				<?php if ($c->showReadCount[Configuration::ON_ENTRY]): ?>
+				<?php if ($c->showPoint[Configuration::ON_ENTRY]): ?>
 					評価: <?=Visualizer::escapeOutput($c->pointMap && $c->commentPointMap ? "{$h->entry->commentedEvaluationCount}/{$h->entry->evaluationCount}" : $h->entry->evaluationCount) ?>
 				<?php endif ?>
 				<?php if ($c->showComment[Configuration::ON_ENTRY]): ?>
@@ -127,7 +127,7 @@ if ($h->page < $maxPage && ($idx = mb_strrpos(mb_substr($h->thread->body ?? "", 
 	<?php elseif ($m == "c"): ?>
 		コメント&nbsp;<a href="#menu">メニューへ</a>
 		<div class="info">
-			<?php if ($c->showReadCount[Configuration::ON_ENTRY]): ?>
+			<?php if ($c->showPoint[Configuration::ON_ENTRY]): ?>
 				評価: <?=Visualizer::escapeOutput($c->pointMap && $c->commentPointMap ? "{$h->entry->commentedEvaluationCount}/{$h->entry->evaluationCount}" : $h->entry->evaluationCount) ?>
 			<?php endif ?>
 			<?php if ($c->showComment[Configuration::ON_ENTRY]): ?>
@@ -189,7 +189,7 @@ if ($h->page < $maxPage && ($idx = mb_strrpos(mb_substr($h->thread->body ?? "", 
 									<option value="<?=Visualizer::escapeOutput($i) ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?=Visualizer::escapeOutput($i) ?> 点</option>
 								<?php endif ?>
 							<?php endforeach ?>
-							<option value="0"<?=ReadHandler::param("point") === null ? ' selected="selected"' : null ?>>無評価</option>
+							<option value="0"<?=intval(ReadHandler::param("point", "0")) == 0 ? ' selected="selected"' : null ?>>無評価</option>
 							<?php foreach ($c->commentPointMap as $i): ?>
 								<?php if ($i < 0): ?>
 									<option value="<?=Visualizer::escapeOutput($i) ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?=Visualizer::escapeOutput($i) ?> 点</option>

@@ -319,7 +319,7 @@ Visualizer::doctype();
 							<div>
 								<label for="name">名前</label><input type="text" name="name" id="name" value="<?=Visualizer::escapeOutput(ReadHandler::param("name", Cookie::getCookie(Cookie::NAME_KEY))) ?>"<?=$c->requireName[Configuration::ON_COMMENT] ? 'required="required"' : null ?> /><br />
 								<label for="mail">メール</label><input type="email" name="mail" id="mail" value="<?=Visualizer::escapeOutput(ReadHandler::param("mail", Cookie::getCookie(Cookie::MAIL_KEY))) ?>" /><br />
-								<label for="password">削除キー</label><input type="password" name="password" id="password" value="<?=Visualizer::escapeOutput(ReadHandler::param("password", Cookie::getCookie(Cookie::PASSWORD_KEY))) ?>"<?=$c->requirePassword[Configuration::ON_ENTRY] ? ' required="required"' : null ?> /><br />
+								<label for="password">削除キー</label><input type="password" name="password" id="password" value="<?=Visualizer::escapeOutput(ReadHandler::param("password", Cookie::getCookie(Cookie::PASSWORD_KEY))) ?>"<?=$c->requirePassword[Configuration::ON_COMMENT] ? ' required="required"' : null ?> /><br />
 								<?php if (!Util::isEmpty($c->postPassword)): ?>
 									<label for="postPassword2">投稿キー</label><input type="password" name="postPassword" id="postPassword2" /><br />
 								<?php endif ?>
@@ -331,7 +331,7 @@ Visualizer::doctype();
 												<option value="<?=Visualizer::escapeOutput($i) ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?=Visualizer::escapeOutput($i) ?> 点</option>
 											<?php endif ?>
 										<?php endforeach ?>
-										<option value="0"<?=!isset($_POST["point"]) ? ' selected="selected"' : null ?>>無評価</option>
+										<option value="0"<?=intval(ReadHandler::param("point", "0")) == 0 ? ' selected="selected"' : null ?>>無評価</option>
 										<?php foreach ($c->commentPointMap as $i): ?>
 											<?php if ($i < 0): ?>
 												<option value="<?=Visualizer::escapeOutput($i) ?>"<?=ReadHandler::param("point") == $i ? ' selected="selected"' : null ?>><?=Visualizer::escapeOutput($i) ?> 点</option>

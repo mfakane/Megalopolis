@@ -97,7 +97,7 @@ class Template
 				"pageCount" => $isAdmin || $c->showPages[Configuration::ON_SUBJECT],
 				"readCount" => $isAdmin || $c->showReadCount[Configuration::ON_SUBJECT],
 				"size" => $isAdmin || $c->showSize[Configuration::ON_SUBJECT],
-				"evaluationCount" => $isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT],
+				"evaluationCount" => $isAdmin && $c->useAnyPoints() || $c->showPoint[Configuration::ON_SUBJECT],
 				"commentCount" => $isAdmin || $c->showComment[Configuration::ON_SUBJECT],
 				"points" => $isAdmin && $c->useAnyPoints() || $c->showPoint[Configuration::ON_SUBJECT],
 				"rate" => $isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT],
