@@ -51,11 +51,15 @@ final class SQLiteSearchQueryTest extends TestCase
 
     public function testIndexesBuiltBeforeThePhraseFormatKeepDroppingRepeatedGrams(): void
     {
-        // Until regenerated, an old index only matches the old (deduplicated) phrases.
+        // Until regenerated, an old index has each gram once per column, so a
+        // phrase could miss ("combining plain" stores no second "in"). Every
+        // gram must be present instead; exclusions keep the phrase.
         $index = new SQLiteSearchIndex();
         (new \ReflectionProperty($index, 'phraseFormat'))->setValue($index, false);
 
-        self::assertSame('"作品 品0 00 05"', $index->buildMatchQuery(['作品00005'], true));
-        self::assertSame('"le eg ga ac cy yb bo od dy yd de el et te"', $index->buildMatchQuery(['legacybodydelete'], true));
+        self::assertSame('作品 品0 00 05', $index->buildMatchQuery(['作品00005'], true));
+        self::assertSame('le eg ga ac cy yb bo od dy yd de el et te', $index->buildMatchQuery(['legacybodydelete'], true));
+        self::assertSame('pl la ai in', $index->buildMatchQuery(['plain'], true));
+        self::assertSame('ab NOT "pl la ai in"', $index->buildMatchQuery(['ab', '-plain'], true));
     }
 }

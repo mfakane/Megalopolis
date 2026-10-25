@@ -105,6 +105,7 @@ class SQLiteSearchIndex extends SearchIndex
 			
 			// 索引は記号などで区切った部分ごとに n-gram にしているため、部分ごとに条件にする
 			$terms = array();
+			$allTerms = array();
 			
 			foreach (self::splitSegments($i) as $segment)
 			{
@@ -113,9 +114,12 @@ class SQLiteSearchIndex extends SearchIndex
 				if (!$words)
 					continue;
 				else if (mb_strlen($words[0]) == $this->gramLength)
+				{
 					$terms[] = '"' . implode(" ", $words) . '"';
+					array_push($allTerms, ...$words);
+				}
 				else
-					$terms[] = "{$words[0]}*";
+					$allTerms[] = $terms[] = "{$words[0]}*";
 			}
 			
 			if (!$terms)
@@ -123,7 +127,9 @@ class SQLiteSearchIndex extends SearchIndex
 			else if ($isExclude)
 				$exclude[] = $terms;
 			else
-				array_push($include, ...$terms);
+				// 旧形式の索引は作品ごとに重複した n-gram を省いており隣接が保たれないため、
+				// フレーズでは取りこぼす。すべての n-gram を含むものを探す
+				array_push($include, ...($this->phraseFormat ? $terms : $allTerms));
 		}
 		
 		// 除外だけの条件は全文検索では表せない

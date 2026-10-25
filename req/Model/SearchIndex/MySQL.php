@@ -135,22 +135,26 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 
 			// 索引は記号などで区切った部分ごとに n-gram にしているため、部分ごとに条件にする
 			$terms = array();
+			$allTerms = array();
 
 			foreach (self::splitSegments($i) as $segment) {
 				$words = $this->getWords([$this->phraseWords() + array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($segment) >= $this->gramLength), $segment]);
 
 				if (!$words)
 					continue;
-				else if (mb_strlen($words[0]) == $this->gramLength)
+				else if (mb_strlen($words[0]) == $this->gramLength) {
 					$terms[] = '"' . implode(" ", $words) . '"';
-				else
-					$terms[] = $words[0] . (Configuration::$instance->mysqlSearchUseHeadMatching ? "*" : str_repeat("_", $this->gramLength - mb_strlen($words[0])));
+					array_push($allTerms, ...$words);
+				} else
+					$allTerms[] = $terms[] = $words[0] . (Configuration::$instance->mysqlSearchUseHeadMatching ? "*" : str_repeat("_", $this->gramLength - mb_strlen($words[0])));
 			}
 
 			if (!$terms)
 				continue;
 			else if (!$exclude)
-				foreach ($terms as $j)
+				// 旧形式の索引は作品ごとに重複した n-gram を省いており隣接が保たれないため、
+				// フレーズでは取りこぼす。すべての n-gram を含むものを探す
+				foreach ($this->phraseFormat ? $terms : $allTerms as $j)
 					$queryArguments[] = "+{$j}";
 			else if (count($terms) == 1)
 				$queryArguments[] = "-{$terms[0]}";

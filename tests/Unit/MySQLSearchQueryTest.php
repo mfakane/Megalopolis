@@ -45,6 +45,21 @@ final class MySQLSearchQueryTest extends TestCase
         self::assertSame($expected, (new MySQLSearchIndex())->buildBooleanQuery($query));
     }
 
+    public function testIndexesBuiltBeforeThePhraseFormatRequireEveryGram(): void
+    {
+        // An old index has each gram once per column, so a phrase could miss.
+        $configuration = new Configuration();
+        $configuration->mysqlSearchNgramLength = 4;
+        $configuration->mysqlSearchUseHeadMatching = false;
+        Configuration::$instance = $configuration;
+        $index = new MySQLSearchIndex();
+        (new \ReflectionProperty($index, 'phraseFormat'))->setValue($index, false);
+
+        self::assertSame('+html +plai +lain', $index->buildBooleanQuery(['HTML:plain']));
+        self::assertSame('+分類__ +abc_', $index->buildBooleanQuery(['分類:ABC']));
+        self::assertSame('+plai +lain -(+"html" +"plai lain")', $index->buildBooleanQuery(['plain', '-HTML:plain']));
+    }
+
     public function testPadsShortGramsByCharacters(): void
     {
         $configuration = new Configuration();
