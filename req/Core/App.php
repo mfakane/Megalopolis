@@ -26,9 +26,9 @@ class App
 	const string SESSION_STORE_TABLE = "sessionStore";
 	const string INDEX_DATABASE = "search";
 
-	static ?Handler $handler;
-	static string $handlerName;
-	static string $actionName;
+	static ?Handler $handler = null;
+	static string $handlerName = "Index";
+	static string $actionName = "";
 	static string $handlerType = "html";
 	/** @var string[] */
 	static array $pathInfo = array();
