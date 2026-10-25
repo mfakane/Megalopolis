@@ -763,7 +763,16 @@ class UtilHandler extends Handler
 
 		Auth::$caption = "管理者ログイン";
 
-		if ($requireAuth && Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
+		if (!$requireAuth)
+			return;
+
+		$password = Auth::login(true);
+
+		if ($password === false || Util::hashEquals(Configuration::$instance->adminHash ?? "", $password) === false)
 			Auth::loginError("管理者パスワードが一致しません");
+
+		// パスワードで認証した場合は、以降のリクエストのためにセッションへ保存する
+		if (!Auth::hasSession(true))
+			Auth::finalizeLogin($password);
 	}
 }
