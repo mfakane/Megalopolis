@@ -509,7 +509,7 @@ class IndexHandler extends Handler
 				$arr = $dh->execute(fn($db) => ThreadEntry::getNames($db));
 				$dh->close();
 
-				return Visualizer::redirect("author" . ($arr ? "/" . array_rand($arr) : ""));
+				return Visualizer::redirect($arr ? Visualizer::currentHref("author", (string)array_rand($arr)) : "author");
 			}
 
 			if (strstr($name, "/random") == "/random") {
@@ -602,7 +602,7 @@ class IndexHandler extends Handler
 				$arr = $dh->execute(fn($db) => ThreadEntry::getTags($db));
 				$dh->close();
 
-				return Visualizer::redirect("tag" . ($arr ? "/" . array_rand($arr) : ""));
+				return Visualizer::redirect($arr ? Visualizer::currentHref("tag", (string)array_rand($arr)) : "tag");
 			}
 
 			if (strstr($tag, "/random") == "/random") {
