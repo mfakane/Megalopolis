@@ -563,7 +563,9 @@ class ThreadEntry
 			App::THREAD_EVALUATION_TABLE,
 			trim($options)
 		);
-		$st = isset($queryCache[$sql]) ? $queryCache[$sql] : $queryCache[$sql] = Util::ensureStatement($db, $db->prepare($sql));
+		// 準備済みの文は接続ごとのものなので、接続を閉じて開き直した場合などに別の接続の文を使わないようにする
+		$key = spl_object_id($db) . "\0" . $sql;
+		$st = isset($queryCache[$key]) ? $queryCache[$key] : $queryCache[$key] = Util::ensureStatement($db, $db->prepare($sql));
 		Util::executeStatement($st, $params);
 
 		/**
