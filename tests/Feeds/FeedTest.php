@@ -6,6 +6,7 @@ namespace Megalopolis\Tests\Feeds;
 use DOMDocument;
 use DOMXPath;
 use Megalopolis\App;
+use Megalopolis\Tests\Support\Drivers;
 use Megalopolis\Tests\Support\Fixtures;
 use Megalopolis\Tests\Support\Http;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -15,7 +16,7 @@ final class FeedTest extends TestCase
 {
     public static function feeds(): iterable
     {
-        foreach (['sqlite', 'mysql'] as $driver) {
+        foreach (array_keys(Drivers::ALL) as $driver) {
             foreach (['rss', 'atom'] as $format) {
                 foreach ([1, 100] as $subject) {
                     yield "$driver/$format/$subject" => [$driver, $format, $subject];
@@ -80,7 +81,7 @@ final class FeedTest extends TestCase
 
             // The frozen SQLite oracle shares BMP cases with MySQL. The supplementary
             // case has intentionally different MySQL input, so it is checked here only on SQLite.
-            if ($driver === 'mysql' && Fixtures::manifest($driver)[$id]['text'] === 'supplementary') continue;
+            if (Drivers::fixture($driver) === 'mysql' && Fixtures::manifest('mysql')[$id]['text'] === 'supplementary') continue;
             // Stored text may contain HTML references (e.g. "&amp;" from input normalization);
             // feeds carry the text they stand for.
             $expected = array_map(fn($value) => is_array($value)

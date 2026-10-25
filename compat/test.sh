@@ -34,8 +34,9 @@ trap 'exit 143' TERM
 "${compose[@]}" run --rm --no-deps --user "$(id -u):$(id -g)" tests \
     vendor/bin/phpunit --testsuite unit --cache-directory /tmp/phpunit-cache
 "${compose[@]}" up -d --wait --wait-timeout 240 \
-    baseline-sqlite candidate-sqlite baseline-mysql candidate-mysql
+    baseline-sqlite candidate-sqlite baseline-mysql candidate-mysql candidate-mariadb
 "${compose[@]}" exec -T baseline-sqlite php /harness/runtime.php > "$COMPAT_RESULTS/r46-runtime.txt"
 "${compose[@]}" exec -T candidate-sqlite php compat/http/runtime.php > "$COMPAT_RESULTS/current-runtime.txt"
 "${compose[@]}" exec -T mysql-candidate mysql --version > "$COMPAT_RESULTS/mysql-runtime.txt"
+"${compose[@]}" exec -T mariadb-candidate mariadb --version > "$COMPAT_RESULTS/mariadb-runtime.txt"
 "${compose[@]}" run --rm --no-deps --user "$(id -u):$(id -g)" tests

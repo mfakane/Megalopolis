@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Megalopolis\Tests\Database;
 
+use Megalopolis\Tests\Support\Drivers;
 use Megalopolis\Tests\Support\Fixtures;
 use Megalopolis\Tests\Support\Http;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -12,7 +13,7 @@ final class UpgradeFromR46Test extends TestCase
 {
     public static function subjects(): iterable
     {
-        foreach (['sqlite', 'mysql'] as $driver) {
+        foreach (array_keys(Drivers::ALL) as $driver) {
             for ($subject = 1; $subject <= 100; $subject++) {
                 yield $driver . '/' . $subject => [$driver, $subject];
             }
@@ -22,7 +23,7 @@ final class UpgradeFromR46Test extends TestCase
     #[DataProvider('subjects')]
     public function testCurrentModelsPreserveEveryR46PayloadAfterOpenAndReopen(string $driver, int $subject): void
     {
-        $manifest = Fixtures::manifest($driver);
+        $manifest = Fixtures::manifest(Drivers::fixture($driver));
         // Fresh PHP requests exercise opening/migration twice, without requiring
         // current physical table names or schema versions to remain r46-shaped.
         for ($pass = 1; $pass <= 2; $pass++) {

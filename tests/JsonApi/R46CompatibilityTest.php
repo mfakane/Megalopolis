@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Megalopolis\Tests\JsonApi;
 
+use Megalopolis\Tests\Support\Drivers;
 use Megalopolis\Tests\Support\Fixtures;
 use Megalopolis\Tests\Support\Http;
 use Megalopolis\Tests\Support\JsonContract;
@@ -16,7 +17,7 @@ final class R46CompatibilityTest extends TestCase
 {
     public static function subjects(): iterable
     {
-        foreach (['sqlite', 'mysql'] as $driver) {
+        foreach (array_keys(Drivers::ALL) as $driver) {
             for ($subject = 1; $subject <= 100; $subject++) {
                 yield $driver . '/' . $subject => [$driver, $subject];
             }
@@ -71,11 +72,13 @@ final class R46CompatibilityTest extends TestCase
         self::assertSame([], array_keys($diff), $driver . ' ' . $id . ' (see test-results)');
     }
 
-    private function responses(string $driver, string $route): array
+    private function responses(string $candidate, string $route): array
     {
+        // MariaDB is compared with the r46 MySQL baseline built from the same dump.
+        $driver = Drivers::fixture($candidate);
         $path = '/index.php?path=' . rawurlencode($route);
         $old = Http::json('baseline-' . $driver, $path);
-        $current = Http::json('candidate-' . $driver, $path);
+        $current = Http::json('candidate-' . $candidate, $path);
         $diff = JsonContract::differences($old, $current);
         $accepted = [];
         $htmlContract = isset($current->entry->id) && is_int($current->entry->id)
@@ -131,10 +134,10 @@ final class R46CompatibilityTest extends TestCase
             }
         }
         if ($diff !== [] || $accepted !== []) {
-            Http::artifact($driver . '-' . $route, ['route' => $route, 'differences' => $diff,
+            Http::artifact($candidate . '-' . $route, ['route' => $route, 'differences' => $diff,
                 'accepted' => $accepted,
                 'r46' => Http::response('baseline-' . $driver),
-                'current' => Http::response('candidate-' . $driver)]);
+                'current' => Http::response('candidate-' . $candidate)]);
         }
         return [$old, $current, $diff];
     }

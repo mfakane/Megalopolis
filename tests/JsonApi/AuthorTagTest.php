@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Megalopolis\Tests\JsonApi;
 
+use Megalopolis\Tests\Support\Drivers;
 use Megalopolis\Tests\Support\Http;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -11,8 +12,7 @@ final class AuthorTagTest extends TestCase
 {
     public static function drivers(): iterable
     {
-        yield 'sqlite' => ['sqlite'];
-        yield 'mysql' => ['mysql'];
+        return Drivers::provider();
     }
 
     // MySQL counts the matches with found_rows(), which must not break the typed entry count.
