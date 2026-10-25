@@ -379,9 +379,35 @@ class Visualizer
 				$href = rtrim($href, "&");
 			}
 			else
-				$href .= "/" . ($encodeTable[$i] ?? ($encodeTable[$i] = str_ireplace("%2F", "%252F", urlencode($i))));
-		
+				$href .= "/" . self::encodePathSegment((string)$i);
+
 		return trim($href, "/");
+	}
+
+	/**
+	 * リンク形式ごとにパスが何回デコードされるかに合わせてエンコードする
+	 */
+	private static function encodePathSegment(string $segment): string
+	{
+		static $encodeTable = array();
+
+		if (isset($encodeTable[$segment]))
+			return $encodeTable[$segment];
+
+		$suffix = Util::getSuffix();
+
+		if ($suffix == "")
+			// mod_rewrite: パスとして一度デコードされたあと、?path= のクエリとしてもう一度デコードされる。
+			// クエリ中で意味を持つ文字や制御文字は二重にエンコードしておく
+			$encoded = urlencode((string)preg_replace_callback('/[%&+#?\/\x00-\x1f\x7f]/', fn($m) => rawurlencode($m[0]), $segment));
+		else if (strpos($suffix, "?") === false)
+			// PATH_INFO: 一度だけデコードされる。%2F はサーバーに拒否されることがあるため / はそのまま渡す
+			$encoded = str_replace("%2F", "/", rawurlencode($segment));
+		else
+			// クエリ形式: PHP が一度だけデコードする
+			$encoded = urlencode($segment);
+
+		return $encodeTable[$segment] = $encoded;
 	}
 	
 	static function actionHref(): string
