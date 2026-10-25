@@ -34,7 +34,7 @@ class MegalithHandler extends Handler
 				if (($subject = $matches[1] == "" ? $latest : intval($matches[1])) > $latest)
 					throw new ApplicationException("ファイルが見つかりません", 404);
 
-				if (($lastUpdate = $dh->execute(fn($db) => Board::getLastUpdate($db, $latest))) !== null && Util::isCachedByBrowser($lastUpdate))
+				if (($lastUpdate = $dh->execute(fn($db) => Board::getLastUpdate($db, $subject))) !== null && Util::isCachedByBrowser($lastUpdate))
 					Visualizer::notModified();
 				
 				if (Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
@@ -45,7 +45,7 @@ class MegalithHandler extends Handler
 					if (Util::isCachedByBrowser($lastUpdate))
 						Visualizer::notModified();
 					
-					$content = implode("\n", array_reverse(array_map(fn($x) => implode("<>", array_map("htmlspecialchars", array_map("strval", array
+					$content = implode("\n", array_reverse(array_map(fn($x) => implode("<>", array_map(fn($x) => Visualizer::escapeOutput($x), array_map("strval", array
 					(
 						"{$x->id}.dat",
 						$x->title,
@@ -107,7 +107,7 @@ class MegalithHandler extends Handler
 			if ($c->showTitle[Configuration::ON_SUBJECT])
 				$content = array
 				(
-					implode("<>", array_map("htmlspecialchars", array_map("strval", array
+					implode("<>", array_map(fn($x) => Visualizer::escapeOutput($x), array_map("strval", array
 					(
 						$_->title,
 						$c->showName[Configuration::ON_ENTRY] ? (Util::isEmpty($_->name) ? $c->defaultName : $_->name) : "",
@@ -166,7 +166,7 @@ class MegalithHandler extends Handler
 						"",
 						"",
 						date("Y/m/d H:i:s", $_->dateTime),
-						$_->point,
+						Configuration::$instance->showPoint[Configuration::ON_COMMENT] ? $_->point : 0,
 						"",
 						"",
 						"no"
@@ -174,7 +174,7 @@ class MegalithHandler extends Handler
 					array_map(fn($_) =>
 						strtr(
 							implode("<>",
-								array_map(fn($x) => htmlspecialchars(strval($x)),
+								array_map(fn($x) => Visualizer::escapeOutput(strval($x)),
 								[
 									$_->body,
 									(Util::isEmpty($_->name) ? Configuration::$instance->defaultName : $_->name),
@@ -266,7 +266,7 @@ class MegalithHandler extends Handler
 			return false;
 		}
 		else if (isset($_GET["log"]))
-			return Visualizer::redirect(IndexHandler::param("log", ""));
+			return Visualizer::redirect(strval(intval(IndexHandler::param("log", ""))));
 		else
 			return false;
 	}
