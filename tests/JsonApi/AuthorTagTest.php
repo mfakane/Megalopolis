@@ -38,4 +38,23 @@ final class AuthorTagTest extends TestCase
             self::assertContains($entry->tags[0], $i->tags);
         }
     }
+
+    // Rows written without input normalization keep a bare "&", which the
+    // normalized lookup ("&amp;") alone would never match.
+    #[DataProvider('drivers')]
+    public function testNamesWithBareAmpersandAreFound(string $driver): void
+    {
+        $service = 'candidate-' . $driver;
+        $entries = Http::json($service, '/index.php?path=' . rawurlencode('1.json'))->entries;
+        $names = array_values(array_filter(array_map(fn($x) => $x->name, $entries),
+            fn($x) => preg_match('/&(?!amp;|lt;|gt;|quot;|#)/', $x) === 1));
+        self::assertNotEmpty($names, 'Fixture must contain a bare ampersand name');
+
+        $author = Http::json($service, '/index.php?path=' . rawurlencode('author/' . $names[0] . '.json'));
+        self::assertSame($names[0], $author->name);
+        self::assertNotEmpty($author->entries);
+        foreach ($author->entries as $i) {
+            self::assertSame($names[0], $i->name);
+        }
+    }
 }

@@ -304,11 +304,11 @@ class Util
 		if ($pathInfo)
 			return $pathInfo;
 		else if (isset($_GET[self::PATH_INFO_QUERY_PARAM]) && is_string($_GET[self::PATH_INFO_QUERY_PARAM])) {
-			$pathInfo = self::escapeInput($_GET[self::PATH_INFO_QUERY_PARAM]);
+			$pathInfo = self::normalizePath($_GET[self::PATH_INFO_QUERY_PARAM]);
 			unset($_GET[self::PATH_INFO_QUERY_PARAM]);
 
 			return $pathInfo;
-		} else if ($rt = self::escapeInput((string)getenv("PATH_INFO")))
+		} else if ($rt = self::normalizePath((string)getenv("PATH_INFO")))
 			return $pathInfo = $rt;
 		else
 			return $pathInfo = mb_substr((string)mb_strstr(self::getPhpSelf(), self::INDEX_FILE_NAME), mb_strlen(self::INDEX_FILE_NAME));
@@ -424,6 +424,15 @@ class Util
 		$input = (string)mb_convert_encoding($input, "UTF-8");
 
 		return $input;
+	}
+
+	/**
+	 * パスには作者名やタグが保存されている値のまま含まれるため、& のエスケープなどはせず
+	 * 文字コードと制御文字だけを正規化する
+	 */
+	private static function normalizePath(string $input): string
+	{
+		return self::escapeControlChars((string)mb_convert_encoding($input, "UTF-8", "UTF-8,Windows-31J,eucJP-win"));
 	}
 
 	static function decodeInputs(): void

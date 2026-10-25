@@ -486,7 +486,7 @@ class IndexHandler extends Handler
 		$args = func_get_args();
 		$page = $args && ctype_digit($args[count($args) - 1]) ? max(intval(array_pop($args)) - 1, 0) : 0;
 		$isNameList = !$args;
-		$name = $isNameList ? null : Util::escapeInput(implode("/", $args));
+		$name = $isNameList ? null : implode("/", $args);
 
 		if (!Auth::hasSession(true))
 			if (!Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
@@ -512,8 +512,14 @@ class IndexHandler extends Handler
 				return Visualizer::redirect($arr ? Visualizer::currentHrefArray(Visualizer::nameHrefArgs("author", (string)array_rand($arr))) : "author");
 			}
 
-			if (strstr($name, "/random") == "/random") {
+			$isRandom = strstr($name, "/random") == "/random";
+
+			if ($isRandom)
 				$name = substr($name, 0, -strlen("/random"));
+
+			$name = self::lookupValue($dh, $name, fn($db, $x) => ThreadEntry::getEntryCountByName($db, $x));
+
+			if ($isRandom) {
 				$this->entries = $dh->execute(fn($db) => ThreadEntry::getEntriesByName($db, $name));
 
 				if ($this->entries) {
@@ -586,7 +592,7 @@ class IndexHandler extends Handler
 		$args = func_get_args();
 		$page = $args && ctype_digit($args[count($args) - 1]) ? max(intval(array_pop($args)) - 1, 0) : 0;
 		$isTagList = !$args;
-		$tag = $isTagList ? null : Util::escapeInput(implode("/", $args));
+		$tag = $isTagList ? null : implode("/", $args);
 
 		if (!Auth::hasSession(true) && !Configuration::$instance->showTitle[Configuration::ON_SUBJECT])
 			throw new ApplicationException("作品の閲覧は許可されていません", 403);
@@ -605,8 +611,14 @@ class IndexHandler extends Handler
 				return Visualizer::redirect($arr ? Visualizer::currentHrefArray(Visualizer::nameHrefArgs("tag", (string)array_rand($arr))) : "tag");
 			}
 
-			if (strstr($tag, "/random") == "/random") {
+			$isRandom = strstr($tag, "/random") == "/random";
+
+			if ($isRandom)
 				$tag = substr($tag, 0, -strlen("/random"));
+
+			$tag = self::lookupValue($dh, $tag, fn($db, $x) => ThreadEntry::getEntryCountByTag($db, $x));
+
+			if ($isRandom) {
 				$this->entries = $dh->execute(fn($db) => ThreadEntry::getEntriesByTag($db, $tag));
 
 				if ($this->entries) {
@@ -672,6 +684,24 @@ class IndexHandler extends Handler
 			default:
 				return Visualizer::visualize($isTagList ? "Index/Tag" : "Index/Index");
 		}
+	}
+
+	/**
+	 * URL に含まれる作者名・タグから検索に使う値を決める。
+	 * 通常は入力として正規化した値 (& を &amp; にするなど) で保存されているが、
+	 * 正規化されずに保存された古いデータは URL のままの値でしか一致しない
+	 * @param callable(\PDO, string): int $count
+	 */
+	private static function lookupValue(DataStoreHandle $dh, string $raw, callable $count): string
+	{
+		$escaped = Util::escapeInput($raw);
+
+		if ($raw !== $escaped &&
+			$dh->execute(fn($db) => $count($db, $escaped)) == 0 &&
+			$dh->execute(fn($db) => $count($db, $raw)) > 0)
+			return $raw;
+
+		return $escaped;
 	}
 
 	private static function toCSV(array $entries): bool
