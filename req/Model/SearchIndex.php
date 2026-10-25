@@ -6,6 +6,8 @@ use \PDO;
 abstract class SearchIndex
 {
 	static ?SearchIndex $instance;
+	/** フレーズ検索する全文検索では、索引も検索語も n-gram の重複を除かない */
+	protected const array PHRASE_WORDS = array("unique" => false);
 	private const string SEGMENT_SEPARATOR = '[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F';
 	static string $endchars = "　｛｝「」【】（）〈〉≪≫『』〔〕［］＜＞、。・…／＆！”＃＄％’ー＝＾～｜￥＋＊‘＠：；？＿";
 	
@@ -183,7 +185,8 @@ abstract class SearchIndex
 	}
 
 	/**
-	 * @param (?string|array{endOnIncompletedGram?: bool, noIncompletedGram?: bool})[] $strings
+	 * unique を false にすると重複した n-gram も出現順に返す (フレーズ検索で隣接を保つため)
+	 * @param (?string|array{endOnIncompletedGram?: bool, noIncompletedGram?: bool, unique?: bool})[] $strings
 	 * @return string[]
 	 */
 	function getWords(array $strings): array
@@ -193,6 +196,7 @@ abstract class SearchIndex
 		$gramMax = Configuration::$instance->maximumSearchIndexLength;
 		$endOnIncompletedGram = false;
 		$noIncompletedGram = false;
+		$unique = true;
 		
 		foreach ($strings as $i)
 			if (is_array($i))
@@ -202,21 +206,28 @@ abstract class SearchIndex
 				
 				if (isset($i["noIncompletedGram"]))
 					$noIncompletedGram = $i["noIncompletedGram"];
+				
+				if (isset($i["unique"]))
+					$unique = $i["unique"];
 			}
 			else if (is_string($i) && mb_strlen($i) > 0)
 				foreach ((array)mb_split(self::SEGMENT_SEPARATOR . self::$endchars . ']', $gramMax == -1 ? mb_strtolower($i) : mb_substr(mb_strtolower($i), 0, $gramMax)) as $j)
 					if ($l = mb_strlen((string)$j))
 						for ($k = 0; $k < $l; $k++)
-							if (!in_array($s = mb_substr((string)$j, $k, $gram), $rt))
-							{
-								if ($noIncompletedGram !== false && mb_strlen($s) < $gram)
-									break;
-								
-								$rt[] = $s;
-								
-								if ($endOnIncompletedGram !== false && mb_strlen($s) < $gram)
-									break;
-							}
+						{
+							$s = mb_substr((string)$j, $k, $gram);
+							
+							if ($unique && in_array($s, $rt))
+								continue;
+							
+							if ($noIncompletedGram !== false && mb_strlen($s) < $gram)
+								break;
+							
+							$rt[] = $s;
+							
+							if ($endOnIncompletedGram !== false && mb_strlen($s) < $gram)
+								break;
+						}
 		
 		return $rt;
 	}

@@ -28,12 +28,12 @@ class SQLiteSearchIndex extends SearchIndex
 		
 		$words = array_filter(array
 		(
-			"title" => $this->getWords([$thread->entry->title]),
-			"name" => $this->getWords([$thread->entry->name]),
-			"summary" => $this->getWords([$thread->entry->summary]),
-			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([$thread->body]) : null,
-			"afterword" => $this->getWords([$thread->afterword]),
-			"tag" => SearchIndex::getWords($thread->entry->tags)
+			"title" => $this->getWords([self::PHRASE_WORDS, $thread->entry->title]),
+			"name" => $this->getWords([self::PHRASE_WORDS, $thread->entry->name]),
+			"summary" => $this->getWords([self::PHRASE_WORDS, $thread->entry->summary]),
+			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([self::PHRASE_WORDS, $thread->body]) : null,
+			"afterword" => $this->getWords([self::PHRASE_WORDS, $thread->afterword]),
+			"tag" => $this->getWords(array_merge([self::PHRASE_WORDS], $thread->entry->tags))
 		));
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
@@ -70,38 +70,7 @@ class SQLiteSearchIndex extends SearchIndex
 		if (!$query)
 			return array();
 		
-		$queryArguments = array();
-		
-		foreach ($query as $i)
-		{
-			$prefix = "";
-			
-			if (strpos($i, "-") === 0)
-			{
-				$i = substr($i, 1);
-				$prefix = "-";
-			}
-			
-			if ($words = $this->getWords([array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($i) >= $this->gramLength), $i]))
-			{
-				$currentWord = array();
-				
-				foreach ($words as $j)
-				{
-					$currentLength = mb_strlen($j);
-					
-					if ($currentLength == $this->gramLength)
-						$currentWord[] = $prefix . $j;
-					else if (!$prefix)
-						$currentWord[] = "{$j}*";
-				}
-				
-				if ($currentWord)
-					$queryArguments[] = '"' . implode(" ", $currentWord) . '"';
-			}
-		}
-		
-		if (!($queryArguments = array_filter($queryArguments)))
+		if (!($matchQuery = $this->buildMatchQuery($query, self::hasEnhancedQuerySyntax($idb))))
 			return array();
 		
 		$targetColumns = $type == null ? array_keys(self::$searchIndexSchema) : $type;
@@ -113,9 +82,81 @@ class SQLiteSearchIndex extends SearchIndex
 			self::INDEX_TABLE
 		)));
 		
-		Util::executeStatement($st, array_fill(0, count($targetColumns), implode(" ", $queryArguments)));
+		Util::executeStatement($st, array_fill(0, count($targetColumns), $matchQuery));
 		
 		return $st?->fetchAll(PDO::FETCH_COLUMN, 0) ?? array();
+	}
+	
+	/**
+	 * 検索語から MATCH 用の条件を作る
+	 * @param string[] $query
+	 */
+	function buildMatchQuery(array $query, bool $enhancedSyntax): string
+	{
+		$include = array();
+		$exclude = array();
+		
+		foreach ($query as $i)
+		{
+			$isExclude = strpos($i, "-") === 0;
+			
+			if ($isExclude)
+				$i = substr($i, 1);
+			
+			// 索引は記号などで区切った部分ごとに n-gram にしているため、部分ごとに条件にする
+			$terms = array();
+			
+			foreach (self::splitSegments($i) as $segment)
+			{
+				$words = $this->getWords([self::PHRASE_WORDS + array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($segment) >= $this->gramLength), $segment]);
+				
+				if (!$words)
+					continue;
+				else if (mb_strlen($words[0]) == $this->gramLength)
+					$terms[] = '"' . implode(" ", $words) . '"';
+				else
+					$terms[] = "{$words[0]}*";
+			}
+			
+			if (!$terms)
+				continue;
+			else if ($isExclude)
+				$exclude[] = $terms;
+			else
+				array_push($include, ...$terms);
+		}
+		
+		// 除外だけの条件は全文検索では表せない
+		if (!$include)
+			return "";
+		
+		$rt = implode(" ", $include);
+		
+		foreach ($exclude as $terms)
+			if ($enhancedSyntax)
+				$rt .= " NOT " . (count($terms) == 1 ? $terms[0] : "(" . implode(" AND ", $terms) . ")");
+			else
+				// 標準の構文ではまとめて除外できないため、いずれかの部分を含むものを除外する
+				foreach ($terms as $j)
+					$rt .= " -{$j}";
+		
+		return $rt;
+	}
+	
+	/**
+	 * 拡張構文 (AND, OR, NOT と括弧) が使えるか。標準の構文では除外は - で表す
+	 */
+	private static function hasEnhancedQuerySyntax(PDO $db): bool
+	{
+		static $rt = null;
+		
+		if ($rt === null)
+		{
+			$st = $db->query("pragma compile_options");
+			$rt = $st !== false && in_array("ENABLE_FTS3_PARENTHESIS", $st->fetchAll(PDO::FETCH_COLUMN, 0));
+		}
+		
+		return $rt;
 	}
 
 	#[\Override]

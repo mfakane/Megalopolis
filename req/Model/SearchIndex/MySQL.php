@@ -19,12 +19,12 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 
 		/** @var array<string, string[]> */
 		$words = array_filter(array(
-			"title" => $this->getWords([$thread->entry->title]),
-			"name" => $this->getWords([$thread->entry->name]),
-			"summary" => $this->getWords([$thread->entry->summary]),
-			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([$thread->body]) : null,
-			"afterword" => $this->getWords([$thread->afterword]),
-			"tag" => SearchIndex::getWords($thread->entry->tags)
+			"title" => $this->getWords([self::PHRASE_WORDS, $thread->entry->title]),
+			"name" => $this->getWords([self::PHRASE_WORDS, $thread->entry->name]),
+			"summary" => $this->getWords([self::PHRASE_WORDS, $thread->entry->summary]),
+			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([self::PHRASE_WORDS, $thread->body]) : null,
+			"afterword" => $this->getWords([self::PHRASE_WORDS, $thread->afterword]),
+			"tag" => $this->getWords(array_merge([self::PHRASE_WORDS], $thread->entry->tags))
 		));
 
 		foreach ($words as $k => $v)
@@ -125,7 +125,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 			$terms = array();
 
 			foreach (self::splitSegments($i) as $segment) {
-				$words = $this->getWords([array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($segment) >= $this->gramLength), $segment]);
+				$words = $this->getWords([self::PHRASE_WORDS + array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($segment) >= $this->gramLength), $segment]);
 
 				if (!$words)
 					continue;

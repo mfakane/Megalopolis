@@ -30,6 +30,7 @@ final class MySQLSearchQueryTest extends TestCase
         yield 'excluded segments are excluded together' => [['-HTML:plain'], '-(+"html" +"plai lain")'];
         yield 'several words' => [['plain', '-abc'], '+"plai lain" -abc_'];
         yield 'symbols only' => [[':-'], ''];
+        yield 'repeated grams keep their order' => [['aaaaab'], '+"aaaa aaaa aaab"'];
     }
 
     #[DataProvider('queries')]
