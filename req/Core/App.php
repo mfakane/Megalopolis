@@ -55,7 +55,9 @@ class App
 
 	private static function isBBQed(): bool
 	{
-		return isset($_SERVER["REMOTE_ADDR"]) && substr_count($_SERVER["REMOTE_ADDR"], ".") == 3 && gethostbyname(implode(".", array_reverse(explode(".", $_SERVER["REMOTE_ADDR"]))) . ".niku.2ch.net") == "127.0.0.2";
+		$addr = Util::getRemoteAddress();
+
+		return $addr !== null && substr_count($addr, ".") == 3 && gethostbyname(implode(".", array_reverse(explode(".", $addr))) . ".niku.2ch.net") == "127.0.0.2";
 	}
 
 	/**
@@ -63,7 +65,7 @@ class App
 	 */
 	private static function matchesAddress($arr): bool
 	{
-		$addr = $_SERVER["REMOTE_ADDR"] ?? null;
+		$addr = Util::getRemoteAddress();
 		$host = Util::getRemoteHost();
 
 		foreach ($arr as $i)

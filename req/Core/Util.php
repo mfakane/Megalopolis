@@ -169,9 +169,51 @@ class Util
 			return null;
 	}
 
+	/**
+	 * 利用者の IP アドレス。X-Forwarded-For は利用者が自由に送れるため、
+	 * 接続元が信頼するリバースプロキシの場合だけ使う
+	 */
+	static function getRemoteAddress(): ?string
+	{
+		$addr = $_SERVER["REMOTE_ADDR"] ?? null;
+
+		if ($addr === null || !isset($_SERVER["HTTP_X_FORWARDED_FOR"]) || !self::isTrustedProxy($addr))
+			return $addr;
+
+		// プロキシは右に追記していくため、信頼するプロキシを除いた一番右が利用者
+		$chain = array_values(array_filter(
+			array_map("trim", explode(",", $_SERVER["HTTP_X_FORWARDED_FOR"])),
+			fn($x) => filter_var($x, FILTER_VALIDATE_IP) !== false
+		));
+
+		foreach (array_reverse($chain) as $i)
+			if (!self::isTrustedProxy($i))
+				return $i;
+
+		return $chain[0] ?? $addr;
+	}
+
+	private static function isTrustedProxy(string $addr): bool
+	{
+		if (filter_var($addr, FILTER_VALIDATE_IP) === false)
+			return false;
+
+		$proxies = Configuration::$instance->trustedProxies;
+
+		// 指定が無ければ、インターネットから直接は来ないプライベートアドレスとループバックを信頼する
+		if ($proxies === null)
+			return filter_var($addr, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
+
+		foreach ($proxies as $i)
+			if (self::wildcard($i, $addr))
+				return true;
+
+		return false;
+	}
+
 	static function remoteHostMatches(?string $host): bool
 	{
-		if (isset($_SERVER["REMOTE_ADDR"]) && $_SERVER["REMOTE_ADDR"] == $host)
+		if (($addr = self::getRemoteAddress()) !== null && $addr == $host)
 			return true;
 
 		return self::getRemoteHost() == $host;
@@ -182,8 +224,8 @@ class Util
 		if (self::canGetMobileUniqueID() && ($id = self::getMobileUniqueID()) !== null)
 			return $id;
 
-		if (isset($_SERVER["HTTP_X_FORWARDED_FOR"]))
-			return $_SERVER["HTTP_X_FORWARDED_FOR"];
+		if (($addr = self::getRemoteAddress()) !== null && $addr !== ($_SERVER["REMOTE_ADDR"] ?? null))
+			return $addr;
 
 		if (isset($_SERVER["REMOTE_HOST"]) && $_SERVER["REMOTE_HOST"])
 			return $_SERVER["REMOTE_HOST"];

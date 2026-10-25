@@ -97,6 +97,12 @@ $config->allowWrite = array
 // 契約者固有 ID は docomo, kddi, softbank, emobile に対応しています
 $config->denyWriteFromMobileWithoutID = false;
 
+// X-Forwarded-For ヘッダーを信頼するリバースプロキシ (文字列一覧または null)
+// 接続元の IP アドレスがこの一覧と一致する場合だけ、X-Forwarded-For から利用者の IP アドレスを取得します。
+// null の場合はプライベートアドレス (10.*, 192.168.* など) とループバック (127.0.0.1 など) を信頼します。
+// ワイルドカード (*, ?, [] など) も使用可能です
+$config->trustedProxies = null;
+
 // 検索を許可するか (true/false)
 $config->useSearch = true;
 

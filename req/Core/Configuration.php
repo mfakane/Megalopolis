@@ -51,6 +51,11 @@ class Configuration
 	/** @var string[] */
 	public array $allowWrite = array();
 	public bool $denyWriteFromMobileWithoutID = false;
+	/**
+	 * X-Forwarded-For を信頼するリバースプロキシ。null の場合はプライベートアドレスとループバック
+	 * @var ?string[]
+	 */
+	public ?array $trustedProxies = null;
 	public bool $useSearch = true;
 	/** @var ?array{0: string, 1: string, 2?: array<string, string>} */
 	public ?array $customSearch = null;
