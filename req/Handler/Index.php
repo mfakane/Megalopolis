@@ -47,8 +47,7 @@ class IndexHandler extends Handler
 			Auth::ensureToken();
 			Auth::createToken();
 
-			if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
-				Auth::loginError("管理者パスワードが一致しません");
+			Auth::loginAsAdmin("管理者パスワードが一致しません");
 
 			$ids = array_map("intval", self::postParamAsArray("id", []));
 			$dh->withTransactionCombo(
@@ -274,8 +273,7 @@ class IndexHandler extends Handler
 			Auth::ensureToken();
 			Auth::createToken();
 
-			if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
-				Auth::loginError("管理者パスワードが一致しません");
+			Auth::loginAsAdmin("管理者パスワードが一致しません");
 
 			$ids = array_map("intval", self::postParamAsArray("id", []));
 			$rt["count"] -= $dh->withTransactionCombo(

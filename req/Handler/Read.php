@@ -80,8 +80,7 @@ class ReadHandler extends Handler
 			Auth::ensureToken();
 			Auth::createToken();
 
-			if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
-				Auth::loginError("管理者パスワードが一致しません");
+			Auth::loginAsAdmin("管理者パスワードが一致しません");
 
 			$ids = array_map(fn(string $x) => intval($x), IndexHandler::postParamAsArray("id", []));
 
@@ -126,8 +125,7 @@ class ReadHandler extends Handler
 			Auth::$label = "管理者パスワード";
 			Auth::$details = '<p class="notify info">管理者のみ新規投稿が可能です。続行するにはパスワードを入力してください</p>';
 
-			if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
-				Auth::loginError("パスワードが一致しません");
+			Auth::loginAsAdmin("パスワードが一致しません");
 		}
 
 		if (!$_POST) {
@@ -228,8 +226,7 @@ class ReadHandler extends Handler
 						Auth::$label = "管理者パスワード";
 						Auth::$details = '<p class="notify info">管理者のみ新規投稿が可能です。続行するにはパスワードを入力してください</p>';
 
-						if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
-							Auth::loginError("パスワードが一致しません");
+						Auth::loginAsAdmin("パスワードが一致しません");
 					}
 				} else {
 					$this->thread = self::loadThread($db, $idb, $id);

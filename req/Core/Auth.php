@@ -242,6 +242,20 @@ class Auth
 		}
 	}
 
+	/**
+	 * 管理者のパスワードを確かめ、パスワードで認証した場合は以降のリクエストのためにセッションに保存する
+	 */
+	static function loginAsAdmin(string $error = "管理者パスワードが一致しません"): void
+	{
+		$password = self::login(true);
+
+		if ($password === false || Util::hashEquals(Configuration::$instance->adminHash ?? "", $password) === false)
+			self::loginError($error);
+
+		if (!self::hasSession(true))
+			self::finalizeLogin($password);
+	}
+
 	static function finalizeLogin(string $password): void
 	{
 		self::clearToken();

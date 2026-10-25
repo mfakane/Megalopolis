@@ -16,8 +16,10 @@ class UtilHandler extends Handler
 	{
 		Auth::$caption = "管理者ログイン";
 
-		if (!Configuration::$instance->utilsEnabled || Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
+		if (!Configuration::$instance->utilsEnabled)
 			Auth::loginError("管理者パスワードが一致しません");
+
+		Auth::loginAsAdmin();
 
 		return Visualizer::visualize();
 	}
@@ -26,8 +28,7 @@ class UtilHandler extends Handler
 	{
 		Auth::$caption = "管理者ログイン";
 
-		if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
-			Auth::loginError("管理者パスワードが一致しません");
+		Auth::loginAsAdmin("管理者パスワードが一致しません");
 
 		Auth::cleanSession(!Auth::hasSession(true));
 
@@ -71,8 +72,7 @@ class UtilHandler extends Handler
 
 				$idh = App::openDB(App::INDEX_DATABASE);
 
-				if (Util::hashEquals(Configuration::$instance->adminHash ?? "", Auth::login(true)) === false)
-					Auth::loginError("管理者パスワードが一致しません");
+				Auth::loginAsAdmin("管理者パスワードが一致しません");
 
 				$ids = array_map(fn(string $x) => intval($x), IndexHandler::postParamAsArray("ids", []));
 
@@ -848,13 +848,6 @@ class UtilHandler extends Handler
 		if (!$requireAuth)
 			return;
 
-		$password = Auth::login(true);
-
-		if ($password === false || Util::hashEquals(Configuration::$instance->adminHash ?? "", $password) === false)
-			Auth::loginError("管理者パスワードが一致しません");
-
-		// パスワードで認証した場合は、以降のリクエストのためにセッションへ保存する
-		if (!Auth::hasSession(true))
-			Auth::finalizeLogin($password);
+		Auth::loginAsAdmin();
 	}
 }
