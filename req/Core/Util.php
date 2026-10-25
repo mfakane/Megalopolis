@@ -462,11 +462,13 @@ class Util
 
 	static function hashEquals(string $hash, string|false $raw): bool|string
 	{
-		if ($raw == false) return false;
+		// "0" も有効なパスワードとして扱う (== false では "0" が空とみなされる)
+		if ($raw === false || $raw === "") return false;
 
 		try {
-			if (empty($hash))
-				return empty($raw);
+			// ハッシュの無い (パスワードの無い) データには、どのパスワードも一致しない
+			if ($hash === "")
+				return false;
 			else if (self::isLength($hash, 13) && crypt($raw, mb_substr($hash, 0, 2)) == $hash)
 				return self::HASH_TYPE_ANTHOLOGYS;
 			else if (self::isLength($hash, 40) == 40 && sha1($raw) == $hash)
