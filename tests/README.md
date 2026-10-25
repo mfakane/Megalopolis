@@ -59,7 +59,12 @@ for retained legacy APIs and narrowly documented unused-code exceptions.
 ## Isolation and evidence
 
 The checked-in [r46 fixtures](Fixtures/r46/README.md) are decompressed/imported into
-four independent disposable stores: SQLite/MySQL × r46/current. The baseline
+four independent disposable stores: SQLite/MySQL × r46/current. The MySQL dump
+is also imported into MariaDB 10.5 with its default strict `sql_mode`, read by the
+current version and compared with the MySQL r46 baseline. A second MariaDB copy is
+converted to utf8mb4 through the real administrator tool
+(`tests/Database/CharsetConversionTest.php`: start/abort, copy, swap, reindex,
+then the fixture hashes again). The baseline
 archives are never mounted writable. Each invocation uses a new Compose project;
 the EXIT trap removes **only that project's** containers and volumes, including
 on test failure. Original `r46-fixtures/` exports and fixture-generation volumes
