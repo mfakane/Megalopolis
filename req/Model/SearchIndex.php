@@ -6,6 +6,7 @@ use \PDO;
 abstract class SearchIndex
 {
 	static ?SearchIndex $instance;
+	private const string SEGMENT_SEPARATOR = '[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F';
 	static string $endchars = "　｛｝「」【】（）〈〉≪≫『』〔〕［］＜＞、。・…／＆！”＃＄％’ー＝＾～｜￥＋＊‘＠：；？＿";
 	
 	protected int $gramLength = 2;
@@ -171,6 +172,17 @@ abstract class SearchIndex
 	}
 
 	/**
+	 * 索引に登録するときと同じく、記号などで区切った部分に分ける
+	 * @return string[]
+	 */
+	static function splitSegments(string $s): array
+	{
+		$segments = mb_split(self::SEGMENT_SEPARATOR . self::$endchars . ']', mb_strtolower($s));
+
+		return $segments === false ? array() : array_values(array_filter($segments, fn($x) => $x !== ""));
+	}
+
+	/**
 	 * @param (?string|array{endOnIncompletedGram?: bool, noIncompletedGram?: bool})[] $strings
 	 * @return string[]
 	 */
@@ -192,7 +204,7 @@ abstract class SearchIndex
 					$noIncompletedGram = $i["noIncompletedGram"];
 			}
 			else if (is_string($i) && mb_strlen($i) > 0)
-				foreach ((array)mb_split('[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F' . self::$endchars . ']', $gramMax == -1 ? mb_strtolower($i) : mb_substr(mb_strtolower($i), 0, $gramMax)) as $j)
+				foreach ((array)mb_split(self::SEGMENT_SEPARATOR . self::$endchars . ']', $gramMax == -1 ? mb_strtolower($i) : mb_substr(mb_strtolower($i), 0, $gramMax)) as $j)
 					if ($l = mb_strlen((string)$j))
 						for ($k = 0; $k < $l; $k++)
 							if (!in_array($s = mb_substr((string)$j, $k, $gram), $rt))

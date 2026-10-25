@@ -78,40 +78,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		if (!$query)
 			return array();
 
-		$queryArguments = array();
-
-		foreach ($query as $i) {
-			$prefix = "+";
-
-			if (strpos($i, "-") === 0) {
-				$i = substr($i, 1);
-				$prefix = "-";
-			}
-
-			if ($words = $this->getWords([array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($i) >= $this->gramLength), $i])) {
-				$currentWord = array();
-
-				foreach ($words as $j) {
-					$currentLength = mb_strlen($j);
-
-					if ($currentLength == $this->gramLength)
-						$currentWord[] = $j;
-					else {
-						if ($currentWord) {
-							$queryArguments[] = $prefix . '"' . implode(" ", $currentWord) . '"';
-							$currentWord = array();
-						}
-
-						$queryArguments[] = $prefix . $j . (Configuration::$instance->mysqlSearchUseHeadMatching ? "*" : str_repeat("_", $this->gramLength - $currentLength));
-					}
-				}
-
-				if ($currentWord)
-					$queryArguments[] = $prefix . '"' . implode(" ", $currentWord) . '"';
-			}
-		}
-
-		if (!($queryArguments = array_filter($queryArguments)))
+		if (!($booleanQuery = $this->buildBooleanQuery($query)))
 			return array();
 
 		$targetColumns = $type == null ? array_keys(self::$searchIndexSchema) : $type;
@@ -124,9 +91,51 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 			is_array($ids) ? "where docid in (" . ($ids ? implode(", ", $ids) : -1) . ")" : "",
 			self::INDEX_TABLE
 		)));
-		Util::executeStatement($st, array_fill(0, count($targetColumns), implode(" ", $queryArguments)));
+		Util::executeStatement($st, array_fill(0, count($targetColumns), $booleanQuery));
 
 		return $st?->fetchAll(PDO::FETCH_COLUMN, 0) ?? array();
+	}
+
+	/**
+	 * 検索語から MATCH ... AGAINST の boolean mode 用の条件を作る
+	 * @param string[] $query
+	 */
+	function buildBooleanQuery(array $query): string
+	{
+		$queryArguments = array();
+
+		foreach ($query as $i) {
+			$exclude = strpos($i, "-") === 0;
+
+			if ($exclude)
+				$i = substr($i, 1);
+
+			// 索引は記号などで区切った部分ごとに n-gram にしているため、部分ごとに条件にする
+			$terms = array();
+
+			foreach (self::splitSegments($i) as $segment) {
+				$words = $this->getWords([array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($segment) >= $this->gramLength), $segment]);
+
+				if (!$words)
+					continue;
+				else if (mb_strlen($words[0]) == $this->gramLength)
+					$terms[] = '"' . implode(" ", $words) . '"';
+				else
+					$terms[] = $words[0] . (Configuration::$instance->mysqlSearchUseHeadMatching ? "*" : str_repeat("_", $this->gramLength - mb_strlen($words[0])));
+			}
+
+			if (!$terms)
+				continue;
+			else if (!$exclude)
+				foreach ($terms as $j)
+					$queryArguments[] = "+{$j}";
+			else if (count($terms) == 1)
+				$queryArguments[] = "-{$terms[0]}";
+			else
+				$queryArguments[] = "-(+" . implode(" +", $terms) . ")";
+		}
+
+		return implode(" ", $queryArguments);
 	}
 
 	#[\Override]
