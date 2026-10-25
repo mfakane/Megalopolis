@@ -1181,7 +1181,7 @@ class ThreadEntry
 				"select " . ($isMysql ? "sql_calc_found_rows " : " ") .
 					"e.*, t.* {$sql} order by t.id " . ($order == Board::ORDER_ASCEND ? "asc" : "desc") .
 					(is_null($limit) ? "" : " limit {$limit} offset {$offset}")
-			)), array(
+			)), $params = array(
 			":begin" => $subjectRange[0],
 			":end" => $subjectRange[1],
 			":host" => str_replace("*", "%", $host)
@@ -1208,7 +1208,7 @@ class ThreadEntry
 				$foundItems = intval(array_pop($found));
 			}
 		} else {
-			Util::executeStatement($st2 = Util::ensureStatement($db, $db->prepare("select count(*) {$sql}")));
+			Util::executeStatement($st2 = Util::ensureStatement($db, $db->prepare("select count(*) {$sql}")), $params);
 			if ($st2) {
 				// $foundItems は型付きプロパティの参照のことがあるので、配列を直接代入しない
 				$found = $st2->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
