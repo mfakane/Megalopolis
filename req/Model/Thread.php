@@ -143,9 +143,28 @@ class Thread
 		return is_array($rt) && isset($rt[$page - 1]) ? $rt[$page - 1] : null;
 	}
 
+	/**
+	 * コメントと評価の ID は投稿した時刻にしているため、同じ秒の投稿で上書きしないよう空いている値にずらす。
+	 * コメントに付いた評価はコメントと同じ ID を使うため、どちらのテーブルとも重ならない値にする
+	 */
+	private static function getUnusedResponseID(PDO $db, int $id): int
+	{
+		$st = Util::ensureStatement($db, $db->prepare(sprintf(
+			'select (select count(*) from %s where id = ?) + (select count(*) from %s where id = ?)',
+			App::COMMENT_TABLE,
+			App::EVALUATION_TABLE
+		)));
+
+		while ($st && Util::executeStatement($st, array($id, $id)) && (int)$st->fetchColumn() > 0)
+			$id++;
+
+		return $id;
+	}
+
 	function evaluate(PDO $db, int $point, bool $saveThread = true): Evaluation
 	{
 		$eval = Evaluation::forEntry($this->entry);
+		$eval->id = self::getUnusedResponseID($db, $eval->id);
 		$eval->point = $point;
 		$eval->host = Util::getRemoteHost();
 		$eval->save($db);
@@ -180,6 +199,7 @@ class Thread
 	function comment(PDO $db, string $name, string $mail, string $body, string $password, int $point, bool $saveThread = true): Comment
 	{
 		$comment = Comment::forEntry($this->entry);
+		$comment->id = self::getUnusedResponseID($db, $comment->id);
 		$comment->name = $name;
 		$comment->mail = $mail;
 		$comment->body = $body;
