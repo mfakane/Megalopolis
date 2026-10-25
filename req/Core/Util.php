@@ -1127,9 +1127,13 @@ class Util
 		return isset($str[$length - 1]);
 	}
 
+	/** @var array<string, true> このリクエストが取得しているロック */
+	private static array $heldLocks = array();
+
 	static function acquireWriteLock(string $name = "default", int $lifetime = 60): string
 	{
-		$path = rtrim(Constant::DATA_DIR, "/") . "/" . $name . ".lock";
+		// 終了時の処理ではカレントディレクトリが変わることがあるため、絶対パスにする
+		$path = rtrim(realpath(Constant::DATA_DIR) ?: Constant::DATA_DIR, "/") . "/" . $name . ".lock";
 
 		while (!@mkdir($path)) {
 			clearstatcache();
@@ -1141,11 +1145,25 @@ class Util
 			usleep(50 * 1000);
 		}
 
+		// 例外や exit で途中で終わった場合も、リクエストの終わりに必ず解放する
+		if (!self::$heldLocks)
+			register_shutdown_function(function () {
+				foreach (array_keys(self::$heldLocks) as $i)
+					self::releaseLock($i);
+			});
+
+		self::$heldLocks[$path] = true;
+
 		return $path;
 	}
 
 	static function releaseLock(string $p): void
 	{
-		rmdir($p);
+		// 解放した後に他のリクエストが取得したロックは消さない
+		if (!isset(self::$heldLocks[$p]))
+			return;
+
+		unset(self::$heldLocks[$p]);
+		@rmdir($p);
 	}
 }
