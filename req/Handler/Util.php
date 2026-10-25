@@ -134,6 +134,10 @@ class UtilHandler extends Handler
 
 		self::ensureTestMode();
 
+		// 処理は JavaScript から JSON で呼び出す
+		if (App::$handlerType != "json")
+			return Visualizer::visualize();
+
 		if (isset($_GET["p"])) {
 			$param = IndexHandler::param("p");
 
@@ -148,28 +152,22 @@ class UtilHandler extends Handler
 				$idh->close();
 				$dh->close();
 
-				if (App::$handlerType == "json")
-					return Visualizer::json(array(
-						"remainingChildren" => 1,
-						"allChildren" => 1,
-						"nextOffset" => 0,
-						"current" => 0,
-						"next" => 1,
-						"max" => $maxSubject,
-						"count" => 0,
-						"buffer" => $defaultBuffer
-					));
-				else
-					return Visualizer::redirect("util/reindex?p=1");
+				return Visualizer::json(array(
+					"remainingChildren" => 1,
+					"allChildren" => 1,
+					"nextOffset" => 0,
+					"current" => 0,
+					"next" => 1,
+					"max" => $maxSubject,
+					"count" => 0,
+					"buffer" => $defaultBuffer
+				));
 			} else if ($param == "end") {
 				Visualizer::$data = isset($_GET["c"]) ? intval($_GET["c"]) : 0;
 
-				if (App::$handlerType == "json")
-					return Visualizer::json(array(
-						"count" => Visualizer::$data
-					));
-				else
-					return Visualizer::visualize();
+				return Visualizer::json(array(
+					"count" => Visualizer::$data
+				));
 			} else {
 				$current = intval($param);
 				$count = isset($_GET["c"]) ? intval($_GET["c"]) : 0;
@@ -194,19 +192,16 @@ class UtilHandler extends Handler
 				$idh->close();
 				$dh->close();
 
-				if (App::$handlerType == "json")
-					return Visualizer::json(array(
-						"remainingChildren" => $rt["remaining"],
-						"allChildren" => $rt["count"],
-						"nextOffset" => $nextOffset,
-						"current" => $current,
-						"next" => $next > $maxSubject ? null : $next,
-						"max" => $maxSubject,
-						"count" => $count,
-						"buffer" => max($buffer, $minimumBuffer)
-					));
-				else
-					return Visualizer::redirect($next > $maxSubject ? "util/reindex?p=end&c={$count}" : "util/reindex?p={$next}&c={$count}&o={$nextOffset}");
+				return Visualizer::json(array(
+					"remainingChildren" => $rt["remaining"],
+					"allChildren" => $rt["count"],
+					"nextOffset" => $nextOffset,
+					"current" => $current,
+					"next" => $next > $maxSubject ? null : $next,
+					"max" => $maxSubject,
+					"count" => $count,
+					"buffer" => max($buffer, $minimumBuffer)
+				));
 			}
 		} else
 			return Visualizer::visualize();
@@ -233,6 +228,10 @@ class UtilHandler extends Handler
 		if (is_dir("{$dir}dat") && (!is_dir("{$dir}sub") || !is_dir("{$dir}com") || !is_dir("{$dir}aft"))) throw new ApplicationException("ディレクトリ {$dir}dat/ が見つかりましたが、他のログディレクトリが見つかりません");
 		if (is_dir("{$dir}com") && (!is_dir("{$dir}sub") || !is_dir("{$dir}dat") || !is_dir("{$dir}aft"))) throw new ApplicationException("ディレクトリ {$dir}com/ が見つかりましたが、他のログディレクトリが見つかりません");
 		if (is_dir("{$dir}aft") && (!is_dir("{$dir}sub") || !is_dir("{$dir}dat") || !is_dir("{$dir}com"))) throw new ApplicationException("ディレクトリ {$dir}aft/ が見つかりましたが、他のログディレクトリが見つかりません");
+
+		// 処理は JavaScript から JSON で呼び出す
+		if (App::$handlerType != "json")
+			return Visualizer::visualize();
 
 		if (isset($_GET["p"])) {
 			$params = explode(",", IndexHandler::param("p", ""));
@@ -276,26 +275,20 @@ class UtilHandler extends Handler
 				$subjectRange = array_map(fn($k, $v) => ($k + 1) . "-{$v['start']}-{$v['end']}", array_keys($subjectRange), $subjectRange);
 				$subjectRange[] = "end";
 
-				if (App::$handlerType == "json")
-					return Visualizer::json(array(
-						"remaining" => $subjectRange,
-						"count" => 0,
-						"buffer" => $defaultBuffer,
-						"allowOverwrite" => $allowOverwrite ? "yes" : "no",
-						"whenNoConvertLineBreakFieldOnly" => $whenNoConvertLineBreakFieldOnly ? "yes" : "no",
-						"whenContainsWin31JOnly" => $whenContainsWin31JOnly ? "yes" : "no",
-					));
-				else
-					return Visualizer::redirect("util/convert?p=" . urlencode(implode(",", $subjectRange)));
+				return Visualizer::json(array(
+					"remaining" => $subjectRange,
+					"count" => 0,
+					"buffer" => $defaultBuffer,
+					"allowOverwrite" => $allowOverwrite ? "yes" : "no",
+					"whenNoConvertLineBreakFieldOnly" => $whenNoConvertLineBreakFieldOnly ? "yes" : "no",
+					"whenContainsWin31JOnly" => $whenContainsWin31JOnly ? "yes" : "no",
+				));
 			} else if ($params[0] == "end") {
 				Visualizer::$data = isset($_GET["c"]) ? intval($_GET["c"]) : 0;
 
-				if (App::$handlerType == "json")
-					return Visualizer::json(array(
-						"count" => Visualizer::$data
-					));
-				else
-					return Visualizer::visualize();
+				return Visualizer::json(array(
+					"count" => Visualizer::$data
+				));
 			} else {
 				$l = explode("-", array_shift($params));
 				$subject = intval($l[0]);
@@ -414,18 +407,15 @@ class UtilHandler extends Handler
 				$idh->close();
 				$dh->close();
 
-				if (App::$handlerType == "json")
-					return Visualizer::json(array(
-						"first" => $firstID,
-						"remaining" => $params,
-						"count" => $count,
-						"buffer" => max($buffer, $minimumBuffer),
-						"allowOverwrite" => $allowOverwrite ? "yes" : "no",
-						"whenNoConvertLineBreakFieldOnly" => $whenNoConvertLineBreakFieldOnly ? "yes" : "no",
-						"whenContainsWin31JOnly" => $whenContainsWin31JOnly ? "yes" : "no"
-					));
-				else
-					return Visualizer::redirect("util/convert?p=" . urlencode(implode(",", $params)) . "&c={$count}");
+				return Visualizer::json(array(
+					"first" => $firstID,
+					"remaining" => $params,
+					"count" => $count,
+					"buffer" => max($buffer, $minimumBuffer),
+					"allowOverwrite" => $allowOverwrite ? "yes" : "no",
+					"whenNoConvertLineBreakFieldOnly" => $whenNoConvertLineBreakFieldOnly ? "yes" : "no",
+					"whenContainsWin31JOnly" => $whenContainsWin31JOnly ? "yes" : "no"
+				));
 			}
 		} else
 			return Visualizer::visualize();
@@ -446,33 +436,31 @@ class UtilHandler extends Handler
 		if (is_dir("{$dir}com") && (!is_dir("{$dir}sub") || !is_dir("{$dir}dat") || !is_dir("{$dir}aft"))) throw new ApplicationException("ディレクトリ {$dir}com/ が見つかりましたが、他のログディレクトリが見つかりません");
 		if (is_dir("{$dir}aft") && (!is_dir("{$dir}sub") || !is_dir("{$dir}dat") || !is_dir("{$dir}com"))) throw new ApplicationException("ディレクトリ {$dir}aft/ が見つかりましたが、他のログディレクトリが見つかりません");
 
+		// 処理は JavaScript から JSON で呼び出す
+		if (App::$handlerType != "json")
+			return Visualizer::visualize("Util/Convert/Tags");
+
 		if (IndexHandler::param("p") == "list") {
 			$dh = App::openDB();
 			$subjectCount = $dh->execute(fn($db) => Board::getLatestSubject($db));
 			$dh->close();
 
-			if (App::$handlerType == "json")
-				return Visualizer::json(array(
-					"remainingChildren" => 1,
-					"allChildren" => 1,
-					"nextOffset" => 0,
-					"current" => 0,
-					"next" => 1,
-					"max" => $subjectCount,
-					"count" => 0,
-					"buffer" => $defaultBuffer
-				));
-			else
-				return Visualizer::redirect("util/convert/tags?s=1&o=0&m={$subjectCount}&c=0");
+			return Visualizer::json(array(
+				"remainingChildren" => 1,
+				"allChildren" => 1,
+				"nextOffset" => 0,
+				"current" => 0,
+				"next" => 1,
+				"max" => $subjectCount,
+				"count" => 0,
+				"buffer" => $defaultBuffer
+			));
 		} else if (IndexHandler::param("p") == "end") {
 			Visualizer::$data = intval(IndexHandler::param("c", "0"));
 
-			if (App::$handlerType == "json")
-				return Visualizer::json(array(
-					"count" => Visualizer::$data
-				));
-			else
-				return Visualizer::visualize("Util/Convert/Tags");
+			return Visualizer::json(array(
+				"count" => Visualizer::$data
+			));
 		} else if (isset($_GET["s"]) && isset($_GET["o"]) && isset($_GET["m"])) {
 			$offset = intval(IndexHandler::param("o"));
 			$subjectCount = intval(IndexHandler::param("m"));
@@ -537,19 +525,16 @@ class UtilHandler extends Handler
 
 			$dh->close();
 
-			if (App::$handlerType == "json")
-				return Visualizer::json(array(
-					"remainingChildren" => $datCount - $offset,
-					"allChildren" => $datCount,
-					"nextOffset" => $offset,
-					"current" => $subject,
-					"next" => $next > $subjectCount ? null : $next,
-					"max" => $subjectCount,
-					"count" => $count,
-					"buffer" => max($buffer, $minimumBuffer)
-				));
-			else
-				return Visualizer::redirect($next > $subjectCount ? "util/convert/tags?p=end&c={$count}" : "util/convert/tags?s={$next}&o={$offset}&m={$subjectCount}&c={$count}");
+			return Visualizer::json(array(
+				"remainingChildren" => $datCount - $offset,
+				"allChildren" => $datCount,
+				"nextOffset" => $offset,
+				"current" => $subject,
+				"next" => $next > $subjectCount ? null : $next,
+				"max" => $subjectCount,
+				"count" => $count,
+				"buffer" => max($buffer, $minimumBuffer)
+			));
 		} else
 			return Visualizer::visualize("Util/Convert/Tags");
 	}

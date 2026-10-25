@@ -68,7 +68,7 @@ class Visualizer
 			<link href="<?php self::converted(self::actionHref("style", "simple", "simple.css")) ?>" rel="stylesheet" />
 		<?php else: ?>
 			<meta name="application-name" content="<?php self::converted(Configuration::$instance->title) ?>" />
-			<script src="http://code.jquery.com/jquery-1.8.1.min.js"></script>
+			<script src="https://code.jquery.com/jquery-1.8.1.min.js"></script>
 			<link href="<?php self::converted(self::actionHref("style", "style.css")) ?>" rel="stylesheet" />
 			<?php if (Configuration::$instance->skin !== null): ?>
 				<link href="<?php self::converted(self::actionHref("style", Configuration::$instance->skin, "style.css")) ?>" rel="stylesheet" />
@@ -352,7 +352,7 @@ class Visualizer
 		
 		?>
 		<a href="https://twitter.com/share?<?php self::converted(implode("&", array_map(fn($k, $v) => rawurlencode($k) . "=" . rawurlencode($v), array_keys($params), array_values($params)))) ?>" class="twitter-share-button" data-lang="ja" target="_blank">Tweet</a>
-		<script src="http://platform.twitter.com/widgets.js"></script>
+		<script src="https://platform.twitter.com/widgets.js"></script>
 		<?php
 	}
 	
