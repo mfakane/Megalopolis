@@ -6,7 +6,7 @@ use \PDO;
 
 class ThreadEntry
 {
-	static int $threadEntrySchemaVersion = 3;
+	static int $threadEntrySchemaVersion = 4;
 
 	static array $threadEntrySchema = array(
 		"id" => "bigint primary key not null",
@@ -23,7 +23,7 @@ class ThreadEntry
 		"pageCount" => "integer",
 		"size" => "real"
 	);
-	static int $threadEvaluationSchemaVersion = 4;
+	static int $threadEvaluationSchemaVersion = 5;
 	static array $threadEvaluationSchema = array(
 		"id" => "bigint primary key not null",
 
@@ -348,7 +348,12 @@ class ThreadEntry
 	{
 		$threadEntryIndices = array(
 			App::THREAD_ENTRY_TABLE . "SubjectIndex" => array("subject"),
-			App::THREAD_ENTRY_TABLE . "NameIndex" => array("name")
+			App::THREAD_ENTRY_TABLE . "NameIndex" => array("name"),
+			App::THREAD_ENTRY_TABLE . "DateTimeIndex" => array("dateTime")
+		);
+		$threadEvaluationIndices = array(
+			App::THREAD_EVALUATION_TABLE . "EvaluationCountIndex" => array("evaluationCount"),
+			App::THREAD_EVALUATION_TABLE . "PointsIndex" => array("points")
 		);
 
 		if (Util::hasTable($db, App::THREAD_ENTRY_TABLE)) {
@@ -360,26 +365,27 @@ class ThreadEntry
 				else
 					Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s drop primary key, add primary key(id)', App::THREAD_ENTRY_TABLE))));
 
-			if ($currentThreadEntrySchemaVersion < 3)
-				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(dateTime)', App::THREAD_ENTRY_TABLE . "DateTimeIndex", App::THREAD_ENTRY_TABLE))));
+			// v3 で追加したインデックスは、v3 以降に新しく作ったテーブルには作られていなかった
+			if ($currentThreadEntrySchemaVersion < 4)
+				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(dateTime)', App::THREAD_ENTRY_TABLE . "DateTimeIndex", App::THREAD_ENTRY_TABLE))), array(), false);
 		}
 
 		if (Util::hasTable($db, App::THREAD_EVALUATION_TABLE)) {
 			$currentThreadEvaluationSchemaVersion = intval(Meta::get($db, App::THREAD_EVALUATION_TABLE, "1"));
-
-			if ($currentThreadEvaluationSchemaVersion < 2) {
-				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(evaluationCount)', App::THREAD_EVALUATION_TABLE . "EvaluationCountIndex", App::THREAD_EVALUATION_TABLE))), array(), false);
-				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(points)', App::THREAD_EVALUATION_TABLE . "PointsIndex", App::THREAD_EVALUATION_TABLE))), array(), false);
-			}
 
 			if ($currentThreadEvaluationSchemaVersion < 3)
 				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column responseLastUpdate bigint', App::THREAD_EVALUATION_TABLE))), array(), false);
 
 			if ($currentThreadEvaluationSchemaVersion < 4)
 				if (Configuration::$instance->dataStore instanceof SQLiteDataStore)
-					Configuration::$instance->dataStore->alterTable($db, self::$threadEvaluationSchema, App::THREAD_EVALUATION_TABLE);
+					Configuration::$instance->dataStore->alterTable($db, self::$threadEvaluationSchema, App::THREAD_EVALUATION_TABLE, $threadEvaluationIndices);
 				else
 					Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s modify column responseLastUpdate bigint', App::THREAD_EVALUATION_TABLE))), array(), false);
+
+			// v2 で追加したインデックスは、新しく作ったテーブルや SQLite で v4 に移行したテーブルには無かった
+			if ($currentThreadEvaluationSchemaVersion < 5)
+				foreach ($threadEvaluationIndices as $k => $v)
+					Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(%s)', $k, App::THREAD_EVALUATION_TABLE, implode(", ", $v)))), array(), false);
 		}
 
 		if (Util::hasTable($db, App::THREAD_TAG_TABLE)) {
@@ -390,7 +396,7 @@ class ThreadEntry
 		}
 
 		Util::createTableIfNotExists($db, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE, $threadEntryIndices);
-		Util::createTableIfNotExists($db, self::$threadEvaluationSchema, App::THREAD_EVALUATION_TABLE);
+		Util::createTableIfNotExists($db, self::$threadEvaluationSchema, App::THREAD_EVALUATION_TABLE, $threadEvaluationIndices);
 		Util::createTableIfNotExists($db, self::$threadTagSchema, App::THREAD_TAG_TABLE, array(
 			App::THREAD_TAG_TABLE . "TagIndex" => array("tag")
 		));
@@ -1089,34 +1095,19 @@ class ThreadEntry
 			"minPoints" => null,
 		);
 
-		if (Configuration::$instance->dataStore instanceof SQLiteDataStore)
-			$st = Util::ensureStatement($db, $db->prepare(sprintf(
-				'
-				select
-					max(a.evaluationCount) as maxEval,
-					min(a.evaluationCount) as minEval,
-					max(a.points) as maxPoints,
-					min(a.points) as minPoints,
-					max(c.dateTime) as maxDateTime,
-					min(c.dateTime) as minDateTime
-					from %2$s as a, %1$s as c',
-				App::THREAD_ENTRY_TABLE,
-				App::THREAD_EVALUATION_TABLE
-			)));
-		else
-			$st = Util::ensureStatement($db, $db->prepare(sprintf(
-				'
-				select
-					max(a.evaluationCount) as maxEval,
-					min(a.evaluationCount) as minEval,
-					max(b.points) as maxPoints,
-					min(b.points) as minPoints,
-					max(c.dateTime) as maxDateTime,
-					min(c.dateTime) as minDateTime
-					from %2$s as a, %2$s as b, %1$s as c',
-				App::THREAD_ENTRY_TABLE,
-				App::THREAD_EVALUATION_TABLE
-			)));
+		// テーブルごとに集計する (結合すると行数の積になる)
+		$st = Util::ensureStatement($db, $db->prepare(sprintf(
+			'
+			select
+				(select max(evaluationCount) from %2$s) as maxEval,
+				(select min(evaluationCount) from %2$s) as minEval,
+				(select max(points) from %2$s) as maxPoints,
+				(select min(points) from %2$s) as minPoints,
+				(select max(dateTime) from %1$s) as maxDateTime,
+				(select min(dateTime) from %1$s) as minDateTime',
+			App::THREAD_ENTRY_TABLE,
+			App::THREAD_EVALUATION_TABLE
+		)));
 
 		Util::executeStatement($st);
 
