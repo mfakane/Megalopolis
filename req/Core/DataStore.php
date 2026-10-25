@@ -157,30 +157,38 @@ abstract class DataStore
 		if (!is_null($params))
 			$params = array_map(fn($x) => $this->encodeValue($x), $params);
 
+		$exception = null;
+
 		foreach (range(1, 5) as $_) {
-			if (is_null($params))
-				$rt = $st->execute();
-			else
-				$rt = $st->execute($params);
+			// PDO は既定で例外を投げるため、$throw が false の場合やロック中の再試行のために受け止める
+			try {
+				$rt = is_null($params) ? $st->execute() : $st->execute($params);
+				$error = $st->errorInfo();
+				$exception = null;
+			} catch (\PDOException $ex) {
+				$rt = false;
+				$error = $ex->errorInfo ?? array();
+				$exception = $ex;
+				// SQLite では失敗した文をリセットしないと、再実行が SQLITE_MISUSE になる
+				$st->closeCursor();
+			}
 
 			if ($rt)
 				break;
 
-			$error = $st->errorInfo();
-
-			if (
-				$error != array("HY000", 5, "database is locked") &&
-				$error != array("HY000", 21, "library routine called out of sequence")
-			)
+			// SQLITE_BUSY (database is locked) と SQLITE_MISUSE のときは少し待って再試行する
+			if (($error[0] ?? null) != "HY000" || !in_array($error[1] ?? null, array(5, 21)))
 				break;
 
 			usleep(5000);
 		}
 
-		$rt = $rt || $st->errorCode() == PDO::ERR_NONE;
+		$rt = $rt || ($exception === null && $st->errorCode() == PDO::ERR_NONE);
 
 		if ($rt)
 			return $rt;
+		else if ($throw && $exception !== null)
+			throw $exception;
 		else if ($throw) {
 			$message = implode(":", $st->errorInfo());
 
@@ -405,10 +413,14 @@ class SQLiteDataStore extends DataStore
 		$rt = null;
 
 		foreach (array(self::MODULE_FTS4, self::MODULE_FTS3) as $i)
-			if ($this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf('create virtual table temp using %s', $i))), array(), false)) {
-				$rt = $i;
+			try {
+				if ($this->executeStatement($this->ensureStatement($db, $db->prepare(sprintf('create virtual table temp using %s', $i))), array(), false)) {
+					$rt = $i;
 
-				break;
+					break;
+				}
+			} catch (\PDOException) {
+				// このモジュールは使えない
 			}
 
 		return $rt;

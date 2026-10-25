@@ -400,13 +400,13 @@ class ThreadEntry
 			$currentThreadEvaluationSchemaVersion = intval(Meta::get($db, App::THREAD_EVALUATION_TABLE, "1"));
 
 			if ($currentThreadEvaluationSchemaVersion < 3)
-				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column responseLastUpdate bigint', App::THREAD_EVALUATION_TABLE))), array(), false);
+				Util::executeIgnoringErrors($db, sprintf('alter table %s add column responseLastUpdate bigint', App::THREAD_EVALUATION_TABLE));
 
 			if ($currentThreadEvaluationSchemaVersion < 4)
 				if (Configuration::$instance->dataStore instanceof SQLiteDataStore)
 					Configuration::$instance->dataStore->alterTable($db, self::$threadEvaluationSchema, App::THREAD_EVALUATION_TABLE, $threadEvaluationIndices);
 				else
-					Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s modify column responseLastUpdate bigint', App::THREAD_EVALUATION_TABLE))), array(), false);
+					Util::executeIgnoringErrors($db, sprintf('alter table %s modify column responseLastUpdate bigint', App::THREAD_EVALUATION_TABLE));
 
 			// v2 で追加したインデックスは、新しく作ったテーブルや SQLite で v4 に移行したテーブルには無かった
 			if ($currentThreadEvaluationSchemaVersion < 5)
@@ -418,7 +418,7 @@ class ThreadEntry
 			$currentThreadTagSchemaVersion = intval(Meta::get($db, App::THREAD_TAG_TABLE, "1"));
 
 			if ($currentThreadTagSchemaVersion < 2)
-				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s add column position tinyint', App::THREAD_TAG_TABLE))), array(), false);
+				Util::executeIgnoringErrors($db, sprintf('alter table %s add column position tinyint', App::THREAD_TAG_TABLE));
 		}
 
 		Util::createTableIfNotExists($db, self::$threadEntrySchema, App::THREAD_ENTRY_TABLE, $threadEntryIndices);
@@ -478,8 +478,8 @@ class ThreadEntry
 			) {
 				$i = sprintf($i, App::AUTHOR_TABLE, App::THREAD_ENTRY_TABLE);
 				$sl = explode(" ", $i);
-				Util::executeStatement(Util::ensureStatement($db, $db->prepare('drop trigger if exists ' . $sl[2])), array(), false);
-				Util::executeStatement(Util::ensureStatement($db, $db->prepare($i)), array(), false);
+				Util::executeIgnoringErrors($db, 'drop trigger if exists ' . $sl[2]);
+				Util::executeIgnoringErrors($db, $i);
 			}
 		}
 
@@ -532,8 +532,8 @@ class ThreadEntry
 			) {
 				$i = sprintf($i, App::TAG_TABLE, App::THREAD_TAG_TABLE);
 				$sl = explode(" ", $i);
-				Util::executeStatement(Util::ensureStatement($db, $db->prepare('drop trigger if exists ' . $sl[2])), array(), false);
-				Util::executeStatement(Util::ensureStatement($db, $db->prepare($i)), array(), false);
+				Util::executeIgnoringErrors($db, 'drop trigger if exists ' . $sl[2]);
+				Util::executeIgnoringErrors($db, $i);
 			}
 		}
 

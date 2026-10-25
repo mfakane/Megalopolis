@@ -397,6 +397,21 @@ class Util
 		Configuration::$instance->dataStore?->saveToTable($db, $values, $tableName);
 	}
 
+	/**
+	 * スキーマの移行などで、失敗してもよい SQL を実行する (既にある列やトリガーなど)
+	 */
+	static function executeIgnoringErrors(PDO $db, string $sql): void
+	{
+		try {
+			$st = $db->prepare($sql);
+
+			if ($st !== false)
+				self::executeStatement($st, array(), false);
+		} catch (\PDOException) {
+			// 既に適用済みなど、失敗しても続行する
+		}
+	}
+
 	static function encodeValue(mixed $value): mixed
 	{
 		return Configuration::$instance->dataStore ? Configuration::$instance->dataStore->encodeValue($value) : $value;
