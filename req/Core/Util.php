@@ -439,7 +439,11 @@ class Util
 	 */
 	private static function normalizePath(string $input): string
 	{
-		return self::escapeControlChars((string)mb_convert_encoding($input, "UTF-8", "UTF-8,Windows-31J,eucJP-win"));
+		// 短い入力は Shift_JIS などと誤判定されることがあるため、正しい UTF-8 ならそのまま使う
+		if (!mb_check_encoding($input, "UTF-8"))
+			$input = (string)mb_convert_encoding($input, "UTF-8", "Windows-31J,eucJP-win");
+
+		return self::escapeControlChars($input);
 	}
 
 	static function decodeInputs(): void

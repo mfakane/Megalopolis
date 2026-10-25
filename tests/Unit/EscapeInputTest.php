@@ -31,4 +31,12 @@ final class EscapeInputTest extends TestCase
     {
         self::assertSame($expected, Util::escapeInput($input));
     }
+
+    #[DataProvider('inputs')]
+    public function testPathsKeepValidUtf8(string $input, string $expected): void
+    {
+        $normalize = new \ReflectionMethod(Util::class, 'normalizePath');
+
+        self::assertSame($expected, $normalize->invoke(null, $input));
+    }
 }
