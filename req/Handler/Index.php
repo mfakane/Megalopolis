@@ -211,7 +211,7 @@ class IndexHandler extends Handler
 			),
 			"points" => array(
 				!Util::isEmpty(self::param("pointsBegin", "")) ? intval(self::param("pointsBegin")) : $vals["minPoints"] ?? 0,
-				!Util::isEmpty(self::param("pointsBegin", "")) ? intval(self::param("pointsEnd")) : $vals["maxPoints"] ?? 0
+				!Util::isEmpty(self::param("pointsEnd", "")) ? intval(self::param("pointsEnd")) : $vals["maxPoints"] ?? 0
 			),
 			"dateTime" => array(
 				self::param("dateTimeBegin", ""),
