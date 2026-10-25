@@ -72,23 +72,23 @@ if (isset($_GET["s"]))
 			
 			break;
 		case "commentCount":
-			usort($h->entries, fn($x, $y): int => $y->commentCount - $x->commentCount);
+			usort($h->entries, fn($x, $y): int => $y->commentCount <=> $x->commentCount);
 			
 			break;
 		case "points":
-			usort($h->entries, fn($x, $y): int => $y->points - $x->points);
+			usort($h->entries, fn($x, $y): int => $y->points <=> $x->points);
 			
 			break;
 		case "rate":
-			usort($h->entries, fn($x, $y): int => $y->rate - $x->rate);
+			usort($h->entries, fn($x, $y): int => $y->rate <=> $x->rate);
 			
 			break;
 		case "size":
-			usort($h->entries, fn($x, $y): int => $y->size - $x->size);
+			usort($h->entries, fn($x, $y): int => $y->size <=> $x->size);
 			
 			break;
 		case "dateTime":
-			usort($h->entries, fn($x, $y): int => $y->dateTime - $x->dateTime);
+			usort($h->entries, fn($x, $y): int => $y->dateTime <=> $x->dateTime);
 			
 			break;
 	}
