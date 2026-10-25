@@ -225,12 +225,18 @@ class App
 
 		$callbackName = self::$actionName = Constant::DEFAULT_ACTION;
 
+		// 先頭または末尾の要素でアクションを決める。決まった後の要素 (タグや作者名) はアクションとみなさない
 		foreach (array("", "_") as $i)
 			if (isset($pathInfo[0]))
-				if (self::isAction(self::$handler, $i . $pathInfo[0]))
+				if (self::isAction(self::$handler, $i . $pathInfo[0])) {
 					$callbackName = $i . (self::$actionName = array_shift($pathInfo));
-				else if (self::isAction(self::$handler, $i . $pathInfo[count($pathInfo) - 1]))
+
+					break;
+				} else if (self::isAction(self::$handler, $i . $pathInfo[count($pathInfo) - 1])) {
 					$callbackName = $i . (self::$actionName = array_pop($pathInfo));
+
+					break;
+				}
 
 		self::$pathInfo = $pathInfo;
 		$callback = array(self::$handler, $callbackName);
