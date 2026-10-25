@@ -136,7 +136,8 @@ class ReadHandler extends Handler
 			Cookie::setCookie(Cookie::NAME_KEY, self::param("name", ""));
 			Cookie::setCookie(Cookie::MAIL_KEY, self::param("mail", ""));
 			Cookie::setCookie(Cookie::LINK_KEY, self::param("link", ""));
-			Cookie::setCookie(Cookie::PASSWORD_KEY, self::param("editPassword", self::param(Auth::SESSION_PASSWORD, "")));
+			// セッションのパスワード (管理者のパスワードのことがある) は Cookie に保存しない
+			Cookie::setCookie(Cookie::PASSWORD_KEY, self::param("editPassword", ""));
 			Cookie::sendCookie();
 		}
 
@@ -180,11 +181,13 @@ class ReadHandler extends Handler
 		)
 			Auth::loginError("編集キーが一致しません");
 
-		if ($_POST) {
+		// 編集キーの入力ではなく、編集フォームを送信したときだけ保存する
+		if ($_POST && isset($_POST["preview"])) {
 			Cookie::setCookie(Cookie::NAME_KEY, self::param("name", ""));
 			Cookie::setCookie(Cookie::MAIL_KEY, self::param("mail", ""));
 			Cookie::setCookie(Cookie::LINK_KEY, self::param("link", ""));
-			Cookie::setCookie(Cookie::PASSWORD_KEY, self::param("editPassword", self::param(Auth::SESSION_PASSWORD, "")));
+			// セッションのパスワード (管理者のパスワードのことがある) は Cookie に保存しない
+			Cookie::setCookie(Cookie::PASSWORD_KEY, self::param("editPassword", ""));
 			Cookie::sendCookie();
 		}
 
