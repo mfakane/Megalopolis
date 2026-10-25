@@ -48,7 +48,8 @@ abstract class DataStore
 		if ($index === false)
 			return;
 
-		array_splice($arr, $index, 1);
+		// getTables() はテーブル名をキーにした配列を返すため、キーで取り除く
+		unset($arr[$index]);
 		$this->tableNames[$this->getDatabaseNameByHandle($db)] = $arr;
 	}
 
