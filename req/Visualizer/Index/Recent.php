@@ -21,7 +21,7 @@ Visualizer::doctype();
 	<div class="entries compact">
 		<article>
 			<h1>閲覧履歴</h1>
-			<?php if (isset($h->recentEntries["view"])): ?>
+			<?php if (!empty($h->recentEntries["view"])): ?>
 				<div class="articleBody">
 					<?php Template::entries($h->recentEntries["view"], false, "compact") ?>
 				</div>
@@ -44,7 +44,7 @@ Visualizer::doctype();
 						評価履歴
 					<?php endif ?>
 				</h1>
-				<?php if (isset($h->recentEntries["evaluation"])): ?>
+				<?php if (!empty($h->recentEntries["evaluation"])): ?>
 					<div class="articleBody">
 						<?php Template::entries($h->recentEntries["evaluation"], false, "compact") ?>
 					</div>
