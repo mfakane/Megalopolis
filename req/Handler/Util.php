@@ -45,7 +45,8 @@ class UtilHandler extends Handler
 			"subjectCount" => $subjectCount,
 			"subjectBegin" => $subjectBegin,
 			"subjectEnd" => $subjectEnd,
-			"target" => IndexHandler::paramAsArray("target", ["thread", "evaluation", "comment"]),
+			// フォームからは target[] で、ページ送りのリンクからはカンマ区切りで渡される
+			"target" => array_values(array_filter(explode(",", implode(",", IndexHandler::paramAsArray("target", ["thread", "evaluation", "comment"]) ?? [])))),
 			"entries" => null,
 			"page" => intval(IndexHandler::param("p", "1")),
 			"pageCount" => 0,
