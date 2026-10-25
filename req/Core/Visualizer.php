@@ -945,7 +945,8 @@ class Visualizer
 		assert(mb_http_output("Windows-31J"));
 		
 		foreach ($obj as $i)
-			fputcsv($s, array_map(fn($_) => mb_convert_encoding($_, "Windows-31J", "UTF-8"), $i));
+			// エスケープ文字を使わず、" は "" と重ねる (RFC 4180)
+			fputcsv($s, array_map(fn($_) => mb_convert_encoding($_, "Windows-31J", "UTF-8"), $i), ",", "\"", "");
 		
 		fclose($s);
 		
