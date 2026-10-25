@@ -729,12 +729,9 @@ class IndexHandler extends Handler
 			session_write_close();
 			
 			// すべての場合でリダイレクトを使用 (URL パスを正しくするため)
+			// リダイレクト先が指定されていない場合はトップページにリダイレクト
 			$redirectUrl = isset($_GET["redir"]) && is_string($_GET["redir"]) ? $_GET["redir"] : "";
-			if (empty($redirectUrl)) {
-				// リダイレクト先が指定されていない場合はトップページにリダイレクト
-				$redirectUrl = "/";
-			}
-			
+
 			return Visualizer::redirect($redirectUrl);
 		}
 		

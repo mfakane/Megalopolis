@@ -233,6 +233,7 @@ class Util
 
 		$script = $_SERVER["SCRIPT_NAME"] ?? "/";
 		$linkType = Configuration::$instance->linkType;
+		$pathAndQuery = $path;
 
 		if (
 			$linkType == Configuration::LINK_REWRITE ||
@@ -245,14 +246,18 @@ class Util
 			if ($linkType == Configuration::LINK_PATH || /* PATH_INFO available */ $linkType == Configuration::LINK_AUTO)
 				$script .= "/";
 			else
+			{
 				$script .= "?" . self::PATH_INFO_QUERY_PARAM . "=";
+				// path= の後ろに続くので、パス側のクエリは & でつなぐ
+				$pathAndQuery = (string)preg_replace('/\?/', '&', $path, 1);
+			}
 
 		$hostWithOrWithoutPort = $_SERVER["HTTP_HOST"] ?? $_SERVER["SERVER_NAME"] ?? "";
 		[$hostWithoutPort, $port] = explode(":", $hostWithOrWithoutPort . ":" . ($_SERVER["SERVER_PORT"] ?? "80"));
 		$scheme = isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on" ? "https" : "http";
 		$portAndColonIfNeeded = $port == ($scheme === "http" ? 80 : 443) ? "" : ":{$port}";
 
-		return $absoluteUrls[$path] = "{$scheme}://{$hostWithoutPort}{$portAndColonIfNeeded}{$script}{$path}";
+		return $absoluteUrls[$path] = "{$scheme}://{$hostWithoutPort}{$portAndColonIfNeeded}{$script}{$pathAndQuery}";
 	}
 
 	static function getSuffix(): string

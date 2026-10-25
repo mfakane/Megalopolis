@@ -5,6 +5,9 @@ $(function()
 	if (form.length)
 	{
 		var action = form.attr("action") + ".json";
+		// リンク形式によっては相対パスが使えないため、絶対パスで遷移する
+		var backHref = form.attr("action");
+		var homeHref = $("link[rel=home]").attr("href");
 		var minimumBuffer = 1;
 		var process = function(bar, status, obj)
 		{
@@ -61,7 +64,7 @@ $(function()
 								.append($("<br />"))
 								.append($("<br />"))
 								.append($("<a />")
-									.attr("href", "../")
+									.attr("href", homeHref)
 									.text("ホームへ戻る")));
 					}
 				},
@@ -85,7 +88,7 @@ $(function()
 							.append($("<br />"))
 							.append($("<br />"))
 							.append($("<a />")
-								.attr("href", "reindex")
+								.attr("href", backHref)
 								.text("戻る")))
 						.append($("<p />")
 							.html(data));
@@ -136,7 +139,7 @@ $(function()
 							.append($("<br />"))
 							.append($("<br />"))
 							.append($("<a />")
-								.attr("href", "reindex")
+								.attr("href", backHref)
 								.text("戻る")))
 						.append($("<p />")
 							.html(data));
