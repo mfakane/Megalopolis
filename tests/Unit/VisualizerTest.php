@@ -166,4 +166,20 @@ final class VisualizerTest extends TestCase
             '<input type="hidden" name="' . $field . '" value="&quot;onmouseover=&quot;marker()" />', $html);
         self::assertStringNotContainsString('"onmouseover="', $html);
     }
+
+    public static function names(): iterable
+    {
+        yield 'plain' => ['作者', null, ['author', '作者']];
+        yield 'digits are not a page number' => ['123', null, ['author', '123', '1']];
+        yield 'digits after slash are not a page number' => ['x/45', null, ['author', 'x/45', '1']];
+        yield 'dot is not a handler type' => ['v1.2', null, ['author', 'v1.2.html']];
+        yield 'feed of digits' => ['123', 'rss', ['author', '123', '1.rss']];
+        yield 'feed of dot' => ['v1.2', 'atom', ['author', 'v1.2.atom']];
+    }
+
+    #[DataProvider('names')]
+    public function testNameHrefArgsKeepTheNameDistinguishable(string $name, ?string $type, array $expected): void
+    {
+        self::assertSame($expected, Visualizer::nameHrefArgs('author', $name, $type));
+    }
 }

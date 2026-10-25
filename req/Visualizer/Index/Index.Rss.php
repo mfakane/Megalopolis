@@ -40,7 +40,7 @@ else
 					<?php endif ?>
 					<?php if ($c->showTags[Configuration::ON_SUBJECT]): ?>
 						<?php foreach ($i->tags as $j): ?>
-							<category domain="<?= Visualizer::escapeOutput(Visualizer::absoluteHref("tag", $j . (strpos($j, ".") !== false ? ".html" : ""))) ?>"><?= Visualizer::escapeOutput($j) ?></category>
+							<category domain="<?= Visualizer::escapeOutput(Visualizer::absoluteHrefArray(Visualizer::nameHrefArgs("tag", $j))) ?>"><?= Visualizer::escapeOutput($j) ?></category>
 						<?php endforeach ?>
 					<?php endif ?>
 				</item>

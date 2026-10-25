@@ -46,7 +46,7 @@ else
 				<?php endif ?>
 				<?php if ($c->showTags[Configuration::ON_SUBJECT]): ?>
 					<?php foreach ($i->tags as $j): ?>
-						<category term="<?= Visualizer::escapeOutput($j) ?>" scheme="<?= Visualizer::escapeOutput(Visualizer::absoluteHref("tag", $j . (strpos($j, ".") !== false ? ".html" : ""))) ?>" />
+						<category term="<?= Visualizer::escapeOutput($j) ?>" scheme="<?= Visualizer::escapeOutput(Visualizer::absoluteHrefArray(Visualizer::nameHrefArgs("tag", $j))) ?>" />
 					<?php endforeach ?>
 				<?php endif ?>
 			</entry>

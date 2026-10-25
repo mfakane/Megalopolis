@@ -26,8 +26,8 @@ Visualizer::doctype();
 		<link href="<?=Visualizer::escapeOutput(Visualizer::actionHrefArray(array($h->subject))) ?>.json" rel="alternate" type="application/json" />
 		<link href="<?=Visualizer::escapeOutput(Visualizer::actionHrefArray(array($h->subject))) ?>" rel="canonical" />
 	<?php else: ?>
-		<link href="<?=Visualizer::escapeOutput(Visualizer::actionHrefArray(array(App::$actionName, $d))) ?>.rss" rel="alternate" type="application/rss+xml" title="RSS 2.0" />
-		<link href="<?=Visualizer::escapeOutput(Visualizer::actionHrefArray(array(App::$actionName, $d))) ?>.atom" rel="alternate" type="application/atom+xml" title="Atom" />
+		<link href="<?=Visualizer::escapeOutput(Visualizer::actionHrefArray(Visualizer::nameHrefArgs(App::$actionName, $d, "rss"))) ?>" rel="alternate" type="application/rss+xml" title="RSS 2.0" />
+		<link href="<?=Visualizer::escapeOutput(Visualizer::actionHrefArray(Visualizer::nameHrefArgs(App::$actionName, $d, "atom"))) ?>" rel="alternate" type="application/atom+xml" title="Atom" />
 	<?php endif ?>
 	<link rel="search" href="<?=Visualizer::escapeOutput(Visualizer::actionHrefArray(array("search"))) ?>" />
 	<?php if ($h->subjectCount): ?>
@@ -81,14 +81,14 @@ Visualizer::doctype();
 	</dl>
 	<?php if (App::$actionName == "tag" && (is_array($c->showTweetButton) ? $c->showTweetButton[Configuration::ON_TAG] : $c->showTweetButton)): ?>
 		<div class="headdingButtons">
-			<?php Visualizer::tweetButton(Visualizer::absoluteHref(App::$actionName, $d), $c->tagTweetButtonText, $c->tagTweetButtonHashtags, array
+			<?php Visualizer::tweetButton(Visualizer::absoluteHrefArray(Visualizer::nameHrefArgs(App::$actionName, $d)), $c->tagTweetButtonText, $c->tagTweetButtonHashtags, array
 			(
 				"[tag]" => $d,
 			)) ?>
 		</div>
 	<?php elseif (App::$actionName == "author" && (is_array($c->showTweetButton) ? $c->showTweetButton[Configuration::ON_AUTHOR] : $c->showTweetButton)): ?>
 		<div class="headdingButtons">
-			<?php Visualizer::tweetButton(Visualizer::absoluteHref(App::$actionName, $d), $c->authorTweetButtonText, $c->authorTweetButtonHashtags, array
+			<?php Visualizer::tweetButton(Visualizer::absoluteHrefArray(Visualizer::nameHrefArgs(App::$actionName, $d)), $c->authorTweetButtonText, $c->authorTweetButtonHashtags, array
 			(
 				"[author]" => $d,
 			)) ?>

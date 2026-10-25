@@ -512,16 +512,29 @@ class Visualizer
 		self::converted(!isset($s) || empty($s) ? Configuration::$instance->defaultName : $s);
 	}
 	
+	/**
+	 * 作者・タグのページへのパス。名前がページ番号や拡張子と解釈されないようにする
+	 * @return string[]
+	 */
+	static function nameHrefArgs(string $action, string $name, ?string $type = null): array
+	{
+		$endsWithDigit = ctype_digit($name) || ($last = strrchr($name, "/")) !== false && ctype_digit(substr($last, 1));
+		$extension = isset($type) ? ".{$type}" : "";
+
+		if ($endsWithDigit)
+			return array($action, $name, "1" . $extension);
+		else
+			return array($action, $name . ($extension ?: (strpos($name, ".") !== false ? ".html" : "")));
+	}
+	
 	static function linkedName(?string $s, string $additional = ""): void
 	{
 		if (!isset($s) || empty($s))
 			self::converted(Configuration::$instance->defaultName);
 		else
 		{
-			$endsWithDigit = ctype_digit($s) || ($last = strrchr($s, "/")) !== false && ctype_digit(substr($last, 1));
-			$endsWithExtension = !$endsWithDigit && strpos($s, ".") !== false;
 			?>
-			<a href="<?php echo self::actionHref("author", $s . ($endsWithExtension ? ".html" : ""), $endsWithDigit ? "1" : null) ?>">
+			<a href="<?php self::converted(self::actionHrefArray(self::nameHrefArgs("author", $s))) ?>">
 				<?php self::converted($s) ?>
 				<?php echo $additional ?>
 			</a>
@@ -531,10 +544,8 @@ class Visualizer
 	
 	static function linkedTag(string $s, string $additional = ""): void
 	{
-		$endsWithDigit = ctype_digit($s) || ($last = strrchr($s, "/")) !== false && ctype_digit(substr($last, 1));
-		$endsWithExtension = !$endsWithDigit && strpos($s, ".") !== false;
 		?>
-		<a href="<?php echo self::actionHref("tag", $s . ($endsWithExtension ? ".html" : ""), $endsWithDigit ? "1" : null) ?>">
+		<a href="<?php self::converted(self::actionHrefArray(self::nameHrefArgs("tag", $s))) ?>">
 			<?php self::converted($s) ?>
 			<?php echo $additional ?>
 		</a>

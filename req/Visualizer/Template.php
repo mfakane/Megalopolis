@@ -135,7 +135,7 @@ class Template
 								<?php if (Util::isEmpty($i->name)): ?>
 									<?php Visualizer::convertedName($i->name) ?>
 								<?php else: ?>
-									<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array("author", $i->name))) ?>"><?php Visualizer::convertedName($i->name) ?></a>
+									<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(Visualizer::nameHrefArgs("author", $i->name ?? ""))) ?>"><?php Visualizer::convertedName($i->name) ?></a>
 								<?php endif ?>
 							</span>
 						<?php endif ?>
