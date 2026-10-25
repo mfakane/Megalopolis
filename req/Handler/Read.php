@@ -725,21 +725,9 @@ class ReadHandler extends Handler
 				$input ??= strval($x);
 			});
 			$input ??= $default;
-			$rt = Util::escapeInput($input ?? "", $stripLinebreaks);
-
-			if (
-				$name != "preview" &&
-				$name != "encoded" &&
-				$name != "preview" &&
-				$name != "p" &&
-				strpos($name, "Auth") === false
-			)
-				$_SESSION[$name] = $rt;
-
-			return $rt;
-		} else if (isset($_SESSION[$name]))
-			return Util::escapeInput($_SESSION[$name], $stripLinebreaks);
-		else if ($tryGet && isset($_GET[$name])) {
+			// 入力はセッションに保存しない (編集キーなどが平文で残り、他の作品のフォームの初期値にもなっていた)
+			return Util::escapeInput($input ?? "", $stripLinebreaks);
+		} else if ($tryGet && isset($_GET[$name])) {
 			$input_array = !is_array($_GET[$name]) ? [$_GET[$name]] : $_GET[$name];
 			$input = null;
 			array_walk_recursive($input_array, function (mixed &$x) use (&$input) {

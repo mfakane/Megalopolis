@@ -11,7 +11,8 @@ $isEdit = in_array(App::$actionName, array("new", "edit"));
 $isAdmin = Auth::hasSession(true);
 
 /** @var array */
-$postOrSession = $_POST ? $_POST : $_SESSION;
+// 確認画面の入力は送信された値だけから引き継ぐ (セッションには認証の情報もある)
+$postOrSession = $_POST;
 Visualizer::doctype();
 ?>
 <html lang="ja">
