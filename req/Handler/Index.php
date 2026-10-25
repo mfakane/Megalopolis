@@ -56,7 +56,8 @@ class IndexHandler extends Handler
 					switch (Util::escapeInput($admin)) {
 						case "unpost":
 							ThreadEntry::deleteDirect($db, $idb, $ids);
-							Board::setLastUpdate($db, $subject);
+							// トップページ (作品集 0) は最新の作品集を表示している
+							Board::setLastUpdate($db, $subject ?: Board::getLatestSubject($db));
 
 							break;
 					}
@@ -495,6 +496,9 @@ class IndexHandler extends Handler
 		$dh = App::openDB();
 		$this->entries = array();
 
+		if (!$isNameList)
+			self::unpostSelectedEntries($dh);
+
 		if ($isNameList || !isset($name)) {
 			$pageCount = (int)ceil(($this->entryCount = $dh->execute(fn($db) => ThreadEntry::getNameCount($db))) / Configuration::$instance->tagListing);
 			Visualizer::$data = ThreadEntry::getNames(
@@ -602,6 +606,9 @@ class IndexHandler extends Handler
 		$dh = App::openDB();
 		$this->entries = array();
 
+		if (!$isTagList)
+			self::unpostSelectedEntries($dh);
+
 		if ($isTagList || !isset($tag)) {
 			$pageCount = ceil(($this->entryCount = $dh->execute(fn($db) => ThreadEntry::getTagCount($db))) / Configuration::$instance->tagListing);
 			Visualizer::$data = $dh->execute(fn($db) => ThreadEntry::getTags($db, $page * Configuration::$instance->tagListing, Configuration::$instance->tagListing));
@@ -690,6 +697,39 @@ class IndexHandler extends Handler
 			default:
 				return Visualizer::visualize($isTagList ? "Index/Tag" : "Index/Index");
 		}
+	}
+
+	/**
+	 * 作者別・タグ別一覧で、管理者が選んだ作品を削除する
+	 */
+	private static function unpostSelectedEntries(DataStoreHandle $dh): void
+	{
+		if (self::postParam("admin", "") != "unpost")
+			return;
+
+		Auth::ensureToken();
+		Auth::createToken();
+		Auth::loginAsAdmin();
+
+		$ids = array_map("intval", self::postParamAsArray("id", []));
+
+		if (!$ids)
+			return;
+
+		$idh = App::openDB(App::INDEX_DATABASE);
+		$dh->withTransactionCombo($idh, function ($db, $idb) use ($ids) {
+			$subjects = array();
+
+			foreach ($ids as $i)
+				if (($entry = ThreadEntry::load($db, $i)) && $entry->subject !== null)
+					$subjects[] = $entry->subject;
+
+			ThreadEntry::deleteDirect($db, $idb, $ids);
+
+			foreach (array_unique($subjects) as $i)
+				Board::setLastUpdate($db, $i);
+		});
+		$idh->close();
 	}
 
 	/**
