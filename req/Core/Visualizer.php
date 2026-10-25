@@ -823,9 +823,9 @@ class Visualizer
 		$diff = $now - $time;
 		
 		if ($diff < -$day)
-			return (int)ceil(-$day) . " 日先 " . date("H:i", $time);	
+			return (int)ceil(-$diff / $day) . " 日先 " . date("H:i", $time);	
 		else if ($diff < -$hour)
-			return (int)ceil(-$hour) . " 時間先";	
+			return (int)ceil(-$diff / $hour) . " 時間先";	
 		else if ($diff < -$minute)
 			return (int)ceil(-$diff / $minute) . " 分先";	
 		else if ($diff < 0)

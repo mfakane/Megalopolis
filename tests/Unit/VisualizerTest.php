@@ -205,4 +205,10 @@ final class VisualizerTest extends TestCase
         // Body text is HTML: "&lt;" typed as text must not become a tag after editing.
         self::assertSame('&amp;lt;b&amp;gt;&lt;i&gt;', Visualizer::escapeSource('&lt;b&gt;<i>'));
     }
+
+    public function testFutureTimesShowTheRemainingTime(): void
+    {
+        self::assertStringStartsWith('2 日先 ', Visualizer::formatShortDateTime(time() + 86400 * 2 - 60));
+        self::assertSame('3 時間先', Visualizer::formatShortDateTime(time() + 3600 * 3 - 60));
+    }
 }
