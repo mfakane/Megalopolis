@@ -32,6 +32,11 @@ Visualizer::doctype();
 				<li>
 					<a href="<?=Visualizer::escapeOutput(Visualizer::actionHref("util", "reindex")) ?>">検索インデックスの再生成</a>
 				</li>
+				<?php if ($c->dataStore instanceof MySQLDataStore): ?>
+					<li>
+						<a href="<?=Visualizer::escapeOutput(Visualizer::actionHref("util", "charset")) ?>">データベースの文字コードの変換 (utf8mb4)</a>
+					</li>
+				<?php endif ?>
 			<?php endif ?>
 		<?php endif ?>
 	</ul>

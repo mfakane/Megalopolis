@@ -127,6 +127,80 @@ class UtilHandler extends Handler
 		return Visualizer::visualize();
 	}
 
+	/**
+	 * MySQL の utf8 のテーブルを utf8mb4 に変換する
+	 */
+	function charset(): bool
+	{
+		self::ensureTestMode();
+
+		$store = Configuration::$instance->dataStore;
+
+		if (!$store instanceof MySQLDataStore) {
+			Visualizer::$data = null;
+
+			return App::$handlerType == "json"
+				? Visualizer::json(array("error" => "MySQL 以外では変換は不要です"))
+				: Visualizer::visualize();
+		}
+
+		$dh = App::openDB();
+
+		try {
+			$rt = $dh->execute(function ($db) use ($store) {
+				$conversion = new CharsetConversion($db, $store);
+
+				if (App::$handlerType != "json")
+					return $conversion->getStatus();
+
+				$action = IndexHandler::param("p", "status");
+
+				if ($action != "status") {
+					// 大きなデータベースでも一回の呼び出しで時間切れにならないようにする
+					set_time_limit(120);
+					ignore_user_abort(true);
+					$conversion->lock();
+				}
+
+				try {
+					$finished = null;
+
+					switch ($action) {
+						case "start":
+							$conversion->start();
+							break;
+						case "step":
+							$finished = $conversion->step(5);
+							break;
+						case "finish":
+							$conversion->finish();
+							break;
+						case "abort":
+							$conversion->abort();
+							break;
+						case "dropOld":
+							$conversion->dropOldTables();
+							break;
+					}
+
+					return array_merge($conversion->getStatus(), array("finished" => $finished));
+				} finally {
+					if ($action != "status")
+						$conversion->unlock();
+				}
+			});
+		} catch (\PDOException $ex) {
+			// 管理者には原因を示す
+			throw new ApplicationException("データベースのエラー: " . $ex->getMessage(), 500);
+		} finally {
+			$dh->close();
+		}
+
+		Visualizer::$data = $rt;
+
+		return App::$handlerType == "json" ? Visualizer::json($rt) : Visualizer::visualize();
+	}
+
 	function reindex(): bool
 	{
 		$defaultBuffer = 40;

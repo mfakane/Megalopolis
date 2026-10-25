@@ -134,6 +134,22 @@ abstract class DataStore
 		return $value;
 	}
 
+	/**
+	 * データベースの変換中など、書き込みを止めているか
+	 */
+	function isMaintenance(): bool
+	{
+		return false;
+	}
+
+	/**
+	 * テーブルの作成・削除・名前の変更の後で、テーブルの一覧を読み直す
+	 */
+	function forgetTables(PDO $db): void
+	{
+		unset($this->tableNames[$this->getDatabaseNameByHandle($db)]);
+	}
+
 	function executeStatement(?PDOStatement $st, ?array $params = null, bool $throw = true): bool
 	{
 		if (!$st) return false;
@@ -410,9 +426,14 @@ class MySQLDataStore extends DataStore
 	private string $password;
 	/** utf8mb4 で保存できるか。utf8 (3 バイト) のテーブルでは 4 バイトの文字を保存できない */
 	private bool $fullUnicode = false;
+	private bool $maintenance = false;
 
 	const string CHARSET_META_NAME = "dataCharset";
 	const string CHARSET_UTF8MB4 = "utf8mb4";
+	const string MAINTENANCE_META_NAME = "maintenance";
+	/** 大文字小文字などの区別は utf8 のテーブル (utf8_general_ci) と同じにする */
+	const string COLLATION = "utf8mb4_general_ci";
+	const string FULLTEXT_COLLATION = "utf8mb4_unicode_ci";
 
 	/**
 	 * @api Selected by user configuration rather than the default SQLite config.
@@ -455,7 +476,9 @@ class MySQLDataStore extends DataStore
 		$this->registerHandle($db, $database);
 
 		// テーブルを utf8mb4 に変換するまでは、接続も utf8 にする
-		$this->fullUnicode = $this->readCharset($db) == self::CHARSET_UTF8MB4;
+		$meta = $this->readMeta($db, array(self::CHARSET_META_NAME, self::MAINTENANCE_META_NAME));
+		$this->fullUnicode = ($meta[self::CHARSET_META_NAME] ?? null) == self::CHARSET_UTF8MB4;
+		$this->maintenance = ($meta[self::MAINTENANCE_META_NAME] ?? "") == "1";
 
 		if (!$this->fullUnicode)
 			$db->exec("set names utf8");
@@ -467,16 +490,46 @@ class MySQLDataStore extends DataStore
 		return $db;
 	}
 
-	private function readCharset(PDO $db): ?string
+	/**
+	 * @param string[] $names
+	 * @return array<string, ?string>
+	 */
+	private function readMeta(PDO $db, array $names): array
 	{
 		if (!$this->hasTable($db, App::META_TABLE))
-			return null;
+			return array();
 
-		$st = $db->prepare(sprintf("select value from %s where name = ?", App::META_TABLE));
-		$st->execute(array(self::CHARSET_META_NAME));
-		$rt = $st->fetchColumn();
+		$st = $db->prepare(sprintf("select name, value from %s where name in (%s)", App::META_TABLE, implode(", ", array_fill(0, count($names), "?"))));
+		$st->execute($names);
 
-		return is_string($rt) ? $rt : null;
+		return $st->fetchAll(PDO::FETCH_KEY_PAIR);
+	}
+
+	function isFullUnicode(): bool
+	{
+		return $this->fullUnicode;
+	}
+
+	#[\Override]
+	function isMaintenance(): bool
+	{
+		return $this->maintenance;
+	}
+
+	function setMaintenance(PDO $db, bool $maintenance): void
+	{
+		Meta::set($db, self::MAINTENANCE_META_NAME, $maintenance ? "1" : null);
+		$this->maintenance = $maintenance;
+	}
+
+	/**
+	 * テーブルを utf8mb4 に変換した後で、接続と以後に作るテーブルを utf8mb4 にする
+	 */
+	function useFullUnicode(PDO $db): void
+	{
+		$db->exec("set names utf8mb4 collate " . self::COLLATION);
+		$this->fullUnicode = true;
+		Meta::set($db, self::CHARSET_META_NAME, self::CHARSET_UTF8MB4);
 	}
 
 	/**
@@ -528,11 +581,14 @@ class MySQLDataStore extends DataStore
 					%s,
 					primary key(%s)%s
 				)
-				default character set utf8 engine InnoDB",
+				%s",
 				$name,
 				implode(", ", array_map(fn($_) => strtr($_, array(" primary key" => "")), $arr)),
 				implode(", ", array_map(fn($_) => explode(" ", $_)[0], array_filter($arr, fn($_) => mb_strstr($_, "primary key")))),
-				is_array($index) ? ", key " . implode(", key ", array_map(fn($x, $y) => "{$x}(" . (is_array($y) ? implode(", ", $y) : $y) . ")", array_keys($index), array_values($index))) : ""
+				is_array($index) ? ", key " . implode(", key ", array_map(fn($x, $y) => "{$x}(" . (is_array($y) ? implode(", ", $y) : $y) . ")", array_keys($index), array_values($index))) : "",
+				$this->fullUnicode
+					? "default character set utf8mb4 collate " . self::COLLATION . " engine InnoDB row_format=dynamic"
+					: "default character set utf8 engine InnoDB"
 			), array(",
 					primary key()" => "")))));
 
@@ -559,11 +615,14 @@ class MySQLDataStore extends DataStore
 					%s,
 					primary key(%s)%s
 				)
-				default character set utf8 collate utf8_unicode_ci engine MyISAM",
+				%s",
 				$name,
 				implode(", ", $columns),
 				implode(", ", $primaryKeys),
-				", fulltext index " . implode(", fulltext index ", array_map(fn($x, $y) => "{$x}{$y}({$x})", $fullTextIndices, array_fill(0, count($fullTextIndices), $indexSuffix)))
+				", fulltext index " . implode(", fulltext index ", array_map(fn($x, $y) => "{$x}{$y}({$x})", $fullTextIndices, array_fill(0, count($fullTextIndices), $indexSuffix))),
+				$this->fullUnicode
+					? "default character set utf8mb4 collate " . self::FULLTEXT_COLLATION . " engine MyISAM"
+					: "default character set utf8 collate utf8_unicode_ci engine MyISAM"
 			), array(",
 					primary key()" => "")))));
 

@@ -110,6 +110,7 @@ class App
 			}
 
 			self::rewriteHtaccess();
+			self::ensureWritable();
 			Util::decodeInputs();
 			self::resolve(Util::getPathInfo());
 		}
@@ -135,6 +136,27 @@ class App
 			else
 				Visualizer::visualize("Exception");
 		}
+	}
+
+	/**
+	 * データベースの変換中は、投稿・コメント・評価などの書き込みを受け付けない
+	 */
+	private static function ensureWritable(): void
+	{
+		$path = trim(Util::getPathInfo(), "/");
+		$writes = $_POST || preg_match('@(^|/)uncomment(\.\w+)?$@', $path);
+		// 管理者のログインと変換ツール自身は通す
+		$allowed = preg_match('@^(login|logout|util/charset)(\.\w+)?$@', $path);
+
+		if (!$writes || $allowed || !Configuration::$instance->dataStore instanceof MySQLDataStore)
+			return;
+
+		$dh = self::openDB();
+		$maintenance = Configuration::$instance->dataStore->isMaintenance();
+		$dh->close();
+
+		if ($maintenance)
+			throw new ApplicationException("データベースの変換中のため、現在は投稿・コメント・評価などの書き込みを停止しています。しばらくしてから再度お試しください", 503);
 	}
 
 	/**

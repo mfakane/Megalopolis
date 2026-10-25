@@ -229,6 +229,10 @@ class ThreadEntry
 
 	function incrementReadCount(PDO $db): void
 	{
+		// データベースの変換中に書き込んだ値は、変換後のテーブルに反映されない
+		if (Configuration::$instance->dataStore?->isMaintenance())
+			return;
+
 		Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf(
 			'
 			update %s

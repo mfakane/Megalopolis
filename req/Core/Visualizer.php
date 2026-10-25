@@ -138,6 +138,14 @@ class Visualizer
 			</h1>
 		<?php
 		endif;
+
+		if (Configuration::$instance->dataStore?->isMaintenance()):
+		?>
+			<p class="notify warning">
+				データベースの変換中のため、投稿・コメント・評価などの書き込みを停止しています
+			</p>
+		<?php
+		endif;
 	}
 	
 	static function footer(?string $backgroundColor = null): void
