@@ -819,8 +819,9 @@ class ThreadEntry
 		if ($isMysql) {
 			Util::executeStatement($st2 = Util::ensureStatement($db, $db->prepare("select found_rows()")));
 			if ($st2) {
-				$foundItems = $st2->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
-				$foundItems = intval(array_pop($foundItems));
+				// $foundItems は型付きプロパティの参照のことがあるので、配列を直接代入しない
+				$found = $st2->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
+				$foundItems = intval(array_pop($found));
 			}
 		}
 
@@ -878,8 +879,9 @@ class ThreadEntry
 		if ($isMysql) {
 			Util::executeStatement($st2 = Util::ensureStatement($db, $db->prepare("select found_rows()")));
 			if ($st2) {
-				$foundItems = $st2->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
-				$foundItems = intval(array_pop($foundItems));
+				// $foundItems は型付きプロパティの参照のことがあるので、配列を直接代入しない
+				$found = $st2->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
+				$foundItems = intval(array_pop($found));
 			}
 		}
 
@@ -1183,14 +1185,16 @@ class ThreadEntry
 		if ($isMysql) {
 			Util::executeStatement($st2 = Util::ensureStatement($db, $db->prepare("select found_rows()")));
 			if ($st2) {
-				$foundItems = $st2->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
-				$foundItems = intval(array_pop($foundItems));
+				// $foundItems は型付きプロパティの参照のことがあるので、配列を直接代入しない
+				$found = $st2->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
+				$foundItems = intval(array_pop($found));
 			}
 		} else {
 			Util::executeStatement($st2 = Util::ensureStatement($db, $db->prepare("select count(*) {$sql}")));
 			if ($st2) {
-				$foundItems = $st2->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
-				$foundItems = intval(array_pop($foundItems));
+				// $foundItems は型付きプロパティの参照のことがあるので、配列を直接代入しない
+				$found = $st2->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0);
+				$foundItems = intval(array_pop($found));
 			}
 		}
 
