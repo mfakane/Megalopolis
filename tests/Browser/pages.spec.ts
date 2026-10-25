@@ -30,6 +30,26 @@ function makeWork(prefix: string): Work {
 	};
 }
 
+// The suite runs against query links (?path=) at the site root, and against
+// mod_rewrite links with the application under a subdirectory (BASE_URL ends with "/sub/").
+const linkMode = process.env.LINK_MODE ?? "query";
+const baseUrl = new URL(process.env.BASE_URL ?? "http://127.0.0.1:8080/");
+
+/** URL of an application route, relative to BASE_URL. */
+function route(path: string): string {
+	return linkMode === "query" ? (path ? `./?path=${path}` : "./") : `./${path}`;
+}
+
+/** Application route of a URL. */
+function routeOf(url: string): string {
+	const parsed = new URL(url);
+
+	if (linkMode === "query")
+		return parsed.searchParams.get("path") ?? "";
+
+	return decodeURIComponent(parsed.pathname.slice(baseUrl.pathname.length));
+}
+
 function isSameOrigin(url: string): boolean {
 	return new URL(url).origin === new URL(process.env.BASE_URL ?? "http://127.0.0.1:8080").origin;
 }
@@ -72,7 +92,7 @@ async function loginAsAdmin(page: Page): Promise<void> {
 }
 
 async function ensureAdmin(page: Page): Promise<void> {
-	await page.goto("/");
+	await page.goto(route(""));
 	if (await page.getByRole("link", { name: "ログイン" }).count()) await loginAsAdmin(page);
 }
 
@@ -157,10 +177,10 @@ test("履歴、検索、作者、タグ、ランダム表示を対象作品と�
 	await expect(page.getByText(first.title, { exact: true })).toBeVisible();
 	await expect(page.getByText(second.title, { exact: true })).toHaveCount(0);
 
-	await page.goto("/");
+	await page.goto(route(""));
 	const availableTitles = await page.locator("article h2 a").allTextContents();
 	await page.getByRole("link", { name: "おまかせ表示" }).click();
-	await expect(page).toHaveURL(/path=\d+\/\d+/);
+	await expect.poll(() => routeOf(page.url())).toMatch(/^\d+\/\d+$/);
 	const randomTitle = (await page.getByRole("heading", { level: 1 }).textContent())?.trim();
 	expect(randomTitle).toBeTruthy();
 	expect(availableTitles).toContain(randomTitle);
@@ -171,10 +191,10 @@ test("履歴、検索、作者、タグ、ランダム表示を対象作品と�
 test("設定情報とnoticeを表示する", async ({ page }) => {
 	const diagnostics = attachDiagnostics(page);
 
-	await page.goto("/");
+	await page.goto(route(""));
 	await page.getByRole("link", { name: "設定情報" }).click();
 	await expect(page.getByRole("heading", { name: "設定情報" })).toBeVisible();
-	await page.goto("/?path=notice/sample");
+	await page.goto(route("notice/sample"));
 	await expect(page.getByRole("heading", { name: "使い方" })).toBeVisible();
 	await expect(page.getByRole("heading", { name: "検索" })).toBeVisible();
 
@@ -275,7 +295,7 @@ test("管理者が作品を削除すると新しいコンテキストでも404�
 	await page.getByRole("checkbox", { name: "作品を削除する" }).check();
 	const unpostRequest = page.waitForRequest((request) => {
 		if (request.method() !== "POST") return false;
-		return new URL(request.url()).searchParams.get("path")?.endsWith("/unpost") === true;
+		return routeOf(request.url()).endsWith("/unpost");
 	});
 	page.once("dialog", (dialog) => dialog.accept());
 	await page.getByRole("button", { name: "削除" }).click();

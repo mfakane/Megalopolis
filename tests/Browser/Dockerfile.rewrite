@@ -1,0 +1,29 @@
+# The application under /sub/ on Apache with mod_rewrite and the shipped .htaccess,
+# so the suite also covers rewritten links and a non-root installation.
+FROM composer:2 AS composer
+FROM php:8.4-apache-bookworm
+
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends unzip \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& a2enmod rewrite \
+	&& sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+
+COPY --from=composer /usr/bin/composer /usr/local/bin/composer
+
+WORKDIR /var/www/html/sub
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --prefer-dist --no-progress
+
+COPY index.php .htaccess ./
+COPY req ./req
+COPY style ./style
+COPY script ./script
+COPY store/store.txt ./store/store.txt
+COPY store/notice ./store/notice
+COPY tests/Browser/config.php ./config.php
+
+# The application rewrites RewriteRule for /sub/ on the first top page request.
+RUN chown -R www-data:www-data /var/www/html/sub
+
+ENV BROWSER_LINK_TYPE=rewrite

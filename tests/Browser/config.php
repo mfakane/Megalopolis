@@ -7,8 +7,10 @@ Configuration::$instance = $config;
 $config->title = "Megalopolis";
 $config->adminHash = Util::hash("browser-admin");
 $config->utilsEnabled = false;
-$config->htaccessAutoConfig = false;
-$config->linkType = Configuration::LINK_QUERY;
+// Dockerfile.rewrite runs the same suite on Apache with .htaccess under /sub/.
+$rewrite = getenv("BROWSER_LINK_TYPE") === "rewrite";
+$config->htaccessAutoConfig = $rewrite;
+$config->linkType = $rewrite ? Configuration::LINK_AUTO : Configuration::LINK_QUERY;
 $config->useOutputCompression = false;
 $config->useSearch = true;
 $config->dataStore = new SQLiteDataStore();
