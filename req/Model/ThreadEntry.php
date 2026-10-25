@@ -339,7 +339,14 @@ class ThreadEntry
 			Util::bindValues($st, $this, self::$threadTagSchema);
 			$st->bindValue("tag", Util::encodeValue($v));
 			$st->bindParam("position", $k);
-			Util::executeStatement($st);
+
+			try {
+				Util::executeStatement($st);
+			} catch (\PDOException $ex) {
+				// 照合順序で同じとみなされるタグ (MySQL の utf8_general_ci での大文字小文字の違いなど) は一つにまとめる
+				if (($ex->errorInfo[1] ?? null) != 1062)
+					throw $ex;
+			}
 		}
 
 		if ($setSubjectLastUpdate)
