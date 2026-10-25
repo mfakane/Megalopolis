@@ -19,8 +19,13 @@ else if (App::$pathInfo &&
 else
 	$m = "i";
 
+// コメントなどの表示 (subject/id/c/N) と本文の表示 (subject/id/N) で、ページ番号の位置が違う
 if (isset(App::$pathInfo[3]) &&
 	$v = intval(App::$pathInfo[3]))
+	$h->page = max($v, 1);
+else if ($m == "i" &&
+	isset(App::$pathInfo[2]) &&
+	$v = intval(App::$pathInfo[2]))
 	$h->page = max($v, 1);
 else
 	$h->page = 1;
