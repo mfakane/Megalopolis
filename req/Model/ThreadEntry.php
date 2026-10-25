@@ -549,7 +549,7 @@ class ThreadEntry
 
 		$sql = sprintf(
 			'
-			select * from %1$s
+			select %2$s.*, %1$s.* from %1$s
 			left join %2$s on %1$s.id = %2$s.id
 			%3$s',
 			App::THREAD_ENTRY_TABLE,
@@ -822,7 +822,7 @@ class ThreadEntry
 		$isMysql = Configuration::$instance->dataStore instanceof MySQLDataStore;
 		$sql = sprintf(
 			'
-			select %s * from %s as t
+			select %s e.*, t.* from %s as t
 			left join %s as e on e.id = t.id
 			where name = ?
 			order by t.id %s
@@ -881,7 +881,7 @@ class ThreadEntry
 		$isMysql = Configuration::$instance->dataStore instanceof MySQLDataStore;
 		$sql = sprintf(
 			'
-			select %s * from %s as tt
+			select %s e.*, tt.*, t.* from %s as tt
 			join %s as t on t.id = tt.id and tag = ?
 			left join %s as e on e.id = tt.id
 			order by tt.id %s
@@ -1178,7 +1178,7 @@ class ThreadEntry
 		);
 		Util::executeStatement($st = Util::ensureStatement($db, $db->prepare(
 				"select " . ($isMysql ? "sql_calc_found_rows " : " ") .
-					"* {$sql} order by t.id " . ($order == Board::ORDER_ASCEND ? "asc" : "desc") .
+					"e.*, t.* {$sql} order by t.id " . ($order == Board::ORDER_ASCEND ? "asc" : "desc") .
 					(is_null($limit) ? "" : " limit {$limit} offset {$offset}")
 			)), array(
 			":begin" => $subjectRange[0],

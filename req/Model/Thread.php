@@ -380,7 +380,7 @@ class Thread
 	{
 		$st = Util::ensureStatement($db, $db->prepare(sprintf(
 			'
-			select * from %1$s
+			select %3$s.*, %2$s.*, %1$s.* from %1$s
 			left join %2$s on %1$s.id = %2$s.id
 			left join %3$s on %1$s.id = %3$s.id
 			%4$s',
@@ -403,7 +403,7 @@ class Thread
 		 * background: ?string,
 		 * backgroundImage: ?string,
 		 * border: ?string,
-		 * writingMode: int,
+		 * writingMode: ?int,
 		 * hash: ?string
 		 * } $record */
 		return array_map(function (array $record): Thread {
@@ -417,7 +417,8 @@ class Thread
 			$thread->background = $record['background'];
 			$thread->backgroundImage = $record['backgroundImage'];
 			$thread->border = $record['border'];
-			$thread->writingMode = $record['writingMode'];
+			// 列を追加する前の作品やスタイルの行が無い作品は NULL になる
+			$thread->writingMode = (int)($record['writingMode'] ?? self::WRITING_MODE_NOT_SPECIFIED);
 			$thread->hash = $record['hash'];
 			return $thread;
 		}, $st->fetchAll());
