@@ -173,6 +173,7 @@ final class VisualizerTest extends TestCase
         yield 'digits are not a page number' => ['123', null, ['author', '123', '1']];
         yield 'digits after slash are not a page number' => ['x/45', null, ['author', 'x/45', '1']];
         yield 'dot is not a handler type' => ['v1.2', null, ['author', 'v1.2.html']];
+        yield 'trailing slash is kept' => ['a.b/', null, ['author', 'a.b/', '1']];
         yield 'feed of digits' => ['123', 'rss', ['author', '123', '1.rss']];
         yield 'feed of dot' => ['v1.2', 'atom', ['author', 'v1.2.atom']];
     }

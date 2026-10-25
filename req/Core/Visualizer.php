@@ -519,9 +519,11 @@ class Visualizer
 	static function nameHrefArgs(string $action, string $name, ?string $type = null): array
 	{
 		$endsWithDigit = ctype_digit($name) || ($last = strrchr($name, "/")) !== false && ctype_digit(substr($last, 1));
+		// 末尾の / はパスの区切りとして取り除かれてしまう
+		$endsWithSlash = str_ends_with($name, "/");
 		$extension = isset($type) ? ".{$type}" : "";
 
-		if ($endsWithDigit)
+		if ($endsWithDigit || $endsWithSlash)
 			return array($action, $name, "1" . $extension);
 		else
 			return array($action, $name . ($extension ?: (strpos($name, ".") !== false ? ".html" : "")));
