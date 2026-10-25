@@ -546,7 +546,8 @@ class UtilHandler extends Handler
 			$next = 0;
 
 			$subject = $dh->withTransaction(function ($db) use ($dir, $subjectCount, &$datCount, &$offset, &$processed, &$next, &$count, $buffer) {
-				for ($subject = intval(IndexHandler::param("s")); $subject < $subjectCount; $subject++) {
+				// 最新の作品集 (subject.txt) も取り込む
+				for ($subject = intval(IndexHandler::param("s")); $subject <= $subjectCount; $subject++) {
 					$subjectFile = $dir . "sub/subject" . ($subject == $subjectCount ? "" : $subject) . ".txt";
 					$datCount = 0;
 
@@ -619,6 +620,10 @@ class UtilHandler extends Handler
 	 */
 	private static function getFirstAndLastDataLineIDFromLines(array $lines): array
 	{
+		// 作品の無い作品集のファイル
+		if (!$lines)
+			return array(0, 0);
+
 		return array(self::getDataLineID($lines[0]), self::getDataLineID($lines[count($lines) - 1]));
 	}
 
