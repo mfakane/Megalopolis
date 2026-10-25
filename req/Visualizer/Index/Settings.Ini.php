@@ -5,7 +5,8 @@ $c = Configuration::$instance;
 
 function convert(string $s): string
 {
-	return addcslashes(addslashes($s), '$\\');
+	// ダブルクォートの PHP 文字列として出力する
+	return addcslashes($s, '\\"$');
 }
 ?>
 <?="<?php\r\n" ?>
