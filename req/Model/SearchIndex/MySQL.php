@@ -28,7 +28,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		));
 
 		foreach ($words as $k => $v)
-			$words[$k] = array_map(fn($_) => str_pad($_, $this->gramLength, "_"), $v);
+			$words[$k] = $this->padWords($v);
 
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf(
 			'
@@ -52,6 +52,17 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		Util::executeStatement($st, array_map(function ($_) {
 			return implode(" ", $_);
 		}, $words));
+	}
+
+	/**
+	 * 全文検索の最小語長より短い n-gram を _ で埋める
+	 * @param string[] $words
+	 * @return string[]
+	 */
+	function padWords(array $words): array
+	{
+		// str_pad はバイト数で数えるため、マルチバイト文字の n-gram が埋められない
+		return array_map(fn($_) => $_ . str_repeat("_", max($this->gramLength - mb_strlen($_), 0)), $words);
 	}
 
 	#[\Override]

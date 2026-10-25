@@ -42,4 +42,13 @@ final class MySQLSearchQueryTest extends TestCase
 
         self::assertSame($expected, (new MySQLSearchIndex())->buildBooleanQuery($query));
     }
+
+    public function testPadsShortGramsByCharacters(): void
+    {
+        $configuration = new Configuration();
+        $configuration->mysqlSearchNgramLength = 4;
+        Configuration::$instance = $configuration;
+
+        self::assertSame(['文字__', 'abc_', 'japa'], (new MySQLSearchIndex())->padWords(['文字', 'abc', 'japa']));
+    }
 }
