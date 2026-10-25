@@ -74,7 +74,8 @@ class IndexHandler extends Handler
 			$this->entries = ThreadEntry::getEntriesBySubject($db, $subject);
 
 			if (($this->lastUpdate = Board::getLastUpdate($db, $subject)) === null)
-				$this->lastUpdate = max(array_map(fn(ThreadEntry $x) => $x->getLatestLastUpdate(), $this->entries) + array(0));
+				// 作品が無い場合は 0 (1970/01/01) ではなく不明とする
+				$this->lastUpdate = max(array_map(fn(ThreadEntry $x) => $x->getLatestLastUpdate(), $this->entries) + array(0)) ?: null;
 
 			$this->subject = $subject;
 			$this->subjectCount = Board::getLatestSubject($db);
@@ -537,7 +538,7 @@ class IndexHandler extends Handler
 				return ThreadEntry::getEntriesByName($db, $name, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $found);
 			});
 
-			$this->lastUpdate = max(array_map(fn($x) => $x->getLatestLastUpdate(), $this->entries) + array(0));
+			$this->lastUpdate = max(array_map(fn($x) => $x->getLatestLastUpdate(), $this->entries) + array(0)) ?: null;
 			$hash = implode(",", array_map(fn($x) => $x->id . ":" . (time() - (int)$x->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"), $this->entries));
 
 			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY, "") . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "") . $hash))
@@ -643,7 +644,7 @@ class IndexHandler extends Handler
 				return ThreadEntry::getEntriesByTag($db, $tag, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $found);
 			});
 
-			$this->lastUpdate = max(array_map(fn($x) => $x->getLatestLastUpdate(), $this->entries) + array(0));
+			$this->lastUpdate = max(array_map(fn($x) => $x->getLatestLastUpdate(), $this->entries) + array(0)) ?: null;
 			$hash = implode(",", array_map(fn($x) => $x->id . ":" . (time() - (int)$x->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"), $this->entries));
 
 			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY, "") . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "") . $hash))
