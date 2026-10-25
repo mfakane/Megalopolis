@@ -127,8 +127,8 @@ Visualizer::doctype();
 			<textarea name="summary" id="summary" rows="2" cols="60"><?=Visualizer::escapeOutput($h->entry->summary) ?></textarea>
 			<?php endif ?>
 			<hr />
-			<label for="body">本文</label><textarea name="body" id="body" rows="20" cols="60"><?=Visualizer::escapeOutput($h->thread->body) ?></textarea><br />
-			<label for="afterword">あとがき</label><textarea name="afterword" id="afterword" rows="4" cols="60"><?=Visualizer::escapeOutput($h->thread->afterword) ?></textarea>
+			<label for="body">本文</label><textarea name="body" id="body" rows="20" cols="60"><?=Visualizer::escapeSource($h->thread->body) ?></textarea><br />
+			<label for="afterword">あとがき</label><textarea name="afterword" id="afterword" rows="4" cols="60"><?=Visualizer::escapeSource($h->thread->afterword) ?></textarea>
 			<ul class="buttons">
 				<li>
 					<button type="submit">

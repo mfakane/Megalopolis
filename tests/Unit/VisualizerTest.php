@@ -183,4 +183,26 @@ final class VisualizerTest extends TestCase
     {
         self::assertSame($expected, Visualizer::nameHrefArgs('author', $name, $type));
     }
+
+    public static function storedText(): iterable
+    {
+        yield 'ampersand escaped on input' => ['Tom&amp;Jerry', 'Tom&amp;Jerry'];
+        yield 'bare ampersand' => ['A&B', 'A&amp;B'];
+        yield 'named entity kept on input' => ['&hearts;', '♥'];
+        yield 'markup is text' => ['<b>"x"</b>', '&lt;b&gt;&quot;x&quot;&lt;/b&gt;'];
+        yield 'escaped markup is text' => ['&lt;b&gt;', '&lt;b&gt;'];
+        yield 'unterminated reference' => ['&quo', '&amp;quo'];
+    }
+
+    #[DataProvider('storedText')]
+    public function testEscapeOutputDoesNotEscapeStoredReferencesTwice(string $stored, string $html): void
+    {
+        self::assertSame($html, Visualizer::escapeOutput($stored));
+    }
+
+    public function testEscapeSourceKeepsStoredMarkupEditable(): void
+    {
+        // Body text is HTML: "&lt;" typed as text must not become a tag after editing.
+        self::assertSame('&amp;lt;b&amp;gt;&lt;i&gt;', Visualizer::escapeSource('&lt;b&gt;<i>'));
+    }
 }

@@ -617,10 +617,24 @@ class Visualizer
 		));
 	}
 	
+	/**
+	 * 入力時に & が &amp; にされるなど、保存されている値は実体参照を含むことがあるため、
+	 * いったんデコードしてからエスケープする
+	 */
 	static function escapeOutput(mixed $s): string
 	{
 		return isset($s)
-			? htmlspecialchars(strval($s), ENT_QUOTES, "UTF-8")
+			? htmlspecialchars(html_entity_decode(strval($s), ENT_QUOTES | ENT_HTML5, "UTF-8"), ENT_QUOTES, "UTF-8")
+			: "";
+	}
+
+	/**
+	 * 本文など HTML として保存されている値を、編集用にそのまま出力する
+	 */
+	static function escapeSource(?string $s): string
+	{
+		return isset($s)
+			? htmlspecialchars($s, ENT_QUOTES, "UTF-8")
 			: "";
 	}
 	

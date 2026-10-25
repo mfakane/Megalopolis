@@ -81,7 +81,12 @@ final class FeedTest extends TestCase
             // The frozen SQLite oracle shares BMP cases with MySQL. The supplementary
             // case has intentionally different MySQL input, so it is checked here only on SQLite.
             if ($driver === 'mysql' && Fixtures::manifest($driver)[$id]['text'] === 'supplementary') continue;
-            $expected = Fixtures::sqlitePayload($id);
+            // Stored text may contain HTML references (e.g. "&amp;" from input normalization);
+            // feeds carry the text they stand for.
+            $expected = array_map(fn($value) => is_array($value)
+                ? array_map(fn($x) => html_entity_decode($x, ENT_QUOTES | ENT_HTML5, 'UTF-8'), $value)
+                : (is_string($value) ? html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8') : $value),
+                Fixtures::sqlitePayload($id));
             foreach (['title' => 'title', 'name' => $format === 'atom' ? 'author/a:name' : 'author'] as $field => $element) {
                 self::assertSame(str_replace(["\r\n", "\r"], "\n", $expected[$field]),
                     $xpath->evaluate("string($prefix$element)", $entry), "$driver $id $field");
