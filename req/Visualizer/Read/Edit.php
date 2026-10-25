@@ -48,7 +48,7 @@ Visualizer::doctype();
 			<?php endforeach ?>
 		</ul>
 	<?php endif ?>
-	<form action="<?=Visualizer::escapeOutput(Util::withMobileUniqueIDRequestSuffix()) ?>" method="post">
+	<form action="" method="post">
 		<section>
 			<label for="name">名前</label><input type="text" name="name" id="name" value="<?=Visualizer::escapeOutput($h->entry->name) ?>"<?=$c->requireName[Configuration::ON_ENTRY] ? 'required="required"' : null ?> /><br />
 			<label for="mail">メール</label><input type="email" name="mail" id="mail" value="<?=Visualizer::escapeOutput($h->entry->mail) ?>" /><br />
@@ -141,7 +141,7 @@ Visualizer::doctype();
 		</section>
 	</form>
 	<?php if (App::$actionName == "edit"): ?>
-		<form action="<?=Visualizer::escapeOutput(Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "unpost"))) ?>" method="post" id="unpostForm">
+		<form action="<?=Visualizer::escapeOutput(Visualizer::actionHref($h->subject, $h->entry->id, "unpost")) ?>" method="post" id="unpostForm">
 			<section>
 				<h2>作品の削除</h2>
 				<label><input type="checkbox" name="password" id="unpostCheck" value="<?=Visualizer::escapeOutput(ReadHandler::param("password")) ?>" />作品を削除する</label>

@@ -240,9 +240,9 @@ Visualizer::doctype();
 		<section class="notify info">
 			<ul class="buttons">
 				<li>
-					<form id="resumeForm" action="<?php Visualizer::converted(Util::withMobileUniqueIDRequestSuffix(App::$actionName == "new"
+					<form id="resumeForm" action="<?php Visualizer::converted(App::$actionName == "new"
 						? Visualizer::actionHref(App::$actionName)
-						: Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName))) ?>" method="post">
+						: Visualizer::actionHref($h->subject, $h->entry->id, App::$actionName)) ?>" method="post">
 						<div>
 							<button type="submit">
 								<img src="<?=Visualizer::escapeOutput(Visualizer::actionHref("style", "backButtonIcon.png")) ?>" alt="" />修正
@@ -252,9 +252,9 @@ Visualizer::doctype();
 					</form>
 				</li>
 				<li>
-					<form id="sendForm" action="<?php Visualizer::converted(Util::withMobileUniqueIDRequestSuffix(App::$actionName == "new"
+					<form id="sendForm" action="<?php Visualizer::converted(App::$actionName == "new"
 						? Visualizer::actionHref("post")
-						: Visualizer::actionHref($h->subject, $h->entry->id, "post"))) ?>" method="post">
+						: Visualizer::actionHref($h->subject, $h->entry->id, "post")) ?>" method="post">
 						<div>
 							<button type="submit">
 								送信<img src="<?=Visualizer::escapeOutput(Visualizer::actionHref("style", "sendButtonIcon.png")) ?>" class="last" alt="" />
@@ -271,7 +271,7 @@ Visualizer::doctype();
 		<?php if (!$c->showCommentsOnLastPageOnly || $h->page == $h->entry->pageCount): ?>
 			<?php if ($c->usePoints()): ?>
 				<a id="evaluateformHeadding" href="#evaluateform" class="first">簡易評価</a>
-				<form id="evaluateform" action="<?=Visualizer::escapeOutput(Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "evaluate"))) ?>#evaluateformHeadding" method="post">
+				<form id="evaluateform" action="<?=Visualizer::escapeOutput(Visualizer::actionHref($h->subject, $h->entry->id, "evaluate")) ?>#evaluateformHeadding" method="post">
 					<?php if ($d && App::$actionName == "evaluate"): ?>
 						<ul class="notify warning">
 							<?php foreach (Visualizer::$data as $i): ?>
@@ -301,7 +301,7 @@ Visualizer::doctype();
 			<?php if ($c->useComments): ?>
 				<a id="commentformHeadding" href="#commentform"<?php if (!$c->usePoints()) echo 'class="first"' ?>>コメント</a>
 				<form id="commentform"
-					  action="<?=Visualizer::escapeOutput(Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "comment"))) ?>#commentformHeadding"
+					  action="<?=Visualizer::escapeOutput(Visualizer::actionHref($h->subject, $h->entry->id, "comment")) ?>#commentformHeadding"
 					  method="post"
 					  data-default-name="<?=Visualizer::escapeOutput($c->defaultName) ?>"
 					  data-use="<?=implode(" ", array_filter(array($isAdmin || $c->showName[Configuration::ON_COMMENT] ? "name" : null, $isAdmin || $c->showPoint[Configuration::ON_COMMENT] ? "points" : null))) ?>">

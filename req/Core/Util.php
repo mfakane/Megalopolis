@@ -38,12 +38,6 @@ class Util
 	const string BROWSER_TYPE_WEBKIT = "WebKit";
 	const string BROWSER_TYPE_KHTML = "KHTML";
 
-	const string MOBILE_TYPE_UNKNOWN = "Unknown";
-	const string MOBILE_TYPE_IMODE = "docomo";
-	const string MOBILE_TYPE_EZWEB = "kddi";
-	const string MOBILE_TYPE_YKEITAI = "softbank";
-	const string MOBILE_TYPE_WILLCOM = "willcom";
-	const string MOBILE_TYPE_EMNET = "emobile";
 
 	static function getBrowserType(): string
 	{
@@ -103,70 +97,13 @@ class Util
 		return $browserType = self::BROWSER_TYPE_UNKNOWN;
 	}
 
-	static function getMobileType(): string
-	{
-		static $mobileType;
-
-		if ($mobileType)
-			return $mobileType;
-
-		$host = isset($_SERVER["REMOTE_HOST"]) && $_SERVER["REMOTE_HOST"] ? $_SERVER["REMOTE_HOST"] : (isset($_SERVER["REMOTE_ADDR"]) ? gethostbyaddr($_SERVER["REMOTE_ADDR"]) : "");
-
-		if ($host === false)
-			return self::MOBILE_TYPE_UNKNOWN;
-
-		foreach (
-			array(
-				'\.docomo\.ne\.jp'								=> self::MOBILE_TYPE_IMODE,
-				'\.ezweb\.ne\.jp'								=> self::MOBILE_TYPE_EZWEB,
-				'\.jp-.\.ne\.jp'								=> self::MOBILE_TYPE_YKEITAI,
-				'\.prin\.ne\.jp'								=> self::MOBILE_TYPE_WILLCOM,
-				'(\.emnet\.ne\.jp|\.pool\.e-mobile\.ad\.jp)'	=> self::MOBILE_TYPE_EMNET,
-			) as $k => $v
-		)
-			if (preg_match("/{$k}$/i", $host))
-				return $mobileType = $v;
-
-		return $mobileType = self::MOBILE_TYPE_UNKNOWN;
-	}
-
+	/**
+	 * @deprecated 携帯端末の契約者固有 ID (i-mode ID など) の受け付けは廃止した
+	 * @api 独自のテンプレートとの互換のために残している
+	 */
 	static function withMobileUniqueIDRequestSuffix(string $path = ""): string
 	{
-		return $path . (self::getMobileType() == self::MOBILE_TYPE_IMODE ? (strpos($path, "?") !== false ? "&guid=ON" : "?guid=ON") : "");
-	}
-
-	static function getMobileUniqueIDName(): string
-	{
-		$type = self::getMobileType();
-		$names = array(
-			self::MOBILE_TYPE_IMODE		=> "iモード ID ",
-			self::MOBILE_TYPE_EZWEB		=> "EZ 番号",
-			self::MOBILE_TYPE_YKEITAI	=> "端末シリアル番号",
-			self::MOBILE_TYPE_EMNET		=> "EMnet ユーザ ID ",
-		);
-
-		return $names[$type] ?? "契約者固有 ID";
-	}
-
-	static function canGetMobileUniqueID(): bool
-	{
-		return !in_array(self::getMobileType(), array(self::MOBILE_TYPE_UNKNOWN, self::MOBILE_TYPE_WILLCOM));
-	}
-
-	static function getMobileUniqueID(): ?string
-	{
-		$header = array(
-			self::MOBILE_TYPE_IMODE		=> "HTTP_X_DCMGUID",
-			self::MOBILE_TYPE_EZWEB		=> "HTTP_X_UP_SUBNO",
-			self::MOBILE_TYPE_YKEITAI	=> "HTTP_X_JPHONE_UID",
-			self::MOBILE_TYPE_EMNET		=> "HTTP_X_EM_UID",
-		);
-		$type = self::getMobileType();
-
-		if (isset($header[$type]) && isset($_SERVER[$header[$type]]))
-			return $type . ":" . $_SERVER[$header[$type]];
-		else
-			return null;
+		return $path;
 	}
 
 	/**
@@ -230,9 +167,6 @@ class Util
 
 	private static function lookupRemoteHost(): ?string
 	{
-		if (self::canGetMobileUniqueID() && ($id = self::getMobileUniqueID()) !== null)
-			return $id;
-
 		if (($addr = self::getRemoteAddress()) !== null && $addr !== ($_SERVER["REMOTE_ADDR"] ?? null))
 			return $addr;
 

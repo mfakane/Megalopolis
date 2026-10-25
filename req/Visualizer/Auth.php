@@ -19,7 +19,7 @@ $d = Visualizer::$data;
 		</div>
 	<?php endif ?>
 	<?php $authAction = $_SERVER["REQUEST_URI"] ?? Visualizer::currentHref($_GET) ?>
-	<form class="auth" action="<?=Visualizer::escapeOutput(Util::withMobileUniqueIDRequestSuffix($authAction)) ?>" method="post">
+	<form class="auth" action="<?=Visualizer::escapeOutput($authAction) ?>" method="post">
 		<section>
 			<?php if (Auth::$passwordRequired): ?>
 				<label for="password"><?=Visualizer::escapeOutput(Auth::$label) ?></label><input type="password" name="password" id="password" /><br />

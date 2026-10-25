@@ -82,20 +82,14 @@ $config->allowRead = array
 );
 
 // 送信に対するホスト規制の例外 (文字列一覧)
-// この一覧にあるものと IP アドレスまたはリモートホスト、契約者固有 ID が一致すると上の規制リストおよび BBQ に含まれていても送信可能になります。
-// 契約者固有 ID は docomo, kddi, softbank, emobile に対応しています。
+// この一覧にあるものと IP アドレスまたはリモートホストが一致すると上の規制リストおよび BBQ に含まれていても送信可能になります。
 // ワイルドカード (*, ?, [] など) も使用可能です
 $config->allowWrite = array
 (
 	// 例:
 	// "192.168.*",			// IP アドレス
 	// "*.example.com",		// リモートホスト
-	// "docomo:*",			// キャリア:契約者固有 ID
 );
-
-// 契約者固有 ID を通知しない携帯端末からの送信を拒否するか (true/false)
-// 契約者固有 ID は docomo, kddi, softbank, emobile に対応しています
-$config->denyWriteFromMobileWithoutID = false;
 
 // X-Forwarded-For ヘッダーを信頼するリバースプロキシ (文字列一覧または null)
 // 接続元の IP アドレスがこの一覧と一致する場合だけ、X-Forwarded-For から利用者の IP アドレスを取得します。

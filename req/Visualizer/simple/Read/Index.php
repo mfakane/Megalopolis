@@ -98,7 +98,7 @@ if ($h->page < $maxPage && ($idx = mb_strrpos(mb_substr($h->thread->body ?? "", 
 				<?php Visualizer::convertedAfterword($h->thread) ?>
 			</div>
 			<?php if ($c->pointMap): ?>
-				<form class="content" action="<?=Visualizer::escapeOutput(Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "evaluate"))) ?>" method="post">
+				<form class="content" action="<?=Visualizer::escapeOutput(Visualizer::actionHref($h->subject, $h->entry->id, "evaluate")) ?>" method="post">
 					<h2>簡易評価</h2>
 					<?php if ($d && App::$actionName == "evaluate"): ?>
 						<ul>
@@ -160,7 +160,7 @@ if ($h->page < $maxPage && ($idx = mb_strrpos(mb_substr($h->thread->body ?? "", 
 		<?php Visualizer::pager($h->page, $maxCommentPage, 5, Visualizer::actionHref($h->entry->subject, $h->entry->id, "c") . "/") ?>
 	<?php else: ?>
 		<?php if ($c->useComments): ?>
-			<form class="content" action="<?=Visualizer::escapeOutput(Util::withMobileUniqueIDRequestSuffix(Visualizer::actionHref($h->subject, $h->entry->id, "comment"))) ?>" method="post">
+			<form class="content" action="<?=Visualizer::escapeOutput(Visualizer::actionHref($h->subject, $h->entry->id, "comment")) ?>" method="post">
 				<?php if ($d && App::$actionName == "comment"): ?>
 					<ul>
 						<?php foreach (Visualizer::$data as $i): ?>

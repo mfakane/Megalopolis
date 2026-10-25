@@ -95,8 +95,6 @@ class App
 					if (Configuration::$instance->denyWrite && self::matchesAddress(Configuration::$instance->denyWrite))
 						throw new ApplicationException("あなたのホストからの送信は規制されています", 403);
 
-					if (Configuration::$instance->denyWriteFromMobileWithoutID && Util::canGetMobileUniqueID() && Util::getMobileUniqueID() == null)
-						throw new ApplicationException(Util::getMobileUniqueIDName() . "の送信設定を有効にしてください", 403);
 				}
 			}
 			else

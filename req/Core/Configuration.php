@@ -50,6 +50,11 @@ class Configuration
 	public array $allowRead = array();
 	/** @var string[] */
 	public array $allowWrite = array();
+	/**
+	 * @deprecated 携帯端末の契約者固有 ID の受け付けは廃止した
+	 * 既存の設定ファイルが代入しても警告にならないよう残している
+	 * @psalm-suppress PossiblyUnusedProperty
+	 */
 	public bool $denyWriteFromMobileWithoutID = false;
 	/**
 	 * X-Forwarded-For を信頼するリバースプロキシ。null の場合はプライベートアドレスとループバック
