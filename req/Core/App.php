@@ -225,9 +225,9 @@ class App
 
 		foreach (array("", "_") as $i)
 			if (isset($pathInfo[0]))
-				if (is_callable(array(self::$handler, $i . $pathInfo[0])))
+				if (self::isAction(self::$handler, $i . $pathInfo[0]))
 					$callbackName = $i . (self::$actionName = array_shift($pathInfo));
-				else if (is_callable(array(self::$handler, $i . $pathInfo[count($pathInfo) - 1])))
+				else if (self::isAction(self::$handler, $i . $pathInfo[count($pathInfo) - 1]))
 					$callbackName = $i . (self::$actionName = array_pop($pathInfo));
 
 		self::$pathInfo = $pathInfo;
@@ -253,6 +253,19 @@ class App
 	 * @param string[] $args
 	 * @return mixed
 	 */
+	/**
+	 * URL から呼べるのはハンドラの公開されたアクション (インスタンスメソッド) だけにする
+	 */
+	private static function isAction(Handler $handler, string $name): bool
+	{
+		if (!method_exists($handler, $name))
+			return false;
+
+		$method = new \ReflectionMethod($handler, $name);
+
+		return $method->isPublic() && !$method->isStatic();
+	}
+
 	static function callHandler(string $name, string $action, array $args): bool
 	{
 		$cast = fn(mixed $orig): Handler => $orig;
@@ -266,6 +279,9 @@ class App
 			throw new ApplicationException("{$handlerName} not found");
 
 		$handlerName::$instance = self::$handler;
+
+		if (!self::isAction(self::$handler, $action))
+			throw new ApplicationException("ファイルが見つかりません", 404);
 
 		return call_user_func_array(array(self::$handler, $action), $args);
 	}

@@ -779,8 +779,14 @@ class UtilHandler extends Handler
 			return Visualizer::visualize();
 	}
 
-	function fill(): void
+	/**
+	 * 動作確認用に、ランダムな作品を投稿する
+	 */
+	function fill(): bool
 	{
+		if (!Configuration::$instance->debug)
+			throw new ApplicationException("ファイルが見つかりません", 404);
+
 		self::ensureTestMode();
 
 		$dh = App::openDB();
@@ -818,6 +824,8 @@ class UtilHandler extends Handler
 
 		$idh->close();
 		$dh->close();
+
+		return Visualizer::redirect();
 	}
 
 	static function createRandomString(int $length): string
