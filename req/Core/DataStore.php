@@ -476,18 +476,37 @@ class MySQLDataStore extends DataStore
 		$this->registerHandle($db, $database);
 
 		// テーブルを utf8mb4 に変換するまでは、接続も utf8 にする
+		$isNew = !$this->hasTable($db, App::META_TABLE);
 		$meta = $this->readMeta($db, array(self::CHARSET_META_NAME, self::MAINTENANCE_META_NAME));
-		$this->fullUnicode = ($meta[self::CHARSET_META_NAME] ?? null) == self::CHARSET_UTF8MB4;
+		$this->fullUnicode = $isNew ? $this->canCreateFullUnicodeTables($db) : ($meta[self::CHARSET_META_NAME] ?? null) == self::CHARSET_UTF8MB4;
 		$this->maintenance = ($meta[self::MAINTENANCE_META_NAME] ?? "") == "1";
-
-		if (!$this->fullUnicode)
-			$db->exec("set names utf8");
+		$db->exec($this->fullUnicode ? "set names utf8mb4 collate " . self::COLLATION : "set names utf8");
 
 		Meta::ensureTable($db);
+
+		if ($isNew && $this->fullUnicode)
+			Meta::set($db, self::CHARSET_META_NAME, self::CHARSET_UTF8MB4);
+
 		Board::ensureTable($db);
 		SearchIndex::ensureTable($db);
 
 		return $db;
+	}
+
+	/**
+	 * 新しく作るテーブルを utf8mb4 にできるか。古い MySQL などではインデックスの長さの
+	 * 上限が小さく、utf8mb4 の varchar(255) にインデックスを作れない
+	 */
+	private function canCreateFullUnicodeTables(PDO $db): bool
+	{
+		try {
+			$db->exec("create temporary table megalopolisCharsetProbe (k varchar(255) not null, primary key(k)) default character set utf8mb4 collate " . self::COLLATION . " engine InnoDB row_format=dynamic");
+			$db->exec("drop temporary table megalopolisCharsetProbe");
+
+			return true;
+		} catch (\PDOException) {
+			return false;
+		}
 	}
 
 	/**
