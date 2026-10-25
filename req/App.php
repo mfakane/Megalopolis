@@ -27,7 +27,6 @@ App::load(array(
 	Constant::MODEL_DIR . "SearchIndex/Classic",
 	Constant::MODEL_DIR . "SearchIndex/SQLite",
 	Constant::MODEL_DIR . "SearchIndex/MySQL",
-	Constant::MODEL_DIR . "Statistics",
 	Constant::MODEL_DIR . "ThreadEntry",
 	Constant::MODEL_DIR . "Thread"
 ));
