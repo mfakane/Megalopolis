@@ -42,8 +42,8 @@ abstract class DataStore
 
 	protected function unregisterTableByHandle(PDO &$db, string $name): void
 	{
-		$arr = $this->tableNames[$this->getDatabaseNameByHandle($db)];
-		$index = array_search($name, $arr);
+		$arr = $this->tableNames[$this->getDatabaseNameByHandle($db)] ?? array();
+		$index = array_search(strtolower($name), $arr);
 
 		if ($index === false)
 			return;
@@ -88,8 +88,11 @@ abstract class DataStore
 
 		if ($this->transactionCount == 0)
 			$db->rollBack();
-		else
+		else {
 			$this->executeStatement($this->ensureStatement($db, $db->prepare("rollback to savepoint SP{$this->transactionCount}")));
+			// rollback to だけではセーブポイントが残り、SQLite ではトランザクションも開いたままになる
+			$this->executeStatement($this->ensureStatement($db, $db->prepare("release savepoint SP{$this->transactionCount}")));
+		}
 	}
 
 	abstract function open(string $database = "data"): PDO;

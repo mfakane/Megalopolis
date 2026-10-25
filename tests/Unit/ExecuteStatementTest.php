@@ -45,4 +45,18 @@ final class ExecuteStatementTest extends TestCase
         Util::executeIgnoringErrors($this->db, 'drop trigger missingTrigger');
         self::assertSame(1, (int)$this->db->query('select count(*) from t')->fetchColumn());
     }
+
+    public function testRolledBackSavepointDoesNotLeaveATransactionOpen(): void
+    {
+        $store = Configuration::$instance->dataStore;
+        // A second handle joining an outer transaction uses a savepoint (shared counter).
+        $store->beginTransactionOrSavepoint($this->db);
+        $other = new PDO('sqlite::memory:');
+        $store->beginTransactionOrSavepoint($other);
+        $store->rollBackOrToSavepoint($other);
+        $store->rollBackOrToSavepoint($this->db);
+
+        self::assertFalse($other->inTransaction());
+        self::assertFalse($this->db->inTransaction());
+    }
 }
