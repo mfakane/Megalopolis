@@ -899,7 +899,7 @@ class Visualizer
 		{
 			// XML text whitespace is content, including trailing spaces in author names.
 			if ($contentType !== "application/atom+xml" && $contentType !== "application/rss+xml")
-				$output = (string)mb_ereg_replace('[\t \r\n]+?<', '<', (string)mb_ereg_replace('>[\t \r\n]+', '>', $output));
+				$output = self::collapseIndentation($output);
 
 			if (isset($mbencoding))
 				$output = (string)mb_convert_encoding($output, $mbencoding, "UTF8");
@@ -965,6 +965,19 @@ class Visualizer
 		return true;
 	}
 	
+	/**
+	 * テンプレートのインデント (タグの前後の改行を含む空白) を詰める。
+	 * 同じ行の空白 (本文のタグの間の空白など) や textarea, pre の中は内容なので残す
+	 */
+	private static function collapseIndentation(string $html): string
+	{
+		return (string)preg_replace_callback(
+			'@<(textarea|pre)\b.*?</\1>|>[\t ]*\r?\n[\t \r\n]*|[\t ]*\r?\n[\t \r\n]*<@is',
+			fn($m) => isset($m[1]) && $m[1] !== "" ? $m[0] : (str_starts_with($m[0], ">") ? ">" : "<"),
+			$html
+		);
+	}
+
 	static function text(string $content, string $encoding = "UTF-8", ?string $mbencoding = null): bool
 	{
 		Auth::commitSession();
