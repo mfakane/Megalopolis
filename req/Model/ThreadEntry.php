@@ -1227,13 +1227,13 @@ class ThreadEntry
 			Configuration::$instance->convertOnDemand &&
 			is_dir("Megalith/sub")
 		) {
-			foreach (range($subjectRange[0], $subjectRange[1] - $subjectRange[0], 1) as $subject)
+			foreach (range($subjectRange[0], $subjectRange[1]) as $subject)
 				foreach (self::getMegalithEntriesBySubject($db, $subject) as $entry) {
 					if (!isset($rt[$entry->id])) {
 						if ($entry->host !== null && Util::wildcard($host, $entry->host))
 							$rt[$entry->id] = $entry;
-						else if (is_file("Megalith/com/{$entry->id}"))
-							foreach (Util::convertLinesToCommentsAndEvaluations($entry->id, array_map(fn($x) => mb_convert_encoding($x, "UTF-8", "Windows-31J"), Util::readLines("Megalith/com/{$entry->id}"))) as $commentOrEvaluation)
+						else if (is_file("Megalith/com/{$entry->id}.res.dat"))
+							foreach (Util::convertLinesToCommentsAndEvaluations($entry->id, array_map(fn($x) => mb_convert_encoding($x, "UTF-8", "Windows-31J"), Util::readLines("Megalith/com/{$entry->id}.res.dat"))) as $commentOrEvaluation)
 								if (isset($commentOrEvaluation->host) && Util::wildcard($host, $commentOrEvaluation->host))
 									$rt[$entry->id] = $entry;
 					}
