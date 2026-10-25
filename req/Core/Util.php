@@ -221,6 +221,15 @@ class Util
 
 	static function getRemoteHost(): ?string
 	{
+		// 逆引きは遅いことがあり、評価の数だけ呼ばれることもあるため、リクエストの間は結果を使い回す
+		static $cache = array();
+		$key = ($_SERVER["REMOTE_ADDR"] ?? "") . "\0" . ($_SERVER["HTTP_X_FORWARDED_FOR"] ?? "");
+
+		return array_key_exists($key, $cache) ? $cache[$key] : $cache[$key] = self::lookupRemoteHost();
+	}
+
+	private static function lookupRemoteHost(): ?string
+	{
 		if (self::canGetMobileUniqueID() && ($id = self::getMobileUniqueID()) !== null)
 			return $id;
 
