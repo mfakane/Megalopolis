@@ -81,7 +81,11 @@ class Template
 					break;
 			}
 			
-			$listType = Cookie::getCookie(Cookie::LIST_TYPE_KEY, $listType);
+			// Cookie の値は HTML の属性に出力するため、決まった値だけを受け付ける
+			$cookieListType = Cookie::getCookie(Cookie::LIST_TYPE_KEY, $listType);
+
+			if (in_array($cookieListType, array("double", "single", "compact"), true))
+				$listType = $cookieListType;
 		}
 		
 		$visibility = array_filter(explode(",", Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "readCount,size,commentCount,evaluationCount,points,rate,dateTime")));
