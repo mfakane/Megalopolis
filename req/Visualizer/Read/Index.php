@@ -61,7 +61,7 @@ Visualizer::doctype();
 				background-color: <?=Visualizer::escapeOutput($h->thread->background) ?>;
 			<?php endif ?>
 			<?php if (!Util::isEmpty($h->thread->backgroundImage)): ?>
-				background-image: url('<?=Visualizer::escapeOutput((strpos($h->thread->backgroundImage ?? "", "http://") === 0  ? "" : Visualizer::$basePath) . ($h->thread->backgroundImage ?? "")) ?>');
+				background-image: url('<?=Visualizer::escapeOutput((preg_match("@^https?://@i", $h->thread->backgroundImage ?? "") ? "" : Visualizer::$basePath) . ($h->thread->backgroundImage ?? "")) ?>');
 			<?php endif ?>
 			<?php if (!Util::isEmpty($h->thread->border)): ?>
 				border-color: <?=Visualizer::escapeOutput($h->thread->border) ?>;

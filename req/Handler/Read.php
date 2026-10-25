@@ -618,7 +618,7 @@ class ReadHandler extends Handler
 		if (
 			isset($entry->link) &&
 			mb_strstr($entry->link, ":") !== false &&
-			!preg_match("/^http:/", trim($entry->link))
+			!preg_match("/^https?:/i", trim($entry->link))
 		)
 			$rt[] = "リンクに不明なプロトコルが指定されています";
 
