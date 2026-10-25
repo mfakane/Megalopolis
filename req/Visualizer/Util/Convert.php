@@ -14,7 +14,8 @@ Visualizer::doctype();
 <body>
 	<?php Visualizer::header("Megalith 形式のログの変換") ?>
 	<section class="convert" id="convert">
-		<form action="<?=Visualizer::escapeOutput(Visualizer::actionHref("util", "convert")) ?>" method="get" id="form">
+		<form action="<?=Visualizer::escapeOutput(Visualizer::actionHref("util", "convert")) ?>" method="post" id="form">
+			<input type="hidden" name="token" value="<?=Visualizer::escapeOutput($_SESSION[Auth::SESSION_TOKEN]) ?>" />
 			<p>
 				ボタンをクリックし、変換を開始します。<br />
 				ログが多い場合は、変換に時間がかかります。ご了承ください。

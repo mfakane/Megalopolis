@@ -5,6 +5,8 @@ $(function()
 	if (form.length)
 	{
 		var action = form.attr("action") + ".json";
+		// 処理はページに埋め込んだトークンを付けて POST で呼び出す
+		var token = $("input[name=token]", form).val();
 		// リンク形式によっては相対パスが使えないため、絶対パスで遷移する
 		var backHref = form.attr("action");
 		var homeHref = $("link[rel=home]").attr("href");
@@ -15,11 +17,12 @@ $(function()
 		{
 			$.ajax
 			({
-				type: "GET",
+				type: "POST",
 				url: action,
 				dataType: "json",
 				data:
 				{
+					token: token,
 					p: obj.remaining.join(","),
 					c: obj.count,
 					b: obj.buffer,
@@ -123,11 +126,12 @@ $(function()
 			
 			$.ajax
 			({
-				type: "GET",
+				type: "POST",
 				url: action,
 				dataType: "json",
 				data:
 				{
+					token: token,
 					p: "list",
 					allowOverwrite: options.allowOverwrite ? "yes" : "no",
 					whenNoConvertLineBreakFieldOnly: options.whenNoConvertLineBreakFieldOnly ? "yes" : "no",

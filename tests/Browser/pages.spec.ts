@@ -310,3 +310,34 @@ test("管理者が作品を削除すると新しいコンテキストでも404�
 
 	assertNoDiagnostics(diagnostics);
 });
+
+test("管理者が検索インデックスを再生成すると、トークン付きのPOSTで処理して検索できる", async ({ page }) => {
+	const diagnostics = attachDiagnostics(page);
+	const work = makeWork("reindex");
+	await createWork(page, work);
+
+	await page.goto(route("util"));
+	await page.getByRole("link", { name: "検索インデックスの再生成" }).click();
+	const methods = new Set<string>();
+	const tokens = new Set<string | null>();
+	page.on("request", (request) => {
+		if (!routeOf(request.url()).startsWith("util/reindex.json")) return;
+		methods.add(request.method());
+		tokens.add(new URLSearchParams(request.postData() ?? "").get("token"));
+	});
+	await page.getByRole("button", { name: "再生成開始" }).click();
+	await expect(page.getByText(/作品のインデックス再生成が完了しました/)).toBeVisible({ timeout: 60_000 });
+	expect([...methods]).toEqual(["POST"]);
+	expect(tokens.size).toBe(1);
+	expect([...tokens][0]).toMatch(/^[0-9a-f]{40}$/);
+
+	// The regenerated index is in the current format and covers every work.
+	await page.goto(route("util"));
+	await expect(page.locator("ul.notify")).toHaveCount(0);
+	const search = new URL(route("search"), baseUrl);
+	search.searchParams.set("title", work.title);
+	await page.goto(search.toString());
+	await expect(page.getByRole("link", { name: work.title, exact: true })).toBeVisible();
+
+	assertNoDiagnostics(diagnostics);
+});

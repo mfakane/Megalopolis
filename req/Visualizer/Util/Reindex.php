@@ -14,7 +14,8 @@ Visualizer::doctype();
 <body>
 	<?php Visualizer::header("検索インデックスの再生成") ?>
 	<section class="convert" id="convert">
-		<form action="<?=Visualizer::escapeOutput(Visualizer::actionHref("util", "reindex")) ?>" method="get" id="form">
+		<form action="<?=Visualizer::escapeOutput(Visualizer::actionHref("util", "reindex")) ?>" method="post" id="form">
+			<input type="hidden" name="token" value="<?=Visualizer::escapeOutput($_SESSION[Auth::SESSION_TOKEN]) ?>" />
 			<p>
 				ボタンをクリックし、検索インデックスの再生成を開始します。<br />
 				作品が多い場合は、再生成に時間がかかります。ご了承ください。

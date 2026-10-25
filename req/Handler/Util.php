@@ -154,9 +154,11 @@ class UtilHandler extends Handler
 				if (App::$handlerType != "json")
 					return $conversion->getStatus();
 
-				$action = IndexHandler::param("p", "status");
+				$action = IndexHandler::postParam("p", "status");
 
 				if ($action != "status") {
+					self::ensureJobRequest();
+
 					// 大きなデータベースでも一回の呼び出しで時間切れにならないようにする
 					set_time_limit(120);
 					ignore_user_abort(true);
@@ -213,15 +215,16 @@ class UtilHandler extends Handler
 		if (App::$handlerType != "json")
 			return Visualizer::visualize();
 
-		if (isset($_GET["p"])) {
-			$param = IndexHandler::param("p");
+		if (isset($_POST["p"])) {
+			self::ensureJobRequest();
+			$param = IndexHandler::postParam("p");
 
 			if ($param == "list") {
 				$dh = App::openDB();
 				$idh = App::openDB(App::INDEX_DATABASE);
 				$maxSubject = $dh->execute(fn($db) => Board::getLatestSubject($db));
 
-				if (isset($_GET["force"]) && $_GET["force"] == "yes")
+				if (isset($_POST["force"]) && $_POST["force"] == "yes")
 					$idh->execute(fn($idb) => SearchIndex::clear($idb));
 
 				$idh->close();
@@ -238,16 +241,16 @@ class UtilHandler extends Handler
 					"buffer" => $defaultBuffer
 				));
 			} else if ($param == "end") {
-				Visualizer::$data = isset($_GET["c"]) ? intval($_GET["c"]) : 0;
+				Visualizer::$data = isset($_POST["c"]) ? intval($_POST["c"]) : 0;
 
 				return Visualizer::json(array(
 					"count" => Visualizer::$data
 				));
 			} else {
 				$current = intval($param);
-				$count = isset($_GET["c"]) ? intval($_GET["c"]) : 0;
-				$offset = isset($_GET["o"]) ? intval($_GET["o"]) : 0;
-				$buffer = isset($_GET["b"]) ? intval($_GET["b"]) : $defaultBuffer;
+				$count = isset($_POST["c"]) ? intval($_POST["c"]) : 0;
+				$offset = isset($_POST["o"]) ? intval($_POST["o"]) : 0;
+				$buffer = isset($_POST["b"]) ? intval($_POST["b"]) : $defaultBuffer;
 
 				$dh = App::openDB();
 				$idh = App::openDB(App::INDEX_DATABASE);
@@ -308,11 +311,12 @@ class UtilHandler extends Handler
 		if (App::$handlerType != "json")
 			return Visualizer::visualize();
 
-		if (isset($_GET["p"])) {
-			$params = explode(",", IndexHandler::param("p", ""));
-			$allowOverwrite = isset($_GET["allowOverwrite"]) && $_GET["allowOverwrite"] == "yes";
-			$whenNoConvertLineBreakFieldOnly = isset($_GET["whenNoConvertLineBreakFieldOnly"]) && $_GET["whenNoConvertLineBreakFieldOnly"] == "yes";
-			$whenContainsWin31JOnly = isset($_GET["whenContainsWin31JOnly"]) && $_GET["whenContainsWin31JOnly"] == "yes";
+		if (isset($_POST["p"])) {
+			self::ensureJobRequest();
+			$params = explode(",", IndexHandler::postParam("p", ""));
+			$allowOverwrite = isset($_POST["allowOverwrite"]) && $_POST["allowOverwrite"] == "yes";
+			$whenNoConvertLineBreakFieldOnly = isset($_POST["whenNoConvertLineBreakFieldOnly"]) && $_POST["whenNoConvertLineBreakFieldOnly"] == "yes";
+			$whenContainsWin31JOnly = isset($_POST["whenContainsWin31JOnly"]) && $_POST["whenContainsWin31JOnly"] == "yes";
 
 			if ($params[0] == "list") {
 				$subjects = array_merge(array_slice(Util::readLines("{$dir}sub/subjects.txt"), 1), array("subject.txt"));
@@ -359,7 +363,7 @@ class UtilHandler extends Handler
 					"whenContainsWin31JOnly" => $whenContainsWin31JOnly ? "yes" : "no",
 				));
 			} else if ($params[0] == "end") {
-				Visualizer::$data = isset($_GET["c"]) ? intval($_GET["c"]) : 0;
+				Visualizer::$data = isset($_POST["c"]) ? intval($_POST["c"]) : 0;
 
 				return Visualizer::json(array(
 					"count" => Visualizer::$data
@@ -369,8 +373,8 @@ class UtilHandler extends Handler
 				$subject = intval($l[0]);
 				$start = intval($l[1]);
 				$end = intval($l[2]);
-				$count = isset($_GET["c"]) ? intval($_GET["c"]) : 0;
-				$buffer = isset($_GET["b"]) ? intval($_GET["b"]) : $defaultBuffer;
+				$count = isset($_POST["c"]) ? intval($_POST["c"]) : 0;
+				$buffer = isset($_POST["b"]) ? intval($_POST["b"]) : $defaultBuffer;
 				$currentCount = 0;
 				$firstID = 0;
 
@@ -515,7 +519,9 @@ class UtilHandler extends Handler
 		if (App::$handlerType != "json")
 			return Visualizer::visualize("Util/Convert/Tags");
 
-		if (IndexHandler::param("p") == "list") {
+		self::ensureJobRequest();
+
+		if (IndexHandler::postParam("p") == "list") {
 			$dh = App::openDB();
 			$subjectCount = $dh->execute(fn($db) => Board::getLatestSubject($db));
 			$dh->close();
@@ -530,17 +536,17 @@ class UtilHandler extends Handler
 				"count" => 0,
 				"buffer" => $defaultBuffer
 			));
-		} else if (IndexHandler::param("p") == "end") {
-			Visualizer::$data = intval(IndexHandler::param("c", "0"));
+		} else if (IndexHandler::postParam("p") == "end") {
+			Visualizer::$data = intval(IndexHandler::postParam("c", "0"));
 
 			return Visualizer::json(array(
 				"count" => Visualizer::$data
 			));
-		} else if (isset($_GET["s"]) && isset($_GET["o"]) && isset($_GET["m"])) {
-			$offset = intval(IndexHandler::param("o"));
-			$subjectCount = intval(IndexHandler::param("m"));
-			$count = intval(IndexHandler::param("c"));
-			$buffer = isset($_GET["b"]) ? intval($_GET["b"]) : $defaultBuffer;
+		} else if (isset($_POST["s"]) && isset($_POST["o"]) && isset($_POST["m"])) {
+			$offset = intval(IndexHandler::postParam("o"));
+			$subjectCount = intval(IndexHandler::postParam("m"));
+			$count = intval(IndexHandler::postParam("c"));
+			$buffer = isset($_POST["b"]) ? intval($_POST["b"]) : $defaultBuffer;
 			$dh = App::openDB();
 			$datCount = 0;
 			$processed = 0;
@@ -548,7 +554,7 @@ class UtilHandler extends Handler
 
 			$subject = $dh->withTransaction(function ($db) use ($dir, $subjectCount, &$datCount, &$offset, &$processed, &$next, &$count, $buffer) {
 				// 最新の作品集 (subject.txt) も取り込む
-				for ($subject = intval(IndexHandler::param("s")); $subject <= $subjectCount; $subject++) {
+				for ($subject = intval(IndexHandler::postParam("s")); $subject <= $subjectCount; $subject++) {
 					$subjectFile = $dir . "sub/subject" . ($subject == $subjectCount ? "" : $subject) . ".txt";
 					$datCount = 0;
 
@@ -855,5 +861,21 @@ class UtilHandler extends Handler
 			return;
 
 		Auth::loginAsAdmin();
+
+		// 処理を始めるページのフォームにトークンを埋め込む
+		if (!Auth::hasToken())
+			Auth::createToken();
+	}
+
+	/**
+	 * 状態を変える処理は、ページに埋め込んだトークンを付けた POST だけで受け付ける
+	 * (GET ではリンクを踏ませるだけで実行されてしまうため)
+	 */
+	private static function ensureJobRequest(): void
+	{
+		if (($_SERVER["REQUEST_METHOD"] ?? "GET") != "POST")
+			throw new ApplicationException("この操作は POST で送信してください", 405);
+
+		Auth::ensureToken();
 	}
 }

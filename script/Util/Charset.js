@@ -8,6 +8,8 @@ $(function()
 	var base = form.attr("action");
 	var action = base + ".json";
 	var reindexAction = base.replace(/charset$/, "reindex") + ".json";
+	// 処理はページに埋め込んだトークンを付けて POST で呼び出す
+	var token = $("input[name=token]", form).val();
 	var homeHref = $("link[rel=home]").attr("href");
 	var div, bar, status;
 
@@ -50,10 +52,10 @@ $(function()
 	{
 		$.ajax
 		({
-			type: "GET",
+			type: "POST",
 			url: url,
 			dataType: "json",
-			data: data,
+			data: $.extend({ token: token }, data),
 			success: function(result)
 			{
 				if (result.error)

@@ -25,7 +25,8 @@ Visualizer::doctype();
 				データベースは utf8mb4 に変換済みです。絵文字などもそのまま保存されます。
 			</p>
 			<?php if ($d["oldTables"]): ?>
-				<form action="<?=Visualizer::escapeOutput(Visualizer::actionHref("util", "charset")) ?>" method="get" id="form" data-action="dropOld">
+				<form action="<?=Visualizer::escapeOutput(Visualizer::actionHref("util", "charset")) ?>" method="post" id="form" data-action="dropOld">
+					<input type="hidden" name="token" value="<?=Visualizer::escapeOutput($_SESSION[Auth::SESSION_TOKEN]) ?>" />
 					<p>
 						変換前のテーブル (<?=Visualizer::escapeOutput(implode(", ", $d["oldTables"])) ?>) が残っています。<br />
 						変換後のデータに問題が無いことを確認してから削除してください。
@@ -36,7 +37,8 @@ Visualizer::doctype();
 				</form>
 			<?php endif ?>
 		<?php else: ?>
-			<form action="<?=Visualizer::escapeOutput(Visualizer::actionHref("util", "charset")) ?>" method="get" id="form" data-action="start">
+			<form action="<?=Visualizer::escapeOutput(Visualizer::actionHref("util", "charset")) ?>" method="post" id="form" data-action="start">
+				<input type="hidden" name="token" value="<?=Visualizer::escapeOutput($_SESSION[Auth::SESSION_TOKEN]) ?>" />
 				<p>
 					データベースのテーブルは utf8 (3 バイト) のため、絵文字などの 4 バイトの文字は数値文字参照に置き換えて保存しています。<br />
 					utf8mb4 に変換すると、そのまま保存できるようになります。

@@ -25,12 +25,14 @@ final class CharsetConversionTest extends TestCase
     private const string REFERENCE = '&#128512;';
 
     private static ?Browser $browser = null;
+    private static string $token = '';
 
     public function testWorksWithSupplementaryCharactersAreStoredAsReferencesBeforeConversion(): array
     {
         $status = $this->convert('status');
         self::assertFalse($status['fullUnicode']);
         self::assertFalse($status['converting']);
+
 
         $id = $this->post('charsetbefore');
         $row = $this->entry($id);
@@ -51,6 +53,16 @@ final class CharsetConversionTest extends TestCase
     #[Depends('testWorksWithSupplementaryCharactersAreStoredAsReferencesBeforeConversion')]
     public function testStartStopsWritesUntilAborted(array $before): array
     {
+        // Jobs change state only by POST with the page's token, never by a link.
+        $get = $this->browser()->request('GET', 'util/charset.json', ['p' => 'start']);
+        self::assertSame(200, $get['status']);
+        self::assertFalse($get['json']['converting']);
+        $forged = $this->browser()->request('POST', 'util/charset.json', ['p' => 'start']);
+        self::assertSame(403, $forged['status'], $forged['body']);
+        $forged = $this->browser()->request('POST', 'util/reindex.json', ['p' => 'list', 'force' => 'yes', 'token' => 'forged']);
+        self::assertSame(403, $forged['status'], $forged['body']);
+        self::assertFalse($this->convert('status')['converting']);
+
         $status = $this->convert('start');
         self::assertTrue($status['converting']);
         self::assertTrue($status['maintenance']);
@@ -158,13 +170,17 @@ final class CharsetConversionTest extends TestCase
             $token = self::$browser->token('util/charset');
             $login = self::$browser->request('POST', 'util/charset', ['password' => self::ADMIN, 'token' => $token]);
             self::assertSame(200, $login['status'], substr($login['body'], 0, 2000));
+            // Logging in issues a new token, embedded in the tool's form.
+            self::$token = self::$browser->token('util/charset');
         }
         return self::$browser;
     }
 
     private function convert(string $action): array
     {
-        $response = $this->browser()->request('GET', 'util/charset.json', ['p' => $action]);
+        $response = $action === 'status'
+            ? $this->browser()->request('GET', 'util/charset.json')
+            : $this->job('util/charset.json', ['p' => $action]);
         self::assertSame(200, $response['status'], $action . "\n" . substr($response['body'], 0, 2000));
         self::assertArrayNotHasKey('error', $response['json']);
         return $response['json'];
@@ -173,11 +189,18 @@ final class CharsetConversionTest extends TestCase
     // The same requests as script/Util/Charset.js makes after finishing.
     private function reindex(): void
     {
-        $data = $this->json('util/reindex.json', ['p' => 'list', 'force' => 'yes']);
+        $data = $this->job('util/reindex.json', ['p' => 'list', 'force' => 'yes'])['json'];
         while ($data['next']) {
-            $data = $this->json('util/reindex.json', ['p' => $data['next'], 'o' => $data['nextOffset'],
-                'c' => $data['count'], 'b' => $data['buffer']]);
+            $data = $this->job('util/reindex.json', ['p' => $data['next'], 'o' => $data['nextOffset'],
+                'c' => $data['count'], 'b' => $data['buffer']])['json'];
         }
+    }
+
+    private function job(string $route, array $fields): array
+    {
+        $response = $this->browser()->request('POST', $route, $fields + ['token' => self::$token]);
+        self::assertSame(200, $response['status'], $route . "\n" . substr($response['body'], 0, 2000));
+        return $response;
     }
 
     private function json(string $route, array $query): array
