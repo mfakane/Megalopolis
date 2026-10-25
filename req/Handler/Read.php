@@ -297,7 +297,7 @@ class ReadHandler extends Handler
 
 		Auth::$caption = "{$thread->entry->title} の削除";
 		Auth::$label = "編集キー";
-		Auth::$details = "<div class='notify warning'>本当に {$thread->entry->title} を削除してよろしいですか？続行する場合は編集キーを入力します</div>";
+		Auth::$details = "<div class='notify warning'>本当に " . Visualizer::escapeOutput($thread->entry->title) . " を削除してよろしいですか？続行する場合は編集キーを入力します</div>";
 
 		if (
 			!Auth::hasSession(true) &&
