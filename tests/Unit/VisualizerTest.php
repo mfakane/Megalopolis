@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Megalopolis\Tests\Unit;
 
+use Megalopolis\App;
 use Megalopolis\Configuration;
 use Megalopolis\Thread;
 use Megalopolis\ThreadEntry;
@@ -140,5 +141,29 @@ final class VisualizerTest extends TestCase
         self::assertSame("a\nb\r\nc\rd", Visualizer::escapeBody($thread));
         $thread->convertLineBreak = true;
         self::assertSame("a<br />\r\nb<br />\r\nc<br />\r\nd", Visualizer::escapeBody($thread));
+    }
+
+    public static function headerSearchTargets(): iterable
+    {
+        yield 'tag' => ['tag', 'tags'];
+        yield 'author' => ['author', 'name'];
+    }
+
+    #[DataProvider('headerSearchTargets')]
+    public function testHeaderSearchKeepsTheCurrentTargetAsEscapedText(string $action, string $field): void
+    {
+        App::$actionName = $action;
+        Visualizer::$data = '"onmouseover="marker()';
+        ob_start();
+        try {
+            Visualizer::header('title');
+        } finally {
+            $html = (string)ob_get_clean();
+            App::$actionName = '';
+            Visualizer::$data = null;
+        }
+        self::assertStringContainsString(
+            '<input type="hidden" name="' . $field . '" value="&quot;onmouseover=&quot;marker()" />', $html);
+        self::assertStringNotContainsString('"onmouseover="', $html);
     }
 }

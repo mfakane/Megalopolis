@@ -102,10 +102,10 @@ class Visualizer
 								echo '<input type="hidden" name="' . self::escapeOutput($k) . '" value="' . self::escapeOutput($v), '" />';
 						?>
 						<?php
-						if (App::$actionName == "tag" && !is_array(Visualizer::$data))
-							echo '<input type="hidden" name="tags" value="', Visualizer::$data, '" />';
-						else if (App::$actionName == "author" && !is_array(Visualizer::$data))
-							echo '<input type="hidden" name="name" value="', Visualizer::$data, '" />';
+						if (App::$actionName == "tag" && is_string(Visualizer::$data))
+							echo '<input type="hidden" name="tags" value="', self::escapeOutput(Visualizer::$data), '" />';
+						else if (App::$actionName == "author" && is_string(Visualizer::$data))
+							echo '<input type="hidden" name="name" value="', self::escapeOutput(Visualizer::$data), '" />';
 						?>
 					</div>
 				</form>
