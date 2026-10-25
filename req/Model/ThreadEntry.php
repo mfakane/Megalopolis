@@ -1077,7 +1077,8 @@ class ThreadEntry
 	{
 		$count = SearchIndex::getEntryCount($idb);
 
-		if ($count !== null)
+		// 作品が無い場合は乱数の範囲が作れない
+		if ($count !== null && $count > 0)
 			$st = $db->prepare(sprintf(
 				'
 				select id from %s
@@ -1318,9 +1319,10 @@ class ThreadEntry
 				foreach (self::searchAllMegalithEntries($db, $query) as $entry)
 					$rt[$entry->id] = $entry->id;
 
-			$val = $rt[array_rand($rt)];
+			if (!$rt)
+				return null;
 
-			return ThreadEntry::load($db, $val);
+			return ThreadEntry::load($db, $rt[array_rand($rt)]);
 		} else {
 			if (is_array($ids) && !$ids)
 				$rt = array();

@@ -206,7 +206,7 @@ Visualizer::doctype();
 						<label accesskey="0">
 							[0]作品集:
 							<select name="log">
-								<?php foreach (range($h->subjectCount, 1, -1) as $i): ?>
+								<?php foreach ($h->subjectCount > 0 ? range($h->subjectCount, 1, -1) : array() as $i): ?>
 									<option value="<?=Visualizer::escapeOutput($i) ?>"<?=$i == $h->subject ? ' selected=""' : null ?>><?=Visualizer::escapeOutput($i) ?></option>
 								<?php endforeach ?>
 							</select>
