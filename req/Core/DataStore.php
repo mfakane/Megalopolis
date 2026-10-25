@@ -431,8 +431,11 @@ class MySQLDataStore extends DataStore
 	const string CHARSET_META_NAME = "dataCharset";
 	const string CHARSET_UTF8MB4 = "utf8mb4";
 	const string MAINTENANCE_META_NAME = "maintenance";
-	/** 大文字小文字などの区別は utf8 のテーブル (utf8_general_ci) と同じにする */
-	const string COLLATION = "utf8mb4_general_ci";
+	/**
+	 * SQLite と同じく文字をそのまま比べる。utf8mb4_general_ci は 4 バイトの文字どうしを、
+	 * unicode 系はひらがなとカタカナや濁点の有無を区別しないため、作者名やタグに使えない
+	 */
+	const string COLLATION = "utf8mb4_bin";
 	const string FULLTEXT_COLLATION = "utf8mb4_unicode_ci";
 
 	/**

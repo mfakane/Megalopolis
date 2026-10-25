@@ -391,8 +391,8 @@ class CharsetConversion
 					implode(" and ", array_map(fn($x) => "{$x} = ?", $keys))
 				))->execute(array_merge(array_values($changes), array_map(fn($x) => $row[$x], $keys)));
 			} catch (\PDOException $ex) {
-				// utf8mb4_general_ci では 4 バイトの文字どうしが等しいとみなされるため、
-				// 同じ作品に絵文字だけが違うタグがあると重複する。その行は数値文字参照のまま残す
+				// 元に戻した結果、既にある値と同じになる場合 (同じ作品に「&#128512;」と同じ文字のタグがあるなど) は
+				// 数値文字参照のまま残す
 				if (($ex->errorInfo[1] ?? null) != 1062)
 					throw $ex;
 			}

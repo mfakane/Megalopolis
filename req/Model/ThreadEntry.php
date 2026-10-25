@@ -1170,11 +1170,11 @@ class ThreadEntry
 			'
 			from (select * from %s where subject between :begin and :end) as t
 			left join %s as e on e.id = t.id
-			where host like :host %s %s',
+			where lower(host) like lower(:host) %s %s',
 			App::THREAD_ENTRY_TABLE,
 			App::THREAD_EVALUATION_TABLE,
-			in_array("comment", $target) ? 'or exists (select * from comment as c where c.entryID = t.id and c.host like :host limit 1)' : "",
-			in_array("evaluation", $target) ? 'or exists (select * from evaluation as ee where ee.entryID = t.id and ee.host like :host limit 1)' : ""
+			in_array("comment", $target) ? 'or exists (select * from comment as c where c.entryID = t.id and lower(c.host) like lower(:host) limit 1)' : "",
+			in_array("evaluation", $target) ? 'or exists (select * from evaluation as ee where ee.entryID = t.id and lower(ee.host) like lower(:host) limit 1)' : ""
 		);
 		Util::executeStatement($st = Util::ensureStatement($db, $db->prepare(
 				"select " . ($isMysql ? "sql_calc_found_rows " : " ") .
