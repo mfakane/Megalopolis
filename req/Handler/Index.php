@@ -687,6 +687,16 @@ class IndexHandler extends Handler
 	}
 
 	/**
+	 * redir にはデコード済みのパスが入っているため、リンク形式に合わせてエンコードし直す
+	 */
+	private static function redirectPath(): string
+	{
+		$redir = isset($_GET["redir"]) && is_string($_GET["redir"]) ? trim($_GET["redir"], "/") : "";
+
+		return Util::isEmpty($redir) ? "" : Visualizer::currentHrefArray(explode("/", $redir));
+	}
+
+	/**
 	 * URL に含まれる作者名・タグから検索に使う値を決める。
 	 * 通常は入力として正規化した値 (& を &amp; にするなど) で保存されているが、
 	 * 正規化されずに保存された古いデータは URL のままの値でしか一致しない
@@ -760,9 +770,7 @@ class IndexHandler extends Handler
 			
 			// すべての場合でリダイレクトを使用 (URL パスを正しくするため)
 			// リダイレクト先が指定されていない場合はトップページにリダイレクト
-			$redirectUrl = isset($_GET["redir"]) && is_string($_GET["redir"]) ? $_GET["redir"] : "";
-
-			return Visualizer::redirect($redirectUrl);
+			return Visualizer::redirect(self::redirectPath());
 		}
 		
 		return false; // ログインが完了しなかった場合
@@ -772,7 +780,7 @@ class IndexHandler extends Handler
 	{
 		Auth::logout();
 
-		return Visualizer::redirect(isset($_GET["redir"]) && is_string($_GET["redir"]) ? $_GET["redir"] : "");
+		return Visualizer::redirect(self::redirectPath());
 	}
 
 	function notice(string $_name = ""): bool
