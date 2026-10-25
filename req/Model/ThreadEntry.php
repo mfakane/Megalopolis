@@ -344,6 +344,26 @@ class ThreadEntry
 		$this->loaded = true;
 	}
 
+	/**
+	 * @param string[] $columns
+	 */
+	private static function createIndexIfNotExists(PDO $db, string $table, string $name, array $columns): void
+	{
+		if (Configuration::$instance->dataStore instanceof SQLiteDataStore) {
+			Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index if not exists %s on %s(%s)', $name, $table, implode(", ", $columns)))));
+
+			return;
+		}
+
+		// MySQL には if not exists が無いため、同名のインデックスがある場合のエラーだけを無視する
+		try {
+			Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(%s)', $name, $table, implode(", ", $columns)))));
+		} catch (\PDOException $ex) {
+			if (($ex->errorInfo[1] ?? null) != 1061)
+				throw $ex;
+		}
+	}
+
 	static function ensureTable(PDO $db): void
 	{
 		$threadEntryIndices = array(
@@ -365,9 +385,11 @@ class ThreadEntry
 				else
 					Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('alter table %s drop primary key, add primary key(id)', App::THREAD_ENTRY_TABLE))));
 
-			// v3 で追加したインデックスは、v3 以降に新しく作ったテーブルには作られていなかった
+			// v3 で追加したインデックスは v3 以降に新しく作ったテーブルには無く、
+			// SQLite で v2 に移行したテーブルでは作り直しの際に他のインデックスも失われていた
 			if ($currentThreadEntrySchemaVersion < 4)
-				Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(dateTime)', App::THREAD_ENTRY_TABLE . "DateTimeIndex", App::THREAD_ENTRY_TABLE))), array(), false);
+				foreach ($threadEntryIndices as $k => $v)
+					self::createIndexIfNotExists($db, App::THREAD_ENTRY_TABLE, $k, $v);
 		}
 
 		if (Util::hasTable($db, App::THREAD_EVALUATION_TABLE)) {
@@ -385,7 +407,7 @@ class ThreadEntry
 			// v2 で追加したインデックスは、新しく作ったテーブルや SQLite で v4 に移行したテーブルには無かった
 			if ($currentThreadEvaluationSchemaVersion < 5)
 				foreach ($threadEvaluationIndices as $k => $v)
-					Util::executeStatement(Util::ensureStatement($db, $db->prepare(sprintf('create index %s on %s(%s)', $k, App::THREAD_EVALUATION_TABLE, implode(", ", $v)))), array(), false);
+					self::createIndexIfNotExists($db, App::THREAD_EVALUATION_TABLE, $k, $v);
 		}
 
 		if (Util::hasTable($db, App::THREAD_TAG_TABLE)) {
