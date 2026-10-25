@@ -36,7 +36,7 @@ else
 						<author><?php Visualizer::convertedName($i->name) ?></author>
 					<?php endif ?>
 					<?php if ($c->useSummary && $c->showSummary[Configuration::ON_SUBJECT]): ?>
-						<description><?php Visualizer::convertedSummary($i->summary ?? "") ?></description>
+						<description><?= Visualizer::escapeSource(Visualizer::escapeSummary($i->summary ?? "")) ?></description>
 					<?php endif ?>
 					<?php if ($c->showTags[Configuration::ON_SUBJECT]): ?>
 						<?php foreach ($i->tags as $j): ?>

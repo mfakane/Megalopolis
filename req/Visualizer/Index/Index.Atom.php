@@ -12,16 +12,20 @@ else if (App::$actionName == "author")
 	$title = "作者: {$d}";
 else
 	$title = $h->subject == $h->subjectCount ? "最新作品集" : "作品集 {$h->subject}";
+
+// フィードの識別子にする一覧の URL
+$feedID = App::$actionName == "tag" || App::$actionName == "author"
+	? Visualizer::absoluteHrefArray(Visualizer::nameHrefArgs(App::$actionName, (string)$d))
+	: Visualizer::absoluteHref($h->subject);
 ?>
 <?= '<?xml version="1.0" encoding="UTF-8"?>' ?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 	<title><?= Visualizer::escapeOutput($c->title) ?> - <?= Visualizer::escapeOutput($title) ?></title>
 	<link href="<?= Visualizer::escapeOutput(Visualizer::absoluteHref()) ?>" />
+	<id><?= Visualizer::escapeOutput($feedID) ?></id>
+	<updated><?= Visualizer::escapeOutput(date("c", $h->lastUpdate ?? time())) ?></updated>
 	<generator version="<?= Visualizer::escapeOutput(App::VERSION) ?>"><?= Visualizer::escapeOutput(App::NAME) ?> <?php Visualizer::converted(App::VERSION_PREFIX) ?><?= Visualizer::escapeOutput(App::VERSION) ?></generator>
 	<?php if (count($h->entries ?? [])): ?>
-		<?php if ($h->lastUpdate !== null): ?>
-			<updated><?= Visualizer::escapeOutput(date("c", $h->lastUpdate)) ?></updated>
-		<?php endif ?>
 		<?php foreach ($h->entries ?? [] as $i): ?>
 			<entry>
 				<?php if ($c->showTitle[Configuration::ON_SUBJECT]): ?>
@@ -38,11 +42,12 @@ else
 						<?php endif ?>
 					</author>
 				<?php endif ?>
+				<id><?= Visualizer::escapeOutput(Visualizer::absoluteHref($i->subject, $i->id)) ?></id>
 				<link href="<?= Visualizer::escapeOutput(Visualizer::absoluteHref($i->subject, $i->id)) ?>" />
 				<published><?= Visualizer::escapeOutput(date("c", $i->dateTime)) ?></published>
 				<updated><?= Visualizer::escapeOutput(date("c", $i->lastUpdate)) ?></updated>
 				<?php if ($c->useSummary && $c->showSummary[Configuration::ON_SUBJECT]): ?>
-					<summary><?php Visualizer::convertedSummary($i->summary ?? "") ?></summary>
+					<summary type="html"><?= Visualizer::escapeSource(Visualizer::escapeSummary($i->summary ?? "")) ?></summary>
 				<?php endif ?>
 				<?php if ($c->showTags[Configuration::ON_SUBJECT]): ?>
 					<?php foreach ($i->tags as $j): ?>
