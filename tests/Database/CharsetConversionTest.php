@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace Megalopolis\Tests\Database;
 
+use Megalopolis\Tests\JsonApi\SearchCountTest;
 use Megalopolis\Tests\Support\Browser;
 use Megalopolis\Tests\Support\Drivers;
 use Megalopolis\Tests\Support\Fixtures;
 use Megalopolis\Tests\Support\Http;
+use Megalopolis\Tests\Support\SearchOracle;
 use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
 
@@ -119,8 +121,17 @@ final class CharsetConversionTest extends TestCase
         $tag = Http::json(self::SERVICE, '/index.php?path=' . rawurlencode('tag/分類' . self::EMOJI . '.json'));
         self::assertEqualsCanonicalizing([$before['id'], $after], array_column($tag->entries, 'id'));
 
-        // The rebuilt search index covers the existing works as before.
+        // The rebuilt search index covers the existing works as before, and
+        // being in the phrase format it finds exactly the works with the terms.
         self::assertSame($before['tagged'], $this->search(['tag' => $before['tag']]));
+        $works = SearchOracle::works(SearchOracle::mysql('mariadb-convert'));
+        foreach (SearchCountTest::QUERIES as $name => $query) {
+            // MySQL folds case, width and accents; the oracle compares exactly.
+            if (in_array($name, ['latin title', 'repeated grams'], true)) {
+                continue;
+            }
+            self::assertSame(SearchOracle::expected($works, $query), SearchOracle::found($this->browser(), $query), $name);
+        }
 
         return $before;
     }

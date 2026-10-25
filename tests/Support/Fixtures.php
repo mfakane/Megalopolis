@@ -50,10 +50,9 @@ final class Fixtures
     }
 
     /** Independent, immutable r46 oracle; never reads the candidate database. */
-    public static function sqlitePayload(int $id): array
+    public static function sqliteOracle(): \PDO
     {
         static $database = null;
-        static $payloads = [];
         if ($database === null) {
             $path = tempnam(sys_get_temp_dir(), 'r46-oracle-');
             $input = gzopen(self::path('data.sqlite'), 'rb');
@@ -68,6 +67,13 @@ final class Fixtures
             $database = new \PDO('sqlite:' . $path, null, null, [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]);
             $database->exec('PRAGMA query_only = ON');
         }
+        return $database;
+    }
+
+    public static function sqlitePayload(int $id): array
+    {
+        static $payloads = [];
+        $database = self::sqliteOracle();
         if (!isset($payloads[$id])) {
             $query = $database->prepare('SELECT e.title, e.name, e.summary, t.body, t.afterword
                 FROM threadEntry e JOIN thread t ON t.id = e.id WHERE e.id = ?');
