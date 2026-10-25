@@ -19,12 +19,12 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 
 		/** @var array<string, string[]> */
 		$words = array_filter(array(
-			"title" => $this->getWords([self::PHRASE_WORDS, self::encodeSupplementary($thread->entry->title)]),
-			"name" => $this->getWords([self::PHRASE_WORDS, self::encodeSupplementary($thread->entry->name)]),
-			"summary" => $this->getWords([self::PHRASE_WORDS, self::encodeSupplementary($thread->entry->summary)]),
-			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([self::PHRASE_WORDS, self::encodeSupplementary($thread->body)]) : null,
-			"afterword" => $this->getWords([self::PHRASE_WORDS, self::encodeSupplementary($thread->afterword)]),
-			"tag" => $this->getWords(array_merge([self::PHRASE_WORDS], array_map(fn($x) => self::encodeSupplementary($x), $thread->entry->tags)))
+			"title" => $this->getWords([$this->phraseWords(), self::encodeSupplementary($thread->entry->title)]),
+			"name" => $this->getWords([$this->phraseWords(), self::encodeSupplementary($thread->entry->name)]),
+			"summary" => $this->getWords([$this->phraseWords(), self::encodeSupplementary($thread->entry->summary)]),
+			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([$this->phraseWords(), self::encodeSupplementary($thread->body)]) : null,
+			"afterword" => $this->getWords([$this->phraseWords(), self::encodeSupplementary($thread->afterword)]),
+			"tag" => $this->getWords(array_merge([$this->phraseWords()], array_map(fn($x) => self::encodeSupplementary($x), $thread->entry->tags)))
 		));
 
 		foreach ($words as $k => $v)
@@ -136,7 +136,7 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 			$terms = array();
 
 			foreach (self::splitSegments($i) as $segment) {
-				$words = $this->getWords([self::PHRASE_WORDS + array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($segment) >= $this->gramLength), $segment]);
+				$words = $this->getWords([$this->phraseWords() + array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($segment) >= $this->gramLength), $segment]);
 
 				if (!$words)
 					continue;

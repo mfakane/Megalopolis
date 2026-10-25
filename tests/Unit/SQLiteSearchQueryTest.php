@@ -48,4 +48,14 @@ final class SQLiteSearchQueryTest extends TestCase
         self::assertSame(['作品', '品0', '00', '00', '00', '05', '5', 'pl', 'la', 'ai', 'in', 'n'],
             $index->getWords([['unique' => false], '作品00005 plain']));
     }
+
+    public function testIndexesBuiltBeforeThePhraseFormatKeepDroppingRepeatedGrams(): void
+    {
+        // Until regenerated, an old index only matches the old (deduplicated) phrases.
+        $index = new SQLiteSearchIndex();
+        (new \ReflectionProperty($index, 'phraseFormat'))->setValue($index, false);
+
+        self::assertSame('"作品 品0 00 05"', $index->buildMatchQuery(['作品00005'], true));
+        self::assertSame('"le eg ga ac cy yb bo od dy yd de el et te"', $index->buildMatchQuery(['legacybodydelete'], true));
+    }
 }

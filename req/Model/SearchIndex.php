@@ -6,8 +6,12 @@ use \PDO;
 abstract class SearchIndex
 {
 	static ?SearchIndex $instance;
-	/** フレーズ検索する全文検索では、索引も検索語も n-gram の重複を除かない */
-	protected const array PHRASE_WORDS = array("unique" => false);
+	/**
+	 * 索引も検索語も n-gram の重複を除かない形式 (フレーズ検索で語の隣接を保つ) で作った索引に付ける目印。
+	 * 目印の無い索引は以前の形式 (重複を除く) で作られているため、再生成されるまでは以前の形式で扱う
+	 */
+	const string PHRASE_FORMAT_TABLE = "searchIndexPhrase";
+	protected bool $phraseFormat = true;
 	private const string SEGMENT_SEPARATOR = '[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F';
 	static string $endchars = "　｛｝「」【】（）〈〉≪≫『』〔〕［］＜＞、。・…／＆！”＃＄％’ー＝＾～｜￥＋＊‘＠：；？＿";
 	
@@ -89,6 +93,9 @@ abstract class SearchIndex
 	
 	static function clear(PDO $idb): void
 	{
+		if (Util::hasTable($idb, self::PHRASE_FORMAT_TABLE))
+			Configuration::$instance->dataStore?->dropTable($idb, self::PHRASE_FORMAT_TABLE);
+		
 		if (Util::hasTable($idb, ClassicSearchIndex::INDEX_TABLE))
 			Configuration::$instance->dataStore?->dropTable($idb, ClassicSearchIndex::INDEX_TABLE);
 		
@@ -171,6 +178,25 @@ abstract class SearchIndex
 			"remaining" => $remaining,
 			"count" => $count
 		);
+	}
+
+	/**
+	 * @return array{unique: bool}
+	 */
+	protected function phraseWords(): array
+	{
+		return array("unique" => !$this->phraseFormat);
+	}
+
+	/**
+	 * 索引のテーブルを作ったときは新しい形式の目印を付け、既にあるときは形式を調べる
+	 */
+	protected function ensurePhraseFormat(PDO $idb, bool $created): void
+	{
+		if ($created)
+			Util::createTableIfNotExists($idb, array("version" => "integer primary key not null"), self::PHRASE_FORMAT_TABLE);
+
+		$this->phraseFormat = $created || Util::hasTable($idb, self::PHRASE_FORMAT_TABLE);
 	}
 
 	/**

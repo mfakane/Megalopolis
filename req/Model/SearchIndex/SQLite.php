@@ -28,12 +28,12 @@ class SQLiteSearchIndex extends SearchIndex
 		
 		$words = array_filter(array
 		(
-			"title" => $this->getWords([self::PHRASE_WORDS, $thread->entry->title]),
-			"name" => $this->getWords([self::PHRASE_WORDS, $thread->entry->name]),
-			"summary" => $this->getWords([self::PHRASE_WORDS, $thread->entry->summary]),
-			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([self::PHRASE_WORDS, $thread->body]) : null,
-			"afterword" => $this->getWords([self::PHRASE_WORDS, $thread->afterword]),
-			"tag" => $this->getWords(array_merge([self::PHRASE_WORDS], $thread->entry->tags))
+			"title" => $this->getWords([$this->phraseWords(), $thread->entry->title]),
+			"name" => $this->getWords([$this->phraseWords(), $thread->entry->name]),
+			"summary" => $this->getWords([$this->phraseWords(), $thread->entry->summary]),
+			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([$this->phraseWords(), $thread->body]) : null,
+			"afterword" => $this->getWords([$this->phraseWords(), $thread->afterword]),
+			"tag" => $this->getWords(array_merge([$this->phraseWords()], $thread->entry->tags))
 		));
 		$st = Util::ensureStatement($idb, $idb->prepare(sprintf
 		('
@@ -108,7 +108,7 @@ class SQLiteSearchIndex extends SearchIndex
 			
 			foreach (self::splitSegments($i) as $segment)
 			{
-				$words = $this->getWords([self::PHRASE_WORDS + array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($segment) >= $this->gramLength), $segment]);
+				$words = $this->getWords([$this->phraseWords() + array("endOnIncompletedGram" => true, "noIncompletedGram" => mb_strlen($segment) >= $this->gramLength), $segment]);
 				
 				if (!$words)
 					continue;
@@ -162,7 +162,7 @@ class SQLiteSearchIndex extends SearchIndex
 	#[\Override]
 	function ensureTableExists(PDO $idb): void
 	{
-		Util::createFullTextTableIfNotExists($idb, self::$searchIndexSchema, self::INDEX_TABLE);
+		$this->ensurePhraseFormat($idb, Util::createFullTextTableIfNotExists($idb, self::$searchIndexSchema, self::INDEX_TABLE));
 	}
 
 	#[\Override]

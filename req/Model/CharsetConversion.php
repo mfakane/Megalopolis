@@ -44,7 +44,8 @@ class CharsetConversion
 			App::AUTHOR_TABLE,
 			App::TAG_TABLE,
 			SQLiteSearchIndex::INDEX_TABLE,
-			ClassicSearchIndex::INDEX_TABLE
+			ClassicSearchIndex::INDEX_TABLE,
+			SearchIndex::PHRASE_FORMAT_TABLE
 		);
 	}
 
@@ -419,7 +420,7 @@ class CharsetConversion
 				$this->db->exec(sprintf("alter table %s row_format=dynamic, convert to character set utf8mb4 collate %s", $i, MySQLDataStore::COLLATION));
 
 		// 作者・タグの集計テーブルと検索インデックスは、utf8mb4 で作り直す
-		foreach (array(App::AUTHOR_TABLE, App::TAG_TABLE, SQLiteSearchIndex::INDEX_TABLE, ClassicSearchIndex::INDEX_TABLE) as $i)
+		foreach (array(App::AUTHOR_TABLE, App::TAG_TABLE, SQLiteSearchIndex::INDEX_TABLE, ClassicSearchIndex::INDEX_TABLE, SearchIndex::PHRASE_FORMAT_TABLE) as $i)
 			$this->db->exec("drop table if exists {$i}");
 
 		Meta::set($this->db, App::AUTHOR_TABLE, "1");
