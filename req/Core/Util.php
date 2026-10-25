@@ -416,7 +416,9 @@ class Util
 
 	static function escapeInput(string $input, bool $stripLinebreaks = false): string
 	{
-		$input = (string)mb_convert_encoding($input, "UTF-8", "UTF-8,Windows-31J,eucJP-win");
+		// 短い入力は Shift_JIS などと誤判定されることがあるため、正しい UTF-8 ならそのまま使う
+		if (!mb_check_encoding($input, "UTF-8"))
+			$input = (string)mb_convert_encoding($input, "UTF-8", "Windows-31J,eucJP-win");
 		$input = self::escapeAmpersand($input);
 		$input = self::decodeNumericEntity($input);
 		$input = self::escapeControlChars($input);
