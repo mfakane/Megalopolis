@@ -74,6 +74,35 @@ class UtilHandler extends Handler
 		return $rt;
 	}
 
+	/**
+	 * 失敗したテーブルの構造の更新を、管理者が再実行する。管理用ツールが無効でも使えるようにする
+	 */
+	function migrate(): bool
+	{
+		if (!Auth::hasSession(true))
+			throw new ApplicationException("管理者としてログインしてください", 403);
+
+		self::ensureJobRequest();
+
+		$store = Configuration::$instance->dataStore;
+		if (!$store) throw new ApplicationException("データベースが開けません");
+
+		$dh = App::openDB();
+		$error = null;
+
+		try {
+			if (!$dh->execute(fn($db) => $store->ensureMigrated($db, true)))
+				$error = $dh->execute(fn($db) => Migration::getError($db)) ?? "ほかの更新処理が実行中です";
+		} finally {
+			$dh->close();
+		}
+
+		if ($error !== null)
+			throw new ApplicationException("データベースの更新処理に失敗しました: " . $error, 500);
+
+		return Visualizer::redirect();
+	}
+
 	function track(): bool
 	{
 		Auth::$caption = "管理者ログイン";

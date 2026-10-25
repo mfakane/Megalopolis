@@ -23,6 +23,7 @@ App::load(array(
 	Constant::MODEL_DIR . "Comment",
 	Constant::MODEL_DIR . "Evaluation",
 	Constant::MODEL_DIR . "Meta",
+	Constant::MODEL_DIR . "Migration",
 	Constant::MODEL_DIR . "SearchIndex",
 	Constant::MODEL_DIR . "SearchIndex/Classic",
 	Constant::MODEL_DIR . "SearchIndex/SQLite",

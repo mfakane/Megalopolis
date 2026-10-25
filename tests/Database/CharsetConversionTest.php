@@ -27,6 +27,52 @@ final class CharsetConversionTest extends TestCase
     private static ?Browser $browser = null;
     private static string $token = '';
 
+    public function testUnfinishedMigrationShowsMaintenanceUntilTheAdministratorRetries(): void
+    {
+        $db = SearchOracle::mysql('mariadb-convert');
+        // The first request migrates the r46 database and stamps it.
+        Http::json(self::SERVICE, '/index.php?path=1.json');
+        $version = $db->query("select value from meta where name = 'schemaVersion'")->fetchColumn();
+        self::assertIsString($version);
+
+        // Another request is migrating: visitors wait, then see maintenance.
+        $db->exec("update meta set value = '0' where name = 'schemaVersion'");
+        self::assertSame(1, (int)$db->query("select get_lock('megalopolis_schema_migration', 0)")->fetchColumn());
+        try {
+            $page = (new Browser(self::SERVICE))->request('GET', '');
+            self::assertSame(503, $page['status']);
+            self::assertContains('Retry-After: 60', $page['headers']);
+            self::assertStringContainsString('更新処理中のため、現在メンテナンス中です', $page['body']);
+            self::assertSame(503, (new Browser(self::SERVICE))->request('GET', '1.json')['status']);
+            self::assertNotSame(503, (new Browser(self::SERVICE))->request('GET', 'login')['status']);
+        } finally {
+            $db->query("select release_lock('megalopolis_schema_migration')");
+        }
+
+        // A failed run is not retried automatically; the administrator reruns it.
+        $db->exec("replace into meta (name, value) values ('schemaMigrationError', 'injected failure')");
+        $page = (new Browser(self::SERVICE))->request('GET', '');
+        self::assertSame(503, $page['status']);
+        self::assertStringContainsString('管理者はログインして', $page['body']);
+        self::assertStringNotContainsString('injected failure', $page['body']);
+
+        $admin = new Browser(self::SERVICE);
+        $form = $admin->request('GET', 'login');
+        $login = $admin->request('POST', 'login', ['password' => self::ADMIN, 'token' => $this->formToken($form['body'])]);
+        self::assertSame(302, $login['status'], $login['body']);
+        $page = $admin->request('GET', '');
+        self::assertSame(503, $page['status']);
+        self::assertStringContainsString('injected failure', $page['body']);
+        $forged = $admin->request('POST', 'util/migrate', ['token' => 'forged']);
+        self::assertSame(403, $forged['status']);
+        $rerun = $admin->request('POST', 'util/migrate', ['token' => $this->formToken($page['body'])]);
+        self::assertSame(302, $rerun['status'], $rerun['body']);
+
+        self::assertSame($version, $db->query("select value from meta where name = 'schemaVersion'")->fetchColumn());
+        self::assertNull($db->query("select value from meta where name = 'schemaMigrationError'")->fetchColumn());
+        self::assertSame(200, (new Browser(self::SERVICE))->request('GET', '')['status']);
+    }
+
     public function testWorksWithSupplementaryCharactersAreStoredAsReferencesBeforeConversion(): array
     {
         $status = $this->convert('status');
@@ -180,6 +226,14 @@ final class CharsetConversionTest extends TestCase
             self::$token = self::$browser->token('util/charset');
         }
         return self::$browser;
+    }
+
+    private function formToken(string $html): string
+    {
+        $document = \Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR, 'UTF-8');
+        $input = $document->querySelector('input[name="token"]');
+        self::assertNotNull($input, 'No token in the form');
+        return $input->getAttribute('value');
     }
 
     private function convert(string $action): array

@@ -33,6 +33,17 @@ class Meta
 		return isset(self::$meta[$name]) ? self::$meta[$name] : $defaultValue;
 	}
 	
+	/**
+	 * ほかのリクエストが書き換えたかもしれない値を、読み込み直す
+	 */
+	static function refresh(PDO $db, string $name): ?string
+	{
+		if (self::$meta !== null)
+			unset(self::$meta[$name]);
+
+		return self::get($db, $name);
+	}
+
 	static function set(PDO $db, string $name, ?string $value): void
 	{
 		if (isset(self::$meta[$name]) && self::$meta[$name] === $value)
@@ -81,6 +92,7 @@ class Meta
 			App::COMMENT_TABLE,
 			App::EVALUATION_TABLE,
 			App::SESSION_STORE_TABLE,
+			Migration::VERSION_META_NAME,
 		));
 	}
 }

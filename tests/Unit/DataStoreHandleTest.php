@@ -40,6 +40,15 @@ final class DataStoreHandleTest extends TestCase
             {
                 throw new \LogicException('Full-text schemas are outside this transaction test');
             }
+
+            public function lockMigration(PDO $db, int $wait): bool
+            {
+                throw new \LogicException('Migrations are outside this transaction test');
+            }
+
+            public function unlockMigration(PDO $db): void
+            {
+            }
         };
         $db = $store->open();
         $db->exec('CREATE TABLE records (value TEXT PRIMARY KEY)');

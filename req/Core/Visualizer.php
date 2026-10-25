@@ -499,8 +499,16 @@ class Visualizer
 				$code .= " Not Found";
 				
 				break;
+			case 405:
+				$code .= " Method Not Allowed";
+				
+				break;
 			case 500:
 				$code .= " Internal Server Error";
+				
+				break;
+			case 503:
+				$code .= " Service Unavailable";
 				
 				break;
 		}

@@ -149,6 +149,40 @@ abstract class DataStore
 	/**
 	 * テーブルの作成・削除・名前の変更の後で、テーブルの一覧を読み直す
 	 */
+	protected bool $migrationPending = false;
+
+	/**
+	 * テーブルの構造の更新が終わっていないか (ほかのリクエストが更新中か、失敗した)
+	 */
+	function isMigrationPending(): bool
+	{
+		return $this->migrationPending;
+	}
+
+	/**
+	 * テーブルの構造を必要なら更新する。データベースを開いたときと、管理者が再実行したときに呼ぶ
+	 */
+	function ensureMigrated(PDO $db, bool $retry = false): bool
+	{
+		return !($this->migrationPending = !Migration::ensure($db, $this, $retry));
+	}
+
+	/**
+	 * 同時に複数のリクエストが更新しないようにする
+	 * @param int $wait 待つ秒数
+	 */
+	abstract function lockMigration(PDO $db, int $wait): bool;
+
+	abstract function unlockMigration(PDO $db): void;
+
+	/**
+	 * @param callable(): void $callback
+	 */
+	function migrate(PDO $db, callable $callback): void
+	{
+		$callback();
+	}
+
 	function forgetTables(PDO $db): void
 	{
 		unset($this->tableNames[$this->getDatabaseNameByHandle($db)]);
@@ -341,10 +375,68 @@ class SQLiteDataStore extends DataStore
 			SearchIndex::ensureTable($db);
 		else {
 			Meta::ensureTable($db);
-			Board::ensureTable($db);
+			$this->ensureMigrated($db);
 		}
 
 		return $db;
+	}
+
+	/** @var resource|null */
+	private $migrationLock = null;
+
+	#[\Override]
+	function lockMigration(PDO $db, int $wait): bool
+	{
+		// Apache の終了時などはカレントディレクトリが変わるため、絶対パスにする
+		$lock = fopen((realpath($this->directory) ?: $this->directory) . "/migration.lock", "c");
+
+		if ($lock === false)
+			return false;
+
+		for ($i = 0; $i <= $wait * 10; $i++) {
+			if (flock($lock, LOCK_EX | LOCK_NB)) {
+				$this->migrationLock = $lock;
+
+				return true;
+			}
+
+			usleep(100000);
+		}
+
+		fclose($lock);
+
+		return false;
+	}
+
+	#[\Override]
+	function unlockMigration(PDO $db): void
+	{
+		if ($this->migrationLock === null)
+			return;
+
+		$lock = $this->migrationLock;
+		$this->migrationLock = null;
+		flock($lock, LOCK_UN);
+		fclose($lock);
+	}
+
+	/**
+	 * テーブルの作り直しの途中で止まっても元に戻るよう、まとめて一つのトランザクションで行う
+	 */
+	#[\Override]
+	function migrate(PDO $db, callable $callback): void
+	{
+		$this->beginTransactionOrSavepoint($db);
+
+		try {
+			$callback();
+			$this->commitOrReleaseSavepoint($db);
+		} catch (\Throwable $ex) {
+			$this->rollBackOrToSavepoint($db);
+			$this->forgetTables($db);
+
+			throw $ex;
+		}
 	}
 
 	#[\Override]
@@ -447,6 +539,7 @@ class MySQLDataStore extends DataStore
 	const string CHARSET_META_NAME = "dataCharset";
 	const string CHARSET_UTF8MB4 = "utf8mb4";
 	const string MAINTENANCE_META_NAME = "maintenance";
+	const string MIGRATION_LOCK_NAME = "megalopolis_schema_migration";
 	/**
 	 * SQLite と同じく文字をそのまま比べる。utf8mb4_general_ci は 4 バイトの文字どうしを、
 	 * unicode 系はひらがなとカタカナや濁点の有無を区別しないため、作者名やタグに使えない
@@ -506,10 +599,27 @@ class MySQLDataStore extends DataStore
 		if ($isNew && $this->fullUnicode)
 			Meta::set($db, self::CHARSET_META_NAME, self::CHARSET_UTF8MB4);
 
-		Board::ensureTable($db);
+		$this->ensureMigrated($db);
 		SearchIndex::ensureTable($db);
 
 		return $db;
+	}
+
+	#[\Override]
+	function lockMigration(PDO $db, int $wait): bool
+	{
+		// MySQL 5.6 以前は一つの接続で一つのロックしか持てず、取り直すと前のロックが外れる。
+		// 文字コードの変換のロックとは同時に取らない (開き終えるまでに外す)
+		$st = $db->prepare("select get_lock(?, ?)");
+		$st->execute(array(self::MIGRATION_LOCK_NAME, $wait));
+
+		return (int)$st->fetchColumn() === 1;
+	}
+
+	#[\Override]
+	function unlockMigration(PDO $db): void
+	{
+		$db->prepare("select release_lock(?)")->execute(array(self::MIGRATION_LOCK_NAME));
 	}
 
 	/**

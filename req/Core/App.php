@@ -110,6 +110,7 @@ class App
 			}
 
 			self::rewriteHtaccess();
+			self::ensureMigrated();
 			self::ensureWritable();
 			Util::decodeInputs();
 			self::resolve(Util::getPathInfo());
@@ -136,6 +137,38 @@ class App
 			else
 				Visualizer::visualize("Exception");
 		}
+	}
+
+	/**
+	 * テーブルの構造の更新が終わるまでは、管理者のログインと更新の再実行のほかはメンテナンス中とする
+	 */
+	private static function ensureMigrated(): void
+	{
+		$store = Configuration::$instance->dataStore;
+		if (!$store) return;
+
+		$dh = self::openDB();
+		$error = $store->isMigrationPending() ? $dh->execute(fn($db) => Migration::getError($db)) : null;
+		$dh->close();
+
+		$path = trim(Util::getPathInfo(), "/");
+
+		if (!$store->isMigrationPending() || preg_match('@^(login|logout|util/migrate)(\.\w+)?$@', $path))
+			return;
+
+		header("Retry-After: 60");
+
+		// 管理者には、その場で再実行できるようにする
+		if (Auth::hasSession(true) && !Auth::hasToken())
+			Auth::createToken();
+
+		$ex = new ApplicationException($error === null
+			? "データベースの更新処理中のため、現在メンテナンス中です。しばらくしてから再度お試しください"
+			: "データベースの更新処理が完了していないため、現在メンテナンス中です。管理者はログインして、更新処理を再実行してください", 503);
+		// 失敗の原因は管理者にだけ示す
+		$ex->data = array("migration" => true, "error" => Auth::hasSession(true) ? $error : null);
+
+		throw $ex;
 	}
 
 	/**
