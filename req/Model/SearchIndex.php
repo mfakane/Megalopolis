@@ -86,6 +86,14 @@ abstract class SearchIndex
 		return self::ensureTable($idb)->searchThread($idb, $query, $type, $ids);
 	}
 	
+	/**
+	 * 隣接を保った新しい形式か。古い形式の索引は再生成するまで検索が不正確になる
+	 */
+	function isPhraseFormat(): bool
+	{
+		return $this->phraseFormat;
+	}
+
 	static function isUpgradeRequired(PDO $idb): bool
 	{
 		return self::getAvailableType() != "Classic" && Util::hasTable($idb, ClassicSearchIndex::INDEX_TABLE);

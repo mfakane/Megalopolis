@@ -33,6 +33,8 @@ final class CharsetConversionTest extends TestCase
         self::assertFalse($status['fullUnicode']);
         self::assertFalse($status['converting']);
 
+        // The old r46 database needs both migrations; the admin page says so.
+        self::assertSame(['charset', 'reindex'], $this->notices());
 
         $id = $this->post('charsetbefore');
         $row = $this->entry($id);
@@ -67,6 +69,7 @@ final class CharsetConversionTest extends TestCase
         self::assertTrue($status['converting']);
         self::assertTrue($status['maintenance']);
         self::assertNotEmpty($this->tables('%' . '\_\_mb4'));
+        self::assertSame(['charset'], $this->notices());
 
         $comment = $this->browser()->request('POST', '1/' . $before['id'] . '/comment.json', ['body' => 'mustnotpersist']);
         self::assertSame(503, $comment['status'], $comment['body']);
@@ -96,6 +99,8 @@ final class CharsetConversionTest extends TestCase
         self::assertFalse($status['converting']);
         self::assertFalse($status['maintenance']);
         $this->reindex();
+        // Only the backup of the old tables is left to deal with.
+        self::assertSame(['charset'], $this->notices());
 
         self::assertSame([], $this->tables('%' . '\_\_mb4'));
         self::assertNotEmpty($this->tables('%' . '\_\_utf8'));
@@ -161,6 +166,7 @@ final class CharsetConversionTest extends TestCase
         $status = $this->convert('dropOld');
         self::assertSame([], $status['oldTables']);
         self::assertSame([], $this->tables('%' . '\_\_utf8'));
+        self::assertSame([], $this->notices());
     }
 
     private function browser(): Browser
@@ -201,6 +207,16 @@ final class CharsetConversionTest extends TestCase
         $response = $this->browser()->request('POST', $route, $fields + ['token' => self::$token]);
         self::assertSame(200, $response['status'], $route . "\n" . substr($response['body'], 0, 2000));
         return $response;
+    }
+
+    /** The tools linked from the migration notices on the admin page. */
+    private function notices(): array
+    {
+        $response = $this->browser()->request('GET', 'util');
+        self::assertSame(200, $response['status']);
+        $document = \Dom\HTMLDocument::createFromString($response['body'], LIBXML_NOERROR, 'UTF-8');
+        return array_map(fn($a) => preg_replace('/^.*[\/=]util\//', '', $a->getAttribute('href')),
+            iterator_to_array($document->querySelectorAll('ul.notify a')));
     }
 
     private function json(string $route, array $query): array

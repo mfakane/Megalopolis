@@ -12,6 +12,16 @@ Visualizer::doctype();
 </head>
 <body>
 	<?php Visualizer::header("管理用ツール") ?>
+	<?php if (Auth::hasSession(true) && !empty(Visualizer::$data["notices"])): ?>
+		<ul class="notify warning">
+			<?php foreach (Visualizer::$data["notices"] as $i): ?>
+				<li>
+					<?=Visualizer::escapeOutput($i["message"]) ?>
+					<a href="<?=Visualizer::escapeOutput(Visualizer::actionHref("util", $i["action"])) ?>"><?=$i["action"] == "charset" ? "データベースの文字コードの変換へ" : "検索インデックスの再生成へ" ?></a>
+				</li>
+			<?php endforeach ?>
+		</ul>
+	<?php endif ?>
 	<ul>
 		<?php if (Auth::hasSession(true)): ?>
 			<li>

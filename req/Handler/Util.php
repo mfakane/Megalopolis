@@ -21,7 +21,57 @@ class UtilHandler extends Handler
 
 		Auth::loginAsAdmin();
 
+		Visualizer::$data = array("notices" => self::getMigrationNotices());
+
 		return Visualizer::visualize();
+	}
+
+	/**
+	 * 管理用ツールで行う必要がある移行処理を調べる
+	 * @return list<array{message: string, action: string}>
+	 */
+	private static function getMigrationNotices(): array
+	{
+		$rt = array();
+		$store = Configuration::$instance->dataStore;
+		$dh = App::openDB();
+		$idh = App::openDB(App::INDEX_DATABASE);
+
+		try {
+			if ($store instanceof MySQLDataStore) {
+				$charset = $dh->execute(fn($db) => (new CharsetConversion($db, $store))->getStatus());
+
+				if ($charset["converting"])
+					$rt[] = array("message" => "データベースの文字コードの変換が途中です。変換が終わるまで投稿・コメント・評価などの書き込みを停止しています。", "action" => "charset");
+				else if (!$charset["fullUnicode"])
+					$rt[] = array("message" => "データベースが utf8 (3 バイト) のため、絵文字などは数値文字参照に置き換えて保存しています。utf8mb4 に変換できます。", "action" => "charset");
+				else if ($charset["oldTables"])
+					$rt[] = array("message" => "文字コードの変換前のテーブルが残っています。変換後のデータに問題が無いことを確認してから削除してください。", "action" => "charset");
+
+				// 変換中は検索インデックスを作り直す前なので、ほかの確認はしない
+				if ($charset["converting"])
+					return $rt;
+			}
+
+			$entries = $dh->execute(fn($db) => (int)$db->query(sprintf("select count(*) from %s", App::THREAD_ENTRY_TABLE))->fetchColumn());
+			$search = $idh->execute(fn($idb) => array(
+				"upgrade" => SearchIndex::isUpgradeRequired($idb),
+				"phrase" => SearchIndex::ensureTable($idb)->isPhraseFormat(),
+				"indexed" => count(SearchIndex::ensureTable($idb)->getExistingThread($idb)),
+			));
+
+			if ($search["upgrade"])
+				$rt[] = array("message" => "より高速な検索インデックスが使えます。検索インデックスを再生成してください。", "action" => "reindex");
+			else if (!$search["phrase"])
+				$rt[] = array("message" => "検索インデックスが古い形式のため、検索結果に検索語を含まない作品が混ざることがあります。検索インデックスを再生成してください。", "action" => "reindex");
+			else if ($search["indexed"] < $entries)
+				$rt[] = array("message" => sprintf("検索インデックスに登録されていない作品が %d 件あります。検索インデックスを再生成してください。", $entries - $search["indexed"]), "action" => "reindex");
+		} finally {
+			$idh->close();
+			$dh->close();
+		}
+
+		return $rt;
 	}
 
 	function track(): bool
