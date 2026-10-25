@@ -117,7 +117,7 @@ class App
 		{
 			Visualizer::statusCode($ex->httpCode);
 			Visualizer::noCache();
-			Visualizer::$data = $ex;
+			Visualizer::$data = $ex = self::hideInternalError($ex);
 
 			if (self::$handlerType == "json" || strstr(Util::getPathInfo(), ".json") == ".json")
 				Visualizer::json(array("error" => $ex->getMessage(), "data" => $ex->data));
@@ -128,13 +128,32 @@ class App
 		{
 			Visualizer::statusCode(500);
 			Visualizer::noCache();
-			Visualizer::$data = $ex;
+			Visualizer::$data = $ex = self::hideInternalError($ex);
 
 			if (self::$handlerType == "json" || strstr(Util::getPathInfo(), ".json") == ".json")
 				Visualizer::json(array("error" => $ex->getMessage(), "data" => null));
 			else
 				Visualizer::visualize("Exception");
 		}
+	}
+
+	/**
+	 * データベースのエラーなど内部の詳細は利用者に見せず、ログに残す
+	 * @template T of Exception
+	 * @param T $ex
+	 * @return T|ApplicationException
+	 */
+	private static function hideInternalError(Exception $ex): Exception
+	{
+		$internal = !$ex instanceof ApplicationException
+			|| ($ex->getPrevious() !== null && !$ex->getPrevious() instanceof ApplicationException);
+
+		if (!$internal || Configuration::$instance->debug)
+			return $ex;
+
+		error_log((string)$ex);
+
+		return new ApplicationException("内部エラーが発生しました。しばらくしてから再度お試しください", 500);
 	}
 
 	private static function rewriteHtaccess(): void

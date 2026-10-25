@@ -126,9 +126,20 @@ abstract class DataStore
 			return null;
 	}
 
+	/**
+	 * 保存できない文字があるデータストアで、値を保存できる形にする
+	 */
+	function encodeValue(mixed $value): mixed
+	{
+		return $value;
+	}
+
 	function executeStatement(?PDOStatement $st, ?array $params = null, bool $throw = true): bool
 	{
 		if (!$st) return false;
+
+		if (!is_null($params))
+			$params = array_map(fn($x) => $this->encodeValue($x), $params);
 
 		foreach (range(1, 5) as $_) {
 			if (is_null($params))
@@ -229,7 +240,7 @@ abstract class DataStore
 		if (!$st) return;
 
 		foreach ($values as $k => $v)
-			$st->bindValue(":$k", $v, is_null($v) ? PDO::PARAM_NULL : (is_int($v) ? PDO::PARAM_INT : PDO::PARAM_STR));
+			$st->bindValue(":$k", $this->encodeValue($v), is_null($v) ? PDO::PARAM_NULL : (is_int($v) ? PDO::PARAM_INT : PDO::PARAM_STR));
 
 		$this->executeStatement($st);
 	}
@@ -260,7 +271,7 @@ abstract class DataStore
 				else
 					$st->bindValue(":" . $k, null, PDO::PARAM_NULL);
 			else
-				$st->bindValue(":" . $k, $value, $type);
+				$st->bindValue(":" . $k, $this->encodeValue($value), $type);
 		}
 	}
 }
@@ -397,6 +408,11 @@ class MySQLDataStore extends DataStore
 	private ?string $unixSocket = null;
 	private string $userName;
 	private string $password;
+	/** utf8mb4 で保存できるか。utf8 (3 バイト) のテーブルでは 4 バイトの文字を保存できない */
+	private bool $fullUnicode = false;
+
+	const string CHARSET_META_NAME = "dataCharset";
+	const string CHARSET_UTF8MB4 = "utf8mb4";
 
 	/**
 	 * @api Selected by user configuration rather than the default SQLite config.
@@ -432,20 +448,48 @@ class MySQLDataStore extends DataStore
 			}
 
 		$db = new PDO(
-			sprintf("mysql:%s;dbname=%s;charset=utf8", is_null($this->unixSocket) ? "host={$this->host};port={$this->port}" : "unixsocket={$this->unixSocket}", $this->databaseName),
+			sprintf("mysql:%s;dbname=%s;charset=utf8mb4", is_null($this->unixSocket) ? "host={$this->host};port={$this->port}" : "unixsocket={$this->unixSocket}", $this->databaseName),
 			$this->userName,
-			$this->password,
-			array(
-				PDO::MYSQL_ATTR_INIT_COMMAND => "set names utf8",
-			)
+			$this->password
 		);
 		$this->registerHandle($db, $database);
+
+		// テーブルを utf8mb4 に変換するまでは、接続も utf8 にする
+		$this->fullUnicode = $this->readCharset($db) == self::CHARSET_UTF8MB4;
+
+		if (!$this->fullUnicode)
+			$db->exec("set names utf8");
 
 		Meta::ensureTable($db);
 		Board::ensureTable($db);
 		SearchIndex::ensureTable($db);
 
 		return $db;
+	}
+
+	private function readCharset(PDO $db): ?string
+	{
+		if (!$this->hasTable($db, App::META_TABLE))
+			return null;
+
+		$st = $db->prepare(sprintf("select value from %s where name = ?", App::META_TABLE));
+		$st->execute(array(self::CHARSET_META_NAME));
+		$rt = $st->fetchColumn();
+
+		return is_string($rt) ? $rt : null;
+	}
+
+	/**
+	 * utf8 のテーブルには 4 バイトの文字を保存できないため、数値文字参照にする。
+	 * 出力時には実体参照をデコードするので、元の文字として表示される
+	 */
+	#[\Override]
+	function encodeValue(mixed $value): mixed
+	{
+		if ($this->fullUnicode || !is_string($value))
+			return $value;
+
+		return preg_replace_callback('/[\x{10000}-\x{10FFFF}]/u', fn($m) => "&#" . (int)mb_ord($m[0], "UTF-8") . ";", $value) ?? $value;
 	}
 
 	#[\Override]

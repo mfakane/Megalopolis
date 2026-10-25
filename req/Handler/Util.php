@@ -493,7 +493,7 @@ class UtilHandler extends Handler
 										App::THREAD_TAG_TABLE
 									)));
 									$st?->bindParam("id", $newEntry->id, PDO::PARAM_INT);
-									$st?->bindParam("tag", $v);
+									$st?->bindValue("tag", Util::encodeValue($v));
 									$st?->bindParam("position", $k, PDO::PARAM_INT);
 									Util::executeStatement($st);
 								}

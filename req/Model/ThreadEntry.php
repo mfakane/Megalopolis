@@ -333,7 +333,7 @@ class ThreadEntry
 			if ($st === null) continue;
 
 			Util::bindValues($st, $this, self::$threadTagSchema);
-			$st->bindParam("tag", $v);
+			$st->bindValue("tag", Util::encodeValue($v));
 			$st->bindParam("position", $k);
 			Util::executeStatement($st);
 		}
@@ -583,7 +583,7 @@ class ThreadEntry
 		)));
 		if ($st === null) return array();
 
-		$st->execute($params);
+		Util::executeStatement($st, $params);
 		$rt = array();
 
 		foreach ($st->fetchAll() as $i) {

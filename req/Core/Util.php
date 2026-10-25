@@ -355,6 +355,11 @@ class Util
 		Configuration::$instance->dataStore?->saveToTable($db, $values, $tableName);
 	}
 
+	static function encodeValue(mixed $value): mixed
+	{
+		return Configuration::$instance->dataStore ? Configuration::$instance->dataStore->encodeValue($value) : $value;
+	}
+
 	static function hasTable(PDO $db, string $name): bool
 	{
 		return Configuration::$instance->dataStore?->hasTable($db, $name) ?? false;
