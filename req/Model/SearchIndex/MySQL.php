@@ -17,15 +17,16 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		if ($thread->id === 0)
 			return;
 
+		// 消した欄 (あとがきやタグなど) の古い語が残らないよう、空の欄も含めてすべての欄を更新する
 		/** @var array<string, string[]> */
-		$words = array_filter(array(
+		$words = array(
 			"title" => $this->getWords([$this->phraseWords(), self::encodeSupplementary($thread->entry->title)]),
 			"name" => $this->getWords([$this->phraseWords(), self::encodeSupplementary($thread->entry->name)]),
 			"summary" => $this->getWords([$this->phraseWords(), self::encodeSupplementary($thread->entry->summary)]),
-			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([$this->phraseWords(), self::encodeSupplementary($thread->body)]) : null,
+			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([$this->phraseWords(), self::encodeSupplementary($thread->body)]) : array(),
 			"afterword" => $this->getWords([$this->phraseWords(), self::encodeSupplementary($thread->afterword)]),
 			"tag" => $this->getWords(array_merge([$this->phraseWords()], array_map(fn($x) => self::encodeSupplementary($x), $thread->entry->tags)))
-		));
+		);
 
 		foreach ($words as $k => $v)
 			$words[$k] = $this->padWords($v);
