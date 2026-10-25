@@ -286,18 +286,19 @@ class ReadHandler extends Handler
 		$dh = App::openDB();
 		$idh = App::openDB(App::INDEX_DATABASE);
 
-		if (!$_POST)
-			if (!$isAdmin)
-				Auth::logout();
-			else
-				Auth::unsetSession();
+		if (!$_POST && !$isAdmin)
+			Auth::logout();
 
 		$thread = $dh->withTransactionCombo($idh, fn($db, $idb) => self::loadThread($db, $idb, $id));
 		$this->thread = &$thread;
 
 		Auth::$caption = "{$thread->entry->title} の削除";
 		Auth::$label = "編集キー";
-		Auth::$details = "<div class='notify warning'>本当に " . Visualizer::escapeOutput($thread->entry->title) . " を削除してよろしいですか？続行する場合は編集キーを入力します</div>";
+		Auth::$details = "<div class='notify warning'>本当に " . Visualizer::escapeOutput($thread->entry->title) . " を削除してよろしいですか？" . ($isAdmin ? "" : "続行する場合は編集キーを入力します") . "</div>";
+
+		// ログイン済みの管理者には、確認画面から送信してもらう
+		if ($isAdmin && !$_POST)
+			Auth::confirm();
 
 		if (
 			!Auth::hasSession(true) &&
@@ -443,11 +444,8 @@ class ReadHandler extends Handler
 		$commentID = intval(self::param("id", "0", true));
 		$isAdmin = Auth::hasSession(true);
 
-		if (!$_POST)
-			if (!$isAdmin)
-				Auth::unsetSession();
-			else
-				Auth::cleanSession();
+		if (!$_POST && !$isAdmin)
+			Auth::unsetSession();
 
 		$dh = App::openDB();
 		$idh = App::openDB(App::INDEX_DATABASE);
@@ -460,6 +458,10 @@ class ReadHandler extends Handler
 
 		Auth::$caption = "コメントの削除";
 		Auth::$label = "削除キー";
+
+		// ログイン済みの管理者でも GET だけでは削除せず、確認画面から送信してもらう
+		if ($isAdmin && !$_POST)
+			Auth::confirm();
 
 		if (
 			Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false)) === false &&

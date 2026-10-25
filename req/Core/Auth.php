@@ -11,6 +11,8 @@ class Auth
 	static string $caption = "認証";
 	static string $label = "パスワード";
 	static ?string $details = null;
+	/** ログイン済みの管理者に確認だけを求める場合は false にする */
+	static bool $passwordRequired = true;
 	private static bool $isAdmin = false;
 
 	static function useSession(bool $beginNew = false): void
@@ -37,7 +39,7 @@ class Auth
 				// セッション開始直後にクッキーの明示的設定を行う
 				$sessionId = session_id();
 				if ($sessionId !== false) {
-					setcookie($sessionName, $sessionId, 0, '/');
+					self::setSessionCookie($sessionName, $sessionId);
 				}
 			}
 
@@ -80,7 +82,7 @@ class Auth
 			return;
 
 		if (isset($_COOKIE[$session["name"]]))
-			setcookie($session["name"], "", time() - 42000, dirname(Util::getPhpSelf()));
+			self::setSessionCookie($session["name"], "", time() - 42000);
 
 		self::unsetSession();
 		session_destroy();
@@ -252,8 +254,44 @@ class Auth
 		$sessionName = session_name();
 		$sessionId = session_id();
 		if ($sessionName !== false && $sessionId !== false) {
-			setcookie($sessionName, $sessionId, 0, '/');
+			self::setSessionCookie($sessionName, $sessionId);
 		}
+	}
+
+	/**
+	 * session_start と同じ属性でセッションのクッキーを送る (省略すると HttpOnly や SameSite が外れる)
+	 */
+	private static function setSessionCookie(string $name, string $value, int $expires = 0): void
+	{
+		setcookie($name, $value, array(
+			"expires" => $expires,
+			"path" => "/",
+			"secure" => isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on",
+			"httponly" => true,
+			"samesite" => "Lax"
+		));
+	}
+
+	/**
+	 * ログイン済みの管理者に、パスワードを求めずに実行してよいかを確認する画面を表示する。
+	 * GET だけで削除などが実行されないよう、確認画面から POST させる
+	 * @return never
+	 */
+	static function confirm(): void
+	{
+		if (!self::hasToken())
+			self::createToken();
+
+		self::$passwordRequired = false;
+		Visualizer::$data = "";
+		Visualizer::noCache();
+
+		if (App::$handlerType == "json")
+			throw new ApplicationException("確認のため POST で送信してください", 405);
+
+		Visualizer::visualize("Auth");
+
+		exit;
 	}
 
 	/**

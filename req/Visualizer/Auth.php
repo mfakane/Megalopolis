@@ -21,7 +21,9 @@ $d = Visualizer::$data;
 	<?php $authAction = $_SERVER["REQUEST_URI"] ?? Visualizer::currentHref($_GET) ?>
 	<form class="auth" action="<?=Visualizer::escapeOutput(Util::withMobileUniqueIDRequestSuffix($authAction)) ?>" method="post">
 		<section>
-			<label for="password"><?=Visualizer::escapeOutput(Auth::$label) ?></label><input type="password" name="password" id="password" /><br />
+			<?php if (Auth::$passwordRequired): ?>
+				<label for="password"><?=Visualizer::escapeOutput(Auth::$label) ?></label><input type="password" name="password" id="password" /><br />
+			<?php endif ?>
 			<button type="submit">
 				<img src="<?=Visualizer::escapeOutput(Visualizer::actionHref("style", "sendButtonIcon.png")) ?>" alt="" />送信
 			</button>
