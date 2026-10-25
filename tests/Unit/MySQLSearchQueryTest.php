@@ -31,6 +31,7 @@ final class MySQLSearchQueryTest extends TestCase
         yield 'several words' => [['plain', '-abc'], '+"plai lain" -abc_'];
         yield 'symbols only' => [[':-'], ''];
         yield 'repeated grams keep their order' => [['aaaaab'], '+"aaaa aaaa aaab"'];
+        yield 'supplementary characters are searched by their references' => [['a😀'], '+a___ +"1285 2851 8512"'];
     }
 
     #[DataProvider('queries')]

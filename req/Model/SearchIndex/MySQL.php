@@ -19,12 +19,12 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 
 		/** @var array<string, string[]> */
 		$words = array_filter(array(
-			"title" => $this->getWords([self::PHRASE_WORDS, $thread->entry->title]),
-			"name" => $this->getWords([self::PHRASE_WORDS, $thread->entry->name]),
-			"summary" => $this->getWords([self::PHRASE_WORDS, $thread->entry->summary]),
-			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([self::PHRASE_WORDS, $thread->body]) : null,
-			"afterword" => $this->getWords([self::PHRASE_WORDS, $thread->afterword]),
-			"tag" => $this->getWords(array_merge([self::PHRASE_WORDS], $thread->entry->tags))
+			"title" => $this->getWords([self::PHRASE_WORDS, self::encodeSupplementary($thread->entry->title)]),
+			"name" => $this->getWords([self::PHRASE_WORDS, self::encodeSupplementary($thread->entry->name)]),
+			"summary" => $this->getWords([self::PHRASE_WORDS, self::encodeSupplementary($thread->entry->summary)]),
+			"body" => Configuration::$instance->registerBodyToSearchIndex ? $this->getWords([self::PHRASE_WORDS, self::encodeSupplementary($thread->body)]) : null,
+			"afterword" => $this->getWords([self::PHRASE_WORDS, self::encodeSupplementary($thread->afterword)]),
+			"tag" => $this->getWords(array_merge([self::PHRASE_WORDS], array_map(fn($x) => self::encodeSupplementary($x), $thread->entry->tags)))
 		));
 
 		foreach ($words as $k => $v)
@@ -52,6 +52,15 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 		Util::executeStatement($st, array_map(function ($_) {
 			return implode(" ", $_);
 		}, $words));
+	}
+
+	/**
+	 * MyISAM の全文検索は 4 バイトの文字を語の一部として扱わないため、
+	 * 索引でも検索語でも数値文字参照の形にする (数字の部分で検索できる)
+	 */
+	private static function encodeSupplementary(?string $s): ?string
+	{
+		return $s === null ? null : (preg_replace_callback('/[\x{10000}-\x{10FFFF}]/u', fn($m) => "&#" . (int)mb_ord($m[0], "UTF-8") . ";", $s) ?? $s);
 	}
 
 	/**
@@ -120,6 +129,8 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 
 			if ($exclude)
 				$i = substr($i, 1);
+
+			$i = (string)self::encodeSupplementary($i);
 
 			// 索引は記号などで区切った部分ごとに n-gram にしているため、部分ごとに条件にする
 			$terms = array();
