@@ -528,8 +528,10 @@ class IndexHandler extends Handler
 				}
 			}
 
-			$this->entryCount = null;
-			$this->entries = $dh->execute(fn($db) => ThreadEntry::getEntriesByName($db, $name, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $this->entryCount));
+			$found = null;
+			$this->entries = $dh->execute(function ($db) use ($name, $page, &$found) {
+				return ThreadEntry::getEntriesByName($db, $name, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $found);
+			});
 
 			$this->lastUpdate = max(array_map(fn($x) => $x->getLatestLastUpdate(), $this->entries) + array(0));
 			$hash = implode(",", array_map(fn($x) => $x->id . ":" . (time() - (int)$x->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"), $this->entries));
@@ -537,7 +539,9 @@ class IndexHandler extends Handler
 			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY, "") . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "") . $hash))
 				Visualizer::notModified();
 
-			$pageCount = $dh->execute(fn($db) => (int)ceil((is_null($this->entryCount) ? ThreadEntry::getEntryCountByName($db, $name) : $this->entryCount) / Configuration::$instance->searchPaging));
+			// MySQL 以外では件数を別に数える
+			$this->entryCount = $found ?? $dh->execute(fn($db) => ThreadEntry::getEntryCountByName($db, $name));
+			$pageCount = (int)ceil($this->entryCount / Configuration::$instance->searchPaging);
 			$this->subject = 0;
 			$this->subjectCount = $dh->execute(fn($db) => Board::getLatestSubject($db));
 			Visualizer::$data = $name;
@@ -627,8 +631,10 @@ class IndexHandler extends Handler
 				}
 			}
 
-			$this->entryCount = null;
-			$this->entries = $dh->execute(fn($db) => ThreadEntry::getEntriesByTag($db, $tag, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $this->entryCount));
+			$found = null;
+			$this->entries = $dh->execute(function ($db) use ($tag, $page, &$found) {
+				return ThreadEntry::getEntriesByTag($db, $tag, $page * Configuration::$instance->searchPaging, Configuration::$instance->searchPaging, Board::ORDER_DESCEND, $found);
+			});
 
 			$this->lastUpdate = max(array_map(fn($x) => $x->getLatestLastUpdate(), $this->entries) + array(0));
 			$hash = implode(",", array_map(fn($x) => $x->id . ":" . (time() - (int)$x->getLatestLastUpdate() < Configuration::$instance->updatePeriod * 24 * 60 * 60 ? "t" : "n"), $this->entries));
@@ -636,7 +642,9 @@ class IndexHandler extends Handler
 			if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY, "") . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "") . $hash))
 				Visualizer::notModified();
 
-			$pageCount = $dh->execute(fn($db) => ceil((is_null($this->entryCount) ? ThreadEntry::getEntryCountByTag($db, $tag) : $this->entryCount) / Configuration::$instance->searchPaging));
+			// MySQL 以外では件数を別に数える
+			$this->entryCount = $found ?? $dh->execute(fn($db) => ThreadEntry::getEntryCountByTag($db, $tag));
+			$pageCount = (int)ceil($this->entryCount / Configuration::$instance->searchPaging);
 			$this->subject = 0;
 			$this->subjectCount = $dh->execute(fn($db) => Board::getLatestSubject($db));
 			Visualizer::$data = $tag;

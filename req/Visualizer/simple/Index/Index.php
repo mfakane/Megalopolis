@@ -41,6 +41,14 @@ else if (App::$actionName == "author")
 else
 	$title = $h->subject == $h->subjectCount ? "最新作品集" : "作品集 {$h->subject}";
 
+// 一覧のリンクの基になるパス。タグ別・作者別の一覧はページ番号もパスで指定する
+$isNameList = in_array(App::$actionName, array("tag", "author"));
+$listArgs = App::$actionName == "index" ? array($h->subject) : ($isNameList ? Visualizer::nameHrefArgs(App::$actionName, (string)$d) : array(App::$actionName));
+$listQuery = App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode) : array();
+$pagerLink = $isNameList
+	? Visualizer::actionHrefArray(array(App::$actionName, (string)$d)) . "/"
+	: Visualizer::actionHrefArray(array_merge($listArgs, array($listQuery + array("p" => ""))));
+
 if (App::$actionName == "index")
 {
 	$h->page = isset($_GET["p"]) ? max(intval(IndexHandler::param("p")), 1) : 1;
@@ -123,7 +131,7 @@ Visualizer::doctype();
 	<?php else: ?>
 		<br />
 	<?php endif ?>
-	<?php Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode) : array()) + array("p" => ""))) ?>
+	<?php Visualizer::pager($h->page, $h->pageCount, 5, $pagerLink) ?>
 	<?=Visualizer::escapeOutput(App::$actionName == "search" ? $d["count"] : (App::$actionName == "index" ? count($h->entries) : $h->entryCount)) ?>件中<?=Visualizer::escapeOutput($offset + 1) ?>～<?=Visualizer::escapeOutput($offset + min($paging, count($h->entries))) ?>件
 	<ul class="entries">
 		<?php if ($h->entries): ?>
@@ -161,7 +169,7 @@ Visualizer::doctype();
 			<li>結果はありません</li>
 		<?php endif ?>
 	</ul>
-	<?php Visualizer::pager($h->page, $h->pageCount, 5, Visualizer::actionHref((App::$actionName == "index" ? $h->subject : App::$actionName), (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode) : array()) + array("p" => ""))) ?>
+	<?php Visualizer::pager($h->page, $h->pageCount, 5, $pagerLink) ?>
 	<ul class="menu">
 		<a id="menu" name="menu">メニュー</a>
 		<?php $i = 0 ?>
@@ -185,7 +193,7 @@ Visualizer::doctype();
 				$isParam = strstr($k, "=") !== false;
 				$param = $isParam ? explode("=", $k) : array();
 				?>
-				[<?=++$i ?>]<a href="<?=Visualizer::escapeOutput($k == "#" ? $k : Visualizer::actionHref($isParam ? (App::$actionName == "index" ? $h->subject : App::$actionName) : $k, $isParam ? (App::$actionName == "search" ? array("query" => $search, "mode" => $searchMode, $param[0] => $param[1]) : array($param[0] => $param[1])) : null)) ?>" accesskey="<?=$i ?>"><?=Visualizer::escapeOutput($v) ?></a>
+				[<?=++$i ?>]<a href="<?=Visualizer::escapeOutput($k == "#" ? $k : ($isParam ? Visualizer::actionHrefArray(array_merge($listArgs, array($listQuery + array($param[0] => $param[1])))) : Visualizer::actionHref($k))) ?>" accesskey="<?=$i ?>"><?=Visualizer::escapeOutput($v) ?></a>
 			</li>
 		<?php endforeach ?>
 		<?php if (App::$actionName == "index"): ?>
