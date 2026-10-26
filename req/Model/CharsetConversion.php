@@ -366,14 +366,28 @@ class CharsetConversion
 		$params = $nextID === null ? array() : ($lastID === null ? array($nextID) : array($lastID, $nextID));
 		$st = $this->db->prepare(sprintf(
 			"select %s from %s where %s and (%s)",
-			implode(", ", array_unique(array_merge($keys, $columns))),
+			implode(", ", $keys),
 			$new,
 			$range,
 			$this->getTextCondition($table)
 		));
 		$st->execute($params);
+		// 本文の大きな作品が多いとメモリが足りなくなるため、まとめて読まずに一行ずつ読む
+		$read = $this->db->prepare(sprintf(
+			"select %s from %s where %s",
+			implode(", ", $columns),
+			$new,
+			implode(" and ", array_map(fn($x) => "{$x} = ?", $keys))
+		));
 
-		foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $row) {
+		foreach ($st->fetchAll(PDO::FETCH_NUM) as $key) {
+			$read->execute($key);
+			$row = $read->fetch(PDO::FETCH_ASSOC);
+			$read->closeCursor();
+
+			if (!$row)
+				continue;
+
 			$changes = array();
 
 			foreach ($columns as $i)
@@ -389,7 +403,7 @@ class CharsetConversion
 					$new,
 					implode(", ", array_map(fn($x) => "{$x} = ?", array_keys($changes))),
 					implode(" and ", array_map(fn($x) => "{$x} = ?", $keys))
-				))->execute(array_merge(array_values($changes), array_map(fn($x) => $row[$x], $keys)));
+				))->execute(array_merge(array_values($changes), $key));
 			} catch (\PDOException $ex) {
 				// 元に戻した結果、既にある値と同じになる場合 (同じ作品に「&#128512;」と同じ文字のタグがあるなど) は
 				// 数値文字参照のまま残す

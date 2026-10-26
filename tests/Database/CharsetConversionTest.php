@@ -110,6 +110,10 @@ final class CharsetConversionTest extends TestCase
         $forged = $this->browser()->request('POST', 'util/reindex.json', ['p' => 'list', 'force' => 'yes', 'token' => 'forged']);
         self::assertSame(403, $forged['status'], $forged['body']);
         self::assertFalse($this->convert('status')['converting']);
+        // Without the administrator's session the tools say so instead of an empty error.
+        $expired = (new Browser(self::SERVICE))->request('POST', 'util/reindex.json', ['p' => 'list']);
+        self::assertSame(401, $expired['status'], $expired['body']);
+        self::assertStringContainsString('ログイン', $expired['json']['error']);
 
         $status = $this->convert('start');
         self::assertTrue($status['converting']);
