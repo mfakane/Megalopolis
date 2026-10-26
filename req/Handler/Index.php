@@ -65,7 +65,7 @@ class IndexHandler extends Handler
 			);
 		}
 
-		$entries = $dh->executeCombo($idh, function ($db, $idb) use ($subject) {
+		$entries = $dh->execute(function ($db) use ($subject) {
 			if ($subject == 0)
 				$subject = Board::getLatestSubject($db);
 			else if ($subject > Board::getLatestSubject($db))
@@ -79,11 +79,13 @@ class IndexHandler extends Handler
 
 			$this->subject = $subject;
 			$this->subjectCount = Board::getLatestSubject($db);
-			$this->entryCount = Board::getEntryCount($db, $idb);
+			$this->entryCount = Board::getEntryCount($db);
 
 			if ($this->lastUpdate !== null) {
 				$updatePeriodInSeconds = Configuration::$instance->updatePeriod * 24 * 60 * 60;
 				$hash = implode(",", array_map(fn(ThreadEntry $x) => $x->id . ":" . (time() - (int)$x->getLatestLastUpdate() < $updatePeriodInSeconds ? "t" : "n"), $this->entries));
+				// 全作品数と作品集の数は、ほかの作品集への投稿や削除でも変わる
+				$hash .= "/{$this->entryCount}/{$this->subjectCount}";
 
 				if (Util::isCachedByBrowser($this->lastUpdate, Cookie::getCookie(Cookie::LIST_TYPE_KEY, "") . Cookie::getCookie(Cookie::LIST_VISIBILITY_KEY, "") . $hash))
 					Visualizer::notModified();
@@ -470,9 +472,7 @@ class IndexHandler extends Handler
 	function random(): bool
 	{
 		$dh = App::openDB();
-		$idh = App::openDB(App::INDEX_DATABASE);
-		$entry = $dh->executeCombo($idh, fn($db, $idb) => ThreadEntry::getRandomEntry($db, $idb));
-		$idh->close();
+		$entry = $dh->execute(fn($db) => ThreadEntry::getRandomEntry($db));
 		$dh->close();
 
 		if ($entry)

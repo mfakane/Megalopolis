@@ -39,11 +39,6 @@ abstract class SearchIndex
 	 */
 	abstract function getExistingThread(PDO $idb): array;
 	
-	function getEntryCountCore(PDO $idb): ?int
-	{
-		return null;
-	}
-	
 	/** @api Legacy extension hook; subclasses may implement attachment. */
 	function attachIndexCore(PDO $idb): void
 	{
@@ -54,11 +49,6 @@ abstract class SearchIndex
 	{
 	}
 
-	static function getEntryCount(PDO $idb): ?int
-	{
-		return self::ensureTable($idb)->getEntryCountCore($idb);
-	}
-	
 	static function register(PDO $idb, Thread $thread, bool $removeExisting = true): void
 	{
 		self::ensureTable($idb)->registerThread($idb, $thread, $removeExisting);

@@ -190,18 +190,4 @@ class MySQLSearchIndex extends SQLiteSearchIndex
 				$count
 			))));
 	}
-
-	#[\Override]
-	function getEntryCountCore(PDO $idb): ?int
-	{
-		$st = Util::ensureStatement($idb, $idb->prepare(sprintf(
-			'
-			select count(*) from %s',
-			self::INDEX_TABLE
-		)));
-		Util::executeStatement($st);
-		$rt = $st?->fetchAll(PDO::FETCH_COLUMN | PDO::FETCH_UNIQUE, 0) ?? array(0);
-
-		return intval(array_shift($rt));
-	}
 }

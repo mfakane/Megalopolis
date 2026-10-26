@@ -39,11 +39,11 @@ class Board
 		return self::$latestSubject;
 	}
 	
-	static function getEntryCount(PDO $db, PDO $idb): int
+	/**
+	 * 検索インデックスに登録されていない作品も数えるよう、作品の表から数える
+	 */
+	static function getEntryCount(PDO $db): int
 	{
-		if (($rt = SearchIndex::$instance?->getEntryCount($idb)) !== null)
-			return $rt;
-		
 		$st = Util::ensureStatement($db, $db->prepare(sprintf
 		('
 			select count(subject) from %s',

@@ -129,7 +129,26 @@ final class CharsetConversionTest extends TestCase
         return $before;
     }
 
+    // A migrated database may lack index rows for old works; the conversion's
+    // reindex below restores them.
     #[Depends('testStartStopsWritesUntilAborted')]
+    public function testTotalCountComesFromTheWorksNotTheSearchIndex(array $before): array
+    {
+        $this->query('delete from searchIndex2 order by docid limit 3');
+        $works = (int)$this->query('select count(*) n from threadEntry')[0]['n'];
+        self::assertSame($works, $this->totalCount(''));
+
+        // Old subject pages are revalidated when a work is posted elsewhere.
+        $etag = $this->etag('1');
+        $before['counted'] = $this->post('charsetcount');
+        self::assertSame($works + 1, $this->totalCount('1'));
+        self::assertNotSame($etag, $this->etag('1'));
+        $before['counts'] = $this->counts();
+
+        return $before;
+    }
+
+    #[Depends('testTotalCountComesFromTheWorksNotTheSearchIndex')]
     public function testConversionCopiesEveryRowAndRebuildsDerivedTables(array $before): array
     {
         $this->convert('start');
@@ -180,9 +199,9 @@ final class CharsetConversionTest extends TestCase
         // Author and tag lists are recomputed from the converted entries.
         $name = '作者' . self::EMOJI;
         $author = Http::json(self::SERVICE, '/index.php?path=' . rawurlencode('author/' . $name . '.json'));
-        self::assertEqualsCanonicalizing([$before['id'], $after], array_column($author->entries, 'id'));
+        self::assertEqualsCanonicalizing([$before['id'], $before['counted'], $after], array_column($author->entries, 'id'));
         $tag = Http::json(self::SERVICE, '/index.php?path=' . rawurlencode('tag/分類' . self::EMOJI . '.json'));
-        self::assertEqualsCanonicalizing([$before['id'], $after], array_column($tag->entries, 'id'));
+        self::assertEqualsCanonicalizing([$before['id'], $before['counted'], $after], array_column($tag->entries, 'id'));
 
         // The rebuilt search index covers the existing works as before, and
         // being in the phrase format it finds exactly the works with the terms.
@@ -293,6 +312,25 @@ final class CharsetConversionTest extends TestCase
         self::assertMatchesRegularExpression('/(\d{9,})/', $response['location']);
         preg_match('/(\d{9,})/', $response['location'], $match);
         return (int)$match[1];
+    }
+
+    /** 全作品数 on a subject page. */
+    private function totalCount(string $route): int
+    {
+        $response = (new Browser(self::SERVICE))->request('GET', $route);
+        self::assertSame(200, $response['status']);
+        $document = \Dom\HTMLDocument::createFromString($response['body'], LIBXML_NOERROR, 'UTF-8');
+        $term = $document->querySelector('dl.status dt');
+        self::assertSame('全作品数', $term?->textContent);
+        return (int)trim($term->nextElementSibling->textContent);
+    }
+
+    private function etag(string $route): string
+    {
+        $headers = (new Browser(self::SERVICE))->request('GET', $route)['headers'];
+        $etag = preg_grep('/^ETag:/i', $headers);
+        self::assertCount(1, $etag);
+        return reset($etag);
     }
 
     private function search(array $query): array

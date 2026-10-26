@@ -1082,12 +1082,13 @@ class ThreadEntry
 		return $rt;
 	}
 
-	static function getRandomEntry(PDO $db, PDO $idb): ?ThreadEntry
+	static function getRandomEntry(PDO $db): ?ThreadEntry
 	{
-		$count = SearchIndex::getEntryCount($idb);
+		$megalith = Configuration::$instance->convertOnDemand && is_dir("Megalith/sub");
+		$count = $megalith ? 0 : Board::getEntryCount($db);
 
-		// 作品が無い場合は乱数の範囲が作れない
-		if ($count !== null && $count > 0)
+		// 作品が無い場合は乱数の範囲が作れない。Megalith のログと合わせる場合はすべての中から選ぶ
+		if ($count > 0)
 			$st = $db->prepare(sprintf(
 				'
 				select id from %s
@@ -1105,10 +1106,7 @@ class ThreadEntry
 		Util::executeStatement(Util::ensureStatement($db, $st));
 		$rt = $st->fetchAll(PDO::FETCH_COLUMN);
 
-		if (
-			Configuration::$instance->convertOnDemand &&
-			is_dir("Megalith/sub")
-		)
+		if ($megalith)
 			$rt = array_unique(array_merge($rt, self::getAllMegalithEntryIDs()));
 
 		if ($rt)
