@@ -53,12 +53,15 @@ class Auth
 		}
 	}
 
+	/**
+	 * 接続元の IP アドレスは含めない。IPv6 の一時アドレスや携帯回線、複数の経路を持つプロキシなどでは
+	 * 同じブラウザでもリクエストごとに変わり、そのたびにログアウトさせてしまうため
+	 */
 	private static function createFingerprint(): string
 	{
 		return hash(Util::HASH_ALGORITHM, implode(", ", array
 		(
 			self::getSessionID(),
-			$_SERVER["REMOTE_ADDR"] ?? null,
 			$_SERVER["HTTP_USER_AGENT"] ?? null,
 			$_SERVER["HTTP_ACCEPT_LANGUAGE"] ?? null,
 			$_SERVER["HTTP_ACCEPT_CHARSET"] ?? null
@@ -98,7 +101,7 @@ class Auth
 	/** @api Returns the token for callers rendering their own forms. */
 	static function createToken(): string
 	{
-		$token = hash("sha1", mt_rand() . self::createFingerprint());
+		$token = bin2hex(random_bytes(20));
 		$_SESSION[self::SESSION_TOKEN] = $token;
 		return $token;
 	}
@@ -237,7 +240,10 @@ class Auth
 			return $_POST["password"];
 		} else {
 			if (!self::hasToken()) self::createToken();
-			self::loginError();
+			// JavaScript から呼ぶ処理では入力画面を出せないため、ログインが切れたことなどを伝える
+			self::loginError(App::$handlerType != "json" ? "" : ($admin
+				? "ログインの有効期限が切れました。ページを開き直してログインしてください"
+				: self::$label . "を入力してください"));
 			return false;
 		}
 	}

@@ -341,3 +341,18 @@ test("管理者が検索インデックスを再生成すると、トークン�
 
 	assertNoDiagnostics(diagnostics);
 });
+
+test("再生成の途中でログインが切れると、その旨を表示する", async ({ page, context }) => {
+	const diagnostics = attachDiagnostics(page);
+	await ensureAdmin(page);
+	await page.goto(route("util/reindex"));
+	await context.clearCookies();
+	await page.getByRole("button", { name: "再生成開始" }).click();
+	await expect(page.getByText(/ログインの有効期限が切れました/)).toBeVisible();
+	await expect(page.getByRole("link", { name: "戻る" })).toBeVisible();
+
+	// Only the expected 401 failed; the message is not raw JSON.
+	expect(diagnostics.pageErrors).toEqual([]);
+	expect(diagnostics.failedResources).toEqual([expect.stringMatching(/util\/reindex\.json: HTTP 401$/)]);
+	await expect(page.getByText('{"error"')).toHaveCount(0);
+});

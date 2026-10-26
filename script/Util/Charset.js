@@ -15,16 +15,7 @@ $(function()
 
 	var showError = function(xhr)
 	{
-		var data = xhr.responseText;
-		var message = "不明なエラーが発生しました。";
-
-		try
-		{
-			message = $.parseJSON(data).error || message;
-		}
-		catch (e)
-		{
-		}
+		var message = megalopolis.errorMessage(xhr);
 
 		$("#convert>div>*").remove();
 		$("#convert>div")

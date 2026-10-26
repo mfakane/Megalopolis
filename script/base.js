@@ -130,6 +130,27 @@ var megalopolis =
 				: destination.jquery ? destination.offset().top
 				: destination
 			}, 500);
+	},
+	/**
+	 * 管理用ツールの処理が失敗したときに表示する文。
+	 * JSON でない応答 (PHP の致命的なエラーなど) は、原因が分かるよう本文を添える
+	 */
+	errorMessage: function(xhr)
+	{
+		var message = "不明なエラーが発生しました。";
+
+		try
+		{
+			return $.parseJSON(xhr.responseText).error || (xhr.status == 401 ? "ログインの有効期限が切れました。ページを開き直してログインしてください。" : message);
+		}
+		catch (e)
+		{
+		}
+
+		// html() では応答の中のスクリプトが実行されるため、タグを取り除くだけにする
+		var text = $.trim((xhr.responseText || "").replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ").replace(/<[^>]*>/g, " ").replace(/\s+/g, " "));
+
+		return message + (text ? " (" + xhr.status + ": " + text.substring(0, 500) + ")" : xhr.status ? " (" + xhr.status + ")" : "");
 	}
 };
 

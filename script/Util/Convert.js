@@ -89,14 +89,12 @@ $(function()
 					$("#convert>div>*").remove();
 					$("#convert>div")
 						.append($("<p />")
-							.text("不明なエラーが発生しました。")
+							.text(megalopolis.errorMessage(xhr))
 							.append($("<br />"))
 							.append($("<br />"))
 							.append($("<a />")
 								.attr("href", backHref)
-								.text("戻る")))
-						.append($("<p />")
-							.html(data));
+								.text("戻る")));
 				}
 			});
 		};
@@ -144,19 +142,15 @@ $(function()
 				},
 				error: function(xhr)
 				{
-					var data = xhr.responseText;
-					
 					$("#convert>div>*").remove();
 					$("#convert>div")
 						.append($("<p />")
-							.text("不明なエラーが発生しました。")
+							.text(megalopolis.errorMessage(xhr))
 							.append($("<br />"))
 							.append($("<br />"))
 							.append($("<a />")
 								.attr("href", backHref)
-								.text("戻る")))
-						.append($("<p />")
-							.html(data));
+								.text("戻る")));
 				}
 			});
 			
