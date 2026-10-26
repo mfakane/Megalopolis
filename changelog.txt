@@ -1,4 +1,73 @@
-﻿2019-01-02 COAH96KoxU <queue glasscore.net>
+﻿2026-10-26 COAH96KoxU <queue glasscore.net>
+
+	* req/Core/App.php: release 49
+	* req/Model/Migration.php,
+	  req/Core/DataStore.php: 更新後に最初のアクセスでテーブルの構造を一度だけ更新し、更新中や失敗時はメンテナンス中と表示するように
+	  失敗した場合は管理者がログインして再実行できます
+	* req/Handler/Util.php,
+	  req/Visualizer/Util/Index.php: 文字コードの変換や検索インデックスの再生成など、必要な移行処理を管理用設定ツールのページに表示するように
+	* req/Model/CharsetConversion.php,
+	  req/Visualizer/Util/Charset.php: MySQL のデータベースを utf8mb4 に変換するツールを追加
+	* req/Core/DataStore.php: 新しく作るデータベースを utf8mb4 (照合順序 utf8mb4_bin) にするように
+	* req/Core/DataStore.php,
+	  req/Model/ThreadEntry.php: MySQL の utf8 のテーブルで絵文字などを含む投稿やコメント、大文字小文字だけが違うタグが失敗するのを修正
+	* req/Model/ThreadEntry.php: インデックスが既にあるデータベースでテーブルの構造の更新が失敗し、全ページがエラーになるのを修正
+	* req/Model/SearchIndex.php,
+	  req/Model/SearchIndex/MySQL.php,
+	  req/Model/SearchIndex/SQLite.php: 検索の不具合を修正
+	  - 検索語をひと続きの語句として探すように (第48版以前の検索インデックスは再生成するまで従来どおり)
+	  - MySQL で記号や絵文字、短い日本語を含む検索語が見つからないのを修正
+	  - SQLite で検索結果の件数が正しくならないのを修正
+	  - MySQL で作品を編集して消した欄の語が検索に残るのを修正
+	  - 詳細検索の画面が開かないほど遅くなる、ポイントの範囲を片方だけ指定すると絞り込めないのを修正
+	  - ホスト検索の件数や 2 ページ目以降の検索対象の誤りを修正
+	* req/Core/DataStore.php: 検索インデックスの強制再生成がエラーになるのを修正
+	* req/Handler/Index.php,
+	  req/Core/Visualizer.php,
+	  req/Model/ThreadEntry.php: 作者名・タグのリンクの不具合を修正
+	  - MySQL で作者別・タグ別一覧が 500 エラーになるのを修正
+	  - 数字だけの名前や末尾が / の名前、new や com という名前へのリンクが正しく開かないのを修正
+	  - & などを含む名前の一覧が 0 件になる、&amp; と表示されるのを修正
+	  - リンク形式 (rewrite / path / query) ごとに URL を正しくエンコードするように
+	* req/Core/Util.php: 短い入力が Shift_JIS と誤判定されて文字化けするのを修正
+	* req/Handler/Util.php,
+	  script/Util/*.js: 管理用設定ツールの処理をトークン付きの POST だけで受け付けるように
+	  JavaScript を使わない再生成・変換の経路を廃止しました
+	* req/Core/Util.php,
+	  script/Util/*.js: ルート以外のディレクトリへの設置やクエリ形式のリンクで、検索インデックスの再生成などの自動転送やリダイレクト先が壊れるのを修正
+	* req/Core/Auth.php: 管理者パスワードでの認証がセッションに保存されない箇所を修正
+	* req/Handler/Read.php: 管理者のコメント削除が GET で実行されるのを修正
+	* req/Core/App.php: URL からハンドラの静的メソッドや存在しない処理を呼べてしまうのを修正
+	* req/Visualizer: 作品名、作者別・タグ別一覧のヘッダー、一覧の表示形式などがエスケープされていない箇所を修正
+	* config.php,
+	  req/Core/Util.php: X-Forwarded-For を信頼するリバースプロキシを設定する $config->trustedProxies を追加
+	  既定ではプライベートアドレスとループバックからの接続に限ります
+	* config.php,
+	  req/Core/Util.php: 携帯端末の契約者固有 ID の受け付けを廃止
+	  $config->denyWriteFromMobileWithoutID は無視されます。記録済みの ID は引き続き表示できます
+	* req/Handler/Read.php: 作者のリンクや背景画像に https の URL を指定できないのを修正
+	* req/Model/Thread.php: 同じ秒に投稿されたコメントや評価が上書きされて消えるのを修正
+	* req/Core/Util.php: 存在しない作品へのコメントや評価で書き込みロックが残るのを修正
+	* req/Model/Thread.php,
+	  req/Model/ThreadEntry.php: 古い作品や関連する行が欠けた作品を開くと 500 エラーになるのを修正
+	* req/Handler/Read.php,
+	  req/Core/Util.php: 作品の編集キーを入力すると保存していた名前などが消える、編集キーや削除キーに 0 を指定すると使えないのを修正
+	* req/Model/ThreadEntry.php: 空の掲示板やおまかせ表示で該当が無いときに 500 エラーになるのを修正
+	* req/Visualizer/simple: 簡易表示の並べ替えやページ送り、長い作品の 2 ページ目以降の表示を修正
+	* req/Visualizer/Index/Index.Atom.php,
+	  req/Visualizer/Index/Index.Rss.php: フィードの形式の誤りを修正
+	* req/Handler/Util.php,
+	  req/Handler/Megalith.php: Megalith 形式のログの変換、タグ順の取り込み、互換出力の不具合を修正
+	* req/Visualizer: 本文のタグの間の空白や textarea の改行が消える、未来の日時や作品の無い作品集の最終更新の表示がおかしいのを修正
+	* req/Core/Visualizer.php: 外部スクリプトを HTTPS で読み込むように
+
+2026-09-24 COAH96KoxU <queue glasscore.net>
+
+	* req/Core/App.php: release 48
+	* 動作要件を PHP 8.4 以上に変更
+	* tests/: 第46版とのデータベースの互換性を確かめるテストを追加
+
+2019-01-02 COAH96KoxU <queue glasscore.net>
 
 	* req/App.php: release 47
 	* req/Visualizer/mobile/Index/Index.php: mobile 表示で全文検索以外で次のページが参照できないのを修正
