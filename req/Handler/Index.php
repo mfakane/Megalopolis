@@ -804,13 +804,17 @@ class IndexHandler extends Handler
 	function login(): bool
 	{
 		Auth::$caption = "管理者ログイン";
+
+		if (Auth::hasSession(true))
+			return Visualizer::redirect(self::redirectPath());
+
 		$password = Auth::login(true);
 
 		if ($password !== false && Util::hashEquals(Configuration::$instance->adminHash ?? "", $password) === false) {
 			Auth::loginError("管理者パスワードが一致しません");
 		} else if ($password !== false) {
 			// パスワード検証成功後にセッション再生成を行う
-			Auth::finalizeLogin($password);
+			Auth::finalizeLogin();
 			
 			// セッションデータを明示的に保存してからリダイレクト
 			session_write_close();
@@ -825,7 +829,7 @@ class IndexHandler extends Handler
 
 	function logout(): bool
 	{
-		Auth::logout();
+		Auth::logoutAdmin();
 
 		return Visualizer::redirect(self::redirectPath());
 	}

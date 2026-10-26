@@ -57,6 +57,12 @@ class Browser
         return $response;
     }
 
+    /** Drops the cookies whose names match, as when the server deletes the session. */
+    public function forget(string $pattern): void
+    {
+        $this->cookies = array_filter($this->cookies, fn($name) => !preg_match($pattern, $name), ARRAY_FILTER_USE_KEY);
+    }
+
     /** The CSRF token of the real form at $route. */
     public function token(string $route = 'new'): string
     {

@@ -13,11 +13,33 @@ class Auth
 	static ?string $details = null;
 	/** ログイン済みの管理者に確認だけを求める場合は false にする */
 	static bool $passwordRequired = true;
-	private static bool $isAdmin = false;
+
+	/**
+	 * 管理者のログインを覚えておくクッキーを、署名し直して期限を延ばす間隔 (秒)
+	 */
+	const int ADMIN_LOGIN_REFRESH = 3600;
 
 	static function useSession(bool $beginNew = false): void
 	{
-		$sessionName = "MEGALOPOLIS_" . basename(dirname(dirname(dirname(__FILE__))));
+		$login = self::getAdminLogin();
+
+		// トークンを置くため、管理者にはセッションが切れていても新しく始める
+		self::startSession($beginNew || $login !== null);
+
+		// 照合に失敗してログアウトした場合は、管理者のログインも取り消されている
+		if ($login === null || ($login = self::getAdminLogin()) === null)
+			return;
+
+		if (time() - $login["issued"] >= self::ADMIN_LOGIN_REFRESH)
+			self::issueAdminLogin($login["nonce"]);
+
+		if (self::isSessionEnabled())
+			$_SESSION[self::SESSION_TOKEN] = self::createAdminToken($login["nonce"]);
+	}
+
+	private static function startSession(bool $beginNew): void
+	{
+		$sessionName = self::cookieName("MEGALOPOLIS_");
 
 		if (!self::isSessionEnabled() && ($beginNew || isset($_COOKIE[$sessionName]))) {
 			// if (Configuration::$instance->storeSessionIntoDataStore)
@@ -48,7 +70,7 @@ class Auth
 			if (!isset($_SESSION[self::SESSION_FINGERPRINT]))
 				$_SESSION[self::SESSION_FINGERPRINT] = $currentFingerprint;
 			else if ($_SESSION[self::SESSION_FINGERPRINT] != $currentFingerprint) {
-				self::logout();
+				self::logoutAdmin();
 			}
 		}
 	}
@@ -89,7 +111,99 @@ class Auth
 
 		self::unsetSession();
 		session_destroy();
-		self::$isAdmin = false;
+	}
+
+	static function logoutAdmin(): void
+	{
+		self::clearAdminLogin();
+		self::logout();
+	}
+
+	/**
+	 * @param non-empty-string $prefix
+	 * @return non-empty-string
+	 */
+	private static function cookieName(string $prefix): string
+	{
+		return $prefix . basename(dirname(dirname(dirname(__FILE__))));
+	}
+
+	/** 管理者のログインを覚えておくクッキーの署名に使う鍵 (リクエストごとに求める) */
+	private static ?string $adminKey = null;
+
+	/**
+	 * 署名の鍵は設定ファイルの内容から作る。adminHash を Util::hash() で書いた設定では値がリクエストごとに
+	 * 変わるため使えない。設定ファイルを書き換える (管理者パスワードを変える) と、それまでのログインは無効になる
+	 */
+	private static function getAdminKey(): ?string
+	{
+		if ((Configuration::$instance->adminHash ?? "") === "")
+			return null;
+
+		if (self::$adminKey === null && ($config = hash_file("sha256", Constant::APP_DIR . "../config.php")) !== false)
+			self::$adminKey = hash_hmac("sha256", "Megalopolis admin login", $config);
+
+		return self::$adminKey;
+	}
+
+	/**
+	 * 署名を確かめた管理者のログイン。期限は、ブラウザを閉じるまでの設定でもサーバー側で区切る
+	 * @return array{issued: int, nonce: string}|null
+	 */
+	private static function getAdminLogin(): ?array
+	{
+		$value = $_COOKIE[self::cookieName("MEGALOPOLIS_ADMIN_")] ?? null;
+		$key = self::getAdminKey();
+
+		if (!is_string($value) || $key === null || !preg_match('/^(\d+)\.([0-9a-f]{32})\.([0-9a-f]{64})$/', $value, $m))
+			return null;
+
+		$issued = (int)$m[1];
+
+		if (!hash_equals((string)self::createAdminLogin($issued, $m[2]), $value)
+			|| $issued > time() + 60
+			|| time() - $issued >= max(Configuration::$instance->adminLoginDays, 1) * 86400)
+			return null;
+
+		return array("issued" => $issued, "nonce" => $m[2]);
+	}
+
+	private static function createAdminLogin(int $issued, string $nonce): ?string
+	{
+		$key = self::getAdminKey();
+
+		return $key === null ? null : "{$issued}.{$nonce}." . hash_hmac("sha256", "{$issued}.{$nonce}", $key);
+	}
+
+	private static function issueAdminLogin(string $nonce): void
+	{
+		$issued = time();
+
+		if (($value = self::createAdminLogin($issued, $nonce)) === null)
+			return;
+
+		$name = self::cookieName("MEGALOPOLIS_ADMIN_");
+		$days = Configuration::$instance->adminLoginDays;
+		$_COOKIE[$name] = $value;
+		self::setSessionCookie($name, $value, $days > 0 ? $issued + $days * 86400 : 0);
+	}
+
+	private static function clearAdminLogin(): void
+	{
+		$name = self::cookieName("MEGALOPOLIS_ADMIN_");
+
+		if (isset($_COOKIE[$name]))
+			self::setSessionCookie($name, "", time() - 42000);
+
+		unset($_COOKIE[$name]);
+	}
+
+	/**
+	 * 管理者のフォームのトークンはログインから求め、セッションが切れた後に開いたままのページから送っても通るようにする
+	 */
+	private static function createAdminToken(string $nonce): string
+	{
+		return substr(hash_hmac("sha256", "token\0" . $nonce, (string)self::getAdminKey()), 0, 40);
 	}
 
 	static function hasToken(): bool
@@ -101,7 +215,8 @@ class Auth
 	/** @api Returns the token for callers rendering their own forms. */
 	static function createToken(): string
 	{
-		$token = bin2hex(random_bytes(20));
+		$login = self::getAdminLogin();
+		$token = $login !== null ? self::createAdminToken($login["nonce"]) : bin2hex(random_bytes(20));
 		$_SESSION[self::SESSION_TOKEN] = $token;
 		return $token;
 	}
@@ -118,6 +233,10 @@ class Auth
 	{
 		$key = "token";
 		$ex = null;
+
+		if (($login = self::getAdminLogin()) !== null && isset($_POST[$key]) && is_string($_POST[$key])
+			&& hash_equals(self::createAdminToken($login["nonce"]), $_POST[$key]))
+			return true;
 
 		$sessionName = session_name();
 
@@ -142,7 +261,6 @@ class Auth
 		if (self::isSessionEnabled()) {
 			session_unset();
 			$_SESSION = array();
-			self::$isAdmin = false;
 		}
 	}
 
@@ -151,8 +269,6 @@ class Auth
 		if (self::isSessionEnabled()) {
 			session_regenerate_id($deleteOld);
 		}
-
-		self::$isAdmin = false;
 	}
 
 	/**
@@ -178,21 +294,13 @@ class Auth
 		return $session ? $session["id"] : null;
 	}
 
+	/**
+	 * 管理者としてログインしているか。ログインするのは管理者だけのため、$hasAdminOnly によらない
+	 * @psalm-suppress PossiblyUnusedParam 管理者かどうかを区別していた頃の呼び出しを残している
+	 */
 	static function hasSession(bool $hasAdminOnly = false): bool
 	{
-		if ($hasAdminOnly && self::$isAdmin) {
-			return self::$isAdmin;
-		} else {
-			$result = self::isSessionEnabled()
-				&& isset($_SESSION[self::SESSION_PASSWORD])
-				&& (!$hasAdminOnly
-					|| self::$isAdmin = isset($_SESSION[self::SESSION_IS_ADMIN])
-					&& $_SESSION[self::SESSION_IS_ADMIN]
-					&& !empty(Configuration::$instance->adminHash ?? "")
-					&& Util::hashEquals(Configuration::$instance->adminHash ?? "", $_SESSION[self::SESSION_PASSWORD]) !== false);
-			
-			return $result;
-		}
+		return self::getAdminLogin() !== null;
 	}
 
 	static function cleanSession(bool $clearToken = true): void
@@ -203,8 +311,6 @@ class Auth
 		foreach ($_SESSION as $k => $_)
 			if (!in_array($k, array(self::SESSION_IS_ADMIN, self::SESSION_PASSWORD, self::SESSION_FINGERPRINT, $clearToken ? null : self::SESSION_TOKEN)))
 				unset($_SESSION[$k]);
-
-		self::$isAdmin = false;
 	}
 
 	/** @api Legacy validation helper retained for custom handlers. */
@@ -226,16 +332,11 @@ class Auth
 	{
 		self::useSession(true);
 
-		if (self::hasSession($admin)) {
-			return $_SESSION[self::SESSION_PASSWORD];
-		} else if (isset($_POST["password"]) && is_string($_POST["password"])) {
+		// ログイン済みの管理者は、呼び出し側で先に hasSession(true) を確かめる
+		if (isset($_POST["password"]) && is_string($_POST["password"])) {
 			if ($ensureToken) {
 				self::ensureToken();
 			}
-
-			// セッション再生成は認証成功が確定してから行う
-			// ここではパスワードを一時保存して、呼び出し側で検証後に resetSession() を行う
-			$_SESSION[self::SESSION_IS_ADMIN] = $admin;
 
 			return $_POST["password"];
 		} else {
@@ -249,25 +350,32 @@ class Auth
 	}
 
 	/**
-	 * 管理者のパスワードを確かめ、パスワードで認証した場合は以降のリクエストのためにセッションに保存する
+	 * 管理者のパスワードを確かめ、パスワードで認証した場合は以降のリクエストのためにログインを覚えておく
 	 */
 	static function loginAsAdmin(string $error = "管理者パスワードが一致しません"): void
 	{
+		if (self::hasSession(true))
+			return;
+
 		$password = self::login(true);
 
 		if ($password === false || Util::hashEquals(Configuration::$instance->adminHash ?? "", $password) === false)
 			self::loginError($error);
 
-		if (!self::hasSession(true))
-			self::finalizeLogin($password);
+		self::finalizeLogin();
 	}
 
-	static function finalizeLogin(string $password): void
+	/**
+	 * 管理者のログインを、セッションとは別の署名したクッキーで覚えておく。
+	 * セッションはサーバーの設定によっては短い時間で消えるうえ、パスワードを置いておくと漏れたときに危ないため
+	 */
+	static function finalizeLogin(): void
 	{
 		self::clearToken();
 		self::resetSession();
-		$_SESSION[self::SESSION_PASSWORD] = $password;
+		unset($_SESSION[self::SESSION_PASSWORD], $_SESSION[self::SESSION_IS_ADMIN]);
 		$_SESSION[self::SESSION_FINGERPRINT] = self::createFingerprint();
+		self::issueAdminLogin(bin2hex(random_bytes(16)));
 		self::createToken();
 		
 		// セッションクッキーを最も基本的な形で設定
@@ -320,8 +428,6 @@ class Auth
 	static function loginError(string $error = ""): void
 	{
 		self::cleanSession(false);
-		unset($_SESSION[self::SESSION_PASSWORD]);
-		unset($_SESSION[self::SESSION_IS_ADMIN]);
 		
 		Visualizer::$data = $error;
 		Visualizer::noCache();

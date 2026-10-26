@@ -464,6 +464,7 @@ class ReadHandler extends Handler
 			Auth::confirm();
 
 		if (
+			!$isAdmin &&
 			Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false)) === false &&
 			Util::hashEquals($comment->hash ?? "", $login) === false
 		)

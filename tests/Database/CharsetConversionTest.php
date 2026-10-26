@@ -238,6 +238,30 @@ final class CharsetConversionTest extends TestCase
         self::assertSame([], $this->notices());
     }
 
+    // PHP deletes idle sessions (24 minutes by default); the administrator
+    // stays logged in, and a page opened before still submits its token.
+    public function testAdminLoginOutlivesTheSession(): void
+    {
+        $admin = new Browser(self::SERVICE);
+        $form = $admin->request('GET', 'login');
+        $login = $admin->request('POST', 'login', ['password' => self::ADMIN, 'token' => $this->formToken($form['body'])]);
+        self::assertSame(302, $login['status'], $login['body']);
+        $token = $this->formToken($admin->request('GET', 'util/reindex')['body']);
+
+        $session = '/^MEGALOPOLIS_(?!ADMIN_)/';
+        $admin->forget($session);
+        self::assertStringContainsString('ログアウト', $admin->request('GET', '')['body']);
+        $admin->forget($session);
+        $job = $admin->request('POST', 'util/reindex.json', ['p' => 'end', 'token' => $token]);
+        self::assertSame(200, $job['status'], $job['body']);
+        $forged = $admin->request('POST', 'util/reindex.json', ['p' => 'end', 'token' => str_repeat('0', 40)]);
+        self::assertSame(403, $forged['status'], $forged['body']);
+
+        self::assertSame(302, $admin->request('GET', 'logout')['status']);
+        self::assertStringNotContainsString('ログアウト', $admin->request('GET', '')['body']);
+        self::assertSame(401, $admin->request('POST', 'util/reindex.json', ['p' => 'end', 'token' => $token])['status']);
+    }
+
     private function browser(): Browser
     {
         if (self::$browser === null) {
