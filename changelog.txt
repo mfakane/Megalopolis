@@ -1,4 +1,22 @@
-﻿2026-10-26 COAH96KoxU <queue glasscore.net>
+﻿2026-10-27 COAH96KoxU <queue glasscore.net>
+
+	* req/Core/App.php: release 50
+	* req/Core/Auth.php,
+	  req/Handler/Index.php: 管理者のログインをセッションとは別の署名したクッキーで覚えるように
+	  - 接続元のアドレスが変わるたびや、セッションが消えたときにログアウトされるのを修正
+	  - ログインはブラウザを閉じるまで有効 (操作しなければ 1 日で失効) です
+	  - 管理者パスワードをセッションに保存しないように
+	  - 更新後は一度ログインし直す必要があります
+	* config.php,
+	  req/Core/Configuration.php: ブラウザを閉じてもログインを保つ日数 $config->adminLoginDays を追加
+	* req/Model/Board.php,
+	  req/Handler/Index.php: 全作品数を検索インデックスではなく作品から数えるように
+	  検索インデックスが不完全なときに件数がずれる、更新しても表示が変わらないのを修正
+	* req/Model/CharsetConversion.php: utf8mb4 への変換で大きな作品が多いとメモリが足りずに止まるのを修正
+	* script/base.js,
+	  script/Util/*.js: 検索インデックスの再生成や変換が失敗したとき、「不明なエラー」ではなく原因を表示するように
+
+2026-10-26 COAH96KoxU <queue glasscore.net>
 
 	* req/Core/App.php: release 49
 	* req/Model/Migration.php,
