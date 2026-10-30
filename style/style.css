@@ -2069,7 +2069,7 @@ body>header form input[type="submit"] {
 
 .read #body.vertical #verticalWrapper {
 	writing-mode: vertical-rl;
-	text-orientation: upright-right;
+	text-orientation: mixed;
 	letter-spacing: 1px;
 	line-height: 130%;
 	height: 100%;
