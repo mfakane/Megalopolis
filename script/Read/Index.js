@@ -583,8 +583,15 @@ $(function()
 						if (!working)
 						{
 							working = true;
-							i.click($(this));
-							working = false;
+							
+							try
+							{
+								i.click($(this));
+							}
+							finally
+							{
+								working = false;
+							}
 						}
 						
 						return false;
