@@ -553,11 +553,15 @@ $(function()
 					separator: true,
 					click: function(sender)
 					{
-						var rt = megalopolis.mainCookie("Vertical", vertical.isVertical ? "no" : "yes");
+						var setVertical = !vertical.isVertical;
 						
-						toggleVertical();
+						// 方向が指定された作品では、全作品共通の設定を書き換えない
+						if (writingMode == 0)
+							megalopolis.mainCookie("Vertical", setVertical ? "yes" : "no");
 						
-						$("img", sender).attr("src", basePath + (rt == "yes" ? "horizontalIcon.png" : "verticalIcon.png"));
+						toggleVertical(false, setVertical);
+						
+						$("img", sender).attr("src", basePath + (setVertical ? "horizontalIcon.png" : "verticalIcon.png"));
 					}
 				}
 			], function(i)
