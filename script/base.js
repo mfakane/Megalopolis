@@ -70,7 +70,7 @@ var megalopolis =
 		else
 		{
 			var href = $("link[rel='home']").attr("href");
-			var path = href.substr(href.indexOf("/", 7)).replace(/\/$/, "");
+			var path = href.replace(/^[a-z][a-z0-9+.-]*:\/\/[^\/]*/i, "").replace(/\/$/, "");
 			
 			if (value === null)
 				document.cookie = name + "=; expires=" + new Date(1970, 1, 1).toUTCString() + "; path=" + path;
