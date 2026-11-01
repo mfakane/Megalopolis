@@ -355,6 +355,11 @@ class SQLiteDataStore extends DataStore
 		$this->directory = $directory;
 	}
 
+	function getDirectory(): string
+	{
+		return $this->directory;
+	}
+
 	#[\Override]
 	function open(string $database = "data"): PDO
 	{

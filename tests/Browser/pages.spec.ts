@@ -54,6 +54,10 @@ function isSameOrigin(url: string): boolean {
 	return new URL(url).origin === new URL(process.env.BASE_URL ?? "http://127.0.0.1:8080").origin;
 }
 
+function isStoreProbe(url: string): boolean {
+	return isSameOrigin(url) && new URL(url).pathname.includes("/store/");
+}
+
 function attachDiagnostics(page: Page): Diagnostics {
 	const diagnostics: Diagnostics = {
 		pageErrors: [],
@@ -69,6 +73,8 @@ function attachDiagnostics(page: Page): Diagnostics {
 	});
 	page.on("response", (response) => {
 		const resourceType = response.request().resourceType();
+		// 管理用ツールは store/ 以下が開けないことを確かめるために、拒否されるはずのファイルを取得する
+		if (isStoreProbe(response.url())) return;
 		if (response.status() >= 400 && isSameOrigin(response.url()))
 			diagnostics.failedResources.push(`${response.url()}: HTTP ${response.status()}`);
 	});
@@ -198,6 +204,28 @@ test("設定情報とnoticeを表示する", async ({ page }) => {
 	await expect(page.getByRole("heading", { name: "使い方" })).toBeVisible();
 	await expect(page.getByRole("heading", { name: "検索" })).toBeVisible();
 
+	assertNoDiagnostics(diagnostics);
+});
+
+test("管理用ツールで store/ 以下が Web から開けるときだけ警告する", async ({ page }) => {
+	const diagnostics = attachDiagnostics(page);
+
+	await ensureAdmin(page);
+	await page.goto(route("util"), { waitUntil: "networkidle" });
+	const warnings = page.locator("#exposureWarnings");
+
+	if (linkMode === "rewrite") {
+		// Apache では付属の .htaccess で拒否される
+		await expect(warnings).toBeHidden();
+		await expect(warnings.locator("li")).toHaveCount(0);
+	} else {
+		// PHP の組み込みサーバは store/ 以下のファイルもそのまま返す
+		await expect(warnings).toBeVisible();
+		await expect(warnings).toContainText("store/ 以下のファイルが Web から開けます");
+		await expect(warnings).toContainText("store/data.sqlite");
+	}
+
+	await logout(page);
 	assertNoDiagnostics(diagnostics);
 });
 
@@ -345,7 +373,8 @@ test("管理者が検索インデックスを再生成すると、トークン�
 
 	// The regenerated index is in the current format and covers every work.
 	await page.goto(route("util"));
-	await expect(page.locator("ul.notify")).toHaveCount(0);
+	// 移行処理の案内が出ていないこと (store/ が開けるときの警告は別に確かめる)
+	await expect(page.locator("ul.notify:not(#exposureWarnings)")).toHaveCount(0);
 	const search = new URL(route("search"), baseUrl);
 	search.searchParams.set("title", work.title);
 	await page.goto(search.toString());

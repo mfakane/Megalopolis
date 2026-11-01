@@ -77,6 +77,9 @@
 	  - mod_rewrite が使える場合は、store/.htaccess が無くても store/ 以下を拒否します
 	  更新の際は store/.htaccess を置き、.htaccess を書き換えてください
 	* readme.txt: nginx など .htaccess を使用しないサーバで store/ 以下を拒否する設定例を追加
+	* req/Visualizer/Util/Index.php,
+	  script/Util/Index.js: 管理用ツールのページで、store/ 以下やデータベースのファイルが Web から開ける場合に警告を表示するように
+	  管理者のブラウザから実際に取得できるかを確かめるため、サーバの種類や設定によらず確認できます
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 
