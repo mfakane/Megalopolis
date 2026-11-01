@@ -21,8 +21,10 @@ Visualizer::doctype();
 		</section>
 		<?php if ($d): ?>
 			<p class="notify info">
-				<?=Visualizer::escapeOutput($d["hash"]) ?>
+				以下の行で config.php の $config->adminHash の行を置き換えてください。
+				ハッシュには $ が含まれるため、" ではなく ' で囲む必要があります
 			</p>
+			<pre><code>$config->adminHash = '<?=Visualizer::escapeOutput($d["hash"]) ?>';</code></pre>
 		<?php endif ?>
 	</form>
 	<?php Visualizer::footer() ?>

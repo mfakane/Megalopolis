@@ -12,7 +12,8 @@ class Util
 	const string HASH_TYPE_ANTHOLOGYS = "Anthologys";
 	const string HASH_TYPE_MEGALITH = "Megalith";
 	const string HASH_TYPE_MEGALOPOLIS1 = "Megalopolis1";
-	const string HASH_TYPE_LATEST = self::HASH_TYPE_MEGALOPOLIS1;
+	const string HASH_TYPE_MEGALOPOLIS2 = "Megalopolis2";
+	const string HASH_TYPE_LATEST = self::HASH_TYPE_MEGALOPOLIS2;
 	const string PATH_INFO_QUERY_PARAM = "path";
 	const string INDEX_FILE_NAME = "index.php";
 
@@ -380,9 +381,16 @@ class Util
 		Configuration::$instance->dataStore?->bindValues($st, $obj, $schema);
 	}
 
-	static function hash(string $raw, int $version = 1, ?string $salt = null, ?int $stretch = null): string
+	/**
+	 * パスワードのハッシュを作る
+	 * version 2 は password_hash() による形式 ($2y$... など)。
+	 * version 1 は以前の形式で、保存済みのハッシュを確かめるためだけに使う
+	 */
+	static function hash(string $raw, int $version = 2, ?string $salt = null, ?int $stretch = null): string
 	{
 		switch ($version) {
+			case 2:
+				return password_hash($raw, PASSWORD_DEFAULT);
 			case 1:
 				if (!isset($salt))
 					$salt = mb_substr(hash(self::HASH_ALGORITHM, (string)mt_rand()), 4, 16);
@@ -413,17 +421,28 @@ class Util
 			// ハッシュの無い (パスワードの無い) データには、どのパスワードも一致しない
 			if ($hash === "")
 				return false;
-			else if (self::isLength($hash, 13) && crypt($raw, mb_substr($hash, 0, 2)) == $hash)
+			// 以前の形式のハッシュ (DES crypt、SHA-1、数字で始まる形式) は $ で始まらない
+			else if (str_starts_with($hash, '$'))
+				return password_verify($raw, $hash) ? self::HASH_TYPE_MEGALOPOLIS2 : false;
+			else if (self::isLength($hash, 13) && hash_equals($hash, crypt($raw, mb_substr($hash, 0, 2))))
 				return self::HASH_TYPE_ANTHOLOGYS;
-			else if (self::isLength($hash, 40) == 40 && sha1($raw) == $hash)
+			else if (self::isLength($hash, 40) && hash_equals($hash, sha1($raw)))
 				return self::HASH_TYPE_MEGALITH;
-			else if (mb_substr($hash, 0, 1) == 1 && self::hash($raw, 1, mb_substr($hash, -16), intval(mb_substr($hash, 1, 4))) == $hash)
+			else if (mb_substr($hash, 0, 1) == "1" && hash_equals($hash, self::hash($raw, 1, mb_substr($hash, -16), intval(mb_substr($hash, 1, 4)))))
 				return self::HASH_TYPE_MEGALOPOLIS1;
 			else
 				return false;
 		} catch (\Throwable) {
 			return false;
 		}
+	}
+
+	/**
+	 * 保存されているハッシュを現在の形式で作り直したほうがよいか
+	 */
+	static function hashNeedsRehash(string $hash): bool
+	{
+		return !str_starts_with($hash, '$') || password_needs_rehash($hash, PASSWORD_DEFAULT);
 	}
 
 	static function escapeInput(string $input, bool $stripLinebreaks = false): string

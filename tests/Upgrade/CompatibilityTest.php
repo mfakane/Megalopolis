@@ -69,7 +69,7 @@ final class CompatibilityTest extends UpgradeTestCase
         $this->assertRecent($after['entry']['lastUpdate'], $begin);
         self::assertNotEmpty($after['entry']['host']);
         self::assertNotSame($before['entry']['host'], $after['entry']['host']);
-        self::assertSame(Util::HASH_TYPE_MEGALOPOLIS1, Util::hashEquals($after['hash'], 'new-edit-key'));
+        self::assertSame(Util::HASH_TYPE_LATEST, Util::hashEquals($after['hash'], 'new-edit-key'));
         self::assertFalse(Util::hashEquals($after['hash'], '旧キー-2'));
         $expected = $before;
         $expected['entry']['title'] = $fields['title'];
@@ -145,7 +145,7 @@ final class CompatibilityTest extends UpgradeTestCase
         self::assertSame($fields['body'], $comment['body']);
         self::assertSame($fields['name'], $comment['name']);
         self::assertSame($fields['mail'], $comment['mail']);
-        self::assertSame(Util::HASH_TYPE_MEGALOPOLIS1, Util::hashEquals($comment['hash'], 'new-comment-key'));
+        self::assertSame(Util::HASH_TYPE_LATEST, Util::hashEquals($comment['hash'], 'new-comment-key'));
         self::assertSame(['id' => $comment['id'], 'entryID' => 1200000004, 'point' => 30,
             'host' => $comment['host'], 'dateTime' => $comment['dateTime']], $after['evaluations'][1]);
         $this->response($browser, 'POST', '1/1200000004/uncomment.json', ['id' => $comment['id'], 'password' => 'new-comment-key']);
@@ -165,7 +165,10 @@ final class CompatibilityTest extends UpgradeTestCase
         $this->response($browser, 'POST', '1/1200000005/post.json', ['password' => 'legacy5',
             'title' => $before['entry']['title'], 'link' => 'http://example.invalid/old/5'], 302);
         $authenticated = $this->work($driver, 5);
-        self::assertSame($before['hash'], $authenticated['hash']);
+        // Authenticating with the old key re-saves it in the current format.
+        self::assertNotSame($before['hash'], $authenticated['hash']);
+        self::assertSame(Util::HASH_TYPE_LATEST, Util::hashEquals($authenticated['hash'], 'legacy5'));
+        self::assertFalse(Util::hashEquals($authenticated['hash'], 'wrong'));
         self::assertSame($before['comments'], $authenticated['comments']);
         self::assertSame($before['evaluations'], $authenticated['evaluations']);
         $this->response($browser, 'POST', '1/1200000005/unevaluate.json', ['id' => 1200002005], 403);
@@ -210,7 +213,7 @@ final class CompatibilityTest extends UpgradeTestCase
         self::assertSame(['新分類', 'createdtag'], $work['entry']['tags']);
         self::assertSame($fields['body'], $work['body']);
         self::assertSame(false, $work['convertLineBreak']);
-        self::assertSame(Util::HASH_TYPE_MEGALOPOLIS1, Util::hashEquals($work['hash'], 'created-key'));
+        self::assertSame(Util::HASH_TYPE_LATEST, Util::hashEquals($work['hash'], 'created-key'));
         $this->assertCounts($work, 0, 0, 0, 0);
         self::assertSame([$id], $this->search($browser, ['query' => 'upgradecreatedbody']));
         self::assertSame([$id], $this->search($browser, ['tag' => 'createdtag']));

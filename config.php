@@ -14,7 +14,7 @@ $config->title = "Megalopolis";
 // 管理者パスワード (ハッシュ)
 // テストモードの「管理者パスワード用ハッシュ算出」を使用して得た任意のパスワードのハッシュを指定します。
 // 既定のパスワードは passwd になっています。必ず変更することを推奨します。
-$config->adminHash = "109823e01afb58706d9c0e40062a505c00d814235a9900ae2f16c3e5f90d07d8895196ac33a87ac6a43ffd56ff6338378b626dd01df4e53102db7";
+$config->adminHash = '$2y$12$gnugd.wrLJLMFUsz2ZV8Y.JRrpPP.i790eay8JNQ9mpCKFSVfM5/2';
 // 推奨されませんが、ハッシュではなく以下のように平文でパスワードを設定することも可能です。
 // $config->adminHash = Util::hash("passwd");
 

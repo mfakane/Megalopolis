@@ -176,8 +176,8 @@ class ReadHandler extends Handler
 
 		if (
 			!Auth::hasSession(true) &&
-			($type = Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false))) === false &&
-			($type = Util::hashEquals($thread->hash ?? "", $login)) === false
+			Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false)) === false &&
+			Util::hashEquals($thread->hash ?? "", $login) === false
 		)
 			Auth::loginError("編集キーが一致しません");
 
@@ -200,9 +200,6 @@ class ReadHandler extends Handler
 		) {
 			return Visualizer::visualize("Read/Index");
 		}
-
-		if (isset($type) && $type != Util::HASH_TYPE_LATEST)
-			Visualizer::$data[] = "サーバに保存されている編集キーの形式が古いため、編集キーを再度入力するか変更することを推奨します。";
 
 		Auth::createToken();
 
@@ -237,8 +234,8 @@ class ReadHandler extends Handler
 
 					if (
 						!Auth::hasSession(true) &&
-						($type = Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false))) === false &&
-						($type = Util::hashEquals($this->thread->hash ?? "", $login)) === false
+						Util::hashEquals(Configuration::$instance->adminHash ?? "", $login = Auth::login(false, false)) === false &&
+						($threadLogin = Util::hashEquals($this->thread->hash ?? "", $login)) === false
 					)
 						Auth::loginError("編集キーが一致しません");
 				}
@@ -248,6 +245,9 @@ class ReadHandler extends Handler
 				$editPassword = self::param("editPassword", "");
 				if ($id == 0 || $editPassword != "")
 					$this->thread->hash = Util::hash($editPassword);
+				// 作品の編集キーで認証できた場合、古い形式で保存されている編集キーを現在の形式で保存し直す
+				else if (isset($threadLogin, $login) && $threadLogin !== false && $login !== false && Util::hashNeedsRehash($this->thread->hash ?? ""))
+					$this->thread->hash = Util::hash($login);
 
 				$errors = self::checkValues($this->entry, $this->thread, $id != 0);
 

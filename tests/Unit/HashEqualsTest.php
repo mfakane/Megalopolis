@@ -29,4 +29,38 @@ final class HashEqualsTest extends TestCase
         self::assertFalse(Util::hashEquals('', '0'));
         self::assertFalse(Util::hashEquals('', 'anything'));
     }
+
+    public function testNewHashesUsePasswordHash(): void
+    {
+        $hash = Util::hash('key');
+
+        self::assertStringStartsWith('$', $hash);
+        self::assertTrue(password_verify('key', $hash));
+        self::assertSame(Util::HASH_TYPE_MEGALOPOLIS2, Util::hashEquals($hash, 'key'));
+        self::assertSame(Util::HASH_TYPE_LATEST, Util::hashEquals($hash, 'key'));
+        self::assertFalse(Util::hashEquals($hash, 'other'));
+        self::assertFalse(Util::hashNeedsRehash($hash));
+    }
+
+    public function testLegacyHashesStillVerifyAndNeedRehash(): void
+    {
+        $legacy = array(
+            Util::HASH_TYPE_MEGALOPOLIS1 => Util::hash('key', 1),
+            Util::HASH_TYPE_MEGALITH => sha1('key'),
+            Util::HASH_TYPE_ANTHOLOGYS => crypt('key', 'ab'),
+        );
+
+        foreach ($legacy as $type => $hash) {
+            self::assertSame($type, Util::hashEquals($hash, 'key'), $type);
+            self::assertFalse(Util::hashEquals($hash, 'other'), $type);
+            self::assertTrue(Util::hashNeedsRehash($hash), $type);
+        }
+    }
+
+    public function testMegalithHashIsNotComparedLoosely(): void
+    {
+        // sha1("aaroZmOk") is a "magic hash" (0e followed by digits); loose comparison would match any other 0e hash.
+        self::assertTrue('0e00000000000000000000000000000000000000' == sha1('aaroZmOk'));
+        self::assertFalse(Util::hashEquals('0e00000000000000000000000000000000000000', 'aaroZmOk'));
+    }
 }
