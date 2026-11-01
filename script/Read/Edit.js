@@ -23,7 +23,13 @@ $(function()
 		
 		$("#body").css(cssProperty, value == "" ? defaultValue : cssProperty == "backgroundImage" ? "url('" + value + "')" : value);
 		// ダークモードでも作者の指定した配色で見えるよう、色を指定したときは明るい配色にする (style.css)
-		$("#body").toggleClass("authorColors", $.grep(["#foreground", "#background", "#backgroundImage"], function(i) { return $(i).val() != ""; }).length > 0);
+		// 色の入力欄は空にできず #000000 になるため、サーバと同じく #000000 は指定なしとみなす
+		$("#body").toggleClass("authorColors", $.grep(["#foreground", "#background", "#backgroundImage"], function(i)
+		{
+			var v = $(i).val() || "";
+
+			return v != "" && v.toLowerCase() != "#000000";
+		}).length > 0);
 	};
 	var createPalette = function(selector, func, cssProperty)
 	{

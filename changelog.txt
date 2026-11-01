@@ -111,6 +111,7 @@
 	  script/Read/Index.js: jQuery 3 で削除された $.browser、andSelf() などを使わないように
 	* script/mobile/*: 使われていない携帯電話向けのスクリプトを削除
 	* THIRD_PARTY_LICENSES.txt: jQuery のライセンスを追加
+	* script/Read/Edit.js: ダークモードの編集画面で、文字色や背景色を「指定なし」に戻しても本文欄が明るい配色のままになるのを修正
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 
