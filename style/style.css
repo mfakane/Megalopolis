@@ -1349,7 +1349,7 @@ body.index>h1, body.read>h1
 	border-radius: 0px 0px 4px 4px;
 	height: 16px;
 	color: #000000;
-	background: transparent url("infoBackground.png") repeat-x scroll right bottom;
+	background: transparent linear-gradient(#d5d5d5 8.5px, #bbbbbb 31.5px) no-repeat scroll right bottom / 100% 32px;
 	line-height: 14px;
 }
 
@@ -1898,7 +1898,7 @@ body.index>h1, body.read>h1
 	border-radius: 0px 0px 4px 4px;
 	color: #000000;
 	height: 30px;
-	background: transparent url("infoBackground.png") repeat-x scroll right bottom;
+	background: transparent linear-gradient(#d5d5d5 8.5px, #bbbbbb 31.5px) no-repeat scroll right bottom / 100% 32px;
 }
 
 .index .subjectPager .pager
