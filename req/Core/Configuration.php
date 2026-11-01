@@ -319,6 +319,7 @@ class Configuration
 	public int $tagListing = 100;
 	public int $maxHistory = 30;
 	public ?string $head = null;
+	public ?string $ogImage = null;
 	public ?string $notes = null;
 	public bool $showFooterVersion = true;
 	/** @var string[] */

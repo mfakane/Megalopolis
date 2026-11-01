@@ -22,6 +22,7 @@ Visualizer::doctype();
 	<?php Visualizer::head() ?>
 	<?php // スマートフォン向けのスタイルに対応したページから順に viewport を指定する ?>
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<?php Visualizer::openGraph("website", "{$title} - {$c->title}", App::$actionName == "index" ? Visualizer::absoluteHrefArray(array($h->subject)) : Visualizer::absoluteHrefArray(Visualizer::nameHrefArgs(App::$actionName, $d))) ?>
 	<?php if (App::$actionName == "index"): ?>
 		<link href="<?=Visualizer::escapeOutput(Visualizer::actionHrefArray(array(0))) ?>.rss" rel="alternate" type="application/rss+xml" title="<?=Visualizer::escapeOutput($c->title) ?> 最新作品集 RSS 2.0" />
 		<link href="<?=Visualizer::escapeOutput(Visualizer::actionHrefArray(array(0))) ?>.atom" rel="alternate" type="application/atom+xml" title="<?=Visualizer::escapeOutput($c->title) ?> 最新作品集 Atom" />

@@ -30,6 +30,13 @@
 	* style/*.png,
 	  style/alt/background.png: ボタン、ヘッダ、状態表示などの背景画像を CSS のグラデーションに置き換えて削除
 	  (background.png, buttonBackground.png, buttonGradation.png, defaultColorIcon.png, infoBackground.png)
+	* req/Core/Visualizer.php,
+	  req/Visualizer/Index/Index.php,
+	  req/Visualizer/Read/Index.php: 作品と作品一覧に OGP と Twitter Card のメタタグを出力するように
+	  作品では作品名と概要を、一覧ではページのタイトルを使用します
+	* config.php,
+	  req/Core/Configuration.php: OGP と Twitter Card の画像を指定する $config->ogImage を追加
+	  既定では画像を指定しません。指定すると Twitter Card は大きな画像の形式になります
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 

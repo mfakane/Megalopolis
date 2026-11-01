@@ -353,6 +353,12 @@ $config->head = trim
 ('
 ');
 
+// OGP および Twitter Card で共有時に表示する画像 (文字列)
+// 設置先からの相対パス (例: "style/ogp.png") または http:// か https:// で始まる URL を指定します。
+// 画像を指定すると Twitter Card は大きな画像の形式 (summary_large_image) になります。
+// null または空欄の場合は画像を指定しません
+$config->ogImage = null;
+
 // 作品一覧表示時に作品集一覧の上に表示されるお知らせ (HTML)
 $config->notes = trim
 ('

@@ -376,6 +376,36 @@ class Visualizer
 		<script src="https://platform.twitter.com/widgets.js"></script>
 		<?php
 	}
+
+	/**
+	 * OGP と Twitter Card のメタタグを出力する
+	 */
+	static function openGraph(string $type, string $title, string $url, ?string $description = null): void
+	{
+		$c = Configuration::$instance;
+		$image = Util::isEmpty($c->ogImage) ? null : (string)$c->ogImage;
+
+		// 相対パスは設置先からのパスとして絶対 URL にする
+		if ($image !== null && !preg_match('/^https?:\/\//i', $image))
+			$image = Util::getAbsoluteUrl(ltrim($image, "/"));
+
+		$description = Util::isEmpty($description) ? null : mb_strimwidth(trim((string)preg_replace('/\s+/u', " ", (string)$description)), 0, 200, "…", "UTF-8");
+
+		?>
+		<meta property="og:site_name" content="<?php self::converted($c->title) ?>" />
+		<meta property="og:type" content="<?php self::converted($type) ?>" />
+		<meta property="og:title" content="<?php self::converted($title) ?>" />
+		<meta property="og:url" content="<?php self::converted($url) ?>" />
+		<meta property="og:locale" content="ja_JP" />
+		<?php if ($description !== null): ?>
+			<meta property="og:description" content="<?php self::converted($description) ?>" />
+		<?php endif ?>
+		<?php if ($image !== null): ?>
+			<meta property="og:image" content="<?php self::converted($image) ?>" />
+		<?php endif ?>
+		<meta name="twitter:card" content="<?=$image !== null ? "summary_large_image" : "summary" ?>" />
+		<?php
+	}
 	
 	/**
 	 * @param (null|string|array<string, ?string>)[] $arr

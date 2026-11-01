@@ -30,6 +30,7 @@ Visualizer::doctype();
 		<meta name="keywords" content="<?=Visualizer::escapeOutput(implode(",", $h->entry->tags)) ?>" />
 	<?php endif ?>
 	<?php if (App::$actionName == "index"): ?>
+		<?php Visualizer::openGraph("article", $h->entry->title ?? "", Visualizer::absoluteHref($h->subject, $h->entry->id), $c->useSummary && $c->showSummary[Configuration::ON_ENTRY] ? $h->entry->summary : null) ?>
 		<link rel="contents" href="<?=Visualizer::escapeOutput(Visualizer::actionHref($h->subject)) ?>" />
 		<?php if (isset($h->page) && $h->entry->pageCount > 1): ?>
 			<?php if ($h->page > 1): ?>
