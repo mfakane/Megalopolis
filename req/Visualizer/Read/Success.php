@@ -25,10 +25,12 @@ switch (App::$actionName)
 <html lang="ja">
 <head>
 	<?php Visualizer::head() ?>
+	<?php // スマートフォン向けのスタイルに対応したページから順に viewport を指定する ?>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="robots" content="noindex,nofollow,noarchive" />
 	<title><?=Visualizer::escapeOutput($c->title) ?></title>
 </head>
-<body>
+<body class="responsive">
 	<?php Visualizer::header("完了") ?>
 	<section class="success">
 		<p>

@@ -1,7 +1,17 @@
 $(function()
 {
 	var section = $(".edit section+section");
-	var textAreas = $("textarea, input[type='text']", section).width(section.width() - 6);
+	var textAreas = $("textarea, input[type='text']", section);
+	var resize = function()
+	{
+		// 幅の狭い画面では CSS で幅を決める
+		if (window.matchMedia && window.matchMedia("(max-width: 600px)").matches)
+			textAreas.css("width", "");
+		else
+			textAreas.width(section.width() - 6);
+	};
+
+	resize();
 	var setBodyBoxStyle = function(boxName, cssProperty, value, defaultValue)
 	{
 		var t = $("#" + boxName);
@@ -57,10 +67,7 @@ $(function()
 	createPalette("#backgroundImage", function(value) { setBodyBoxStyle("backgroundImage", "backgroundImage", value, "none"); }, "backgroundImage");
 	createPalette("#border", function(value) { setBodyBoxStyle("border", "borderColor", value, "#999999"); }, "backgroundColor");
 	
-	$(window).resize(function()
-	{
-		textAreas.width(section.width() - 6);
-	});
+	$(window).resize(resize);
 	$("#unpostCheck").change(function()
 	{
 		$("#unpostSubmit").attr("disabled", !$(this).is(":checked"));

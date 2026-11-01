@@ -2413,6 +2413,12 @@ select {
 		font-size: inherit;
 	}
 	
+	.read .notify ul.buttons button
+	{
+		height: 36px;
+		font-size: inherit;
+	}
+	
 	.read #evaluateform>div
 	{
 		float: none;
@@ -2823,5 +2829,72 @@ select {
 	{
 		margin-left: 0px;
 		margin-right: 0px;
+	}
+	
+	.edit section,
+	.edit section:first-child,
+	.edit section+section
+	{
+		float: none;
+		margin: 0px 0px 8px 0px;
+		padding: 8px 12px 0px 12px;
+		width: auto;
+		border-left: none;
+		border-right: none;
+		border-radius: 0px;
+	}
+	
+	.edit section label[for],
+	.edit section+section label[for],
+	.edit section h2
+	{
+		float: none;
+		display: block;
+		margin: 0px 0px 4px 0px;
+	}
+	
+	.edit section .notice
+	{
+		margin-left: 0px;
+	}
+	
+	.edit section input[type="text"],
+	.edit section input[type="email"],
+	.edit section input[type="url"],
+	.edit section input[type="password"],
+	.edit section input[type="color"],
+	.edit section+section input[type="text"],
+	.edit textarea
+	{
+		padding: 4px;
+		width: 100%;
+		box-sizing: border-box;
+	}
+	
+	.edit section input[type="text"],
+	.edit section input[type="email"],
+	.edit section input[type="url"],
+	.edit section input[type="password"],
+	.edit section input[type="color"],
+	.edit section+section input[type="text"]
+	{
+		height: 36px;
+	}
+	
+	.edit textarea[name="body"]
+	{
+		min-height: 320px;
+	}
+	
+	.edit section ul.palette li
+	{
+		width: 32px;
+		height: 32px;
+	}
+	
+	.edit section ul.buttons button
+	{
+		height: 36px;
+		font-size: inherit;
 	}
 }

@@ -12,6 +12,8 @@ Visualizer::doctype();
 <html lang="ja">
 <head>
 	<?php Visualizer::head() ?>
+	<?php // スマートフォン向けのスタイルに対応したページから順に viewport を指定する ?>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>
 		<?=Visualizer::escapeOutput($title) ?>
 		-
@@ -21,7 +23,7 @@ Visualizer::doctype();
 		<script src="<?=Visualizer::escapeOutput(Visualizer::actionHref("script", "Read", "Edit.js")) ?>"></script>
 	<?php endif ?>
 </head>
-<body class="edit">
+<body class="edit responsive">
 	<?php Visualizer::header($title, App::$actionName == "new"
 		? array()
 		: array
