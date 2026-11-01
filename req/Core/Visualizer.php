@@ -22,6 +22,15 @@ class Visualizer
 		));
 	}
 	
+	static function isSmartphone(): bool
+	{
+		return in_array(Util::getBrowserType(), array
+		(
+			Util::BROWSER_TYPE_IPHONE,
+			Util::BROWSER_TYPE_ANDROIDMOBILE,
+		));
+	}
+
 	static function doctype(): void
 	{
 		echo "<!DOCTYPE html>\r\n";
@@ -169,6 +178,11 @@ class Visualizer
 				<?php if (Auth::hasSession(true)): ?>
 					<li>
 						<a href="<?php self::converted(self::actionHref("util")) ?>">管理用ツール</a>
+					</li>
+				<?php endif ?>
+				<?php if (self::isSmartphone()): ?>
+					<li>
+						<a href="<?php self::converted(self::actionHrefArray(array_merge(array_filter(explode("/", $pathInfo), "strlen"), array(array("visualizer" => "simple"))))) ?>">簡易表示</a>
 					</li>
 				<?php endif ?>
 				<li>
