@@ -956,7 +956,7 @@ h2
 	width: 128px;
 }
 
-form[action="unpost"] section
+#unpostForm section
 {
 	position: relative;
 	margin-top: -42px;
@@ -967,19 +967,19 @@ form[action="unpost"] section
 	height: 24px;
 }
 
-form[action="unpost"] section h2
+#unpostForm section h2
 {
 	padding-top: 1px;
 }
 
-form[action="unpost"] section .buttons
+#unpostForm section .buttons
 {
 	position: absolute;
 	right: 4px;
 	top: 4px;
 }
 
-form[action="unpost"] button, button.unpost
+#unpostForm button, button.unpost
 {
 	color: #ffffff;
 	background-color: #ff3300;
@@ -988,30 +988,30 @@ form[action="unpost"] button, button.unpost
 	box-shadow: 1px 1px 0px #ff6633 inset, -1px 1px 0px #ff6633 inset, -1px -1px 0px #ff6633 inset, 1px -1px 0px #ff6633 inset;
 }
 
-form[action="unpost"] button:hover, button.unpost:hover
+#unpostForm button:hover, button.unpost:hover
 {
 	background-color: #ff4422;
 	border-color: #cc3333;
 }
 
-form[action="unpost"] button:active, button.unpost:active
+#unpostForm button:active, button.unpost:active
 {
 	border-color: #880000;
 	box-shadow: 0px 0px 4px #aa0000;
 }
 
-form[action="unpost"] button img, button.unpost img
+#unpostForm button img, button.unpost img
 {
 	border-color: #ff6633;
 	background-color: #aa0000;
 }
 
-form[action="unpost"] button:hover img, button.unpost:hover img
+#unpostForm button:hover img, button.unpost:hover img
 {
 	background-color: #cc3333;
 }
 
-form[action="unpost"] button:active img, button.unpost:active img
+#unpostForm button:active img, button.unpost:active img
 {
 	background-color: #880000;
 }
@@ -2119,7 +2119,7 @@ button[disabled] {
 	box-shadow: 1px 1px 0px #ffffff inset, -1px 1px 0px #ffffff inset, -1px -1px 0px #ffffff inset, 1px -1px 0px #ffffff inset !important;
 }
 
-form[action="unpost"] button,
+#unpostForm button,
 button.unpost {
 	box-shadow: 1px 1px 0px #ff6633 inset, -1px 1px 0px #ff6633 inset, -1px -1px 0px #ff6633 inset, 1px -1px 0px #ff6633 inset;
 }
@@ -2893,6 +2893,27 @@ select {
 	}
 	
 	.edit section ul.buttons button
+	{
+		height: 36px;
+		font-size: inherit;
+	}
+	
+	#unpostForm section
+	{
+		margin-top: 0px;
+		padding-top: 8px;
+		padding-bottom: 8px;
+		width: auto;
+		height: auto;
+	}
+	
+	#unpostForm section .buttons
+	{
+		right: 12px;
+		top: 8px;
+	}
+	
+	#unpostForm button
 	{
 		height: 36px;
 		font-size: inherit;
