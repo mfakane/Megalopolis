@@ -44,8 +44,14 @@ class Cookie
 			(
 				self::COOKIE_NAME,
 				"<" . implode("<", array_map(fn($k, $v) => urlencode($k) . ">" . urlencode($v), array_keys(self::$data), array_values(self::$data))),
-				time() + 60 * 60 * 24 * 30,
-				dirname(Util::getPhpSelf())
+				array
+				(
+					"expires" => time() + 60 * 60 * 24 * 30,
+					"path" => dirname(Util::getPhpSelf()),
+					"secure" => Util::isHttps(),
+					// 閲覧履歴などをスクリプト (script/base.js) からも読み書きするため HttpOnly にはしない
+					"samesite" => "Lax",
+				)
 			);
 	}
 	

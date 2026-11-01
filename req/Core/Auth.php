@@ -51,6 +51,7 @@ class Auth
 				"cookie_httponly" => true,
 				"cookie_lifetime" => 0,
 				"cookie_samesite" => "lax",
+				"cookie_secure" => Util::isHttps(),
 				"use_strict_mode" => true,
 			])) {
 				self::logout();
@@ -394,7 +395,7 @@ class Auth
 		setcookie($name, $value, array(
 			"expires" => $expires,
 			"path" => "/",
-			"secure" => isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on",
+			"secure" => Util::isHttps(),
 			"httponly" => true,
 			"samesite" => "Lax"
 		));

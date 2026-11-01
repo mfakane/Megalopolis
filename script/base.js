@@ -113,7 +113,7 @@ var megalopolis =
 				var date = new Date();
 
 				date.setTime(date.getTime() + 60 * 60 * 24 * 30 * 1000);
-				document.cookie = name + "=" + encodeURIComponent(value) + "; expires="  + date.toUTCString() + "; path=" + path;
+				document.cookie = name + "=" + encodeURIComponent(value) + "; expires="  + date.toUTCString() + "; path=" + path + "; samesite=lax" + (location.protocol == "https:" ? "; secure" : "");
 			}
 
 			return value;

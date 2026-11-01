@@ -209,6 +209,16 @@ class Util
 		return array_reduce(array_map(fn(string $x): int => (int)filemtime($x), get_included_files()), fn(int $x, int $y): int => max($x, $y), 0);
 	}
 
+	/**
+	 * https で接続されているか
+	 */
+	static function isHttps(): bool
+	{
+		$https = $_SERVER["HTTPS"] ?? "";
+
+		return $https !== "" && strtolower($https) !== "off";
+	}
+
 	static function getAbsoluteUrl(string $path = ""): string
 	{
 		static $absoluteUrls = array();
@@ -239,7 +249,7 @@ class Util
 
 		$hostWithOrWithoutPort = $_SERVER["HTTP_HOST"] ?? $_SERVER["SERVER_NAME"] ?? "";
 		[$hostWithoutPort, $port] = explode(":", $hostWithOrWithoutPort . ":" . ($_SERVER["SERVER_PORT"] ?? "80"));
-		$scheme = isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on" ? "https" : "http";
+		$scheme = self::isHttps() ? "https" : "http";
 		$portAndColonIfNeeded = $port == ($scheme === "http" ? 80 : 443) ? "" : ":{$port}";
 
 		return $absoluteUrls[$path] = "{$scheme}://{$hostWithoutPort}{$portAndColonIfNeeded}{$script}{$pathAndQuery}";

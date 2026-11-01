@@ -47,7 +47,14 @@ class Visualizer
 			if (self::$mode == "auto")
 				self::$mode = self::autoVisualizerMode();
 			
-			setcookie(self::MODE_COOKIE_NAME, self::$mode, time() + 60 * 60 * 24 * 7, "/");
+			setcookie(self::MODE_COOKIE_NAME, self::$mode, array
+			(
+				"expires" => time() + 60 * 60 * 24 * 7,
+				"path" => "/",
+				"secure" => Util::isHttps(),
+				"httponly" => true,
+				"samesite" => "Lax",
+			));
 			
 			return self::$mode;
 		}

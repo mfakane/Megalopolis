@@ -44,6 +44,12 @@
 	* config.php,
 	  req/Core/Configuration.php: Content-Security-Policy を変更または無効にする $config->contentSecurityPolicy を追加
 	  head、notes、footers にアクセス解析などのスクリプトを追加している場合、更新後はこの設定でスクリプトを許可する必要があります
+	* req/Core/Cookie.php,
+	  req/Core/Visualizer.php,
+	  script/base.js: 名前や閲覧履歴、表示モードのクッキーに SameSite=Lax を付け、https では Secure を付けるように
+	  表示モードのクッキーはスクリプトから読まないため HttpOnly にしました
+	* req/Core/Auth.php: https ではセッションのクッキーに Secure を付けるように
+	* req/Core/Util.php: HTTPS が on 以外の値 (1 など) で渡されるサーバーでも https と判定するように
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 
