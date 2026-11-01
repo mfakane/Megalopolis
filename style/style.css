@@ -67,7 +67,8 @@ input[type="submit"], input[type="reset"], input[type="button"], button
 	border: #999999 1px solid;
 	border-radius: 4px;
 	height: 24px;
-	background: #fcfcfc url("buttonBackground.png") repeat-x scroll left bottom;
+	/* 下半分に、下へ向かって濃くなる影を付ける */
+	background: #fcfcfc linear-gradient(rgba(128, 128, 128, 0) 50%, rgba(128, 128, 128, 0.13) 50%, rgba(128, 128, 128, 0.48));
 	font: inherit;
 	font-size: 9pt;
 	text-shadow: 1px 1px 0px #ffffff;
@@ -77,24 +78,33 @@ input[type="submit"], input[type="reset"], input[type="button"], button
 	box-shadow: 1px 1px 0px #ffffff inset, -1px 1px 0px #ffffff inset, -1px -1px 0px #ffffff inset, 1px -1px 0px #ffffff inset;
 }
 
+button
+{
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* アイコンの領域は、ボタンの高さによらず内側の上端から下端まで伸ばす */
 button img
 {
-	position: relative;
-	left: -8px;
-	top: -2px;
-	margin: 0px;
-	padding: 3px 4px 3px 3px;
+	align-self: stretch;
+	margin: -2px 8px -2px -8px;
+	padding: 0px 4px 0px 3px;
 	border-right: #ffffff 1px solid;
+	border-radius: 3px 0px 0px 3px;
+	width: 16px;
+	height: auto;
 	background-color: #999999;
-	vertical-align: top;
+	object-fit: none;
 }
 
 button img.last
 {
-	left: auto;
-	right: -8px;
+	margin: -2px -8px -2px 8px;
 	border-right: none;
 	border-left: #ffffff 1px solid;
+	border-radius: 0px 3px 3px 0px;
 }
 
 input[type="submit"]:hover, input[type="reset"]:hover, input[type="button"]:hover, button:hover
@@ -1286,9 +1296,10 @@ ul.buttons li,
 	height: 100%;
 }
 
+/* 無指定の欄は、左下から右上への斜線で表す */
 .edit section ul.palette li:first-child a
 {
-	background-image: url("defaultColorIcon.png");
+	background-image: linear-gradient(to bottom right, transparent 44%, #999999 44%, #999999 56%, transparent 56%);
 }
 
 .index h1, .read h1
@@ -2295,6 +2306,12 @@ select {
 		border-left: none;
 		border-right: none;
 		border-radius: 0px;
+	}
+	
+	.responsive .admin button
+	{
+		height: 36px;
+		font-size: inherit;
 	}
 	
 	.responsive .pagerContainer
