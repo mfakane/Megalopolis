@@ -1,34 +1,48 @@
+/*
+ * 配色 (style.css の値のうち、アクセントの色とページの背景だけを置き換える)
+ */
+:root,
+.read #body.authorColors,
+.edit textarea#body.authorColors
+{
+	--page-background: #ffffff;
+	--accent-text: #480000;
+	--accent-border: #480000;
+	--accent-fill: #480000;
+	--accent-soft: #772200;
+}
+
 html
 {
-	background-image: linear-gradient(#480000 57px, rgba(72, 0, 0, 0.34) 57px, rgba(72, 0, 0, 0.34) 57.5px, rgba(72, 0, 0, 0) 63.5px);
-	background-color: #ffffff;
+	background-image: linear-gradient(var(--accent-fill) 57px, rgba(72, 0, 0, 0.34) 57px, rgba(72, 0, 0, 0.34) 57.5px, rgba(72, 0, 0, 0) 63.5px);
+	background-color: var(--page-background);
 }
 
 hr
 {
-	border-color: #480000;
+	border-color: var(--accent-border);
 }
 
 input[type="submit"]:hover, input[type="reset"]:hover, input[type="button"]:hover, button:hover
 {
-	border-color: #772200;
-	color: #480000;
+	border-color: var(--accent-soft);
+	color: var(--accent-text);
 }
 
 input[type="submit"]:active, input[type="reset"]:active, input[type="button"]:active, button:active
 {
-	border-color: #480000;
-	box-shadow: 0px 0px 4px #772200;
+	border-color: var(--accent-border);
+	box-shadow: 0px 0px 4px var(--accent-soft);
 }
 
 button:hover img
 {
-	background-color: #772200;
+	background-color: var(--accent-soft);
 }
 
 button:active img
 {
-	background-color: #480000;
+	background-color: var(--accent-fill);
 }
 
 body
@@ -38,7 +52,7 @@ body
 
 body>header
 {
-	background: #480000;
+	background: var(--accent-fill);
 }
 
 body>header nav
@@ -56,12 +70,12 @@ body>header form>div
 	margin: -5px -5px 0px -8px;
 	height: 32px;
 	border-radius: 0px 4px 4px 0px;
-	background: #ffffff;
+	background: var(--surface);
 }
 
 body>header>a:first-child
 {
-	color: #ffffff;
+	color: var(--on-accent);
 }
 
 body>header nav ul
@@ -71,181 +85,181 @@ body>header nav ul
 	padding: 8px;
 	padding-left: 0px;
 	border-radius: 4px 0px 0px 4px;
-	background-color: #ffffff;
+	background-color: var(--surface);
 }
 
 body>header nav ul li a img
 {
-	background-color: #480000;
+	background-color: var(--accent-fill);
 }
 
 body>footer>ul:first-child+a
 {
-	background-color: #ffffff;
+	background-color: var(--page-background);
 }
 
 div.entries article .articleBody
 {
-	border-color: #480000;
+	border-color: var(--accent-border);
 }
 
 .entries .update
 {
-	color: #480000;
+	color: var(--accent-text);
 }
 
 .entries table thead tr
 {
-	border-bottom-color: #480000;
+	border-bottom-color: var(--accent-border);
 }
 
 .entries table th
 {
-	color: #480000;
+	color: var(--accent-text);
 }
 
 .entries table tr.tags+tr,
 .entries table tr.notags+tr
 {
-	border-top: #480000 1px solid;
+	border-top: var(--accent-border) 1px solid;
 }
 
 .entries table tr.hover+tr
 {
-	border-top: #999999 1px solid;
+	border-top: var(--border) 1px solid;
 }
 
 section, .taglist, body>ul
 {
-	border-color: #480000;
+	border-color: var(--accent-border);
 }
 
 .taglist dt
 {
-	color: #480000;
+	color: var(--accent-text);
 }
 
 h1
 {
-	color: #480000;
+	color: var(--accent-text);
 	background-image: url("h1.png");
 }
 
 h2
 {
-	color: #480000;
+	color: var(--accent-text);
 }
 
 .edit label[for], .edit section h2, .auth label, #commentform label, .config dt, .search section label[for]
 {
-	color: #480000;
+	color: var(--accent-text);
 }
 
 #commentform, #evaluateform
 {
-	border-color: #480000;
+	border-color: var(--accent-border);
 }
 
 #evaluateform
 {
-	background: #ffffff;
+	background: var(--surface);
 }
 
 #commentformHeadding, #evaluateformHeadding
 {
-	border-color: #480000;
-	background: #480000;
+	border-color: var(--accent-border);
+	background: var(--accent-fill);
 }
 
 #commentformHeadding.inactive, #evaluateformHeadding.inactive
 {
-	border-bottom: #480000 1px solid;
+	border-bottom: var(--accent-border) 1px solid;
 }
 
 .search section ul.filter li
 {
-	border-bottom: #480000 1px solid;
+	border-bottom: var(--accent-border) 1px solid;
 }
 
 .read .status+.status
 {
-	border-color: #480000;
-	color: #ffffff;
-	background: #480000;
+	border-color: var(--accent-border);
+	color: var(--on-accent);
+	background: var(--accent-fill);
 }
 
 .read #body
 {
-	border-color: #efefef;
+	border-color: var(--surface-alt);
 }
 
 .read #comments
 {
-	border-color: #480000;
+	border-color: var(--accent-border);
 }
 
 .read #evaluateform>div label
 {
-	color: #480000;
+	color: var(--accent-text);
 }
 
 .pager li a[href="#"], .pager li a[href=""], .pager li button.loopback
 {
-	border-color: #480000;
-	background: #480000;
+	border-color: var(--accent-border);
+	background: var(--accent-fill);
 }
 
 .index .pagerContainer.subjectPager
 {
-	border-color: #480000;
-	color: #ffffff;
-	background: #480000;
+	border-color: var(--accent-border);
+	color: var(--on-accent);
+	background: var(--accent-fill);
 }
 
 .dropDown
 {
-	border-color: #480000;
+	border-color: var(--accent-border);
 }
 
 .dropDown.open
 {
-	background-color: #480000;
-	box-shadow: 0px 0px 4px #480000;
+	background-color: var(--accent-fill);
+	box-shadow: 0px 0px 4px var(--accent-fill);
 }
 
 .dropDown ul
 {
-	border-color: #480000;
-	color: #480000;
-	box-shadow: 0px 0px 4px #480000;
+	border-color: var(--accent-border);
+	color: var(--accent-text);
+	box-shadow: 0px 0px 4px var(--accent-fill);
 }
 
 .dropDown ul li:hover
 {
-	background-color: #480000;
+	background-color: var(--accent-fill);
 }
 
 .dropDown ul li.listType+.listVisibility,
 .dropDown ul li.listVisibility+.dateType
 {
-	border-color: #480000;
+	border-color: var(--accent-border);
 }
 
 .dropDown .button
 {
-	background-color: #480000;
+	background-color: var(--accent-fill);
 }
 
 .dropDown ul li.selected .button
 {
-	background-color: #480000;
+	background-color: var(--accent-fill);
 }
 
 @media (max-width: 600px)
 {
 	body.responsive>header:after
 	{
-		background-image: linear-gradient(#480000 1px, rgba(72, 0, 0, 0.34) 1px, rgba(72, 0, 0, 0.34) 1.5px, rgba(72, 0, 0, 0) 7.5px);
+		background-image: linear-gradient(var(--accent-fill) 1px, rgba(72, 0, 0, 0.34) 1px, rgba(72, 0, 0, 0.34) 1.5px, rgba(72, 0, 0, 0) 7.5px);
 	}
 
 	body.responsive>header form>div
@@ -261,12 +275,33 @@ h2
 		margin: 4px 0px 0px 0px;
 		padding: 0px 8px 0px 8px;
 		border-radius: 4px;
-		background-color: #ffffff;
+		background-color: var(--surface);
 	}
 	
 	.read .status+.status
 	{
-		color: #666666;
+		color: var(--text-muted);
 		background: none;
+	}
+}
+
+/*
+ * ダークモード
+ */
+@media (prefers-color-scheme: dark)
+{
+	:root
+	{
+		--page-background: #181414;
+		--accent-text: #f0a090;
+		--accent-border: #8a3a2c;
+		--accent-fill: #5a140c;
+		--accent-soft: #a8503a;
+	}
+
+	/* 文字の大きさや縦書きのアイコン (alt/*Icon.png) は暗い赤の画像のため、明るい赤に反転する */
+	.read ul.options li img
+	{
+		filter: invert(1) hue-rotate(180deg);
 	}
 }
