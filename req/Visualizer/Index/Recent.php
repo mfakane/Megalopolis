@@ -11,12 +11,14 @@ Visualizer::doctype();
 <html lang="ja">
 <head>
 	<?php Visualizer::head() ?>
+	<?php // スマートフォン向けのスタイルに対応したページから順に viewport を指定する ?>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>
 		履歴 - <?=Visualizer::escapeOutput($c->title) ?>
 	</title>
 	<script src="<?=Visualizer::escapeOutput(Visualizer::actionHrefArray(array("script", "Index", "Index.js"))) ?>"></script>
 </head>
-<body>
+<body class="recent responsive">
 	<?php Visualizer::header() ?>
 	<div class="entries compact">
 		<article>

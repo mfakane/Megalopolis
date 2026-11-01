@@ -243,14 +243,12 @@ h2
 
 @media (max-width: 600px)
 {
-	body.read>header:after,
-	body.index>header:after
+	body.responsive>header:after
 	{
 		background-image: url("background.png");
 	}
 
-	body.read>header form>div,
-	body.index>header form>div
+	body.responsive>header form>div
 	{
 		margin: 0px;
 		height: auto;
@@ -258,8 +256,7 @@ h2
 		background: none;
 	}
 	
-	body.read>header nav ul,
-	body.index>header nav ul
+	body.responsive>header nav ul
 	{
 		margin: 4px 0px 0px 0px;
 		padding: 0px 8px 0px 8px;

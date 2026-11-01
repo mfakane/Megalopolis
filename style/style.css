@@ -2147,31 +2147,26 @@ select {
 
 @media (max-width: 600px)
 {
-	body.read,
-	body.index
+	body.responsive
 	{
 		margin: 0px;
 		min-width: 0px;
 	}
 	
-	.read input[type="text"],
-	.index input[type="text"],
-	.read input[type="password"],
-	.index input[type="password"],
-	.read input[type="search"],
-	.index input[type="search"],
-	.read input[type="email"],
-	.index input[type="email"],
-	.read textarea,
-	.index textarea,
-	.read select,
-	.index select
+	.responsive input[type="text"],
+	.responsive input[type="password"],
+	.responsive input[type="search"],
+	.responsive input[type="email"],
+	.responsive input[type="url"],
+	.responsive input[type="number"],
+	.responsive input[type="date"],
+	.responsive textarea,
+	.responsive select
 	{
 		font-size: 16px;
 	}
 	
-	body.read>header,
-	body.index>header
+	body.responsive>header
 	{
 		margin: 0px;
 		padding: 8px;
@@ -2180,8 +2175,7 @@ select {
 		background-position: left bottom -8px;
 	}
 
-	body.read>header:after,
-	body.index>header:after
+	body.responsive>header:after
 	{
 		position: absolute;
 		left: 0px;
@@ -2192,15 +2186,13 @@ select {
 		content: "";
 	}
 	
-	body.read>header>a:first-child,
-	body.index>header>a:first-child
+	body.responsive>header>a:first-child
 	{
 		display: block;
 		font-size: 20px;
 	}
 	
-	body.read>header nav,
-	body.index>header nav
+	body.responsive>header nav
 	{
 		position: static;
 		margin: 0px;
@@ -2208,8 +2200,7 @@ select {
 		height: auto;
 	}
 	
-	body.read>header nav ul,
-	body.index>header nav ul
+	body.responsive>header nav ul
 	{
 		margin: 4px 0px 0px 0px;
 		padding: 0px;
@@ -2218,22 +2209,19 @@ select {
 		overflow: hidden;
 	}
 	
-	body.read>header nav ul li,
-	body.index>header nav ul li
+	body.responsive>header nav ul li
 	{
 		margin: 0px 16px 0px 0px;
 		height: auto;
 		line-height: 32px;
 	}
 	
-	body.read>header nav ul li a img,
-	body.index>header nav ul li a img
+	body.responsive>header nav ul li a img
 	{
 		vertical-align: middle;
 	}
 	
-	body.read>header form,
-	body.index>header form
+	body.responsive>header form
 	{
 		position: relative;
 		top: auto;
@@ -2243,8 +2231,7 @@ select {
 		height: auto;
 	}
 	
-	body.read>header form input[type="search"],
-	body.index>header form input[type="search"]
+	body.responsive>header form input[type="search"]
 	{
 		position: static;
 		margin: 0px;
@@ -2254,8 +2241,7 @@ select {
 		box-sizing: border-box;
 	}
 	
-	body.read>header form input[type="submit"],
-	body.index>header form input[type="submit"]
+	body.responsive>header form input[type="submit"]
 	{
 		top: 1px;
 		right: 1px;
@@ -2264,14 +2250,13 @@ select {
 		box-shadow: none;
 	}
 	
-	body.read>h1,
-	body.index>h1
+	body.responsive>h1
 	{
 		margin: 16px 8px 8px 8px;
+		height: auto;
 	}
 	
-	.read .status,
-	.index .status,
+	.responsive .status,
 	.read .status+.status
 	{
 		position: static;
@@ -2304,25 +2289,21 @@ select {
 		margin: 0px 8px 8px 8px;
 	}
 	
-	.read .notify,
-	.index .notify,
-	.read .admin,
-	.index .admin
+	.responsive .notify,
+	.responsive .admin
 	{
 		border-left: none;
 		border-right: none;
 		border-radius: 0px;
 	}
 	
-	.read .pagerContainer,
-	.index .pagerContainer
+	.responsive .pagerContainer
 	{
 		margin: 0px 8px 0px 8px;
 		height: auto;
 	}
 	
-	.read .pager,
-	.index .pager
+	.responsive .pager
 	{
 		display: flex;
 		flex-wrap: wrap;
@@ -2332,17 +2313,14 @@ select {
 		row-gap: 4px;
 	}
 	
-	.read .pager li,
-	.index .pager li
+	.responsive .pager li
 	{
 		left: 0px;
 		float: none;
 	}
 	
-	.read .pager li a,
-	.index .pager li a,
-	.read .pager li button,
-	.index .pager li button
+	.responsive .pager li a,
+	.responsive .pager li button
 	{
 		min-width: 24px;
 		height: 32px;
@@ -2396,7 +2374,8 @@ select {
 		margin-top: 48px;
 	}
 	
-	.read #commentformHeadding, .read #evaluateformHeadding
+	.read #commentformHeadding,
+	.read #evaluateformHeadding
 	{
 		margin-left: 8px;
 	}
@@ -2406,7 +2385,9 @@ select {
 		margin-left: 82px;
 	}
 	
-	.read #commentform, .read #evaluateform, .read #comments
+	.read #commentform,
+	.read #evaluateform,
+	.read #comments
 	{
 		border-left: none;
 		border-right: none;
@@ -2497,15 +2478,13 @@ select {
 		overflow-wrap: anywhere;
 	}
 	
-	body.read>footer,
-	body.index>footer
+	body.responsive>footer
 	{
 		display: flex;
 		flex-direction: column-reverse;
 	}
 	
-	body.read>footer>ul:first-child,
-	body.index>footer>ul:first-child
+	body.responsive>footer>ul:first-child
 	{
 		margin: 0px;
 		padding: 8px;
@@ -2514,8 +2493,7 @@ select {
 		border-radius: 0px;
 	}
 	
-	body.read>footer>ul:first-child+a,
-	body.index>footer>ul:first-child+a
+	body.responsive>footer>ul:first-child+a
 	{
 		position: static;
 		align-self: flex-end;
@@ -2528,13 +2506,13 @@ select {
 		background-color: #efefef !important;
 	}
 	
-	.index .headdingButtons
+	.responsive .headdingButtons
 	{
 		position: static;
 		margin: 0px 8px 8px 8px;
 	}
 	
-	.index .pagerContainer.subjectPager
+	.responsive .pagerContainer.subjectPager
 	{
 		position: static;
 		display: flex;
@@ -2550,35 +2528,35 @@ select {
 		row-gap: 4px;
 	}
 	
-	.index .pagerContainer.subjectPager span
+	.responsive .pagerContainer.subjectPager span
 	{
 		float: none;
 	}
 	
-	.index .pagerContainer.subjectPager select
+	.responsive .pagerContainer.subjectPager select
 	{
 		height: 34px;
 	}
 	
-	.index .notes
+	.responsive .notes
 	{
 		border-left: none;
 		border-right: none;
 		border-radius: 0px;
 	}
 	
-	.index div.entries
+	.responsive div.entries
 	{
 		margin: 0px;
 	}
 	
-	.index div.entries article
+	.responsive div.entries article
 	{
 		display: block;
 		width: auto;
 	}
 	
-	.index div.entries article .articleBody
+	.responsive div.entries article .articleBody
 	{
 		margin: 0px 0px 8px 0px;
 		padding: 8px 12px 8px 12px;
@@ -2588,7 +2566,7 @@ select {
 	}
 	
 	/* 折り返した行の先頭に区切り線が来ないよう、区切り線をやめて間隔で区切る */
-	.index div.entries dl dt
+	.responsive div.entries dl dt
 	{
 		margin: 0px;
 		padding: 0px;
@@ -2596,27 +2574,27 @@ select {
 		white-space: nowrap;
 	}
 	
-	.index div.entries dl dd
+	.responsive div.entries dl dd
 	{
 		margin-right: 12px;
 		white-space: nowrap;
 	}
 
 	/* HTML の出力ではタグ間の空白が詰められるため、項目の後に改行できる位置を作る */
-	.index div.entries dl dd:after
+	.responsive div.entries dl dd:after
 	{
 		white-space: normal;
 		content: "\200B";
 	}
 	
 	/* 並べ替えと表示形式のメニューは、件数の後で改行して 2 つ並べる */
-	body.index>h1>span:after
+	body.responsive>h1>span:after
 	{
 		display: block;
 		content: "";
 	}
 	
-	.index .dropDown
+	.responsive .dropDown
 	{
 		margin-top: 8px;
 		padding: 4px 4px 4px 6px;
@@ -2626,32 +2604,32 @@ select {
 		font-size: 14px;
 	}
 	
-	.index .dropDown .button
+	.responsive .dropDown .button
 	{
 		margin-top: 4px;
 	}
 	
-	.index .dropDown ul
+	.responsive .dropDown ul
 	{
 		top: 34px;
 		width: 106px;
 	}
 	
-	.index .dropDown ul li
+	.responsive .dropDown ul li
 	{
 		padding: 8px 6px 8px 6px;
 		height: 18px;
 		line-height: 18px;
 	}
 	
-	.index .dropDown ul li .button
+	.responsive .dropDown ul li .button
 	{
 		top: 8px;
 		right: 6px;
 		margin-top: 0px;
 	}
 	
-	.index section.entries
+	.responsive section.entries
 	{
 		padding: 0px;
 		border-left: none;
@@ -2660,20 +2638,20 @@ select {
 	}
 	
 	/* テーブル表示は 1 作品ずつのカードに組み替える */
-	.index .entries table,
-	.index .entries table tbody,
-	.index .entries table tr,
-	.index .entries table td
+	.responsive .entries table,
+	.responsive .entries table tbody,
+	.responsive .entries table tr,
+	.responsive .entries table td
 	{
 		display: block;
 	}
 	
-	.index .entries table thead
+	.responsive .entries table thead
 	{
 		display: none;
 	}
 	
-	.index .entries table tr.article
+	.responsive .entries table tr.article
 	{
 		display: flex;
 		flex-wrap: wrap;
@@ -2682,7 +2660,7 @@ select {
 		column-gap: 8px;
 	}
 	
-	.index .entries table td
+	.responsive .entries table td
 	{
 		padding: 0px;
 		width: auto;
@@ -2690,40 +2668,40 @@ select {
 		text-align: left;
 	}
 	
-	.index .entries table td.title
+	.responsive .entries table td.title
 	{
 		flex: 1 0 100%;
 		margin-bottom: 4px;
 	}
 	
-	.index .entries table td.checkbox+td.title
+	.responsive .entries table td.checkbox+td.title
 	{
 		flex-basis: calc(100% - 24px);
 	}
 	
-	.index .entries table td.checkbox
+	.responsive .entries table td.checkbox
 	{
 		width: 16px;
 	}
 	
-	.index .entries table h2
+	.responsive .entries table h2
 	{
 		font-size: 120%;
 	}
 
-	.index .entries table td.title br
+	.responsive .entries table td.title br
 	{
 		display: none;
 	}
 
-	.index .entries table td.title .host
+	.responsive .entries table td.title .host
 	{
 		display: block;
 	}
 	
-	.index .entries table td.dateTime,
-	.index .entries table td.lastUpdate,
-	.index .entries table td.info
+	.responsive .entries table td.dateTime,
+	.responsive .entries table td.lastUpdate,
+	.responsive .entries table td.info
 	{
 		width: auto;
 		color: #666666;
@@ -2731,48 +2709,119 @@ select {
 		white-space: nowrap;
 	}
 	
-	.index .entries table td.lastUpdate:before
+	.responsive .entries table td.lastUpdate:before
 	{
 		content: "更新: ";
 	}
 	
-	.index .entries table td.pageCount:before
+	.responsive .entries table td.pageCount:before
 	{
 		content: "ページ: ";
 	}
 	
-	.index .entries table td.readCount:before
+	.responsive .entries table td.readCount:before
 	{
 		content: "閲覧: ";
 	}
 
-	.index .entries table td.evaluationCount:before
+	.responsive .entries table td.evaluationCount:before
 	{
 		content: "評価: ";
 	}
 	
-	.index .entries table td.commentCount:before
+	.responsive .entries table td.commentCount:before
 	{
 		content: "コメント: ";
 	}
 
-	.index .entries table td.points:before
+	.responsive .entries table td.points:before
 	{
 		content: "POINT: ";
 	}
 	
-	.index .entries table td.rate:before
+	.responsive .entries table td.rate:before
 	{
 		content: "Rate: ";
 	}
 	
-	.index .entries table tr.tags td
+	.responsive .entries table tr.tags td
 	{
 		padding: 4px 12px 8px 12px;
 	}
 	
-	.index .entries table .hidden
+	.responsive .entries table .hidden
 	{
 		display: none;
+	}
+	
+	.search section.filter
+	{
+		margin: 0px 0px 8px 0px;
+		padding: 8px 12px 0px 12px;
+		border-left: none;
+		border-right: none;
+		border-radius: 0px;
+	}
+	
+	.search ul.params
+	{
+		margin: 0px;
+	}
+	
+	.search .params li
+	{
+		float: none;
+		margin: 0px 0px 4px 0px;
+		width: auto;
+	}
+	
+	.search section label[for]
+	{
+		float: none;
+		display: block;
+		margin: 0px 0px 4px 0px;
+	}
+	
+	.search section.filter input
+	{
+		margin-left: 0px;
+		padding: 4px;
+		height: 36px;
+		box-sizing: border-box;
+	}
+	
+	.search section input[type="text"]
+	{
+		width: 100%;
+	}
+	
+	/* 範囲指定の 2 つの入力欄は「～」を挟んで 1 行に並べる */
+	.search section input[type="number"],
+	.search section input[type="date"]
+	{
+		width: calc(50% - 12px);
+	}
+	
+	.search section ul.buttons
+	{
+		margin-bottom: 8px;
+	}
+	
+	.search section ul.buttons button
+	{
+		height: 36px;
+		font-size: inherit;
+	}
+	
+	.recent div.entries h1
+	{
+		margin-left: 8px;
+		margin-right: 8px;
+	}
+	
+	.responsive div.entries article .notify
+	{
+		margin-left: 0px;
+		margin-right: 0px;
 	}
 }

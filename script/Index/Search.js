@@ -5,6 +5,14 @@ $(function()
 	var nums = $("input[type='number'], input[type='date']", list);
 	var resize = function()
 	{
+		// 幅の狭い画面では CSS で幅を決める
+		if (window.matchMedia && window.matchMedia("(max-width: 600px)").matches)
+		{
+			texts.add(nums).css("width", "");
+
+			return;
+		}
+
 		texts.each(function()
 		{
 			var elem = $(this);

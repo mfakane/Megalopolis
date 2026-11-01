@@ -45,7 +45,7 @@ Visualizer::doctype();
 	</title>
 	<script src="<?=Visualizer::escapeOutput(Visualizer::actionHrefArray(array("script", "Index", "Index.js"))) ?>"></script>
 </head>
-<body class="index">
+<body class="index responsive">
 	<?php
 	$arr = array
 	(

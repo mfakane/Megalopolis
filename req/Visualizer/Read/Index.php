@@ -72,7 +72,7 @@ Visualizer::doctype();
 		}
 	</style>
 </head>
-<body class="read">
+<body class="read responsive">
 	<?php Visualizer::header($h->entry->title, App::$actionName == "index"
 		? array
 		(
