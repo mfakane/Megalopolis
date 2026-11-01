@@ -123,6 +123,20 @@
 	  Firefox でも動作するようになり、トラックパッドの横方向の操作はブラウザに任せるようにしました
 	* style/style.css: 検索欄のプレースホルダーの色を、Firefox などでも指定どおりにするように
 	* config.php: 実装されていない契約者固有 ID による送信規制の説明を削除
+	* script/base.js,
+	  script/Index/Index.js: 一覧の並べ替えと表示形式のメニューをキーボードで操作できるように
+	  Tab で選ぶと開き、上下の矢印で項目を移動、Enter または Space で選択、Esc で閉じます
+	  スクリーンリーダー向けに、開閉や選択の状態を aria 属性で伝えるようにしました
+	* req/Core/Visualizer.php,
+	  style/style.css,
+	  style/alt/style.css: 本文を main 要素で囲み、検索欄とメニューに名前を付けて、スクリーンリーダーで移動しやすくする
+	* req/Visualizer/Template.php,
+	  req/Visualizer/Index/Search.php,
+	  req/Visualizer/Read/Index.php,
+	  req/Visualizer/Util/Hash.php,
+	  req/Visualizer/Util/Track.php,
+	  script/Read/Edit.js: ラベルの無かった入力欄 (コメント欄、検索の範囲の終わり、管理者の選択欄など) と色の見本に名前を付ける
+	* style/style.css: 一覧の日時などの薄い灰色を、白地でも読みやすい濃さ (コントラスト比 4.5:1 以上) にする
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 

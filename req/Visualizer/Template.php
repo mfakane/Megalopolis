@@ -173,7 +173,7 @@ class Template
 							<?php if ($isAdmin || $c->showTitle[Configuration::ON_SUBJECT]): ?>
 								<h2>
 									<?php if ($isAdmin): ?>
-										<input type="checkbox" name="id[]" value="<?php Visualizer::converted(strval($i->id)) ?>" />
+										<input type="checkbox" name="id[]" value="<?php Visualizer::converted(strval($i->id)) ?>" aria-label="<?php Visualizer::converted(($i->title ?? "") . " を選択") ?>" />
 									<?php endif ?>
 									<a href="<?php Visualizer::converted(Visualizer::actionHrefArray(array($i->subject, $i->id))) ?>"><?php Visualizer::converted($i->title) ?></a>
 								</h2>
@@ -300,7 +300,7 @@ class Template
 							<tr class="article<?php if (!$isAdmin && !$c->showTags[Configuration::ON_SUBJECT] && !$c->showSummary[Configuration::ON_SUBJECT]) { echo ' notags'; } else if ($c->useSummary && !Util::isEmpty($i->summary)) { echo ' hasSummary'; } ?>" id="article<?php echo $i->id ?>">
 								<?php if ($isAdmin): ?>
 									<td class="checkbox">
-										<input type="checkbox" name="id[]" value="<?php Visualizer::converted(strval($i->id)) ?>" />
+										<input type="checkbox" name="id[]" value="<?php Visualizer::converted(strval($i->id)) ?>" aria-label="<?php Visualizer::converted(($i->title ?? "") . " を選択") ?>" />
 									</td>
 								<?php endif ?>
 								<?php if ($isAdmin || $c->showTitle[Configuration::ON_SUBJECT]): ?>

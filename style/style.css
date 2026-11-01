@@ -16,7 +16,7 @@
 	--bar-2: #bbbbbb;
 	--text: #000000;
 	--text-muted: #666666;
-	--text-subtle: #999999;
+	--text-subtle: #767676;
 	--link: #0000ff;
 	--surface: #ffffff;
 	--surface-alt: #efefef;
@@ -832,7 +832,7 @@ section.entries
 	margin-top: 8px;
 }
 
-section, .taglist, body>ul
+section, .taglist, main>ul
 {
 	margin: 0px 0px 8px 0px;
 	padding: 8px 8px 0px 8px;
@@ -841,7 +841,7 @@ section, .taglist, body>ul
 	background: var(--surface);
 }
 
-body>ul
+main>ul
 {
 	padding: 8px 8px 8px 24px;
 }
@@ -912,7 +912,7 @@ h1
 	font-size: 20px;
 }
 
-body>h1, .entries h1
+main>h1, .entries h1
 {
 	height: 20px;
 }
@@ -924,7 +924,7 @@ body>h1, .entries h1
 	margin-right: 4px;
 }
 
-body>h1>span
+main>h1>span
 {
 	margin: 0px 8px 0px 8px;
 	color: var(--text);
@@ -1403,7 +1403,7 @@ ul.buttons li,
 	margin-top: 32px;
 }
 
-body.index>h1, body.read>h1
+.index main>h1, .read main>h1
 {
 	height: auto;
 	min-height: 20px;
@@ -2355,7 +2355,7 @@ select {
 		box-shadow: none;
 	}
 	
-	body.responsive>h1
+	.responsive main>h1
 	{
 		margin: 16px 8px 8px 8px;
 		height: auto;
@@ -2710,12 +2710,12 @@ select {
 	}
 	
 	/* 並べ替えと表示形式のメニューは、件数の後で改行して 2 つ並べる */
-	body.responsive>h1>span:not(:last-child)
+	.responsive main>h1>span:not(:last-child)
 	{
 		margin-right: 0px;
 	}
 	
-	body.responsive>h1>span:not(:last-child):after
+	.responsive main>h1>span:not(:last-child):after
 	{
 		display: block;
 		content: "";

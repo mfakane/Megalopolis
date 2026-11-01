@@ -1,6 +1,6 @@
 $(function()
 {
-	var h1 = $("header+h1").first();
+	var h1 = $("main>h1").first();
 	var entries = $("#entries");
 	var listType = !entries.length ? null : entries.data("type");
 	var use = !entries.length ? null : $.extend((function(arr, obj) { return $.each(obj, function(k) { obj[k] = $.inArray(k, arr) >= 0; }); })
@@ -217,6 +217,8 @@ $(function()
 		})
 		.appendTo(h1);
 
+		megalopolis.accessibleDropDown(control, "並べ替え");
+
 		if (control[0].addEventListener)
 			control[0].addEventListener("pointerdown", function(e)
 			{
@@ -349,6 +351,8 @@ $(function()
 			return false;
 		})
 		.appendTo(h1);
+
+		megalopolis.accessibleDropDown(control, "表示形式");
 	};
 	var loadAdminButtons = function()
 	{

@@ -351,7 +351,7 @@ Visualizer::doctype();
 									</select>
 								<?php endif ?>
 							</div>
-							<textarea name="body" class="<?=Visualizer::escapeOutput(implode(" ", array($c->useCommentPoints() ? "usePoint" : "", !Util::isEmpty($c->postPassword) ? "usePostPassword" : ""))) ?>" rows="2" cols="80"><?=Visualizer::escapeOutput(ReadHandler::param("body")) ?></textarea>
+							<textarea name="body" aria-label="コメント" class="<?=Visualizer::escapeOutput(implode(" ", array($c->useCommentPoints() ? "usePoint" : "", !Util::isEmpty($c->postPassword) ? "usePostPassword" : ""))) ?>" rows="2" cols="80"><?=Visualizer::escapeOutput(ReadHandler::param("body")) ?></textarea>
 						</div>
 						<ul class="buttons">
 							<li>
@@ -378,7 +378,7 @@ Visualizer::doctype();
 							<?php if ($h->thread->nonCommentEvaluations): ?>
 								<?php foreach (array_filter($arr, function($_) { return $_ instanceof Evaluation; }) as $k => $i): ?>
 									<dt class="evaluation">
-										<input type="checkbox" name="id[]" value="<?=Visualizer::escapeOutput($i->id) ?>" />
+										<input type="checkbox" name="id[]" value="<?=Visualizer::escapeOutput($i->id) ?>" aria-label="評価 <?=Visualizer::escapeOutput($k + 1) ?> を選択" />
 										<?=Visualizer::escapeOutput($k + 1) ?>.
 										<?php if ($i->point < 0): ?>
 											<span class="point minus"><?=Visualizer::escapeOutput($i->point) ?></span>点
@@ -418,7 +418,7 @@ Visualizer::doctype();
 						<?php foreach (array_filter($arr, function($_) { return $_ instanceof Comment; }) as $k => $i): ?>
 							<dt id="comment<?=Visualizer::escapeOutput($k + 1) ?>">
 								<?php if ($isAdmin): ?>
-									<input type="checkbox" name="id[]" value="<?=Visualizer::escapeOutput($i->id) ?>" />
+									<input type="checkbox" name="id[]" value="<?=Visualizer::escapeOutput($i->id) ?>" aria-label="コメント <?=Visualizer::escapeOutput($k + 1) ?> を選択" />
 								<?php endif ?>
 								<?=Visualizer::escapeOutput($k + 1) ?>.
 								<?php if ($isAdmin || isset($c->showPoint[Configuration::ON_COMMENT]) && $c->showPoint[Configuration::ON_COMMENT]): ?>

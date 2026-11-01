@@ -47,7 +47,8 @@ $(function()
 			var list = $('<ul class="palette"></ul>');
 		
 			list.append($("<li />")
-					.append($('<a href="#" />')
+					.append($('<a href="#" role="button" />')
+						.attr({ "aria-label": "指定なし", title: "指定なし" })
 						.click(function()
 						{
 							func("");
@@ -57,7 +58,8 @@ $(function()
 				.append($.map(map, function(_)
 				{
 					return $("<li />")
-						.append($('<a href="#" />')
+						.append($('<a href="#" role="button" />')
+							.attr({ "aria-label": _, title: _ })
 							.css(cssProperty, cssProperty == "backgroundImage" ? "url('" + _ + "')" : _)
 							.click(function()
 							{

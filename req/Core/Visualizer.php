@@ -10,6 +10,9 @@ class Visualizer
 	static ?string $mode = null;
 
 	const string MODE_COOKIE_NAME = "VisualizerMode";
+
+	/** header() で開いた main 要素を、footer() で閉じる */
+	private static bool $mainOpen = false;
 	
 	static function isSimple(): bool
 	{
@@ -108,9 +111,9 @@ class Visualizer
 				<?php self::converted(Configuration::$instance->title) ?>
 			</a>
 			<?php if ((Configuration::$instance->showTitle[Configuration::ON_SUBJECT] && Configuration::$instance->useSearch) || Configuration::$instance->customSearch || Auth::hasSession(true)): ?>
-				<form action="<?php self::converted(isset(Configuration::$instance->customSearch) ? Configuration::$instance->customSearch[0] : self::actionHref("search")) ?>" method="get">
+				<form action="<?php self::converted(isset(Configuration::$instance->customSearch) ? Configuration::$instance->customSearch[0] : self::actionHref("search")) ?>" method="get" role="search">
 					<div>
-						<input type="search" name="<?php self::converted(isset(Configuration::$instance->customSearch) ? Configuration::$instance->customSearch[1] : "query") ?>" placeholder="検索" />
+						<input type="search" name="<?php self::converted(isset(Configuration::$instance->customSearch) ? Configuration::$instance->customSearch[1] : "query") ?>" placeholder="検索" aria-label="検索" />
 						<input type="submit" value="検索" />
 						<?php
 						if (isset(Configuration::$instance->customSearch[2]))
@@ -126,7 +129,7 @@ class Visualizer
 					</div>
 				</form>
 			<?php endif ?>
-			<nav>
+			<nav aria-label="メニュー">
 				<ul>
 					<?php foreach ($menu as $k => $v): ?>
 						<?php
@@ -145,6 +148,11 @@ class Visualizer
 				</ul>
 			</nav>
 		</header>
+		<?php // 本文を main で囲み、スクリーンリーダーなどで本文へ移動できるようにする (footer() で閉じる) ?>
+		<main>
+		<?php
+		self::$mainOpen = true;
+		?>
 		<?php if (!Util::isEmpty($title)): ?>
 			<h1>
 				<?php self::converted($title) ?>
@@ -169,6 +177,12 @@ class Visualizer
 		$pathInfo = trim(Util::getPathInfo(), "/");
 		$redir = Util::isEmpty($pathInfo) ? null : array("redir" => $pathInfo);
 		
+		if (self::$mainOpen)
+		{
+			echo "</main>";
+			self::$mainOpen = false;
+		}
+
 		?>
 		<footer>
 			<ul>

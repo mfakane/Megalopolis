@@ -14,7 +14,7 @@ Visualizer::doctype();
 	<?php Visualizer::header("管理者パスワード用ハッシュ算出") ?>
 	<form action="<?=Visualizer::escapeOutput(Visualizer::actionHref(App::$handlerName, "hash")) ?>" method="post">
 		<section>
-			<input type="text"  name="raw" value="<?=Visualizer::escapeOutput($d ? $d["raw"] : null) ?>" /><br />
+			<input type="text" name="raw" aria-label="パスワード" value="<?=Visualizer::escapeOutput($d ? $d["raw"] : null) ?>" /><br />
 			<button type="submit">
 				<img src="<?=Visualizer::escapeOutput(Visualizer::actionHref("style", "sendButtonIcon.png")) ?>" alt="" />算出
 			</button>

@@ -43,7 +43,7 @@ $pagerHref = Visualizer::actionHref("util", "track", array
 					<label for="host">ホスト名</label><input type="text" name="host" id="host" value="<?=Visualizer::escapeOutput($d["host"]) ?>" />
 				</li>
 				<li>
-					<label for="subject">作品集</label><input type="number" name="subjectBegin" id="subject" value="<?=Visualizer::escapeOutput($d["subjectBegin"]) ?>" min="1" max="<?=Visualizer::escapeOutput($d["subjectCount"]) ?>" /><span>～</span><input type="number" name="subjectEnd" value="<?=Visualizer::escapeOutput($d["subjectEnd"]) ?>" min="1" max="<?=Visualizer::escapeOutput($d["subjectCount"]) ?>" />
+					<label for="subject">作品集</label><input type="number" name="subjectBegin" id="subject" value="<?=Visualizer::escapeOutput($d["subjectBegin"]) ?>" min="1" max="<?=Visualizer::escapeOutput($d["subjectCount"]) ?>" /><span>～</span><input type="number" name="subjectEnd" aria-label="作品集の終わり" value="<?=Visualizer::escapeOutput($d["subjectEnd"]) ?>" min="1" max="<?=Visualizer::escapeOutput($d["subjectCount"]) ?>" />
 				</li>
 				<li>
 					<label for="thread">検索対象</label><label><input type="checkbox" id="thread" name="target[]" value="thread"<?=in_array("thread", $d["target"]) ? ' checked="checked"' : null ?> />作品</label><br />

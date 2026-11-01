@@ -1,5 +1,95 @@
 var megalopolis =
 {
+	/**
+	 * マウスで開くドロップダウン (.dropDown) を、キーボードとスクリーンリーダーでも使えるようにする
+	 * - Tab でフォーカスすると開き、フォーカスが外れると閉じる
+	 * - Enter / Space で選ぶ (ドロップダウン自体では、マウスのクリックと同じ動作)、上下の矢印で項目を移動、Esc で閉じる
+	 * - 開閉や選択の状態は、既存の open / selected クラスから aria 属性に写す
+	 */
+	accessibleDropDown: function(control, name)
+	{
+		var dropDown = control.children("ul");
+		var items = function() { return dropDown.children("li"); };
+		var label = control.children("span");
+		// Esc で閉じてドロップダウン自体にフォーカスを戻すときは、開き直さない
+		var closing = false;
+
+		control.attr({ tabindex: 0, role: "button", "aria-haspopup": "menu", "aria-expanded": "false" });
+		dropDown.attr("role", "menu");
+		items().each(function()
+		{
+			var item = $(this);
+
+			item.attr("tabindex", -1)
+				.attr("role", item.hasClass("listVisibility") ? "menuitemcheckbox" : item.hasClass("listType") ? "menuitemradio" : "menuitem");
+		});
+
+		var sync = function()
+		{
+			control.attr("aria-expanded", control.hasClass("open") ? "true" : "false")
+				.attr("aria-label", name + ": " + $.trim(label.text()));
+			items().filter("[role=menuitemcheckbox], [role=menuitemradio]").each(function()
+			{
+				$(this).attr("aria-checked", $(this).hasClass("selected") ? "true" : "false");
+			});
+		};
+
+		sync();
+
+		if (window.MutationObserver)
+			new MutationObserver(sync).observe(control[0], { attributes: true, attributeFilter: ["class"], subtree: true, childList: true, characterData: true });
+
+		control.on("focusin", function()
+		{
+			if (!closing && !control.hasClass("open"))
+				control.trigger("mouseenter");
+		})
+		.on("focusout", function()
+		{
+			// フォーカスがドロップダウンの中で移るときは閉じない
+			setTimeout(function()
+			{
+				if (!$.contains(control[0], document.activeElement) && document.activeElement != control[0] && control.hasClass("open"))
+					control.trigger("mouseleave");
+			}, 0);
+		})
+		.on("keydown", function(e)
+		{
+			var list = items();
+			var index = list.index(document.activeElement);
+
+			if (e.key == "Enter" || e.key == " ")
+			{
+				$(e.target).trigger("click");
+
+				return false;
+			}
+			else if (e.key == "ArrowDown" || e.key == "ArrowUp")
+			{
+				if (!control.hasClass("open"))
+					control.trigger("mouseenter");
+
+				var next = e.key == "ArrowDown" ? index + 1 : index < 0 ? list.length - 1 : index - 1;
+
+				list.eq((next + list.length) % list.length).trigger("focus");
+
+				return false;
+			}
+			else if (e.key == "Escape" && control.hasClass("open"))
+			{
+				control.trigger("mouseleave");
+
+				if (index >= 0)
+				{
+					closing = true;
+					control.trigger("focus");
+					closing = false;
+				}
+
+				return false;
+			}
+		});
+	},
 	unixTimeAsString: function(unixTime, type)
 	{
 		function padLeft(str, len)

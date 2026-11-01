@@ -68,16 +68,16 @@ $pagerHref = Visualizer::actionHref("search", array
 				<?php endif ?>
 				<?php if ($isAdmin && $c->useAnyPoints() || $c->showRate[Configuration::ON_SUBJECT]): ?>
 					<li>
-						<label for="eval">評価数</label><input type="number" name="evalBegin" id="eval" value="<?=Visualizer::escapeOutput($d["evalBegin"]) ?>" min="<?=Visualizer::escapeOutput($d["evalMin"]) ?>" max="<?=Visualizer::escapeOutput($d["evalMax"]) ?>" /><span>～</span><input type="number" name="evalEnd" value="<?=Visualizer::escapeOutput($d["evalEnd"]) ?>" min="<?=Visualizer::escapeOutput($d["evalMin"]) ?>" max="<?=Visualizer::escapeOutput($d["evalMax"]) ?>" />
+						<label for="eval">評価数</label><input type="number" name="evalBegin" id="eval" value="<?=Visualizer::escapeOutput($d["evalBegin"]) ?>" min="<?=Visualizer::escapeOutput($d["evalMin"]) ?>" max="<?=Visualizer::escapeOutput($d["evalMax"]) ?>" /><span>～</span><input type="number" name="evalEnd" aria-label="評価数の上限" value="<?=Visualizer::escapeOutput($d["evalEnd"]) ?>" min="<?=Visualizer::escapeOutput($d["evalMin"]) ?>" max="<?=Visualizer::escapeOutput($d["evalMax"]) ?>" />
 					</li>
 				<?php endif ?>
 				<?php if ($isAdmin || $c->showPoint[Configuration::ON_SUBJECT]): ?>
 					<li>
-						<label for="points">POINT</label><input type="number" name="pointsBegin" id="points" value="<?=Visualizer::escapeOutput($d["pointsBegin"]) ?>" min="<?=Visualizer::escapeOutput($d["pointsMin"]) ?>" max="<?=Visualizer::escapeOutput($d["pointsMax"]) ?>" /><span>～</span><input type="number" name="pointsEnd" value="<?=Visualizer::escapeOutput($d["pointsEnd"]) ?>" min="<?=Visualizer::escapeOutput($d["pointsMin"]) ?>" max="<?=Visualizer::escapeOutput($d["pointsMax"]) ?>" />
+						<label for="points">POINT</label><input type="number" name="pointsBegin" id="points" value="<?=Visualizer::escapeOutput($d["pointsBegin"]) ?>" min="<?=Visualizer::escapeOutput($d["pointsMin"]) ?>" max="<?=Visualizer::escapeOutput($d["pointsMax"]) ?>" /><span>～</span><input type="number" name="pointsEnd" aria-label="POINT の上限" value="<?=Visualizer::escapeOutput($d["pointsEnd"]) ?>" min="<?=Visualizer::escapeOutput($d["pointsMin"]) ?>" max="<?=Visualizer::escapeOutput($d["pointsMax"]) ?>" />
 					</li>
 				<?php endif ?>
 				<li>
-					<label for="dateTime">投稿日時</label><input type="date" name="dateTimeBegin" id="dateTime" value="<?=Visualizer::escapeOutput($d["dateTimeBegin"]) ?>" min="<?=Visualizer::escapeOutput($d["dateTimeMin"]) ?>" max="<?=Visualizer::escapeOutput($d["dateTimeMax"]) ?>" /><span>～</span><input type="date" name="dateTimeEnd" value="<?=Visualizer::escapeOutput($d["dateTimeEnd"]) ?>" min="<?=Visualizer::escapeOutput($d["dateTimeMin"]) ?>" max="<?=Visualizer::escapeOutput($d["dateTimeMax"]) ?>" />
+					<label for="dateTime">投稿日時</label><input type="date" name="dateTimeBegin" id="dateTime" value="<?=Visualizer::escapeOutput($d["dateTimeBegin"]) ?>" min="<?=Visualizer::escapeOutput($d["dateTimeMin"]) ?>" max="<?=Visualizer::escapeOutput($d["dateTimeMax"]) ?>" /><span>～</span><input type="date" name="dateTimeEnd" aria-label="投稿日時の終わり" value="<?=Visualizer::escapeOutput($d["dateTimeEnd"]) ?>" min="<?=Visualizer::escapeOutput($d["dateTimeMin"]) ?>" max="<?=Visualizer::escapeOutput($d["dateTimeMax"]) ?>" />
 				</li>
 			</ul>
 			<ul class="buttons">

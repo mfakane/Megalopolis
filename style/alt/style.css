@@ -129,7 +129,7 @@ div.entries article .articleBody
 	border-top: var(--border) 1px solid;
 }
 
-section, .taglist, body>ul
+section, .taglist, main>ul
 {
 	border-color: var(--accent-border);
 }

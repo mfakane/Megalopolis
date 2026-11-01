@@ -207,6 +207,38 @@ test("設定情報とnoticeを表示する", async ({ page }) => {
 	assertNoDiagnostics(diagnostics);
 });
 
+test("一覧の並べ替えと表示形式をキーボードで操作できる", async ({ page }) => {
+	const diagnostics = attachDiagnostics(page);
+	const work = makeWork("keyboard");
+	await createWork(page, work);
+	await page.goto(route(""));
+
+	const sort = page.getByRole("button", { name: /^並べ替え: / });
+	await sort.focus();
+	await expect(sort).toHaveAttribute("aria-expanded", "true");
+	const before = await sort.getAttribute("aria-label");
+	await page.keyboard.press("ArrowDown");
+	await page.keyboard.press("ArrowDown");
+	await expect(page.locator(":focus")).toHaveAttribute("role", "menuitem");
+	await page.keyboard.press("Enter");
+	await expect(sort).not.toHaveAttribute("aria-label", before ?? "");
+	await page.keyboard.press("Escape");
+	await expect(sort).toBeFocused();
+	await expect(sort).toHaveAttribute("aria-expanded", "false");
+
+	const view = page.getByRole("button", { name: /^表示形式: / });
+	await view.focus();
+	const column = page.getByRole("menuitemcheckbox").first();
+	const checked = await column.getAttribute("aria-checked");
+	await column.focus();
+	await page.keyboard.press(" ");
+	await expect(column).toHaveAttribute("aria-checked", checked === "true" ? "false" : "true");
+	await page.keyboard.press(" ");
+	await expect(column).toHaveAttribute("aria-checked", checked ?? "");
+
+	assertNoDiagnostics(diagnostics);
+});
+
 test("管理用ツールで store/ 以下が Web から開けるときだけ警告する", async ({ page }) => {
 	const diagnostics = attachDiagnostics(page);
 
