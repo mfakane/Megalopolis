@@ -39,64 +39,125 @@ var megalopolis =
 			date.getTimezoneOffset() > 0 ? -date.getTimezoneOffset() / 60 : '+' + -date.getTimezoneOffset() / 60
 		);
 	},
+	/**
+	 * 同じ名前のクッキーの値をすべて返す。パスの長いものから順に並ぶ
+	 */
+	cookieValues: function(name)
+	{
+		if (!document.cookie)
+			return [];
+
+		return $.map($.grep($.map(document.cookie.split(";"), function(i) { return $.trim(i); }), function(i)
+		{
+			return i.substr(0, name.length + 1) == name + "=";
+		}), function(i)
+		{
+			try
+			{
+				return decodeURIComponent(i.substr(name.length + 1));
+			}
+			catch (ex)
+			{
+				return null;
+			}
+		});
+	},
+	homePath: function()
+	{
+		return $("link[rel='home']").attr("href").replace(/^[a-z][a-z0-9+.-]*:\/\/[^\/]*/i, "");
+	},
+	/**
+	 * サーバー (Cookie::sendCookie) と同じく、index.php を除いたディレクトリをクッキーのパスにする
+	 */
+	cookiePath: function()
+	{
+		return megalopolis.homePath().replace(/\/[^\/]*\.php$/, "").replace(/\/$/, "") || "/";
+	},
+	/**
+	 * 以前クッキーに付けていたパス。サーバーとずれていたため、書き込むときに消す
+	 */
+	legacyCookiePaths: function()
+	{
+		var path = megalopolis.homePath().replace(/\/$/, "");
+
+		// パスが空だと、ブラウザは開いているページのディレクトリをパスにしていた
+		if (!path)
+			path = location.pathname.replace(/\/[^\/]*$/, "") || "/";
+
+		return path == megalopolis.cookiePath() ? [] : [path];
+	},
 	cookie: function(name, value)
 	{
 		if (value === undefined)
 		{
-			if (document.cookie)
-			{
-				var rt = $.map($.grep($.map(document.cookie.split(";"), function(i) { return $.trim(i); }), function(i)
-				{
-					return i.substr(0, name.length + 1) == name + "=";
-				}), function(i)
-				{
-					try
-					{
-						return decodeURIComponent(i.substr(name.length + 1));
-					}
-					catch (ex)
-					{
-						return null;
-					}
-				});
-				
-				return rt.length == 0
-					? null
-					: rt[0];
-			}
-			else
-				return null;
+			var rt = megalopolis.cookieValues(name);
+
+			return rt.length == 0
+				? null
+				: rt[0];
 		}
 		else
 		{
-			var href = $("link[rel='home']").attr("href");
-			var path = href.replace(/^[a-z][a-z0-9+.-]*:\/\/[^\/]*/i, "").replace(/\/$/, "");
-			
+			var path = megalopolis.cookiePath();
+			var expired = "=; expires=" + new Date(1970, 1, 1).toUTCString() + "; path=";
+
+			$.each(megalopolis.legacyCookiePaths(), function(_, i)
+			{
+				document.cookie = name + expired + i;
+			});
+
 			if (value === null)
-				document.cookie = name + "=; expires=" + new Date(1970, 1, 1).toUTCString() + "; path=" + path;
+				document.cookie = name + expired + path;
 			else
 			{
 				var date = new Date();
-				
+
 				date.setTime(date.getTime() + 60 * 60 * 24 * 30 * 1000);
 				document.cookie = name + "=" + encodeURIComponent(value) + "; expires="  + date.toUTCString() + "; path=" + path;
 			}
-			
+
 			return value;
 		}
 	},
-	mainCookie: function(name, value)
+	parseMainCookie: function(value)
 	{
-		var arr = megalopolis.cookie("Cookie") ? megalopolis.cookie("Cookie").replace(/^</, "").split("<") : [];
-		var data = [];
-		
-		$.each(arr, function(k, v)
+		var data = {};
+
+		$.each(value ? value.replace(/^</, "").split("<") : [], function(k, v)
 		{
 			var sl = v.split(">");
-			
+
 			data[sl[0]] = sl[1];
 		});
-		
+
+		return data;
+	},
+	/**
+	 * パスのずれで 2 つできたクッキーを 1 つにまとめる。
+	 * 以前のパスのもの (先頭) にはスクリプトで書いた設定が、正しいパスのもの (最後) にはサーバーで書いた値が新しく入っている
+	 */
+	mergeMainCookies: function(values)
+	{
+		var scriptKeys = ["FontSize", "Vertical", "ListType", "ListVisibility", "MobileVertical", "Sort"];
+		var data = megalopolis.parseMainCookie(values[0]);
+		var set = [];
+
+		$.each(megalopolis.parseMainCookie(values[values.length - 1]), function(k, v)
+		{
+			if ($.inArray(k, scriptKeys) < 0)
+				data[k] = v;
+		});
+
+		for (var i in data)
+			if (data[i] && data[i].length)
+				set.push(i + ">" + data[i]);
+
+		return "<" + set.join("<");
+	},
+	mainCookie: function(name, value)
+	{
+		var data = megalopolis.parseMainCookie(megalopolis.cookie("Cookie"));
+
 		if (value !== undefined)
 		{
 			if (value === null)
@@ -156,6 +217,12 @@ var megalopolis =
 
 $(function()
 {
+	// 以前のパスのクッキーが残っていると、そちらが先に送られてサーバーで書いた値が読まれなくなるため、まとめて書き直す
+	var mainCookies = megalopolis.cookieValues("Cookie");
+
+	if (mainCookies.length > 1)
+		megalopolis.cookie("Cookie", megalopolis.mergeMainCookies(mainCookies));
+
 	$("#scrollToTop").click(function()
 	{
 		megalopolis.scrollTo(0);
