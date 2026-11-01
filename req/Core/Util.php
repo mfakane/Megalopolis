@@ -19,49 +19,33 @@ class Util
 
 	const string BROWSER_TYPE_UNKNOWN = "Unknown";
 	const string BROWSER_TYPE_IPHONE = "iPhone";
-	const string BROWSER_TYPE_IPAD = "iPad";
 	const string BROWSER_TYPE_ANDROID = "Android";
 	const string BROWSER_TYPE_ANDROIDMOBILE = "Android Mobile";
 	const string BROWSER_TYPE_PSP = "PlayStation Portable";
 	const string BROWSER_TYPE_3DS = "Nintendo 3DS";
-	const string BROWSER_TYPE_NETFRONT = "NetFront";
-	const string BROWSER_TYPE_IEMOBILE7 = "Trident/3.1";
 	const string BROWSER_TYPE_MOBILE = "Mobile";
-	const string BROWSER_TYPE_MSIE_NEW = "Trident/";
-	const string BROWSER_TYPE_MSIE7 = "MSIE 7";
-	const string BROWSER_TYPE_MSIE6 = "MSIE 6";
-	const string BROWSER_TYPE_MSIE = "MSIE ";
-	const string BROWSER_TYPE_FIREFOX2 = "Firefox/2.";
-	const string BROWSER_TYPE_FIREFOX = "Firefox";
-	const string BROWSER_TYPE_GECKO = "Gecko";
-	const string BROWSER_TYPE_PRESTO = "Presto";
-	const string BROWSER_TYPE_PRESTO_M = "Opera Mobi";
-	const string BROWSER_TYPE_WEBKIT = "WebKit";
-	const string BROWSER_TYPE_KHTML = "KHTML";
 
-
+	/**
+	 * 表示の切り替え (簡易表示、スマートフォン) に使う端末の種類
+	 * パソコンのブラウザは区別しない (BROWSER_TYPE_UNKNOWN)
+	 */
 	static function getBrowserType(): string
 	{
 		static $browserType;
 
-		if ($browserType)
-			return $browserType;
+		return $browserType ??= self::detectBrowserType($_SERVER["HTTP_USER_AGENT"] ?? "");
+	}
 
-		if (!isset($_SERVER["HTTP_USER_AGENT"]))
-			return $browserType = self::BROWSER_TYPE_UNKNOWN;
-
-		$ua = $_SERVER["HTTP_USER_AGENT"];
-
+	static function detectBrowserType(string $ua): string
+	{
 		foreach (
 			array(
 				self::BROWSER_TYPE_IPHONE		=> self::BROWSER_TYPE_IPHONE,
 				"iPod"							=> self::BROWSER_TYPE_IPHONE,
-				self::BROWSER_TYPE_IPAD			=> self::BROWSER_TYPE_IPAD,
 				self::BROWSER_TYPE_ANDROID		=> self::BROWSER_TYPE_ANDROID,
 				self::BROWSER_TYPE_PSP			=> self::BROWSER_TYPE_PSP,
 				self::BROWSER_TYPE_3DS			=> self::BROWSER_TYPE_3DS,
-				self::BROWSER_TYPE_NETFRONT		=> self::BROWSER_TYPE_NETFRONT,
-				self::BROWSER_TYPE_IEMOBILE7	=> self::BROWSER_TYPE_IEMOBILE7,
+				// 携帯電話 (フィーチャーフォン)
 				"DoCoMo"						=> self::BROWSER_TYPE_MOBILE,
 				"KDDI-"							=> self::BROWSER_TYPE_MOBILE,
 				"J-PHONE"						=> self::BROWSER_TYPE_MOBILE,
@@ -71,31 +55,16 @@ class Util
 				"PDXGW"							=> self::BROWSER_TYPE_MOBILE,
 				"WILLCOM"						=> self::BROWSER_TYPE_MOBILE,
 				"emobile"						=> self::BROWSER_TYPE_MOBILE,
-				"Huawei"						=> self::BROWSER_TYPE_MOBILE,
-				"IEMobile"						=> self::BROWSER_TYPE_MOBILE,
-				self::BROWSER_TYPE_MSIE_NEW		=> self::BROWSER_TYPE_MSIE_NEW,
-				self::BROWSER_TYPE_MSIE7		=> self::BROWSER_TYPE_MSIE7,
-				self::BROWSER_TYPE_MSIE6		=> self::BROWSER_TYPE_MSIE6,
-				self::BROWSER_TYPE_MSIE			=> self::BROWSER_TYPE_MSIE,
-				self::BROWSER_TYPE_FIREFOX2		=> self::BROWSER_TYPE_FIREFOX2,
-				self::BROWSER_TYPE_FIREFOX		=> self::BROWSER_TYPE_FIREFOX,
-				self::BROWSER_TYPE_PRESTO_M		=> self::BROWSER_TYPE_PRESTO_M,
-				self::BROWSER_TYPE_PRESTO		=> self::BROWSER_TYPE_PRESTO,
-				"Opera"							=> self::BROWSER_TYPE_PRESTO,
-				self::BROWSER_TYPE_WEBKIT		=> self::BROWSER_TYPE_WEBKIT,
-				self::BROWSER_TYPE_KHTML		=> self::BROWSER_TYPE_KHTML,
-				self::BROWSER_TYPE_GECKO		=> self::BROWSER_TYPE_GECKO,
 			) as $k => $v
 		)
 			if (mb_strstr($ua, $k) !== false)
+				// Android は Mobile を含むものだけがスマートフォン (含まないものはタブレット)
 				if ($k == self::BROWSER_TYPE_ANDROID && mb_strstr($ua, self::BROWSER_TYPE_MOBILE) !== false)
-					return $browserType = self::BROWSER_TYPE_ANDROIDMOBILE;
-				else if ($k == self::BROWSER_TYPE_IPHONE && mb_strstr($ua, "Safari") === false)
-					return $browserType = self::BROWSER_TYPE_MOBILE;
+					return self::BROWSER_TYPE_ANDROIDMOBILE;
 				else
-					return $browserType = $v;
+					return $v;
 
-		return $browserType = self::BROWSER_TYPE_UNKNOWN;
+		return self::BROWSER_TYPE_UNKNOWN;
 	}
 
 	/**

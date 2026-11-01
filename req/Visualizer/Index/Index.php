@@ -114,16 +114,6 @@ Visualizer::doctype();
 			</form>
 		</div>
 	<?php endif ?>
-	<?php if (in_array(Util::getBrowserType(), array
-	(
-		Util::BROWSER_TYPE_MSIE6,
-		Util::BROWSER_TYPE_MSIE7,
-		Util::BROWSER_TYPE_FIREFOX2,
-	))): ?>
-		<p class="notify warning">
-			古いブラウザを使っているため、表示が乱れたり、ページの一部が使用不能になる可能性があります。最新のバージョンへ変更することを推奨します。
-		</p>
-	<?php endif ?>
 	<?php if (App::$actionName == "index" && !Util::isEmpty(trim($c->notes ?? ""))): ?>
 		<section class="notes">
 			<?=$c->notes ?>

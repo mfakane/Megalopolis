@@ -1,16 +1,5 @@
 var megalopolis =
 {
-	isWebKit: function()
-	{
-		try
-		{
-			return window.navigator.taintEnabled == undefined;
-		}
-		catch (ex)
-		{
-			return false;
-		}
-	},
 	unixTimeAsString: function(unixTime, type)
 	{
 		function padLeft(str, len)

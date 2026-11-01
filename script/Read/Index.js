@@ -600,19 +600,25 @@ $(function()
 			}))
 			.insertBefore(content);
 		
-		if (megalopolis.isWebKit())
-			wrapper.on("mousewheel", function(e)
+		// 縦書きでは、縦方向のホイールで横にスクロールする (右から左へ読み進めるため、下へ回すと左へ動かす)
+		wrapper.on("wheel", function(e)
+		{
+			var ev = e.originalEvent;
+
+			// トラックパッドなどの横方向の操作は、ブラウザに任せる
+			if (vertical.isVertical && Math.abs(ev.deltaY) > Math.abs(ev.deltaX))
 			{
-				if (vertical.isVertical)
-				{
-					wrapper.stop(true, true).animate
-					({
-						scrollLeft: wrapper.scrollLeft() + e.originalEvent.wheelDelta,
-					}, 20, "linear");
-					
-					return false;
-				}
-			});
+				// 行単位 (Firefox) やページ単位の量をピクセルに直す
+				var delta = ev.deltaY * (ev.deltaMode == 1 ? 40 : ev.deltaMode == 2 ? wrapper.width() : 1);
+
+				wrapper.stop(true, true).animate
+				({
+					scrollLeft: wrapper.scrollLeft() - delta
+				}, 20, "linear");
+				
+				return false;
+			}
+		});
 		
 		$(window).resize(resizeAction);
 		

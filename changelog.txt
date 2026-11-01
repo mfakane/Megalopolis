@@ -112,6 +112,17 @@
 	* script/mobile/*: 使われていない携帯電話向けのスクリプトを削除
 	* THIRD_PARTY_LICENSES.txt: jQuery のライセンスを追加
 	* script/Read/Edit.js: ダークモードの編集画面で、文字色や背景色を「指定なし」に戻しても本文欄が明るい配色のままになるのを修正
+	* req/Core/Util.php: iPhone の LINE や X などのアプリ内ブラウザで、携帯電話向けの簡易表示になるのを修正
+	  端末の判定を、簡易表示やスマートフォン向けの表示の切り替えに使うものだけにしました
+	* req/Core/Visualizer.php: 以前の版の携帯表示 (mobile) が表示モードのクッキーに残っていても、自動判定に戻すように
+	* req/Visualizer/Index/Index.php,
+	  req/Visualizer/Read/Edit.php,
+	  req/Core/Visualizer.php: Internet Explorer 6、7 と Firefox 2 向けの警告やページ送りの処理を削除
+	* script/base.js,
+	  script/Read/Index.js: 縦書きで縦方向のホイールを横のスクロールにする処理を標準の wheel イベントに変更
+	  Firefox でも動作するようになり、トラックパッドの横方向の操作はブラウザに任せるようにしました
+	* style/style.css: 検索欄のプレースホルダーの色を、Firefox などでも指定どおりにするように
+	* config.php: 実装されていない契約者固有 ID による送信規制の説明を削除
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 

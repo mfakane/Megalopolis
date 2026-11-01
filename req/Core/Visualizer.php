@@ -44,7 +44,7 @@ class Visualizer
 		{
 			self::$mode = Util::escapeInput($_GET["visualizer"]);
 			
-			if (self::$mode == "auto")
+			if (!in_array(self::$mode, array("simple", "normal"), true))
 				self::$mode = self::autoVisualizerMode();
 			
 			setcookie(self::MODE_COOKIE_NAME, self::$mode, array
@@ -58,8 +58,9 @@ class Visualizer
 			
 			return self::$mode;
 		}
-		else if (isset($_COOKIE[self::MODE_COOKIE_NAME]))
-			return $_COOKIE[self::MODE_COOKIE_NAME];
+		// 以前の版の "mobile" など、今は無い表示は自動判定に戻す
+		else if (isset($_COOKIE[self::MODE_COOKIE_NAME]) && in_array($_COOKIE[self::MODE_COOKIE_NAME], array("simple", "normal"), true))
+			return self::$mode = $_COOKIE[self::MODE_COOKIE_NAME];
 		else
 			return self::$mode = self::autoVisualizerMode();
 	}
@@ -221,13 +222,8 @@ class Visualizer
 		if ($max < 2)
 			return;
 		
-		$loopback = in_array(Util::getBrowserType(), array
-		(
-			Util::BROWSER_TYPE_MSIE6,
-			Util::BROWSER_TYPE_MSIE7,
-			Util::BROWSER_TYPE_MSIE,
-			Util::BROWSER_TYPE_MSIE_NEW
-		)) ? "#" : "";
+		// 現在のページなど、移動先の無いリンク
+		$loopback = "";
 		$start = (int)max(min((float)$current - floor($range / 2), $max - $range + 1), 1);
 		$end = (int)min((float)max((float)$current - ceil($range / 2), 0) + (float)$range, $max);
 		$isSimple = self::isSimple();
@@ -929,10 +925,7 @@ class Visualizer
 		$basePath = Constant::APP_DIR . Constant::VISUALIZER_DIR;
 		$mode = self::visualizerMode();
 		
-		if ($mode == "mobile" &&
-			is_file("{$basePath}mobile/{$path}.php"))
-			$basePath .= "mobile/";
-		else if ($mode == "simple" &&
+		if ($mode == "simple" &&
 			is_file("{$basePath}simple/{$path}.php"))
 			$basePath .= "simple/";
 			

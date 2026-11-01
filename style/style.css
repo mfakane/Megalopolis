@@ -1944,7 +1944,6 @@ body.index>h1, body.read>h1
 	font-size: inherit;
 	text-shadow: none;
 	box-shadow: none;
-	-webkit-box-shadow: none;
 }
 
 .index .pagerContainer.subjectPager button:hover
@@ -2139,7 +2138,7 @@ body.index>h1, body.read>h1
 	text-align: center;
 }
 
-body>header form input[name="query"]::-webkit-input-placeholder {
+body>header form input[name="query"]::placeholder {
 	color: var(--text-muted);
 }
 
