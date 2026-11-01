@@ -53,13 +53,6 @@ class App
 			throw new ApplicationException("Precondition {$desc} failed.");
 	}
 
-	private static function isBBQed(): bool
-	{
-		$addr = Util::getRemoteAddress();
-
-		return $addr !== null && substr_count($addr, ".") == 3 && gethostbyname(implode(".", array_reverse(explode(".", $addr))) . ".niku.2ch.net") == "127.0.0.2";
-	}
-
 	/**
 	 * @param string[] $arr
 	 */
@@ -89,9 +82,6 @@ class App
 					if (Util::getBrowserType() != Util::BROWSER_TYPE_MOBILE && (!isset($_SERVER["HTTP_REFERER"]) || mb_strpos($_SERVER["HTTP_REFERER"], Util::getAbsoluteUrl()) != 0))
 						throw new ApplicationException("不正な送信元です", 403);
 
-					if ((Configuration::$instance->useBBQ & Configuration::BBQ_WRITE) && self::isBBQed())
-						throw new ApplicationException("公開プロキシを使用した送信は規制されています", 403);
-
 					if (Configuration::$instance->denyWrite && self::matchesAddress(Configuration::$instance->denyWrite))
 						throw new ApplicationException("あなたのホストからの送信は規制されています", 403);
 
@@ -101,9 +91,6 @@ class App
 			{
 				if (!Configuration::$instance->allowRead || !self::matchesAddress(Configuration::$instance->allowRead))
 				{
-					if ((Configuration::$instance->useBBQ & Configuration::BBQ_READ) && self::isBBQed())
-						throw new ApplicationException("公開プロキシを使用した閲覧は規制されています", 403);
-
 					if (Configuration::$instance->denyRead && self::matchesAddress(Configuration::$instance->denyRead))
 						throw new ApplicationException("あなたのホストからの閲覧は規制されています", 403);
 				}

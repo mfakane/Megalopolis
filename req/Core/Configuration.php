@@ -42,7 +42,11 @@ class Configuration
 	/** @var Configuration::LINK_* */
 	public int $linkType = self::LINK_AUTO;
 	public bool $useOutputCompression = true;
-	/** @var Configuration::BBQ_* */
+	/**
+	 * BBQ のサービス終了により使用しない。以前の設定ファイルとの互換性のために残す
+	 * @var Configuration::BBQ_*
+	 * @psalm-suppress PossiblyUnusedProperty
+	 */
 	public int $useBBQ = self::BBQ_NONE;
 	/** @var string[] */
 	public array $denyRead = array();

@@ -50,6 +50,11 @@
 	  表示モードのクッキーはスクリプトから読まないため HttpOnly にしました
 	* req/Core/Auth.php: https ではセッションのクッキーに Secure を付けるように
 	* req/Core/Util.php: HTTPS が on 以外の値 (1 など) で渡されるサーバーでも https と判定するように
+	* req/Core/App.php,
+	  config.php,
+	  req/Core/Configuration.php: サービスが終了した BBQ による公開プロキシ規制を廃止
+	  有効にしていると、応答のない DNS の問い合わせで閲覧や送信が遅くなっていました
+	  $config->useBBQ は以前の設定ファイルとの互換性のために残していますが、使用されません
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 

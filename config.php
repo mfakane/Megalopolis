@@ -48,11 +48,9 @@ $config->linkType = Configuration::LINK_AUTO;
 // 転送量を削減します。
 $config->useOutputCompression = true;
 
-// BBQ (http://bbq.uso800.net/) による公開プロキシ規制を使用するか (特定値)
-// - Configuration::BBQ_NONE		使用しない
-// - Configuration::BBQ_READ		閲覧に対して使用する
-// - Configuration::BBQ_WRITE		送信に対して使用する
-// - Configuration::BBQ_READWRITE	両方に対して使用する
+// BBQ による公開プロキシ規制 (廃止)
+// BBQ のサービスが終了しているため、この設定は使用されません。
+// 以前の設定ファイルとの互換性のために残しています
 $config->useBBQ = Configuration::BBQ_NONE;
 
 // 閲覧に対するホスト規制 (文字列一覧)
@@ -78,7 +76,7 @@ $config->denyWrite = array
 );
 
 // 閲覧に対するホスト規制の例外 (文字列一覧)
-// この一覧にあるものと IP アドレスまたはリモートホストが一致すると上の規制リストおよび BBQ に含まれていても閲覧可能になります。
+// この一覧にあるものと IP アドレスまたはリモートホストが一致すると上の規制リストに含まれていても閲覧可能になります。
 // ワイルドカード (*, ?, [] など) も使用可能です
 $config->allowRead = array
 (
@@ -88,7 +86,7 @@ $config->allowRead = array
 );
 
 // 送信に対するホスト規制の例外 (文字列一覧)
-// この一覧にあるものと IP アドレスまたはリモートホストが一致すると上の規制リストおよび BBQ に含まれていても送信可能になります。
+// この一覧にあるものと IP アドレスまたはリモートホストが一致すると上の規制リストに含まれていても送信可能になります。
 // ワイルドカード (*, ?, [] など) も使用可能です
 $config->allowWrite = array
 (
