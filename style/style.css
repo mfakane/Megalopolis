@@ -1036,9 +1036,10 @@ h2
 	background: #ffffff;
 }
 
+/* 右端の 640px に、右へ向かって濃くなる緑を重ねる */
 #evaluateform
 {
-	background: #ffffff url("buttonGradation.png") repeat-y scroll right top;
+	background: #ffffff linear-gradient(to right, rgba(0, 80, 25, 0), rgba(0, 80, 25, 0.6)) no-repeat scroll right top / 640px 100%;
 }
 
 #evaluateform p
