@@ -2144,3 +2144,355 @@ input[type="color"] {
 select {
 	box-sizing: border-box;
 }
+
+@media (max-width: 600px)
+{
+	body.read
+	{
+		margin: 0px;
+		min-width: 0px;
+	}
+	
+	.read input[type="text"],
+	.read input[type="password"],
+	.read input[type="search"],
+	.read input[type="email"],
+	.read textarea,
+	.read select
+	{
+		font-size: 16px;
+	}
+	
+	body.read>header
+	{
+		margin: 0px;
+		padding: 8px;
+		height: auto;
+		/* background.png は 56px までがヘッダ、残り 8px が下端の線と影なので、ヘッダの下端に揃える */
+		background-position: left bottom -8px;
+	}
+
+	body.read>header:after
+	{
+		position: absolute;
+		left: 0px;
+		right: 0px;
+		top: 100%;
+		height: 8px;
+		background: transparent url("background.png") repeat-x scroll left bottom;
+		content: "";
+	}
+	
+	body.read>header>a:first-child
+	{
+		display: block;
+		font-size: 20px;
+	}
+	
+	body.read>header nav
+	{
+		position: static;
+		margin: 0px;
+		padding: 0px;
+		height: auto;
+	}
+	
+	body.read>header nav ul
+	{
+		margin: 4px 0px 0px 0px;
+		padding: 0px;
+		height: auto;
+		background: none;
+		overflow: hidden;
+	}
+	
+	body.read>header nav ul li
+	{
+		margin: 0px 16px 0px 0px;
+		height: auto;
+		line-height: 32px;
+	}
+	
+	body.read>header nav ul li a img
+	{
+		vertical-align: middle;
+	}
+	
+	body.read>header form
+	{
+		position: relative;
+		top: auto;
+		right: auto;
+		margin: 4px 0px 0px 0px;
+		width: auto;
+		height: auto;
+	}
+	
+	body.read>header form input[type="search"]
+	{
+		position: static;
+		margin: 0px;
+		padding: 4px 32px 4px 4px;
+		width: 100%;
+		height: 32px;
+		box-sizing: border-box;
+	}
+	
+	body.read>header form input[type="submit"]
+	{
+		top: 1px;
+		right: 1px;
+		width: 30px;
+		height: 30px;
+		box-shadow: none;
+	}
+	
+	body.read>h1
+	{
+		margin: 16px 8px 8px 8px;
+	}
+	
+	.read .status, .read .status+.status
+	{
+		position: static;
+		margin: 0px 8px 4px 8px;
+		padding: 0px;
+		border: none;
+		height: auto;
+		color: #666666;
+		background: none;
+		line-height: inherit;
+		overflow: hidden;
+	}
+	
+	.read .status+.status dt
+	{
+		margin: 0px 4px 0px 4px;
+		padding: 0px 0px 0px 4px;
+		border-left: #666666 1px solid;
+	}
+	
+	.read .status+.status dt:first-child
+	{
+		margin-left: 0px;
+		padding-left: 0px;
+		border-left: none;
+	}
+	
+	.read #tags
+	{
+		margin: 0px 8px 8px 8px;
+	}
+	
+	.read .notify, .read .admin
+	{
+		border-left: none;
+		border-right: none;
+		border-radius: 0px;
+	}
+	
+	.read .pagerContainer
+	{
+		margin: 0px 8px 0px 8px;
+		height: auto;
+	}
+	
+	.read .pager
+	{
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		left: 0px;
+		float: none;
+		row-gap: 4px;
+	}
+	
+	.read .pager li
+	{
+		left: 0px;
+		float: none;
+	}
+	
+	.read .pager li a, .read .pager li button
+	{
+		min-width: 24px;
+		height: 32px;
+		line-height: 32px;
+	}
+	
+	.read ul.options
+	{
+		display: flex;
+		justify-content: flex-end;
+		float: none;
+		margin: 0px 8px 0px 8px;
+		padding: 0px;
+		height: auto;
+	}
+	
+	.read ul.options li
+	{
+		float: none;
+		margin: 0px 0px 0px 4px;
+		height: auto;
+	}
+	
+	.read ul.options li a
+	{
+		display: block;
+		padding: 12px;
+	}
+	
+	.read ul.options li a img
+	{
+		display: block;
+	}
+	
+	.read #body
+	{
+		margin: 0px 0px 16px 0px;
+		padding: 16px 12px 8px 12px;
+		border-left: none;
+		border-right: none;
+		border-radius: 0px;
+	}
+	
+	.read #body.vertical #contentWrapper
+	{
+		padding: 12px;
+	}
+	
+	.read #afterword
+	{
+		margin-top: 48px;
+	}
+	
+	.read #commentformHeadding, .read #evaluateformHeadding
+	{
+		margin-left: 8px;
+	}
+	
+	.read #commentformHeadding.tab
+	{
+		margin-left: 82px;
+	}
+	
+	.read #commentform, .read #evaluateform, .read #comments
+	{
+		border-left: none;
+		border-right: none;
+		border-radius: 0px;
+	}
+	
+	.read #evaluateform .buttons
+	{
+		float: none;
+		margin: 0px;
+		text-align: left;
+	}
+	
+	.read #evaluateform ul.buttons li
+	{
+		padding: 0px 8px 0px 0px;
+	}
+	
+	.read #evaluateform input[type="submit"]
+	{
+		min-width: 44px;
+		height: 36px;
+		font-size: inherit;
+	}
+	
+	.read #evaluateform>div
+	{
+		float: none;
+		margin: 0px 0px 8px 0px;
+	}
+	
+	.read #evaluateform p
+	{
+		height: auto;
+	}
+	
+	.read #commentformContent
+	{
+		padding: 0px;
+		width: auto;
+	}
+	
+	.read #commentformContent div div
+	{
+		position: static;
+	}
+	
+	.read #commentform label
+	{
+		float: none;
+		display: block;
+		margin: 0px;
+	}
+	
+	.read #commentform input[type="text"],
+	.read #commentform input[type="password"],
+	.read #commentform input[type="email"],
+	.read #commentform select
+	{
+		padding: 4px;
+		width: 100%;
+		height: 36px;
+		box-sizing: border-box;
+	}
+	
+	.read #commentform textarea,
+	.read #commentform textarea.usePoint,
+	.read #commentform textarea.usePostPassword,
+	.read #commentform textarea.usePoint.usePostPassword
+	{
+		margin: 0px 0px 8px 0px;
+		padding: 4px;
+		width: 100%;
+		min-width: 0px;
+		height: 120px;
+		box-sizing: border-box;
+	}
+	
+	.read #commentform button
+	{
+		height: 36px;
+		font-size: inherit;
+	}
+	
+	.read #comments dd
+	{
+		margin-left: 8px;
+		overflow-wrap: anywhere;
+	}
+	
+	body.read>footer
+	{
+		display: flex;
+		flex-direction: column-reverse;
+	}
+	
+	body.read>footer>ul:first-child
+	{
+		margin: 0px;
+		padding: 8px;
+		border-left: none;
+		border-right: none;
+		border-radius: 0px;
+	}
+	
+	body.read>footer>ul:first-child+a
+	{
+		position: static;
+		align-self: flex-end;
+		margin: 0px 8px -1px 0px;
+		z-index: 1;
+		border-top: #999999 1px solid;
+		border-bottom: none;
+		border-radius: 4px 4px 0px 0px;
+		/* 作品の背景色が style 属性で指定されるため、フッタと同じ色で上書きする */
+		background-color: #efefef !important;
+	}
+}

@@ -18,6 +18,8 @@ Visualizer::doctype();
 <html lang="ja">
 <head>
 	<?php Visualizer::head() ?>
+	<?php // スマートフォン向けのスタイルに対応したページから順に viewport を指定する ?>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<?php if ($c->showName[Configuration::ON_ENTRY]): ?>
 		<meta name="author" content="<?=Visualizer::escapeOutput($h->entry->name) ?>" />
 	<?php endif ?>

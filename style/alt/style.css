@@ -240,3 +240,33 @@ h2
 {
 	background-color: #480000;
 }
+
+@media (max-width: 600px)
+{
+	body.read>header:after
+	{
+		background-image: url("background.png");
+	}
+
+	body.read>header form>div
+	{
+		margin: 0px;
+		height: auto;
+		border-radius: 0px;
+		background: none;
+	}
+	
+	body.read>header nav ul
+	{
+		margin: 4px 0px 0px 0px;
+		padding: 0px 8px 0px 8px;
+		border-radius: 4px;
+		background-color: #ffffff;
+	}
+	
+	.read .status+.status
+	{
+		color: #666666;
+		background: none;
+	}
+}
