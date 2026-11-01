@@ -9,11 +9,13 @@ Visualizer::doctype();
 <html lang="ja">
 <head>
 	<?php Visualizer::head() ?>
+	<?php // スマートフォン向けのスタイルに対応したページから順に viewport を指定する ?>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>
 		<?=Visualizer::escapeOutput(App::$actionName == "author" ? "作者" : "タグ") ?>の一覧 - <?=Visualizer::escapeOutput($c->title) ?>
 	</title>
 </head>
-<body>
+<body class="responsive">
 	<?php Visualizer::header(App::$actionName == "author" ? "作者の一覧" : "タグの一覧", array
 	(
 		App::$actionName . "/random" => array("おまかせ表示", "refreshIcon.png")

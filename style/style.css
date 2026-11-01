@@ -2948,4 +2948,66 @@ select {
 		height: 36px;
 		font-size: inherit;
 	}
+	
+	.responsive section,
+	.responsive .taglist
+	{
+		padding-left: 12px;
+		padding-right: 12px;
+		border-left: none;
+		border-right: none;
+		border-radius: 0px;
+	}
+	
+	/* section のお知らせ欄は、左にアイコンの余白を残す */
+	.responsive section.notify
+	{
+		padding-left: 32px;
+		padding-right: 8px;
+	}
+	
+	.responsive .notify
+	{
+		overflow-wrap: anywhere;
+	}
+	
+	.auth section
+	{
+		padding-bottom: 8px;
+	}
+	
+	.auth label
+	{
+		float: none;
+		display: block;
+		margin: 0px 0px 4px 0px;
+	}
+	
+	.auth input[type="password"]
+	{
+		padding: 4px;
+		width: 100%;
+		height: 36px;
+		box-sizing: border-box;
+	}
+	
+	.auth button
+	{
+		height: 36px;
+		font-size: inherit;
+	}
+	
+	/* 設定情報は、項目名を値の上に置く */
+	.config dt
+	{
+		float: none;
+		margin: 0px;
+		padding: 0px;
+	}
+	
+	.config dd
+	{
+		margin: 0px 0px 8px 0px;
+		overflow-wrap: anywhere;
+	}
 }
