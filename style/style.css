@@ -2147,23 +2147,31 @@ select {
 
 @media (max-width: 600px)
 {
-	body.read
+	body.read,
+	body.index
 	{
 		margin: 0px;
 		min-width: 0px;
 	}
 	
 	.read input[type="text"],
+	.index input[type="text"],
 	.read input[type="password"],
+	.index input[type="password"],
 	.read input[type="search"],
+	.index input[type="search"],
 	.read input[type="email"],
+	.index input[type="email"],
 	.read textarea,
-	.read select
+	.index textarea,
+	.read select,
+	.index select
 	{
 		font-size: 16px;
 	}
 	
-	body.read>header
+	body.read>header,
+	body.index>header
 	{
 		margin: 0px;
 		padding: 8px;
@@ -2172,7 +2180,8 @@ select {
 		background-position: left bottom -8px;
 	}
 
-	body.read>header:after
+	body.read>header:after,
+	body.index>header:after
 	{
 		position: absolute;
 		left: 0px;
@@ -2183,13 +2192,15 @@ select {
 		content: "";
 	}
 	
-	body.read>header>a:first-child
+	body.read>header>a:first-child,
+	body.index>header>a:first-child
 	{
 		display: block;
 		font-size: 20px;
 	}
 	
-	body.read>header nav
+	body.read>header nav,
+	body.index>header nav
 	{
 		position: static;
 		margin: 0px;
@@ -2197,7 +2208,8 @@ select {
 		height: auto;
 	}
 	
-	body.read>header nav ul
+	body.read>header nav ul,
+	body.index>header nav ul
 	{
 		margin: 4px 0px 0px 0px;
 		padding: 0px;
@@ -2206,19 +2218,22 @@ select {
 		overflow: hidden;
 	}
 	
-	body.read>header nav ul li
+	body.read>header nav ul li,
+	body.index>header nav ul li
 	{
 		margin: 0px 16px 0px 0px;
 		height: auto;
 		line-height: 32px;
 	}
 	
-	body.read>header nav ul li a img
+	body.read>header nav ul li a img,
+	body.index>header nav ul li a img
 	{
 		vertical-align: middle;
 	}
 	
-	body.read>header form
+	body.read>header form,
+	body.index>header form
 	{
 		position: relative;
 		top: auto;
@@ -2228,7 +2243,8 @@ select {
 		height: auto;
 	}
 	
-	body.read>header form input[type="search"]
+	body.read>header form input[type="search"],
+	body.index>header form input[type="search"]
 	{
 		position: static;
 		margin: 0px;
@@ -2238,7 +2254,8 @@ select {
 		box-sizing: border-box;
 	}
 	
-	body.read>header form input[type="submit"]
+	body.read>header form input[type="submit"],
+	body.index>header form input[type="submit"]
 	{
 		top: 1px;
 		right: 1px;
@@ -2247,12 +2264,15 @@ select {
 		box-shadow: none;
 	}
 	
-	body.read>h1
+	body.read>h1,
+	body.index>h1
 	{
 		margin: 16px 8px 8px 8px;
 	}
 	
-	.read .status, .read .status+.status
+	.read .status,
+	.index .status,
+	.read .status+.status
 	{
 		position: static;
 		margin: 0px 8px 4px 8px;
@@ -2284,20 +2304,25 @@ select {
 		margin: 0px 8px 8px 8px;
 	}
 	
-	.read .notify, .read .admin
+	.read .notify,
+	.index .notify,
+	.read .admin,
+	.index .admin
 	{
 		border-left: none;
 		border-right: none;
 		border-radius: 0px;
 	}
 	
-	.read .pagerContainer
+	.read .pagerContainer,
+	.index .pagerContainer
 	{
 		margin: 0px 8px 0px 8px;
 		height: auto;
 	}
 	
-	.read .pager
+	.read .pager,
+	.index .pager
 	{
 		display: flex;
 		flex-wrap: wrap;
@@ -2307,13 +2332,17 @@ select {
 		row-gap: 4px;
 	}
 	
-	.read .pager li
+	.read .pager li,
+	.index .pager li
 	{
 		left: 0px;
 		float: none;
 	}
 	
-	.read .pager li a, .read .pager li button
+	.read .pager li a,
+	.index .pager li a,
+	.read .pager li button,
+	.index .pager li button
 	{
 		min-width: 24px;
 		height: 32px;
@@ -2468,13 +2497,15 @@ select {
 		overflow-wrap: anywhere;
 	}
 	
-	body.read>footer
+	body.read>footer,
+	body.index>footer
 	{
 		display: flex;
 		flex-direction: column-reverse;
 	}
 	
-	body.read>footer>ul:first-child
+	body.read>footer>ul:first-child,
+	body.index>footer>ul:first-child
 	{
 		margin: 0px;
 		padding: 8px;
@@ -2483,7 +2514,8 @@ select {
 		border-radius: 0px;
 	}
 	
-	body.read>footer>ul:first-child+a
+	body.read>footer>ul:first-child+a,
+	body.index>footer>ul:first-child+a
 	{
 		position: static;
 		align-self: flex-end;
@@ -2494,5 +2526,253 @@ select {
 		border-radius: 4px 4px 0px 0px;
 		/* 作品の背景色が style 属性で指定されるため、フッタと同じ色で上書きする */
 		background-color: #efefef !important;
+	}
+	
+	.index .headdingButtons
+	{
+		position: static;
+		margin: 0px 8px 8px 8px;
+	}
+	
+	.index .pagerContainer.subjectPager
+	{
+		position: static;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+		margin: 0px 0px 8px 0px;
+		padding: 4px 8px 4px 8px;
+		border-left: none;
+		border-right: none;
+		border-radius: 0px;
+		height: auto;
+		row-gap: 4px;
+	}
+	
+	.index .pagerContainer.subjectPager span
+	{
+		float: none;
+	}
+	
+	.index .pagerContainer.subjectPager select
+	{
+		height: 34px;
+	}
+	
+	.index .notes
+	{
+		border-left: none;
+		border-right: none;
+		border-radius: 0px;
+	}
+	
+	.index div.entries
+	{
+		margin: 0px;
+	}
+	
+	.index div.entries article
+	{
+		display: block;
+		width: auto;
+	}
+	
+	.index div.entries article .articleBody
+	{
+		margin: 0px 0px 8px 0px;
+		padding: 8px 12px 8px 12px;
+		border-left: none;
+		border-right: none;
+		border-radius: 0px;
+	}
+	
+	/* 折り返した行の先頭に区切り線が来ないよう、区切り線をやめて間隔で区切る */
+	.index div.entries dl dt
+	{
+		margin: 0px;
+		padding: 0px;
+		border-left: none;
+		white-space: nowrap;
+	}
+	
+	.index div.entries dl dd
+	{
+		margin-right: 12px;
+		white-space: nowrap;
+	}
+
+	/* HTML の出力ではタグ間の空白が詰められるため、項目の後に改行できる位置を作る */
+	.index div.entries dl dd:after
+	{
+		white-space: normal;
+		content: "\200B";
+	}
+	
+	/* 並べ替えと表示形式のメニューは、件数の後で改行して 2 つ並べる */
+	body.index>h1>span:after
+	{
+		display: block;
+		content: "";
+	}
+	
+	.index .dropDown
+	{
+		margin-top: 8px;
+		padding: 4px 4px 4px 6px;
+		width: 96px;
+		height: 26px;
+		line-height: 26px;
+		font-size: 14px;
+	}
+	
+	.index .dropDown .button
+	{
+		margin-top: 4px;
+	}
+	
+	.index .dropDown ul
+	{
+		top: 34px;
+		width: 106px;
+	}
+	
+	.index .dropDown ul li
+	{
+		padding: 8px 6px 8px 6px;
+		height: 18px;
+		line-height: 18px;
+	}
+	
+	.index .dropDown ul li .button
+	{
+		top: 8px;
+		right: 6px;
+		margin-top: 0px;
+	}
+	
+	.index section.entries
+	{
+		padding: 0px;
+		border-left: none;
+		border-right: none;
+		border-radius: 0px;
+	}
+	
+	/* テーブル表示は 1 作品ずつのカードに組み替える */
+	.index .entries table,
+	.index .entries table tbody,
+	.index .entries table tr,
+	.index .entries table td
+	{
+		display: block;
+	}
+	
+	.index .entries table thead
+	{
+		display: none;
+	}
+	
+	.index .entries table tr.article
+	{
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		padding: 8px 12px 4px 12px;
+		column-gap: 8px;
+	}
+	
+	.index .entries table td
+	{
+		padding: 0px;
+		width: auto;
+		min-width: 0px;
+		text-align: left;
+	}
+	
+	.index .entries table td.title
+	{
+		flex: 1 0 100%;
+		margin-bottom: 4px;
+	}
+	
+	.index .entries table td.checkbox+td.title
+	{
+		flex-basis: calc(100% - 24px);
+	}
+	
+	.index .entries table td.checkbox
+	{
+		width: 16px;
+	}
+	
+	.index .entries table h2
+	{
+		font-size: 120%;
+	}
+
+	.index .entries table td.title br
+	{
+		display: none;
+	}
+
+	.index .entries table td.title .host
+	{
+		display: block;
+	}
+	
+	.index .entries table td.dateTime,
+	.index .entries table td.lastUpdate,
+	.index .entries table td.info
+	{
+		width: auto;
+		color: #666666;
+		font-size: 90%;
+		white-space: nowrap;
+	}
+	
+	.index .entries table td.lastUpdate:before
+	{
+		content: "更新: ";
+	}
+	
+	.index .entries table td.pageCount:before
+	{
+		content: "ページ: ";
+	}
+	
+	.index .entries table td.readCount:before
+	{
+		content: "閲覧: ";
+	}
+
+	.index .entries table td.evaluationCount:before
+	{
+		content: "評価: ";
+	}
+	
+	.index .entries table td.commentCount:before
+	{
+		content: "コメント: ";
+	}
+
+	.index .entries table td.points:before
+	{
+		content: "POINT: ";
+	}
+	
+	.index .entries table td.rate:before
+	{
+		content: "Rate: ";
+	}
+	
+	.index .entries table tr.tags td
+	{
+		padding: 4px 12px 8px 12px;
+	}
+	
+	.index .entries table .hidden
+	{
+		display: none;
 	}
 }

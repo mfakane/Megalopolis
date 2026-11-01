@@ -117,7 +117,9 @@ $(function()
 		});
 		var lastSort = sortItems.dateTime;
 		var ascending = false;
-		
+		// タッチでは 1 回のタップで mouseenter と click が両方起きるため、開くためのタップでは並び順を反転しない
+		var openedByTouch = false;
+
 		var control = $('<div class="dropDown"><span>投稿日時</span><div class="button"></div><ul></ul></div>');
 		var label = control.find("span");
 		var dropDown = control.find("ul").hide().append($.map(sortItems, function(v)
@@ -201,18 +203,31 @@ $(function()
 		})
 		.click(function()
 		{
+			if (openedByTouch)
+			{
+				openedByTouch = false;
+
+				return false;
+			}
+
 			ascending = !ascending;
 			sort();
-			
+
 			return false;
 		})
 		.appendTo(h1);
+
+		if (control[0].addEventListener)
+			control[0].addEventListener("pointerdown", function(e)
+			{
+				openedByTouch = e.pointerType != "mouse" && !control.hasClass("open");
+			});
 	};
 	var loadVisibilityDropDown = function()
 	{
 		var styleMap =
 		{
-			"double": "二列表示",
+			"double": "並べて表示",
 			"single": "テーブル"
 		};
 		var visibilityMap = (function(obj) { return $.each(obj, function(k, v) { if (!use[k]) delete obj[k]; }); })
