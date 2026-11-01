@@ -22,6 +22,8 @@ $(function()
 			value = t.val();
 		
 		$("#body").css(cssProperty, value == "" ? defaultValue : cssProperty == "backgroundImage" ? "url('" + value + "')" : value);
+		// ダークモードでも作者の指定した配色で見えるよう、色を指定したときは明るい配色にする (style.css)
+		$("#body").toggleClass("authorColors", $.grep(["#foreground", "#background", "#backgroundImage"], function(i) { return $(i).val() != ""; }).length > 0);
 	};
 	var createPalette = function(selector, func, cssProperty)
 	{
@@ -62,10 +64,10 @@ $(function()
 		}
 	};
 	
-	createPalette("#foreground", function(value) { setBodyBoxStyle("foreground", "color", value, "#000000"); }, "backgroundColor");
-	createPalette("#background", function(value) { setBodyBoxStyle("background", "backgroundColor", value, "#ffffff"); }, "backgroundColor");
-	createPalette("#backgroundImage", function(value) { setBodyBoxStyle("backgroundImage", "backgroundImage", value, "none"); }, "backgroundImage");
-	createPalette("#border", function(value) { setBodyBoxStyle("border", "borderColor", value, "#999999"); }, "backgroundColor");
+	createPalette("#foreground", function(value) { setBodyBoxStyle("foreground", "color", value, ""); }, "backgroundColor");
+	createPalette("#background", function(value) { setBodyBoxStyle("background", "backgroundColor", value, ""); }, "backgroundColor");
+	createPalette("#backgroundImage", function(value) { setBodyBoxStyle("backgroundImage", "backgroundImage", value, ""); }, "backgroundImage");
+	createPalette("#border", function(value) { setBodyBoxStyle("border", "borderColor", value, ""); }, "backgroundColor");
 	
 	$(window).resize(resize);
 	$("#unpostCheck").change(function()

@@ -13,6 +13,13 @@ $isAdmin = Auth::hasSession(true);
 /** @var array */
 // 確認画面の入力は送信された値だけから引き継ぐ (セッションには認証の情報もある)
 $postOrSession = $_POST;
+
+// 作者が配色を指定した作品は、ダークモードでも本文の枠の中を明るい配色で表示する (style.css)
+$authorColors =
+	!Util::isEmpty($h->thread->foreground) ||
+	!Util::isEmpty($h->thread->background) ||
+	!Util::isEmpty($h->thread->backgroundImage) ||
+	preg_match('/color\s*[:=]/i', ($h->thread->body ?? "") . ($h->thread->afterword ?? ""));
 Visualizer::doctype();
 ?>
 <html lang="ja">
@@ -159,7 +166,7 @@ Visualizer::doctype();
 	<?php else: ?>
 		<?php Visualizer::pager($h->page ?? 1, $h->entry->pageCount, 10, array(Visualizer::actionHref($h->subject, $h->entry->id) . "/", "#body")) ?>
 	<?php endif ?>
-	<section id="body" data-style-path="<?=Visualizer::escapeOutput(Visualizer::$basePath) ?>style/<?=Visualizer::escapeOutput($c->skin !== null && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null) ?>" data-writing-mode="<?=intval($h->thread->writingMode) ?>">
+	<section id="body"<?php if ($authorColors): ?> class="authorColors"<?php endif ?> data-style-path="<?=Visualizer::escapeOutput(Visualizer::$basePath) ?>style/<?=Visualizer::escapeOutput($c->skin !== null && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null) ?>" data-writing-mode="<?=intval($h->thread->writingMode) ?>">
 		<div id="verticalWrapper">
 			<div id="contentWrapper">
 				<?php if ($h->page == 1 && $c->showHeaderInsideBorder): ?>

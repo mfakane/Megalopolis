@@ -1,9 +1,54 @@
+/*
+ * 配色
+ * ダークモード (prefers-color-scheme: dark) では、ファイルの末尾でこれらの値だけを置き換える
+ */
+:root,
+.read #body.authorColors,
+.edit textarea#body.authorColors
+{
+	--page-background: #ccddcc;
+	--header-1: #fefefe;
+	--header-2: #f7f7f7;
+	--header-3: #efefef;
+	--header-4: #e4e4e4;
+	--header-5: #d5d5d5;
+	--bar-1: #d5d5d5;
+	--bar-2: #bbbbbb;
+	--text: #000000;
+	--text-muted: #666666;
+	--text-subtle: #999999;
+	--link: #0000ff;
+	--surface: #ffffff;
+	--surface-alt: #efefef;
+	--surface-hover: #f6f6f6;
+	--border: #999999;
+	--border-disabled: #cccccc;
+	--accent-text: #005019;
+	--accent-border: #005019;
+	--accent-fill: #005019;
+	--accent-soft: #559977;
+	--on-accent: #ffffff;
+	--button-background: #fcfcfc;
+	--button-hover: #ffffff;
+	--button-icon: #999999;
+	--bevel: #ffffff;
+	--notify-border: #ffbb00;
+	--notify-background: #ffffcc;
+	--point-plus: #0000cc;
+	--point-minus: #cc0000;
+}
+
+:root
+{
+	color-scheme: light dark;
+}
+
 html
 {
 	margin: 0px;
 	padding: 0px;
 	/* 上端の 64px は、ヘッダの下で灰色になるグラデーション、緑の線、影の順に重ねる */
-	background: #ccddcc linear-gradient(#fefefe 42px, #f7f7f7 46.5px, #efefef 49.5px, #e4e4e4 52.5px, #d5d5d5 55.5px, #005019 56px, #005019 57px, rgba(49, 98, 63, 0.34) 57px, rgba(49, 98, 63, 0.34) 57.5px, rgba(49, 98, 63, 0) 63.5px) no-repeat scroll left top / 100% 64px;
+	background: var(--page-background) linear-gradient(var(--header-1) 42px, var(--header-2) 46.5px, var(--header-3) 49.5px, var(--header-4) 52.5px, var(--header-5) 55.5px, var(--accent-fill) 56px, var(--accent-fill) 57px, rgba(49, 98, 63, 0.34) 57px, rgba(49, 98, 63, 0.34) 57.5px, rgba(49, 98, 63, 0) 63.5px) no-repeat scroll left top / 100% 64px;
 	font-family: sans-serif;
 	line-height: 1.25;
 }
@@ -13,7 +58,7 @@ body
 	position: relative;
 	margin: 0px 5% 0px 5%;
 	padding: 0px;
-	color: #000000;
+	color: var(--text);
 	min-width: 560px;
 }
 
@@ -24,7 +69,7 @@ img
 
 a
 {
-	color: #0000ff;
+	color: var(--link);
 	text-decoration: none;
 }
 
@@ -50,7 +95,7 @@ hr
 {
 	margin: 0px 0px 8px 0px;
 	border: none;
-	border-top: #005019 1px solid;
+	border-top: var(--accent-border) 1px solid;
 	height: 0px;
 }
 
@@ -65,18 +110,18 @@ input[type="submit"], input[type="reset"], input[type="button"], button
 	position: relative;
 	margin: 0px 0px 8px 0px;
 	padding: 2px 8px 2px 8px;
-	border: #999999 1px solid;
+	border: var(--border) 1px solid;
 	border-radius: 4px;
 	height: 24px;
 	/* 下半分に、下へ向かって濃くなる影を付ける */
-	background: #fcfcfc linear-gradient(rgba(128, 128, 128, 0) 50%, rgba(128, 128, 128, 0.13) 50%, rgba(128, 128, 128, 0.48));
+	background: var(--button-background) linear-gradient(rgba(128, 128, 128, 0) 50%, rgba(128, 128, 128, 0.13) 50%, rgba(128, 128, 128, 0.48));
 	font: inherit;
 	font-size: 9pt;
-	text-shadow: 1px 1px 0px #ffffff;
+	text-shadow: 1px 1px 0px var(--bevel);
 	line-height: 18px;
 	overflow: visible;
 	box-sizing: border-box;
-	box-shadow: 1px 1px 0px #ffffff inset, -1px 1px 0px #ffffff inset, -1px -1px 0px #ffffff inset, 1px -1px 0px #ffffff inset;
+	box-shadow: 1px 1px 0px var(--bevel) inset, -1px 1px 0px var(--bevel) inset, -1px -1px 0px var(--bevel) inset, 1px -1px 0px var(--bevel) inset;
 }
 
 button
@@ -92,11 +137,11 @@ button img
 	align-self: stretch;
 	margin: -2px 8px -2px -8px;
 	padding: 0px 4px 0px 3px;
-	border-right: #ffffff 1px solid;
+	border-right: var(--bevel) 1px solid;
 	border-radius: 3px 0px 0px 3px;
 	width: 16px;
 	height: auto;
-	background-color: #999999;
+	background-color: var(--button-icon);
 	object-fit: none;
 }
 
@@ -104,45 +149,45 @@ button img.last
 {
 	margin: -2px -8px -2px 8px;
 	border-right: none;
-	border-left: #ffffff 1px solid;
+	border-left: var(--bevel) 1px solid;
 	border-radius: 0px 3px 3px 0px;
 }
 
 input[type="submit"]:hover, input[type="reset"]:hover, input[type="button"]:hover, button:hover
 {
-	border-color: #559977;
-	color: #005019;
-	background-color: #ffffff;
+	border-color: var(--accent-soft);
+	color: var(--accent-text);
+	background-color: var(--button-hover);
 }
 
 input[type="submit"]:active, input[type="reset"]:active, input[type="button"]:active, button:active
 {
-	border-color: #005019;
-	box-shadow: 0px 0px 4px #559977;
+	border-color: var(--accent-border);
+	box-shadow: 0px 0px 4px var(--accent-soft);
 }
 
 button:hover img
 {
-	background-color: #559977;
+	background-color: var(--accent-soft);
 }
 
 button:active img
 {
-	background-color: #005019;
+	background-color: var(--accent-fill);
 }
 
 input[type="submit"][disabled], input[type="reset"][disabled], input[type="button"][disabled], button[disabled]
 {
-	background-color: #ffffff !important;
-	border-color: #cccccc !important;
-	text-shadow: #cccccc -1px -1px 0px !important;
-	box-shadow: 1px 1px 0px #ffffff inset, -1px 1px 0px #ffffff inset, -1px -1px 0px #ffffff inset, 1px -1px 0px #ffffff inset !important;
+	background-color: var(--surface) !important;
+	border-color: var(--border-disabled) !important;
+	text-shadow: var(--border-disabled) -1px -1px 0px !important;
+	box-shadow: 1px 1px 0px var(--bevel) inset, -1px 1px 0px var(--bevel) inset, -1px -1px 0px var(--bevel) inset, 1px -1px 0px var(--bevel) inset !important;
 }
 
 button[disabled] img
 {
-	border-color: #ffffff !important;
-	background-color: #cccccc !important;
+	border-color: var(--bevel) !important;
+	background-color: var(--border-disabled) !important;
 }
 
 input[type="text"],
@@ -158,10 +203,10 @@ select
 {
 	margin: 0px 0px 8px 0px;
 	padding: 1px 2px 1px 2px;
-	border: #999999 1px solid;
+	border: var(--border) 1px solid;
 	min-height: 18px;
-	color: #000000;
-	background-color: #ffffff;
+	color: var(--text);
+	background-color: var(--surface);
 	font: inherit;
 	font-size: 9pt;
 	line-height: 16px;
@@ -203,7 +248,7 @@ body>header
 	padding: 16px 0px 16px 0px;
 	height: 24px;
 	/* ヘッダの高さが変わっても、灰色のグラデーションは下端に揃える */
-	background: #fefefe linear-gradient(#fefefe 42px, #f7f7f7 46.5px, #efefef 49.5px, #e4e4e4 52.5px, #d5d5d5 55.5px) no-repeat scroll left bottom / 100% 56px;
+	background: var(--header-1) linear-gradient(var(--header-1) 42px, var(--header-2) 46.5px, var(--header-3) 49.5px, var(--header-4) 52.5px, var(--header-5) 55.5px) no-repeat scroll left bottom / 100% 56px;
 }
 
 body>header>a:first-child
@@ -213,7 +258,7 @@ body>header>a:first-child
 	line-height: 24px;
 	font-size: 24px;
 	font-weight: bold;
-	color: #005019;
+	color: var(--accent-text);
 }
 
 body>header nav
@@ -234,7 +279,7 @@ body>header nav ul
 	margin-right: -8px;
 	padding: 8px;
 	height: 16px;
-	background-color: #ffffff;
+	background-color: var(--surface);
 }
 
 body>header nav ul li
@@ -252,7 +297,7 @@ body>header nav ul li a img
 {
 	margin: 0px 4px 0px 0px;
 	vertical-align: top;
-	background-color: #005019;
+	background-color: var(--accent-fill);
 }
 
 body>header form
@@ -313,9 +358,9 @@ body>footer>ul:first-child
 {
 	margin: 0px 0px 8px 0px;
 	padding: 8px 142px 8px 8px;
-	border: #999999 1px solid;
+	border: var(--border) 1px solid;
 	border-radius: 4px;
-	background: #efefef;
+	background: var(--surface-alt);
 	text-align: center;
 }
 
@@ -340,11 +385,11 @@ body>footer>ul:first-child+a
 	right: 9px;
 	margin: 0px;
 	padding: 4px 22px 4px 12px;
-	border: #999999 1px solid;
+	border: var(--border) 1px solid;
 	border-top: none;
 	border-radius: 0px 0px 4px 4px;
 	height: 16px;
-	background: #ccddcc url("returnToTopIcon.png") no-repeat scroll right top;
+	background: var(--page-background) url("returnToTopIcon.png") no-repeat scroll right top;
 	text-align: center;
 	line-height: 16px;
 }
@@ -358,10 +403,10 @@ body>footer>ul:first-child+a
 {
 	margin: 0px 0px 8px 0px;
 	padding: 8px 8px 8px 32px;
-	border: #ffbb00 1px solid;
+	border: var(--notify-border) 1px solid;
 	border-radius: 4px;
 	min-height: 16px;
-	background: #ffffcc none no-repeat scroll 8px 8px;
+	background: var(--notify-background) none no-repeat scroll 8px 8px;
 	line-height: 17px;
 	font-size: 9pt;
 }
@@ -397,9 +442,9 @@ ul.notify
 {
 	margin: 0px 0px 8px 0px;
 	padding: 8px;
-	border: #999999 1px solid;
+	border: var(--border) 1px solid;
 	border-radius: 4px;
-	background: #efefef;
+	background: var(--surface-alt);
 }
 
 .search section.filter
@@ -445,9 +490,9 @@ div.entries article .articleBody
 {
 	margin: 0px 4px 8px 4px;
 	padding: 8px;
-	border: #005019 1px solid;
+	border: var(--accent-border) 1px solid;
 	border-radius: 4px;
-	background: #ffffff;
+	background: var(--surface);
 	overflow: hidden;
 }
 
@@ -455,7 +500,7 @@ div.entries article time
 {
 	float: right;
 	display: block;
-	color: #999999;
+	color: var(--text-subtle);
 	text-align: right;
 }
 
@@ -471,7 +516,7 @@ div.entries article time.hidden+time
 
 div.entries article time.lastUpdate
 {
-	color: #666666;
+	color: var(--text-muted);
 }
 
 .entries .compact
@@ -492,12 +537,12 @@ div.entries article time.lastUpdate
 {
 	margin-top: 4px;
 	padding-top: 8px;
-	border-top: #999999 1px solid;
+	border-top: var(--border) 1px solid;
 }
 
 .entries .host
 {
-	color: #666666;
+	color: var(--text-muted);
 }
 
 .entries .update
@@ -505,7 +550,7 @@ div.entries article time.lastUpdate
 	float: right;
 	display: block;
 	padding: 0px 4px 0px 0px;
-	color: #005019;
+	color: var(--accent-text);
 	font-weight: bold;
 	text-align: right;
 }
@@ -525,7 +570,7 @@ div.entries dl
 {
 	margin: 4px 0px 0px 0px;
 	padding: 4px;
-	background: #efefef;
+	background: var(--surface-alt);
 	font-size: 90%;
 	clear: both;
 }
@@ -540,7 +585,7 @@ div.entries dl dt
 	display: inline;
 	margin: 0px 0px 0px 4px;
 	padding: 0px 0px 0px 4px;
-	border-left: #000000 1px solid;
+	border-left: var(--text) 1px solid;
 }
 
 div.entries dl dt:first-child, div.entries dl dt.firstChild
@@ -583,7 +628,7 @@ div.entries .summary
 {
 	margin: 4px 0px 0px 0px;
 	padding: 8px 0px 0px 0px;
-	border-top: #999999 1px solid;
+	border-top: var(--border) 1px solid;
 }
 
 section.entries
@@ -618,28 +663,28 @@ section.entries
 
 .entries table tr
 {
-	background: #ffffff;
+	background: var(--surface);
 }
 
 .entries tbody .tags
 {
-	background: #efefef;
+	background: var(--surface-alt);
 }
 
 .entries tbody tr.tags+tr,
 .entries tbody tr.notags+tr
 {
-	border-top: #999999 1px solid !important;
+	border-top: var(--border) 1px solid !important;
 }
 
 .entries tbody .hasSummary:hover, .entries table .hasSummary:hover+.tags, .entries th.clickable:hover
 {
-	background: #f6f6f6;
+	background: var(--surface-hover);
 }
 
 .entries th.clickable:hover
 {
-	border-bottom: #999999 1px solid;
+	border-bottom: var(--border) 1px solid;
 }
 
 .entries table tr.tags ul
@@ -664,7 +709,7 @@ section.entries
 	display: block;
 	float: right;
 	margin: 0px 0px 0px 8px;
-	color: #999999;
+	color: var(--text-subtle);
 }
 
 .entries table th, .entries table td
@@ -678,14 +723,14 @@ section.entries
 .entries table thead tr
 {
 	font-weight: bold;
-	color: #ffffff;
-	border-bottom: #005019 1px solid;
+	color: var(--on-accent);
+	border-bottom: var(--accent-border) 1px solid;
 }
 
 .entries table th
 {
 	text-align: left;
-	color: #005019;
+	color: var(--accent-text);
 }
 
 .entries table .checkbox
@@ -754,9 +799,9 @@ section, .taglist, body>ul
 {
 	margin: 0px 0px 8px 0px;
 	padding: 8px 8px 0px 8px;
-	border: #005019 1px solid;
+	border: var(--accent-border) 1px solid;
 	border-radius: 4px;
-	background: #ffffff;
+	background: var(--surface);
 }
 
 body>ul
@@ -783,7 +828,7 @@ body>ul
 	display: block;
 	margin: 0px;
 	padding: 0px;
-	color: #005019;
+	color: var(--accent-text);
 	font-weight: bold;
 }
 
@@ -823,7 +868,7 @@ h1
 {
 	margin: 16px 0px 8px 0px;
 	padding: 0px 0px 0px 24px;
-	color: #005019;
+	color: var(--accent-text);
 	background: transparent url("h1.png") no-repeat scroll left top;
 	vertical-align: middle;
 	line-height: 20px;
@@ -845,7 +890,7 @@ body>h1, .entries h1
 body>h1>span
 {
 	margin: 0px 8px 0px 8px;
-	color: #000000;
+	color: var(--text);
 	font-size: 9pt;
 	font-weight: normal;
 	line-height: normal;
@@ -855,7 +900,7 @@ h2
 {
 	margin: 0px 0px 8px 0px;
 	padding: 0px;
-	color: #005019;
+	color: var(--accent-text);
 	font: inherit;
 	font-weight: bold;
 }
@@ -876,8 +921,8 @@ h2
 {
 	margin: 0px 0px 8px -72px;
 	padding: 8px 0px 0px 0px;
-	border-top: #999999 1px solid;
-	color: #666666;
+	border-top: var(--border) 1px solid;
+	color: var(--text-muted);
 	font-size: 9pt;
 }
 
@@ -892,7 +937,7 @@ h2
 	clear: left;
 	margin: 0px 0px 8px -72px;
 	padding: 2px 2px 2px 0px;
-	color: #005019;
+	color: var(--accent-text);
 	font-size: 9pt;
 	font-weight: bold;
 	line-height: 16px;
@@ -973,8 +1018,8 @@ h2
 	position: relative;
 	margin-top: -42px;
 	padding-top: 7px;
-	border-color: #ffbb00;
-	background: #ffffcc;
+	border-color: var(--notify-border);
+	background: var(--notify-background);
 	width: 276px;
 	height: 24px;
 }
@@ -1033,15 +1078,15 @@ h2
 	position: relative;
 	margin: 0px 0px 8px 0px;
 	padding: 8px;
-	border: #005019 1px solid;
+	border: var(--accent-border) 1px solid;
 	border-radius: 0px 4px 4px 4px;
-	background: #ffffff;
+	background: var(--surface);
 }
 
 /* 右端の 640px に、右へ向かって濃くなる緑を重ねる */
 #evaluateform
 {
-	background: #ffffff linear-gradient(to right, rgba(0, 80, 25, 0), rgba(0, 80, 25, 0.6)) no-repeat scroll right top / 640px 100%;
+	background: var(--surface) linear-gradient(to right, rgba(0, 80, 25, 0), rgba(0, 80, 25, 0.6)) no-repeat scroll right top / 640px 100%;
 }
 
 #evaluateform p
@@ -1058,11 +1103,11 @@ h2
 	padding: 2px 4px 2px 4px;
 	width: 64px;
 	height: 18px;
-	border: #005019 1px solid;
+	border: var(--accent-border) 1px solid;
 	border-bottom: none;
 	border-radius: 4px 4px 0px 0px;
-	color: #ffffff;
-	background: #005019;
+	color: var(--on-accent);
+	background: var(--accent-fill);
 	line-height: 18px;
 	text-decoration: none;
 	font-weight: bold;
@@ -1094,16 +1139,16 @@ h2
 	margin-top: 3px;
 	padding-top: 1px;
 	padding-bottom: 0px;
-	border-color: #999999;
-	border-bottom: #005019 1px solid;
-	color: #0000ff;
-	background: #efefef;
+	border-color: var(--border);
+	border-bottom: var(--accent-border) 1px solid;
+	color: var(--link);
+	background: var(--surface-alt);
 	font-weight: normal;
 }
 
 #commentformHeadding.inactive:hover, #evaluateformHeadding.inactive:hover
 {
-	background: #ffffff;
+	background: var(--surface);
 }
 
 #evaluateformHeadding.inactive
@@ -1289,14 +1334,14 @@ ul.buttons li,
 	display: block;
 	margin: 0px;
 	padding: 0px;
-	border: #999999 1px solid;
+	border: var(--border) 1px solid;
 	border-left: none;
 	border-top: none;
 }
 
 .edit section ul.palette li:first-child
 {
-	border-left: #999999 1px solid;
+	border-left: var(--border) 1px solid;
 }
 
 /* 見本の大きさは a に直接指定し、正方形にする */
@@ -1334,7 +1379,7 @@ body.index>h1, body.read>h1
 	top: 64px;
 	margin: 0px;
 	padding: 0px;
-	color: #666666;
+	color: var(--text-muted);
 	font-size: 9pt;
 }
 
@@ -1344,12 +1389,12 @@ body.index>h1, body.read>h1
 	right: 0px;
 	top: 56px;
 	padding: 4px 8px 4px 0px;
-	border: #005019 1px solid;
+	border: var(--accent-border) 1px solid;
 	border-top: none;
 	border-radius: 0px 0px 4px 4px;
 	height: 16px;
-	color: #000000;
-	background: transparent linear-gradient(#d5d5d5 8.5px, #bbbbbb 31.5px) no-repeat scroll right bottom / 100% 32px;
+	color: var(--text);
+	background: transparent linear-gradient(var(--bar-1) 8.5px, var(--bar-2) 31.5px) no-repeat scroll right bottom / 100% 32px;
 	line-height: 14px;
 }
 
@@ -1359,7 +1404,7 @@ body.index>h1, body.read>h1
 	display: block;
 	margin: 0px 4px 0px 4px;
 	padding: 0px 0px 0px 4px;
-	border-left: #666666 1px solid;
+	border-left: var(--text-muted) 1px solid;
 }
 
 .index .status dt:first-child
@@ -1441,7 +1486,7 @@ body.index>h1, body.read>h1
 	margin: 0px;
 	padding: 0px;
 	height: auto;
-	color: #666666;
+	color: var(--text-muted);
 	background: none;
 }
 
@@ -1449,7 +1494,7 @@ body.index>h1, body.read>h1
 {
 	margin: 0px 0px 8px 0px;
 	padding: 0px;
-	color: #666666;
+	color: var(--text-muted);
 	font-style: normal;
 	text-align: right;
 }
@@ -1461,14 +1506,14 @@ body.index>h1, body.read>h1
 
 .read #body table th, .read #body table td
 {
-	border: #999999 1px solid;
+	border: var(--border) 1px solid;
 	padding: 4px;
 }
 
 .read .commentIsOnLastPage
 {
 	margin-bottom: 8px;
-	color: #666666;
+	color: var(--text-muted);
 }
 
 .read ul.options
@@ -1500,7 +1545,7 @@ body.index>h1, body.read>h1
 .read ul.options li.split
 {
 	padding-left: 4px;
-	border-left: #999999 1px solid;
+	border-left: var(--border) 1px solid;
 }
 
 .read .hint
@@ -1509,10 +1554,10 @@ body.index>h1, body.read>h1
 	right: 4px;
 	top: 4px;
 	padding: 4px;
-	border: #ffbb00 1px solid;
+	border: var(--notify-border) 1px solid;
 	border-radius: 4px;
-	color: #000000;
-	background-color: #ffffcc;
+	color: var(--text);
+	background-color: var(--notify-background);
 	z-index: 1;
 }
 
@@ -1520,7 +1565,7 @@ body.index>h1, body.read>h1
 {
 	margin: 0px -8px 24px -8px;
 	padding: 8px;
-	background: #efefef;
+	background: var(--surface-alt);
 }
 
 .read #body.vertical
@@ -1565,8 +1610,8 @@ body.index>h1, body.read>h1
 	padding: 8px 8px 0px 8px;
 	border: none;
 	border-radius: 4px;
-	color: #000000;
-	background-color: #efefef;
+	color: var(--text);
+	background-color: var(--surface-alt);
 }
 
 .read #afterword address
@@ -1586,23 +1631,23 @@ body.index>h1, body.read>h1
 .read #afterword address .host
 {
 	font-weight: normal;
-	color: #666666;
+	color: var(--text-muted);
 }
 
 .read #comments
 {
 	margin: 0px 0px 8px 0px;
 	padding: 0px 8px 8px 8px;
-	border: #005019 1px solid;
+	border: var(--accent-border) 1px solid;
 	border-radius: 4px;
-	background: #ffffff;
+	background: var(--surface);
 }
 
 .read #comments dt
 {
 	margin: 8px 0px 0px 0px;
 	padding: 8px 0px 0px 0px;
-	border-top: #999999 1px solid;
+	border-top: var(--border) 1px solid;
 	line-height: 16px;
 }
 
@@ -1616,7 +1661,7 @@ body.index>h1, body.read>h1
 {
 	padding-top: 0px;
 	border-top: none;
-	color: #666666;
+	color: var(--text-muted);
 }
 
 .read #comments dt .point
@@ -1626,18 +1671,18 @@ body.index>h1, body.read>h1
 
 .read #comments dt .point.none, .read #comments dt.none
 {
-	color: #666666;
+	color: var(--text-muted);
 }
 
 .read #comments dt .point.plus
 {
-	color: #0000cc;
+	color: var(--point-plus);
 	font-weight: bold;
 }
 
 .read #comments dt .point.minus
 {
-	color: #cc0000;
+	color: var(--point-minus);
 	font-weight: bold;
 }
 
@@ -1656,7 +1701,7 @@ body.index>h1, body.read>h1
 .read #comments dt span.host
 {
 	float: right;
-	color: #666666;
+	color: var(--text-muted);
 }
 
 .read #comments dt time:before
@@ -1721,7 +1766,7 @@ body.index>h1, body.read>h1
 .read #evaluateform>div label
 {
 	margin-right: 8px;
-	color: #005019;
+	color: var(--accent-text);
 	font-weight: bold;
 }
 
@@ -1767,12 +1812,12 @@ body.index>h1, body.read>h1
 	display: block;
 	margin: 0px;
 	padding: 0px 5px 0px 5px;
-	border: #999999 1px solid;
+	border: var(--border) 1px solid;
 	border-radius: 0px;
-	color: #0000ff;
+	color: var(--link);
 	min-width: 14px;
 	height: 24px;
-	background: #efefef;
+	background: var(--surface-alt);
 	line-height: 24px;
 	text-align: center;
 	text-shadow: none;
@@ -1787,7 +1832,7 @@ body.index>h1, body.read>h1
 
 .pager li a:hover, .pager li button:hover
 {
-	background: #ffffff;
+	background: var(--surface);
 	text-decoration: none;
 }
 
@@ -1803,17 +1848,17 @@ body.index>h1, body.read>h1
 
 .pager li a[href="#"], .pager li a[href=""], .pager li button.loopback
 {
-	border-color: #005019;
-	color: #ffffff;
-	background: #005019;
+	border-color: var(--accent-fill);
+	color: var(--on-accent);
+	background: var(--accent-fill);
 	font-weight: bold;
 }
 
 .pager li.nav a[href="#"], .pager li.nav a[href=""], .pager li.nav button.loopback
 {
-	border-color: #999999;
-	color: #999999;
-	background: #efefef;
+	border-color: var(--border);
+	color: var(--text-subtle);
+	background: var(--surface-alt);
 	font-weight: normal;
 }
 
@@ -1839,11 +1884,11 @@ body.index>h1, body.read>h1
 {
 	margin: 0px 2px 0px 2px;
 	padding: 1px;
-	border: #999999 1px solid;
+	border: var(--border) 1px solid;
 	border-radius: 0px 4px 4px 0px;
 	min-width: 56px;
 	height: 26px;
-	background: #efefef;
+	background: var(--surface-alt);
 	line-height: 26px;
 	font-size: inherit;
 	vertical-align: top;
@@ -1853,11 +1898,11 @@ body.index>h1, body.read>h1
 {
 	margin: 0px 2px 0px 2px;
 	padding: 1px 4px 1px 4px;
-	border: #999999 1px solid;
+	border: var(--border) 1px solid;
 	border-radius: 4px;
 	min-width: 14px;
 	height: 26px;
-	background: #efefef;
+	background: var(--surface-alt);
 	line-height: 26px;
 	font-size: inherit;
 	text-shadow: none;
@@ -1867,8 +1912,8 @@ body.index>h1, body.read>h1
 
 .index .pagerContainer.subjectPager button:hover
 {
-	color: #000000;
-	background: #ffffff;
+	color: var(--text);
+	background: var(--surface);
 }
 
 .index .pagerContainer.subjectPager .pager
@@ -1893,12 +1938,12 @@ body.index>h1, body.read>h1
 	right: 0px;
 	top: 56px;
 	padding: 2px 2px 0px 2px;
-	border: #005019 1px solid;
+	border: var(--accent-border) 1px solid;
 	border-top: none;
 	border-radius: 0px 0px 4px 4px;
-	color: #000000;
+	color: var(--text);
 	height: 30px;
-	background: transparent linear-gradient(#d5d5d5 8.5px, #bbbbbb 31.5px) no-repeat scroll right bottom / 100% 32px;
+	background: transparent linear-gradient(var(--bar-1) 8.5px, var(--bar-2) 31.5px) no-repeat scroll right bottom / 100% 32px;
 }
 
 .index .subjectPager .pager
@@ -1927,11 +1972,11 @@ body.index>h1, body.read>h1
 	display: inline-block;
 	margin: 0px;
 	padding: 1px 1px 1px 3px;
-	border: #005019 1px solid;
+	border: var(--accent-border) 1px solid;
 	border-radius: 3px 0px 0px 3px;
 	width: 76px;
 	height: 18px;
-	background-color: #ffffff;
+	background-color: var(--surface);
 	font-size: 9pt;
 	font-weight: normal;
 	line-height: 18px;
@@ -1949,7 +1994,7 @@ body.index>h1, body.read>h1
 	float: right;
 	margin: 0px 0px 0px 3px;
 	padding: 0px;
-	background: #005019 url("dropDownIcon.png") no-repeat scroll 0 -18px;
+	background: var(--accent-fill) url("dropDownIcon.png") no-repeat scroll 0 -18px;
 	width: 18px;
 	height: 18px;
 	cursor: pointer;
@@ -1958,9 +2003,9 @@ body.index>h1, body.read>h1
 .dropDown.open
 {
 	border-radius: 3px 0px 0px 0px;
-	color: #ffffff;
-	background-color: #005019;
-	box-shadow: 0px 0px 4px #005019;
+	color: var(--on-accent);
+	background-color: var(--accent-fill);
+	box-shadow: 0px 0px 4px var(--accent-fill);
 }
 
 .dropDown+.dropDown.open
@@ -1997,12 +2042,12 @@ body.index>h1, body.read>h1
 	margin: 0px;
 	padding: 0px;
 	width: 80px;
-	border: #005019 1px solid;
+	border: var(--accent-border) 1px solid;
 	border-top: none;
 	border-radius: 0px 0px 3px 3px;
-	color: #005019;
-	background-color: #ffffff;
-	box-shadow: 0px 0px 4px #005019;
+	color: var(--accent-text);
+	background-color: var(--surface);
+	box-shadow: 0px 0px 4px var(--accent-fill);
 	z-index: 1;
 }
 
@@ -2018,13 +2063,13 @@ body.index>h1, body.read>h1
 
 .dropDown ul li:hover
 {
-	color: #ffffff;
-	background-color: #005019;
+	color: var(--on-accent);
+	background-color: var(--accent-fill);
 }
 
 .dropDown ul li.listType+.listVisibility
 {
-	border-top: #005019 1px solid;
+	border-top: var(--accent-border) 1px solid;
 }
 
 .dropDown ul li .button
@@ -2032,7 +2077,7 @@ body.index>h1, body.read>h1
 	position: absolute;
 	right: 1px;
 	top: 1px;
-	background: #ffffff;
+	background: var(--surface);
 }
 
 .dropDown ul li:hover .button
@@ -2042,7 +2087,7 @@ body.index>h1, body.read>h1
 
 .dropDown ul li.selected .button
 {
-	background: #005019 url("dropDownIcon.png") no-repeat scroll 0px -36px;
+	background: var(--accent-fill) url("dropDownIcon.png") no-repeat scroll 0px -36px;
 }
 
 .dropDown ul li:hover.selected .button
@@ -2058,7 +2103,7 @@ body.index>h1, body.read>h1
 }
 
 body>header form input[name="query"]::-webkit-input-placeholder {
-	color: #666666;
+	color: var(--text-muted);
 }
 
 input[type="text"],
@@ -2134,14 +2179,14 @@ input[type="reset"],
 input[type="button"],
 button {
 	box-sizing: border-box;
-	box-shadow: 1px 1px 0px #ffffff inset, -1px 1px 0px #ffffff inset, -1px -1px 0px #ffffff inset, 1px -1px 0px #ffffff inset;
+	box-shadow: 1px 1px 0px var(--bevel) inset, -1px 1px 0px var(--bevel) inset, -1px -1px 0px var(--bevel) inset, 1px -1px 0px var(--bevel) inset;
 }
 
 input[type="submit"][disabled],
 input[type="reset"][disabled],
 input[type="button"][disabled],
 button[disabled] {
-	box-shadow: 1px 1px 0px #ffffff inset, -1px 1px 0px #ffffff inset, -1px -1px 0px #ffffff inset, 1px -1px 0px #ffffff inset !important;
+	box-shadow: 1px 1px 0px var(--bevel) inset, -1px 1px 0px var(--bevel) inset, -1px -1px 0px var(--bevel) inset, 1px -1px 0px var(--bevel) inset !important;
 }
 
 #unpostForm button,
@@ -2206,7 +2251,7 @@ select {
 		top: 100%;
 		height: 8px;
 		/* PC ではページの背景が描いているヘッダ下端の線と影を、ヘッダの高さに合わせて描く */
-		background: linear-gradient(#005019 1px, rgba(49, 98, 63, 0.34) 1px, rgba(49, 98, 63, 0.34) 1.5px, rgba(49, 98, 63, 0) 7.5px);
+		background: linear-gradient(var(--accent-fill) 1px, rgba(49, 98, 63, 0.34) 1px, rgba(49, 98, 63, 0.34) 1.5px, rgba(49, 98, 63, 0) 7.5px);
 		content: "";
 	}
 	
@@ -2288,7 +2333,7 @@ select {
 		padding: 0px;
 		border: none;
 		height: auto;
-		color: #666666;
+		color: var(--text-muted);
 		background: none;
 		line-height: inherit;
 		overflow: hidden;
@@ -2298,7 +2343,7 @@ select {
 	{
 		margin: 0px 4px 0px 4px;
 		padding: 0px 0px 0px 4px;
-		border-left: #666666 1px solid;
+		border-left: var(--text-muted) 1px solid;
 	}
 	
 	.read .status+.status dt:first-child
@@ -2535,11 +2580,11 @@ select {
 		align-self: flex-end;
 		margin: 0px 8px -1px 0px;
 		z-index: 1;
-		border-top: #999999 1px solid;
+		border-top: var(--border) 1px solid;
 		border-bottom: none;
 		border-radius: 4px 4px 0px 0px;
 		/* 作品の背景色が style 属性で指定されるため、フッタと同じ色で上書きする */
-		background-color: #efefef !important;
+		background-color: var(--surface-alt) !important;
 	}
 	
 	.responsive .headdingButtons
@@ -2558,13 +2603,13 @@ select {
 		margin: 0px 0px 8px 0px;
 		padding: 4px 8px 4px 8px;
 		/* ページの途中に置くので、ほかの欄と同じく上下を線で区切る */
-		border-top: #005019 1px solid;
+		border-top: var(--accent-border) 1px solid;
 		border-left: none;
 		border-right: none;
 		border-radius: 0px;
 		height: auto;
 		/* 帯の高さが変わっても、グラデーションは帯の全体に伸ばす */
-		background-image: linear-gradient(#d5d5d5 27%, #bbbbbb 98%);
+		background-image: linear-gradient(var(--bar-1) 27%, var(--bar-2) 98%);
 		background-size: 100% 100%;
 		row-gap: 4px;
 	}
@@ -2758,7 +2803,7 @@ select {
 	.responsive .entries table td.info
 	{
 		width: auto;
-		color: #666666;
+		color: var(--text-muted);
 		font-size: 90%;
 		white-space: nowrap;
 	}
@@ -3027,5 +3072,88 @@ select {
 	{
 		margin: 0px 0px 8px 0px;
 		overflow-wrap: anywhere;
+	}
+}
+
+/*
+ * ダークモード
+ * 配色の値だけを置き換える
+ */
+@media (prefers-color-scheme: dark)
+{
+	:root
+	{
+		--page-background: #141a16;
+		--header-1: #1f2120;
+		--header-2: #1d1f1e;
+		--header-3: #1b1d1c;
+		--header-4: #191b1a;
+		--header-5: #171918;
+		--bar-1: #2e302f;
+		--bar-2: #252726;
+		--text: #e2e4e2;
+		--text-muted: #a8aca9;
+		--text-subtle: #868a87;
+		--link: #8cb4ff;
+		--surface: #1f2120;
+		--surface-alt: #2a2c2b;
+		--surface-hover: #262827;
+		--border: #565a57;
+		--border-disabled: #3c3f3d;
+		--accent-text: #8fd1a6;
+		--accent-border: #3d7a52;
+		--accent-fill: #1f5f36;
+		--accent-soft: #5aa37c;
+		--on-accent: #ffffff;
+		--button-background: #2c2e2d;
+		--button-hover: #363937;
+		--button-icon: #5d615e;
+		--bevel: rgba(255, 255, 255, 0.06);
+		--notify-border: #8a6d1a;
+		--notify-background: #332d17;
+		--point-plus: #8cb4ff;
+		--point-minus: #ff8080;
+	}
+
+	/* 作品ごとに指定されたページの背景色は、本文の枠の中だけに使う */
+	html
+	{
+		background-color: var(--page-background) !important;
+	}
+
+	/*
+	 * ドロップダウンのアイコンは、左の列が白地に矢印を抜いた画像のため、
+	 * 暗い背景では右の列 (透明な地に白い矢印) を緑の地に重ねて使う
+	 */
+	.dropDown .button
+	{
+		background-position: -18px -18px;
+	}
+
+	.dropDown.ascending .button
+	{
+		background-position: -18px 0px;
+	}
+
+	.dropDown ul li.selected .button
+	{
+		background-position: -18px -36px;
+	}
+
+	/* 虫眼鏡のアイコンは白地の画像のため、白を入力欄の暗い色に近づける */
+	body>header form input[type="submit"]
+	{
+		filter: invert(0.88);
+	}
+
+	/*
+	 * 作者が文字色、背景色、背景画像を指定した作品や、本文で文字の色を指定している作品は、
+	 * 指定された配色で読めるよう、本文の枠の中だけ明るい配色のままにする (値は先頭で定義)
+	 */
+	/* 作者の指定 (Read/Index.php の .read #body) を優先するよう、詳細度を 0 にする */
+	:where(.read #body.authorColors, .edit textarea#body.authorColors)
+	{
+		color-scheme: light;
+		color: var(--text);
 	}
 }

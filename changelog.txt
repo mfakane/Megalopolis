@@ -80,6 +80,12 @@
 	* req/Visualizer/Util/Index.php,
 	  script/Util/Index.js: 管理用ツールのページで、store/ 以下やデータベースのファイルが Web から開ける場合に警告を表示するように
 	  管理者のブラウザから実際に取得できるかを確かめるため、サーバの種類や設定によらず確認できます
+	* style/style.css: OS やブラウザの設定 (prefers-color-scheme) に合わせてダークモードで表示するように
+	  配色を CSS 変数にまとめ、ダークモードでは変数の値だけを置き換えます。通常の表示は変わりません
+	* req/Visualizer/Read/Index.php,
+	  script/Read/Edit.js: 作者が文字色、背景色、背景画像を指定した作品や、本文で文字の色を指定している作品は、
+	  ダークモードでも本文の枠の中だけを明るい配色で表示するように
+	  背景色だけが指定された作品でも文字が読めるよう、指定されていない色は明るい配色の既定値で補います
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 
