@@ -2,7 +2,8 @@ html
 {
 	margin: 0px;
 	padding: 0px;
-	background: #ccddcc url("background.png") repeat-x scroll top left;
+	/* 上端の 64px は、ヘッダの下で灰色になるグラデーション、緑の線、影の順に重ねる */
+	background: #ccddcc linear-gradient(#fefefe 42px, #f7f7f7 46.5px, #efefef 49.5px, #e4e4e4 52.5px, #d5d5d5 55.5px, #005019 56px, #005019 57px, rgba(49, 98, 63, 0.34) 57px, rgba(49, 98, 63, 0.34) 57.5px, rgba(49, 98, 63, 0) 63.5px) no-repeat scroll left top / 100% 64px;
 	font-family: sans-serif;
 	line-height: 1.25;
 }
@@ -201,7 +202,8 @@ body>header
 	margin: 0px 0px 8px 0px;
 	padding: 16px 0px 16px 0px;
 	height: 24px;
-	background: #ffffff url("background.png") repeat-x scroll top left;
+	/* ヘッダの高さが変わっても、灰色のグラデーションは下端に揃える */
+	background: #fefefe linear-gradient(#fefefe 42px, #f7f7f7 46.5px, #efefef 49.5px, #e4e4e4 52.5px, #d5d5d5 55.5px) no-repeat scroll left bottom / 100% 56px;
 }
 
 body>header>a:first-child
@@ -2194,8 +2196,6 @@ select {
 		margin: 0px;
 		padding: 8px;
 		height: auto;
-		/* background.png は 56px までがヘッダ、残り 8px が下端の線と影なので、ヘッダの下端に揃える */
-		background-position: left bottom -8px;
 	}
 
 	body.responsive>header:after
@@ -2205,7 +2205,8 @@ select {
 		right: 0px;
 		top: 100%;
 		height: 8px;
-		background: transparent url("background.png") repeat-x scroll left bottom;
+		/* PC ではページの背景が描いているヘッダ下端の線と影を、ヘッダの高さに合わせて描く */
+		background: linear-gradient(#005019 1px, rgba(49, 98, 63, 0.34) 1px, rgba(49, 98, 63, 0.34) 1.5px, rgba(49, 98, 63, 0) 7.5px);
 		content: "";
 	}
 	

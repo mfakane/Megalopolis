@@ -1,6 +1,6 @@
 html
 {
-	background-image: url("background.png");
+	background-image: linear-gradient(#480000 57px, rgba(72, 0, 0, 0.34) 57px, rgba(72, 0, 0, 0.34) 57.5px, rgba(72, 0, 0, 0) 63.5px);
 	background-color: #ffffff;
 }
 
@@ -245,7 +245,7 @@ h2
 {
 	body.responsive>header:after
 	{
-		background-image: url("background.png");
+		background-image: linear-gradient(#480000 1px, rgba(72, 0, 0, 0.34) 1px, rgba(72, 0, 0, 0.34) 1.5px, rgba(72, 0, 0, 0) 7.5px);
 	}
 
 	body.responsive>header form>div
