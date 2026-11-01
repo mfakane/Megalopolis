@@ -13,10 +13,9 @@ class Visualizer
 	
 	static function isSimple(): bool
 	{
+		// スマートフォンは通常表示が幅の狭い画面に対応しているため、ここには含めない
 		return in_array(Util::getBrowserType(), array
 		(
-			Util::BROWSER_TYPE_IPHONE,
-			Util::BROWSER_TYPE_ANDROIDMOBILE,
 			Util::BROWSER_TYPE_PSP,
 			Util::BROWSER_TYPE_3DS,
 			Util::BROWSER_TYPE_MOBILE,
