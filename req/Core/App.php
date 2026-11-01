@@ -79,7 +79,8 @@ class App
 			{
 				if (!Configuration::$instance->allowWrite || !self::matchesAddress(Configuration::$instance->allowWrite))
 				{
-					if (Util::getBrowserType() != Util::BROWSER_TYPE_MOBILE && (!isset($_SERVER["HTTP_REFERER"]) || mb_strpos($_SERVER["HTTP_REFERER"], Util::getAbsoluteUrl()) != 0))
+					// 携帯電話 (フィーチャーフォン) のブラウザは送信元を送らないことがあるため除く
+					if (Util::getBrowserType() != Util::BROWSER_TYPE_MOBILE && !Util::isSameOriginRequest())
 						throw new ApplicationException("不正な送信元です", 403);
 
 					if (Configuration::$instance->denyWrite && self::matchesAddress(Configuration::$instance->denyWrite))

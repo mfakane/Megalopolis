@@ -98,6 +98,11 @@
 	  - 設定名 ($config->showTweetButton など) は変わりません
 	* config.php,
 	  req/Core/Visualizer.php: 既定の Content-Security-Policy から platform.twitter.com を外す
+	* req/Core/App.php,
+	  req/Core/Util.php: 他のサイトから送信された POST を拒否する確認が働いていなかったのを修正
+	  Referer の比較が誤っており、Referer が無い場合しか拒否されていませんでした
+	  - 新しいブラウザでは Sec-Fetch-Site で、対応していないブラウザでは Origin または Referer のホスト名で判断します
+	  - リバースプロキシが Host を書き換える環境でも、信頼するプロキシ ($config->trustedProxies) からの X-Forwarded-Host を使って判断します
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 

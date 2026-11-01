@@ -131,6 +131,54 @@ class Util
 		return $chain[0] ?? $addr;
 	}
 
+	/**
+	 * POST がこのサイトのページから送信されたものか (他のサイトからの送信 (CSRF) を防ぐ)
+	 */
+	static function isSameOriginRequest(): bool
+	{
+		// 新しいブラウザは送信元との関係を Sec-Fetch-Site で伝える。
+		// ブラウザ自身が判定するため、リバースプロキシが Host を書き換えていても正しく判断できる
+		$site = $_SERVER["HTTP_SEC_FETCH_SITE"] ?? null;
+
+		if ($site === "same-origin")
+			return true;
+		else if ($site === "same-site" || $site === "cross-site")
+			return false;
+
+		// 対応していないブラウザでは、送信元のページのホストを比べる
+		$source = $_SERVER["HTTP_ORIGIN"] ?? $_SERVER["HTTP_REFERER"] ?? null;
+
+		// Origin が "null" になるのは、サンドボックスやリダイレクトなどで送信元を明かさない場合
+		if ($source === null || $source === "null")
+			return false;
+
+		$sourceHost = parse_url($source, PHP_URL_HOST);
+
+		return is_string($sourceHost) && in_array(strtolower($sourceHost), self::getRequestHosts(), true);
+	}
+
+	/**
+	 * このリクエストを受けたホスト名の一覧 (ポートを除く)
+	 * @return string[]
+	 */
+	private static function getRequestHosts(): array
+	{
+		$hosts = array($_SERVER["HTTP_HOST"] ?? null, $_SERVER["SERVER_NAME"] ?? null);
+		$addr = $_SERVER["REMOTE_ADDR"] ?? null;
+
+		// 信頼するリバースプロキシからは、利用者がアクセスしたホスト名を X-Forwarded-Host で受け取る
+		if ($addr !== null && isset($_SERVER["HTTP_X_FORWARDED_HOST"]) && self::isTrustedProxy($addr))
+			$hosts = array_merge($hosts, explode(",", $_SERVER["HTTP_X_FORWARDED_HOST"]));
+
+		$rt = array();
+
+		foreach ($hosts as $i)
+			if (is_string($i) && ($host = parse_url("http://" . trim($i), PHP_URL_HOST)) !== null && $host !== false)
+				$rt[] = strtolower($host);
+
+		return $rt;
+	}
+
 	private static function isTrustedProxy(string $addr): bool
 	{
 		if (filter_var($addr, FILTER_VALIDATE_IP) === false)
