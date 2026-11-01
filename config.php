@@ -24,6 +24,14 @@ $config->adminHash = '$2y$12$gnugd.wrLJLMFUsz2ZV8Y.JRrpPP.i790eay8JNQ9mpCKFSVfM5
 // この設定ファイルを書き換える (管理者パスワードを変更するなど) と、すべてのブラウザでログアウトします
 $config->adminLoginDays = 0;
 
+// パスワードやキーの照合に続けて失敗したときに受け付けを停止する回数 (整数) と期間 (分)
+// 管理者パスワード、編集キー、削除キーの総当たりを防ぎます。
+// 同じ接続元 (IP アドレス) が期間内にこの回数だけ照合に失敗すると、その期間は正しいパスワードでも受け付けません。
+// 失敗の記録は store/loginfailures.php に保存されます。
+// どちらかが 0 の場合は停止しません
+$config->loginFailureLimit = 10;
+$config->loginLockMinutes = 15;
+
 // 管理用設定ツールが使用可能か (true/false)
 // 詳細については、readme.txt を参照してください。
 // 公開された環境で使用する場合、false にすることを推奨します

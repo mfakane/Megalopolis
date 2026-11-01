@@ -1,5 +1,6 @@
 vendor/
 store/*.sqlite
+store/loginfailures.php
 .htaccess
 *.lock
 .direnv/

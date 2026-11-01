@@ -19,6 +19,16 @@ class Auth
 	 */
 	const int ADMIN_LOGIN_REFRESH = 3600;
 
+	/**
+	 * パスワードやキーの照合に失敗した記録を置くファイル。
+	 * Web から開かれても中身を返さないよう、PHP として終了する行を先頭に置く
+	 */
+	const string FAILURE_FILE = "loginfailures.php";
+	const string FAILURE_FILE_HEADER = "<?php exit; ?>\n";
+
+	/** このリクエストが照合を止められているか (止められている間の失敗は数えない) */
+	private static bool $lockedOut = false;
+
 	static function useSession(bool $beginNew = false): void
 	{
 		$login = self::getAdminLogin();
@@ -339,6 +349,12 @@ class Auth
 				self::ensureToken();
 			}
 
+			// 総当たりを防ぐため、失敗が続いた接続元からは正しいパスワードでも受け付けない
+			if (self::isLockedOut()) {
+				self::$lockedOut = true;
+				self::loginError("パスワードまたはキーの照合に続けて失敗したため、一時的に受け付けを停止しています。しばらく待ってからやり直してください");
+			}
+
 			return $_POST["password"];
 		} else {
 			if (!self::hasToken()) self::createToken();
@@ -428,6 +444,10 @@ class Auth
 	 */
 	static function loginError(string $error = ""): void
 	{
+		// 入力されたパスワードやキーが一致しなかった場合だけ数える
+		if ($error !== "" && !self::$lockedOut && isset($_POST["password"]) && is_string($_POST["password"]))
+			self::recordFailure();
+
 		self::cleanSession(false);
 		
 		Visualizer::$data = $error;
@@ -439,6 +459,91 @@ class Auth
 			Visualizer::visualize("Auth");
 
 		exit;
+	}
+
+	/**
+	 * 接続元ごとの、期間内に照合に失敗した時刻の一覧を読み書きする
+	 * @param (callable(array<string, int[]>): ?array<string, int[]>) $update 書き換えない場合は null を返す
+	 */
+	private static function withFailures(callable $update): void
+	{
+		$path = Constant::DATA_DIR . self::FAILURE_FILE;
+		$fp = @fopen($path, "c+");
+
+		if ($fp === false)
+			return;
+
+		try {
+			if (!flock($fp, LOCK_EX))
+				return;
+
+			$content = stream_get_contents($fp);
+			$data = $content === false ? null : json_decode(substr($content, strlen(self::FAILURE_FILE_HEADER)), true);
+			$period = Configuration::$instance->loginLockMinutes * 60;
+			$failures = array();
+
+			// 期間を過ぎた記録は捨てる
+			if (is_array($data))
+				foreach ($data as $addr => $times)
+					if (is_array($times) && ($times = array_values(array_filter($times, fn($t) => is_int($t) && $t > time() - $period))))
+						$failures[(string)$addr] = $times;
+
+			$failures = $update($failures);
+
+			if ($failures !== null) {
+				ftruncate($fp, 0);
+				rewind($fp);
+				fwrite($fp, self::FAILURE_FILE_HEADER . (json_encode($failures) ?: "{}"));
+				fflush($fp);
+			}
+
+			flock($fp, LOCK_UN);
+		} finally {
+			fclose($fp);
+		}
+	}
+
+	private static function isThrottleEnabled(): bool
+	{
+		return Configuration::$instance->loginFailureLimit > 0 && Configuration::$instance->loginLockMinutes > 0;
+	}
+
+	/**
+	 * 接続元が照合に失敗した回数が上限に達しているか
+	 */
+	static function isLockedOut(): bool
+	{
+		$addr = Util::getRemoteAddress();
+
+		if (!self::isThrottleEnabled() || $addr === null)
+			return false;
+
+		$locked = false;
+		self::withFailures(function (array $failures) use ($addr, &$locked) {
+			$locked = count($failures[$addr] ?? array()) >= Configuration::$instance->loginFailureLimit;
+
+			return null;
+		});
+
+		return $locked;
+	}
+
+	/**
+	 * 接続元が照合に失敗したことを記録する
+	 */
+	static function recordFailure(): void
+	{
+		$addr = Util::getRemoteAddress();
+
+		if (!self::isThrottleEnabled() || $addr === null)
+			return;
+
+		self::withFailures(function (array $failures) use ($addr) {
+			$failures[$addr][] = time();
+			$failures[$addr] = array_slice($failures[$addr], -Configuration::$instance->loginFailureLimit);
+
+			return $failures;
+		});
 	}
 }
 ?>

@@ -325,6 +325,8 @@ class Configuration
 	public ?string $head = null;
 	public ?string $ogImage = null;
 	public string|false|null $contentSecurityPolicy = null;
+	public int $loginFailureLimit = 10;
+	public int $loginLockMinutes = 15;
 	public ?string $notes = null;
 	public bool $showFooterVersion = true;
 	/** @var string[] */

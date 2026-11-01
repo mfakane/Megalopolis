@@ -65,6 +65,11 @@
 	  readme.txt: 管理用設定ツールのハッシュ算出で config.php に書く行をそのまま表示するように
 	  新しい形式のハッシュには $ が含まれるため、" ではなく ' で囲む必要があります
 	  既定の管理者パスワード (passwd) のハッシュも新しい形式にしました
+	* req/Core/Auth.php: 管理者パスワード、編集キー、削除キーの照合に続けて失敗した接続元からの受け付けを一時的に停止するように
+	  既定では 15 分間に 10 回失敗すると、その後 15 分ほどは正しいパスワードでも受け付けません
+	  失敗の記録は store/loginfailures.php に保存し、Web から開かれても中身を返さないようにしています
+	* config.php,
+	  req/Core/Configuration.php: 停止するまでの回数 $config->loginFailureLimit と期間 $config->loginLockMinutes を追加
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 
