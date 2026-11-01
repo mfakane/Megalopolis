@@ -19,6 +19,8 @@ $pagerHref = Visualizer::actionHref("util", "track", array
 <html lang="ja">
 <head>
 	<?php Visualizer::head() ?>
+	<?php // スマートフォン向けのスタイルに対応したページから順に viewport を指定する ?>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<link rel="search" href="<?=Visualizer::escapeOutput(Visualizer::actionHrefArray(array("search"))) ?>" />
 	<?php if ($d["entries"]): ?>
 		<?php if ($d["page"] > 1): ?>
@@ -32,7 +34,7 @@ $pagerHref = Visualizer::actionHref("util", "track", array
 	<script src="<?=Visualizer::escapeOutput(Visualizer::actionHref("script", "Index", "Index.js")) ?>"></script>
 	<script src="<?=Visualizer::escapeOutput(Visualizer::actionHref("script", "Index", "Search.js")) ?>"></script>
 </head>
-<body class="search">
+<body class="search responsive">
 	<?php Visualizer::header("ホスト検索", array(), !is_null($d["entries"]) ? ($d['count'] <= $c->searchPaging ? "{$d['count']} 件" : "{$d['count']} 件中 " . (($d["page"] - 1) * $c->searchPaging + 1) . " - " . (($d["page"] - 1) * $c->searchPaging + count($d["entries"])) .  " 件") : "作品集数 {$d['subjectCount']}") ?>
 	<form>
 		<section class="filter">

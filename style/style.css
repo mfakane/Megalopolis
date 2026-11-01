@@ -2624,7 +2624,7 @@ select {
 	}
 	
 	/* 並べ替えと表示形式のメニューは、件数の後で改行して 2 つ並べる */
-	body.responsive>h1>span:after
+	body.responsive>h1>span:not(:last-child):after
 	{
 		display: block;
 		content: "";
