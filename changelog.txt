@@ -37,6 +37,13 @@
 	* config.php,
 	  req/Core/Configuration.php: OGP と Twitter Card の画像を指定する $config->ogImage を追加
 	  既定では画像を指定しません。指定すると Twitter Card は大きな画像の形式になります
+	* req/Core/Visualizer.php: Content-Security-Policy を標準のヘッダー名で送るように
+	  これまでは現在のブラウザが解釈しない X-Content-Security-Policy などで送っていたため、効いていませんでした
+	  - Referrer-Policy: strict-origin-when-cross-origin を送るように
+	  - Internet Explorer 向けの X-UA-Compatible を送らないように
+	* config.php,
+	  req/Core/Configuration.php: Content-Security-Policy を変更または無効にする $config->contentSecurityPolicy を追加
+	  head、notes、footers にアクセス解析などのスクリプトを追加している場合、更新後はこの設定でスクリプトを許可する必要があります
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 

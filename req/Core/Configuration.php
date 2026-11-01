@@ -320,6 +320,7 @@ class Configuration
 	public int $maxHistory = 30;
 	public ?string $head = null;
 	public ?string $ogImage = null;
+	public string|false|null $contentSecurityPolicy = null;
 	public ?string $notes = null;
 	public bool $showFooterVersion = true;
 	/** @var string[] */

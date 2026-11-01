@@ -349,9 +349,22 @@ $config->searchPaging = 30;
 $config->tagListing = 100;
 
 // head タグ内の追加のタグ (HTML)
+// アクセス解析などのスクリプトを追加する場合は、下の contentSecurityPolicy でそのスクリプトを許可してください
 $config->head = trim
 ('
 ');
+
+// Content-Security-Policy (特定値)
+// ブラウザに読み込みを許可するスクリプトや画像などの取得先を指定し、スクリプトの埋め込み (XSS) による被害を防ぎます。
+// - null						既定の設定を使用します。スクリプトはこのサイト、jQuery、Tweet Button のもののみ許可されます。
+// - "default-src 'self'; ..."	指定した内容をそのまま使用します。
+// - false						送信しません。
+// head、notes、footers にアクセス解析などのスクリプトや外部のウィジェットを追加している場合、
+// 既定の設定ではそれらが動作しなくなります。その場合は既定の設定を元に許可する取得先を追加してください。既定の設定は以下の通りです:
+// "default-src 'self'; script-src 'self' https://code.jquery.com https://platform.twitter.com; style-src 'self' 'unsafe-inline'; img-src * data:; frame-src https://platform.twitter.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+// 例えば head に <script> タグを直接書いている場合は script-src に 'unsafe-inline' を、
+// 外部のスクリプトを読み込んでいる場合はその取得先 (例: https://www.googletagmanager.com) を追加します
+$config->contentSecurityPolicy = null;
 
 // OGP および Twitter Card で共有時に表示する画像 (文字列)
 // 設置先からの相対パス (例: "style/ogp.png") または http:// か https:// で始まる URL を指定します。

@@ -1060,22 +1060,26 @@ class Visualizer
 		echo $output;
 	}
 	
+	/**
+	 * 既定の Content-Security-Policy
+	 * 管理者が config.php で追加する HTML (head, notes, footers) の外部スクリプトなどは
+	 * $config->contentSecurityPolicy で許可する
+	 */
+	const string DEFAULT_CONTENT_SECURITY_POLICY = "default-src 'self'; script-src 'self' https://code.jquery.com https://platform.twitter.com; style-src 'self' 'unsafe-inline'; img-src * data:; frame-src https://platform.twitter.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'";
+	
 	private static function defaultHeaders(): void
 	{
 		header("X-Content-Type-Options: nosniff");
 		header("X-Frame-Options: SAMEORIGIN");
+		header("Referrer-Policy: strict-origin-when-cross-origin");
 		
-		$csp = "default-src 'self'; img-src *; script-src 'self' code.jquery.com platform.twitter.com; style-src 'self' code.jquery.com 'unsafe-inline'; frame-src platform.twitter.com";
+		$csp = Configuration::$instance->contentSecurityPolicy;
 		
-		header("X-Content-Security-Policy: {$csp}");
+		if ($csp === null)
+			$csp = self::DEFAULT_CONTENT_SECURITY_POLICY;
 		
-		if (Util::getBrowserType() == Util::BROWSER_TYPE_WEBKIT &&
-			strpos($ua = $_SERVER["HTTP_USER_AGENT"] ?? "", "Safari") !== false &&
-			!preg_match('/Version\/[1-5]\./', $ua))
-			header("X-WebKit-CSP: {$csp}");
-		
-		if (Util::getBrowserType() == Util::BROWSER_TYPE_MSIE_NEW)
-			header("X-UA-Compatible: IE=8; IE=9");
+		if ($csp !== false && $csp !== "")
+			header("Content-Security-Policy: " . str_replace(array("\r", "\n"), " ", $csp));
 	}
 }
 
