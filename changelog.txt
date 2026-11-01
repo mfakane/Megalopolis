@@ -87,6 +87,17 @@
 	  ダークモードでも本文の枠の中だけを明るい配色で表示するように
 	  背景色だけが指定された作品でも文字が読めるよう、指定されていない色は明るい配色の既定値で補います
 	* style/alt/style.css: 赤ベースの見た目 ($config->skin = "alt") もダークモードに対応
+	* req/Core/Visualizer.php,
+	  req/Visualizer/Index/Index.php,
+	  req/Visualizer/Read/Index.php,
+	  script/base.js,
+	  style/style.css: Tweet Button を「X でポスト」のリンクと、端末の共有機能 (Web Share API) を使う「共有」ボタンに置き換え
+	  Twitter のスクリプト (widgets.js) と埋め込みを読み込まないため、表示が速くなり、閲覧が外部に伝わらなくなります
+	  - 「共有」ボタンは、共有機能に対応したブラウザ (主にスマートフォン) でだけ表示します
+	  - テキストが指定されていない場合は、これまでと同じくページのタイトルを使います
+	  - 設定名 ($config->showTweetButton など) は変わりません
+	* config.php,
+	  req/Core/Visualizer.php: 既定の Content-Security-Policy から platform.twitter.com を外す
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 

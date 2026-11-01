@@ -87,14 +87,14 @@ Visualizer::doctype();
 			<?php Visualizer::tweetButton(Visualizer::absoluteHrefArray(Visualizer::nameHrefArgs(App::$actionName, $d)), $c->tagTweetButtonText, $c->tagTweetButtonHashtags, array
 			(
 				"[tag]" => $d,
-			)) ?>
+			), "{$title} - {$c->title}") ?>
 		</div>
 	<?php elseif (App::$actionName == "author" && (is_array($c->showTweetButton) ? $c->showTweetButton[Configuration::ON_AUTHOR] : $c->showTweetButton)): ?>
 		<div class="headdingButtons">
 			<?php Visualizer::tweetButton(Visualizer::absoluteHrefArray(Visualizer::nameHrefArgs(App::$actionName, $d)), $c->authorTweetButtonText, $c->authorTweetButtonHashtags, array
 			(
 				"[author]" => $d,
-			)) ?>
+			), "{$title} - {$c->title}") ?>
 		</div>
 	<?php endif ?>
 	

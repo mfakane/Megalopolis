@@ -362,12 +362,12 @@ $config->head = trim
 
 // Content-Security-Policy (特定値)
 // ブラウザに読み込みを許可するスクリプトや画像などの取得先を指定し、スクリプトの埋め込み (XSS) による被害を防ぎます。
-// - null						既定の設定を使用します。スクリプトはこのサイト、jQuery、Tweet Button のもののみ許可されます。
+// - null						既定の設定を使用します。スクリプトはこのサイトと jQuery のもののみ許可されます。
 // - "default-src 'self'; ..."	指定した内容をそのまま使用します。
 // - false						送信しません。
 // head、notes、footers にアクセス解析などのスクリプトや外部のウィジェットを追加している場合、
 // 既定の設定ではそれらが動作しなくなります。その場合は既定の設定を元に許可する取得先を追加してください。既定の設定は以下の通りです:
-// "default-src 'self'; script-src 'self' https://code.jquery.com https://platform.twitter.com; style-src 'self' 'unsafe-inline'; img-src * data:; frame-src https://platform.twitter.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+// "default-src 'self'; script-src 'self' https://code.jquery.com; style-src 'self' 'unsafe-inline'; img-src * data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
 // 例えば head に <script> タグを直接書いている場合は script-src に 'unsafe-inline' を、
 // 外部のスクリプトを読み込んでいる場合はその取得先 (例: https://www.googletagmanager.com) を追加します
 $config->contentSecurityPolicy = null;
@@ -488,7 +488,8 @@ $config->showPages = array
 	Configuration::ON_ENTRY => true,		// 作品に表示するか
 );
 
-// Tweet Button を表示するか (true/false)
+// 共有ボタン (X でポスト、端末の共有機能) を表示するか (true/false)
+// 設定名は以前の Tweet Button のままです
 $config->showTweetButton = array
 (
 	Configuration::ON_AUTHOR => true,		// 作者別一覧に表示するか
@@ -496,7 +497,7 @@ $config->showTweetButton = array
 	Configuration::ON_ENTRY => true,		// 作品に表示するか
 );
 
-// 作品の Tweet Button のテキスト (文字列)
+// 作品の共有ボタンのテキスト (文字列)
 // 以下のキーワードは次の項目に変換されます:
 // - [id]			作品番号
 // - [subject]		作品集番号
@@ -506,7 +507,7 @@ $config->showTweetButton = array
 // null または空欄の場合ページタイトルになります
 $config->entryTweetButtonText = "";
 
-// 作品の Tweet Button のハッシュタグ (文字列)
+// 作品の共有ボタンのハッシュタグ (文字列)
 // コンマ区切りで複数の指定が可能です。# は含めないでください。
 // 以下のキーワードは次の項目に変換されます:
 // - [id]			作品番号
@@ -516,26 +517,26 @@ $config->entryTweetButtonText = "";
 // null または空欄の場合ハッシュタグは付加されません
 $config->entryTweetButtonHashtags = "";
 
-// 分類タグの Tweet Button のテキスト (文字列)
+// 分類タグの共有ボタンのテキスト (文字列)
 // 以下のキーワードは次の項目に変換されます:
 // - [tag]			分類タグ
 // null または空欄の場合ページタイトルになります
 $config->tagTweetButtonText = "";
 
-// 分類タグの Tweet Button のハッシュタグ (文字列)
+// 分類タグの共有ボタンのハッシュタグ (文字列)
 // コンマ区切りで複数の指定が可能です。# は含めないでください。
 // 以下のキーワードは次の項目に変換されます:
 // - [tag]			分類タグ
 // null または空欄の場合ハッシュタグは付加されません
 $config->tagTweetButtonHashtags = "";
 
-// タグの Tweet Button のテキスト (文字列)
+// 作者の共有ボタンのテキスト (文字列)
 // 以下のキーワードは次の項目に変換されます:
 // - [author]		名前
 // null または空欄の場合ページタイトルになります
 $config->authorTweetButtonText = "";
 
-// タグの Tweet Button のハッシュタグ (文字列)
+// 作者の共有ボタンのハッシュタグ (文字列)
 // コンマ区切りで複数の指定が可能です。# は含めないでください。
 // 以下のキーワードは次の項目に変換されます:
 // - [author]		名前

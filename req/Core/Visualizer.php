@@ -367,20 +367,31 @@ class Visualizer
 	}
 	
 	/**
+	 * X へのポストと、端末の共有機能 (Web Share API) で共有するボタンを出力する。
+	 * 外部のスクリプトを読み込まないよう、X へはリンクで投稿画面を開く
 	 * @param string[] $keywords
+	 * @param string $title テキストが指定されていない場合に使うテキスト (ページのタイトル)
 	 */
-	static function tweetButton(string $url = "", ?string $text = null, ?string $hashtags = null, array $keywords = array()): void
+	static function tweetButton(string $url = "", ?string $text = null, ?string $hashtags = null, array $keywords = array(), string $title = ""): void
 	{
+		$text = strtr($text ?? "", $keywords);
+
+		if (Util::isEmpty($text))
+			$text = $title;
+
 		$params = array_filter(array
 		(
-			"text" => strtr($text ?? "", $keywords),
+			"text" => $text,
 			"url" => strtr($url, $keywords),
 			"hashtags" => strtr($hashtags ?? "", $keywords),
 		));
 		
 		?>
-		<a href="https://twitter.com/share?<?php self::converted(implode("&", array_map(fn($k, $v) => rawurlencode($k) . "=" . rawurlencode($v), array_keys($params), array_values($params)))) ?>" class="twitter-share-button" data-lang="ja" target="_blank">Tweet</a>
-		<script src="https://platform.twitter.com/widgets.js"></script>
+		<span class="shareButtons">
+			<a href="https://x.com/intent/post?<?php self::converted(implode("&", array_map(fn($k, $v) => rawurlencode($k) . "=" . rawurlencode($v), array_keys($params), array_values($params)))) ?>" class="shareButton" target="_blank" rel="noopener">X でポスト</a>
+			<?php // 端末の共有機能が使える場合だけ、script/base.js で表示する ?>
+			<button type="button" class="shareButton nativeShare" hidden data-url="<?php self::converted($params["url"] ?? "") ?>" data-text="<?php self::converted($text) ?>">共有</button>
+		</span>
 		<?php
 	}
 
@@ -1072,7 +1083,7 @@ class Visualizer
 	 * 管理者が config.php で追加する HTML (head, notes, footers) の外部スクリプトなどは
 	 * $config->contentSecurityPolicy で許可する
 	 */
-	const string DEFAULT_CONTENT_SECURITY_POLICY = "default-src 'self'; script-src 'self' https://code.jquery.com https://platform.twitter.com; style-src 'self' 'unsafe-inline'; img-src * data:; frame-src https://platform.twitter.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'";
+	const string DEFAULT_CONTENT_SECURITY_POLICY = "default-src 'self'; script-src 'self' https://code.jquery.com; style-src 'self' 'unsafe-inline'; img-src * data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'";
 	
 	private static function defaultHeaders(): void
 	{

@@ -459,9 +459,46 @@ ul.notify
 	right: 0px;
 }
 
-.headdingButtons iframe
+.shareButtons
 {
-	margin-right: -32px;
+	display: inline-flex;
+	gap: 4px;
+	align-items: center;
+}
+
+/* X へのリンクも、共有のボタンと同じ見た目にする */
+a.shareButton
+{
+	display: inline-block;
+	padding: 2px 8px 2px 8px;
+	border: var(--border) 1px solid;
+	border-radius: 4px;
+	height: 24px;
+	background: var(--button-background) linear-gradient(rgba(128, 128, 128, 0) 50%, rgba(128, 128, 128, 0.13) 50%, rgba(128, 128, 128, 0.48));
+	color: var(--text);
+	font-size: 9pt;
+	line-height: 18px;
+	text-shadow: 1px 1px 0px var(--bevel);
+	box-sizing: border-box;
+	box-shadow: 1px 1px 0px var(--bevel) inset, -1px 1px 0px var(--bevel) inset, -1px -1px 0px var(--bevel) inset, 1px -1px 0px var(--bevel) inset;
+}
+
+a.shareButton:hover
+{
+	border-color: var(--accent-soft);
+	color: var(--accent-text);
+	background-color: var(--button-hover);
+	text-decoration: none;
+}
+
+.shareButtons button.shareButton
+{
+	margin: 0px;
+}
+
+.shareButtons [hidden]
+{
+	display: none;
 }
 
 div.entries

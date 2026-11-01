@@ -231,7 +231,7 @@ Visualizer::doctype();
 									"[subject]" => strval($h->entry->subject),
 									"[title]" => $h->entry->title ?? "",
 									"[name]" => $h->entry->name ?? "",
-								)) ?>
+								), ($h->entry->title ?? "") . ($c->showName[Configuration::ON_ENTRY] ? " 作者: " . ($h->entry->name ?? "") : "")) ?>
 							</footer>
 						<?php endif ?>
 					</div>

@@ -229,6 +229,25 @@ $(function()
 		
 		return false;
 	});
+
+	// 端末の共有機能 (Web Share API) が使える場合だけ、共有ボタンを表示する
+	if (navigator.share)
+		$(".nativeShare").each(function()
+		{
+			var button = $(this);
+
+			button.prop("hidden", false).click(function()
+			{
+				var data = { title: $.trim(document.title), url: button.data("url") };
+
+				// テキストがタイトルと同じ場合は、共有先で二重に表示されないよう省く
+				if (button.data("text") && button.data("text") != data.title)
+					data.text = button.data("text");
+
+				// 共有の画面を閉じたときも reject されるため、エラーは無視する
+				navigator.share(data).catch(function() { });
+			});
+		});
 });
 
 /*!{id:"uupaa.js",ver:0.7,license:"MIT",author:"uupaa.js@gmail.com"}*/
