@@ -362,12 +362,12 @@ $config->head = trim
 
 // Content-Security-Policy (特定値)
 // ブラウザに読み込みを許可するスクリプトや画像などの取得先を指定し、スクリプトの埋め込み (XSS) による被害を防ぎます。
-// - null						既定の設定を使用します。スクリプトはこのサイトと jQuery のもののみ許可されます。
+// - null						既定の設定を使用します。スクリプトはこのサイトのもののみ許可されます。
 // - "default-src 'self'; ..."	指定した内容をそのまま使用します。
 // - false						送信しません。
 // head、notes、footers にアクセス解析などのスクリプトや外部のウィジェットを追加している場合、
 // 既定の設定ではそれらが動作しなくなります。その場合は既定の設定を元に許可する取得先を追加してください。既定の設定は以下の通りです:
-// "default-src 'self'; script-src 'self' https://code.jquery.com; style-src 'self' 'unsafe-inline'; img-src * data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+// "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src * data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
 // 例えば head に <script> タグを直接書いている場合は script-src に 'unsafe-inline' を、
 // 外部のスクリプトを読み込んでいる場合はその取得先 (例: https://www.googletagmanager.com) を追加します
 $config->contentSecurityPolicy = null;

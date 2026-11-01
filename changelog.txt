@@ -103,6 +103,14 @@
 	  Referer の比較が誤っており、Referer が無い場合しか拒否されていませんでした
 	  - 新しいブラウザでは Sec-Fetch-Site で、対応していないブラウザでは Origin または Referer のホスト名で判断します
 	  - リバースプロキシが Host を書き換える環境でも、信頼するプロキシ ($config->trustedProxies) からの X-Forwarded-Host を使って判断します
+	* req/Core/Visualizer.php,
+	  script/jquery-3.7.1.min.js: jQuery を 1.8.1 から 3.7.1 に更新し、外部 (code.jquery.com) から読み込まずに同梱するように
+	  jQuery 1.x の既知の脆弱性 (XSS) を解消し、既定の Content-Security-Policy でスクリプトをこのサイトのものだけに制限しました
+	* script/base.js,
+	  script/Index/Index.js,
+	  script/Read/Index.js: jQuery 3 で削除された $.browser、andSelf() などを使わないように
+	* script/mobile/*: 使われていない携帯電話向けのスクリプトを削除
+	* THIRD_PARTY_LICENSES.txt: jQuery のライセンスを追加
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 

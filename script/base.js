@@ -181,7 +181,8 @@ var megalopolis =
 	},
 	scrollTo: function(destination)
 	{
-		$($.browser.webkit ? "body" : "html")
+		// スクロールする要素はブラウザによって html か body か異なるため、ブラウザに尋ねる
+		$(document.scrollingElement || document.documentElement)
 			.stop(true, true)
 			.animate
 			({
@@ -202,7 +203,7 @@ var megalopolis =
 
 		try
 		{
-			return $.parseJSON(xhr.responseText).error || (xhr.status == 401 ? "ログインの有効期限が切れました。ページを開き直してログインしてください。" : message);
+			return JSON.parse(xhr.responseText).error || (xhr.status == 401 ? "ログインの有効期限が切れました。ページを開き直してログインしてください。" : message);
 		}
 		catch (e)
 		{

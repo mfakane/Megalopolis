@@ -169,7 +169,7 @@ $(function()
 				
 				var list = $.map(tbody.find("tr.article").map(function()
 				{
-					return $(this).next("tr.tags").andSelf();
+					return $(this).next("tr.tags").addBack();
 				}).sort(function(x, y)
 				{
 					return ascending ? selector($(x[0]), $(y[0])) : selector($(y[0]), $(x[0]));
@@ -300,7 +300,7 @@ $(function()
 					{
 						if (articles)
 						{
-							articles.find("dd." + k).prev("dt").andSelf().toggleClass("hidden");
+							articles.find("dd." + k).prev("dt").addBack().toggleClass("hidden");
 							articles.find("dl").each(function(k, v)
 							{
 								var elems = $("dt", v);

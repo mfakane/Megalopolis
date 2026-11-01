@@ -83,7 +83,7 @@ class Visualizer
 			<link href="<?php self::converted(self::actionHref("style", "simple", "simple.css")) ?>" rel="stylesheet" />
 		<?php else: ?>
 			<meta name="application-name" content="<?php self::converted(Configuration::$instance->title) ?>" />
-			<script src="https://code.jquery.com/jquery-1.8.1.min.js"></script>
+			<script src="<?php self::converted(self::actionHref("script", "jquery-3.7.1.min.js")) ?>"></script>
 			<link href="<?php self::converted(self::actionHref("style", "style.css")) ?>" rel="stylesheet" />
 			<?php if (Configuration::$instance->skin !== null): ?>
 				<link href="<?php self::converted(self::actionHref("style", Configuration::$instance->skin, "style.css")) ?>" rel="stylesheet" />
@@ -1083,7 +1083,7 @@ class Visualizer
 	 * 管理者が config.php で追加する HTML (head, notes, footers) の外部スクリプトなどは
 	 * $config->contentSecurityPolicy で許可する
 	 */
-	const string DEFAULT_CONTENT_SECURITY_POLICY = "default-src 'self'; script-src 'self' https://code.jquery.com; style-src 'self' 'unsafe-inline'; img-src * data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'";
+	const string DEFAULT_CONTENT_SECURITY_POLICY = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src * data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'";
 	
 	private static function defaultHeaders(): void
 	{

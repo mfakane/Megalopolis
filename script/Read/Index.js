@@ -104,7 +104,8 @@ $(function()
 				.prop("href", data.deleteAction)
 				.text("削除"));
 			
-			return $([dt, $("<dd />").html(data.formattedBody)]);
+			// jQuery 3 では jQuery オブジェクトの配列を $() で包めないため、add() でまとめる
+			return dt.add($("<dd />").html(data.formattedBody));
 		};
 		var evaluate = function(point)
 		{
@@ -205,7 +206,7 @@ $(function()
 					},
 					error: function(xhr)
 					{
-						var data = $.parseJSON(xhr.responseText);
+						var data = JSON.parse(xhr.responseText);
 						
 						(data && data.error && $.isArray(data.error)
 							? $("<ul />")
@@ -321,7 +322,7 @@ $(function()
 					},
 					error: function(xhr)
 					{
-						var data = $.parseJSON(xhr.responseText);
+						var data = JSON.parse(xhr.responseText);
 						
 						(data && data.error && $.isArray(data.error)
 							? $("<ul />")
