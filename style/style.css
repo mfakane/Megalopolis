@@ -2557,10 +2557,15 @@ select {
 		align-items: center;
 		margin: 0px 0px 8px 0px;
 		padding: 4px 8px 4px 8px;
+		/* ページの途中に置くので、ほかの欄と同じく上下を線で区切る */
+		border-top: #005019 1px solid;
 		border-left: none;
 		border-right: none;
 		border-radius: 0px;
 		height: auto;
+		/* 帯の高さが変わっても、グラデーションは帯の全体に伸ばす */
+		background-image: linear-gradient(#d5d5d5 27%, #bbbbbb 98%);
+		background-size: 100% 100%;
 		row-gap: 4px;
 	}
 	
