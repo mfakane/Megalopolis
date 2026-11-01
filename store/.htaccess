@@ -1,0 +1,10 @@
+# データベースや失敗の記録などを保存するディレクトリのため、Web からはすべて拒否する
+<IfModule mod_authz_core.c>
+	# Apache 2.4 以降
+	Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+	# Apache 2.2
+	Order Deny,Allow
+	Deny from All
+</IfModule>

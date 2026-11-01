@@ -71,6 +71,8 @@ config.php を編集することにより設定します。
 ----------------------
 
 store/, .htaccess および config.php 以外を上書きすることでアップデートが可能です。
+ただし store/.htaccess は Web からのアクセスを拒否するためのファイルなので、無い場合や古い場合は新しいものを置いてください。
+.htaccess も付属のものと見比べ、アクセスを制限する設定が古い場合は書き換えてください。
 設定項目の追加がある場合、config.php を新しいものから再設定する必要があります。
 再設定せずに使用した場合、新しい設定項目についてはデフォルトの設定が使用されます。
 
@@ -92,7 +94,7 @@ PATH_INFO が使用可能な環境の場合、/index.php/2 などでアクセス
 .htaccess および mod_rewrite が使用可能な環境の場合、付属の .htaccess を使用し URL の index.php を省略できます。 
 たとえば /index.php/2 や /index.php?path=/2 となるところを /2 などでアクセス可能にできます。
 
-使わない場合は、.htaccess を削除してしまってもかまいません。
+URL の省略を使わない場合でも、.htaccess はデータベースへのアクセスを拒否する設定を含むため、残しておいてください。
 
 管理者パスワードの設定
 ----------------------
@@ -299,9 +301,18 @@ Megalopolis は作品集や作品閲覧など一部のページで Last-Modified
 注意
 ----
 
-* .htaccess などでアクセスの制限が可能な環境の場合、セキュリティなどの理由により
-  store/ や req/、Megalith/ 以下へのアクセスを制限することを推奨します。
-  付属の .htaccess では既定で *.sqlite ファイルへのアクセスを制限する設定がなされています。
+* store/ 以下には作品やコメントのデータベース、接続元の記録などが保存されるため、
+  Web から開けないようにしてください。
+  Apache では付属の store/.htaccess と .htaccess により、store/ 以下と *.sqlite ファイルへのアクセスを拒否します。
+  (Apache 2.2 と 2.4 以降の両方に対応しています。AllowOverride で .htaccess が無効になっている場合は効きません)
+  nginx など .htaccess を使用しないサーバでは、サーバの設定で拒否してください。nginx の場合の例:
+      location ^~ /store/ { deny all; }
+      location ~ \.sqlite$ { deny all; }
+  設置先がサブディレクトリの場合は /store/ をそのディレクトリからのパスに置き換えてください。
+  または、config.php で $config->dataStore = new SQLiteDataStore("../store/"); のように
+  Web から見えない場所を保存先に指定することもできます。
+  (この場合でも、照合の失敗の記録 store/loginfailures.php やお知らせ store/notice/ などは store/ に置かれます)
+* 同様に、req/ や Megalith/ 以下へのアクセスも制限することを推奨します。
 
 更新履歴
 --------

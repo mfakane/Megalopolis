@@ -19,6 +19,7 @@ COPY index.php .htaccess ./
 COPY req ./req
 COPY style ./style
 COPY script ./script
+COPY store/.htaccess ./store/.htaccess
 COPY store/store.txt ./store/store.txt
 COPY store/notice ./store/notice
 COPY tests/Browser/config.php ./config.php

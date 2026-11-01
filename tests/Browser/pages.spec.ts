@@ -201,6 +201,18 @@ test("設定情報とnoticeを表示する", async ({ page }) => {
 	assertNoDiagnostics(diagnostics);
 });
 
+test("Apache では store/ 以下のファイルを Web から開けない", async ({ page }) => {
+	test.skip(linkMode !== "rewrite", "Only the Apache image applies the shipped .htaccess files.");
+
+	// 投稿などでデータベースが作られたあとに確かめる
+	await page.goto(route(""));
+
+	for (const path of ["store/", "store/data.sqlite", "store/search.sqlite", "store/store.txt", "store/notice/sample.txt", "store/loginfailures.php", "store/missing"]) {
+		const response = await page.request.get(new URL(path, baseUrl).href);
+		expect(response.status(), path).toBe(403);
+	}
+});
+
 test("編集キーで編集し、誤った編集キーでは変更しない", async ({ page, browser }) => {
 	const diagnostics = attachDiagnostics(page);
 	const work = makeWork("edit");

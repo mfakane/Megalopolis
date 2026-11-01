@@ -70,6 +70,13 @@
 	  失敗の記録は store/loginfailures.php に保存し、Web から開かれても中身を返さないようにしています
 	* config.php,
 	  req/Core/Configuration.php: 停止するまでの回数 $config->loginFailureLimit と期間 $config->loginLockMinutes を追加
+	* .htaccess,
+	  store/.htaccess: store/ 以下へのアクセスをすべて拒否するように
+	  これまでは .htaccess で *.sqlite を拒否しているだけで、Apache 2.4 以降の書き方にも対応していませんでした
+	  - Apache 2.4 以降では Require all denied を、2.2 では Order と Deny を使用します
+	  - mod_rewrite が使える場合は、store/.htaccess が無くても store/ 以下を拒否します
+	  更新の際は store/.htaccess を置き、.htaccess を書き換えてください
+	* readme.txt: nginx など .htaccess を使用しないサーバで store/ 以下を拒否する設定例を追加
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 
