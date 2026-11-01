@@ -2629,20 +2629,32 @@ select {
 	}
 	
 	/* 並べ替えと表示形式のメニューは、件数の後で改行して 2 つ並べる */
+	body.responsive>h1>span:not(:last-child)
+	{
+		margin-right: 0px;
+	}
+	
 	body.responsive>h1>span:not(:last-child):after
 	{
 		display: block;
 		content: "";
 	}
 	
+	/* 見出しのアイコン分の字下げを打ち消し、左右の余白をヘッダと同じ 8px にして 2 つを等分に並べる */
 	.responsive .dropDown
 	{
 		margin-top: 8px;
 		padding: 4px 4px 4px 6px;
-		width: 96px;
-		height: 26px;
+		width: calc(50% + 12px);
+		height: 36px;
 		line-height: 26px;
 		font-size: 14px;
+		box-sizing: border-box;
+	}
+	
+	.responsive h1 .dropDown:not(.dropDown+.dropDown)
+	{
+		margin-left: -24px;
 	}
 	
 	.responsive .dropDown .button
@@ -2653,7 +2665,8 @@ select {
 	.responsive .dropDown ul
 	{
 		top: 34px;
-		width: 106px;
+		width: calc(100% + 2px);
+		box-sizing: border-box;
 	}
 	
 	.responsive .dropDown ul li
