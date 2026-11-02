@@ -10,6 +10,7 @@ $config->dataStore = getenv('COMPAT_DRIVER') === 'mysql'
 // Only the charset conversion candidate enables the admin tools.
 if (getenv('COMPAT_ADMIN') !== false) {
     $config->utilsEnabled = true;
+    $config->checkForUpdates = false;
     $config->adminHash = Util::hash(getenv('COMPAT_ADMIN'));
 }
 if (getenv('COMPAT_UPGRADE') === '1') {

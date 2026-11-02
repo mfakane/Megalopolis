@@ -49,6 +49,12 @@ Visualizer::doctype();
 	<?php if ($exposureProbes): ?>
 		<ul class="notify warning" id="exposureWarnings" hidden data-probes="<?=Visualizer::escapeOutput(json_encode($exposureProbes)) ?>"></ul>
 	<?php endif ?>
+	<?php if (Auth::hasSession(true) && !empty(Visualizer::$data["update"])): ?>
+		<p class="notify info" id="updateNotice">
+			新しいバージョン <?=Visualizer::escapeOutput(App::VERSION_PREFIX . Visualizer::$data["update"]["version"]) ?> が公開されています (現在 <?=Visualizer::escapeOutput(App::VERSION_PREFIX . App::VERSION) ?>)。
+			<a href="<?=Visualizer::escapeOutput(Visualizer::$data["update"]["url"]) ?>" rel="noopener noreferrer">リリースのページへ</a>
+		</p>
+	<?php endif ?>
 	<?php if (Auth::hasSession(true) && !empty(Visualizer::$data["notices"])): ?>
 		<ul class="notify warning">
 			<?php foreach (Visualizer::$data["notices"] as $i): ?>

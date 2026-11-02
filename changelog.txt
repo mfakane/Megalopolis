@@ -177,6 +177,16 @@
 	  req/Visualizer/Util/Track.php,
 	  script/Read/Edit.js: ラベルの無かった入力欄 (コメント欄、検索の範囲の終わり、管理者の選択欄など) と色の見本に名前を付ける
 	* style/style.css: 一覧の日時などの薄い灰色を、白地でも読みやすい濃さ (コントラスト比 4.5:1 以上) にする
+	* req/App.php,
+	  req/Core/UpdateCheck.php,
+	  req/Handler/Util.php,
+	  req/Visualizer/Util/Index.php,
+	  config.php,
+	  readme.txt: 管理用ツールのトップに、新しいバージョンが公開されていることを表示する
+	  - GitHub (api.github.com) に最新のリリースを問い合わせ、新しければリリースのページへのリンクを表示します。自動で更新はしません
+	  - 問い合わせは 1 日に 1 回までで、結果は store/updatecheck.php に保存します。問い合わせに失敗した場合も 1 日待ちます
+	  - 外部へ接続できない場合は何も表示しません
+	* req/Core/Configuration.php: 確認するかどうか $config->checkForUpdates を追加
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 

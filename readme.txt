@@ -311,7 +311,7 @@ Megalopolis は作品集や作品閲覧など一部のページで Last-Modified
   設置先がサブディレクトリの場合は /store/ をそのディレクトリからのパスに置き換えてください。
   または、config.php で $config->dataStore = new SQLiteDataStore("../store/"); のように
   Web から見えない場所を保存先に指定することもできます。
-  (この場合でも、照合の失敗の記録 store/loginfailures.php やお知らせ store/notice/ などは store/ に置かれます)
+  (この場合でも、照合の失敗の記録 store/loginfailures.php や更新の確認の結果 store/updatecheck.php、お知らせ store/notice/ などは store/ に置かれます)
 * 同様に、req/ や Megalith/ 以下へのアクセスも制限することを推奨します。
 
 更新履歴

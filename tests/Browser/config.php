@@ -7,6 +7,8 @@ Configuration::$instance = $config;
 $config->title = "Megalopolis";
 $config->adminHash = Util::hash("browser-admin");
 $config->utilsEnabled = true;
+// テストから GitHub に問い合わせない
+$config->checkForUpdates = false;
 // Dockerfile.rewrite runs the same suite on Apache with .htaccess under /sub/.
 $rewrite = getenv("BROWSER_LINK_TYPE") === "rewrite";
 $config->htaccessAutoConfig = $rewrite;

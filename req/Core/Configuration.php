@@ -42,6 +42,7 @@ class Configuration
 	public ?string $adminHash = null;
 	/** 管理者のログインを覚えておく日数。0 の場合はブラウザを閉じるまで (最長 1 日) */
 	public int $adminLoginDays = 0;
+	public bool $checkForUpdates = true;
 	public bool $utilsEnabled = false;
 	public bool $htaccessAutoConfig = false;
 	/** @var Configuration::LINK_* */

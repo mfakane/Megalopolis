@@ -21,7 +21,10 @@ class UtilHandler extends Handler
 
 		Auth::loginAsAdmin();
 
-		Visualizer::$data = array("notices" => self::getMigrationNotices());
+		Visualizer::$data = array(
+			"notices" => self::getMigrationNotices(),
+			"update" => Configuration::$instance->checkForUpdates ? UpdateCheck::getNewerRelease() : null,
+		);
 
 		return Visualizer::visualize();
 	}

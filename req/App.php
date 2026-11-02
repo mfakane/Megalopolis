@@ -17,6 +17,7 @@ App::load(array(
 	Constant::CORE_DIR . "DataStore",
 	Constant::CORE_DIR . "Handler",
 	Constant::CORE_DIR . "SessionStore",
+	Constant::CORE_DIR . "UpdateCheck",
 	Constant::CORE_DIR . "Visualizer",
 	Constant::MODEL_DIR . "Board",
 	Constant::MODEL_DIR . "CharsetConversion",

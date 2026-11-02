@@ -37,6 +37,14 @@ $config->loginLockMinutes = 15;
 // 公開された環境で使用する場合、false にすることを推奨します
 $config->utilsEnabled = true;
 
+// 管理用ツールで新しいバージョンを確認するか (true/false)
+// 管理用ツールのトップを開いたときに、GitHub (api.github.com) に最新のリリースを問い合わせ、
+// 新しいバージョンが公開されていればリリースのページへのリンクを表示します。自動で更新はしません。
+// 問い合わせは 1 日に 1 回までで、結果は store/updatecheck.php に保存されます。
+// サーバから外部へ接続できない場合は何も表示しません。
+// false の場合は問い合わせません
+$config->checkForUpdates = true;
+
 // .htaccess の RewriteRule 自動設定をするか (true/false)
 // .htaccess が存在し、パラメータなしのページにアクセスしたときに、
 // RewriteRule の書き換え先パスを自動的に現在のドキュメントルートに合うように書き換えます。
