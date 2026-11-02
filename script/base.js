@@ -323,7 +323,9 @@ var megalopolis =
 		{
 			var sl = v.split(">");
 
-			data[sl[0]] = sl[1];
+			// 設定をすべて消すと値が "<" だけになるため、サーバーと同じく ">" の無い項目と空の値は読み飛ばす
+			if (sl.length > 1 && sl[1] !== "")
+				data[sl[0]] = sl[1];
 		});
 
 		return data;
@@ -364,7 +366,7 @@ var megalopolis =
 			var set = [];
 			
 			for (var i in data)
-				if (data[i].length)
+				if (data[i] && data[i].length)
 					set.push(i + ">" + data[i]);
 			
 			this.cookie("Cookie", "<" + set.join("<"));

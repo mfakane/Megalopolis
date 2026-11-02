@@ -297,6 +297,21 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await page.reload();
 	expect(await lineHeight()).toBeCloseTo(2.4, 1);
 
+	// 設定をすべて消してクッキーが "<" だけになっても、設定を読み書きできる
+	expect(await page.evaluate(() => {
+		const m = (window as any).megalopolis;
+		const cookie = m.cookie;
+		let written = "<";
+
+		m.cookie = (name: string, value?: string) => value === undefined ? written : void (written = value);
+
+		try {
+			return [m.mainCookie("LineHeight"), m.mainCookie("LineHeight", "2.1"), written];
+		} finally {
+			m.cookie = cookie;
+		}
+	})).toEqual([null, "2.1", "<LineHeight>2.1"]);
+
 	// 縦書きでは短い数字や感嘆符を縦中横にし、横書きに戻すと元に戻す
 	await settings.click();
 	await page.getByText("縦書き", { exact: true }).click();
