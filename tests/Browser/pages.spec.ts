@@ -328,28 +328,43 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await expect.poll(progress).toBeGreaterThan(0.4);
 	expect(await progress()).toBeLessThan(0.6);
 
-	// 本文の枠を全画面にすると、表示設定のボタンも枠の中に移り、読んでいた位置を保つ
+	// 全画面で読むと、題名と表示設定のボタンを枠の中に出し、読んでいた位置を保つ
 	const body = page.locator("#body");
-	const enter = page.getByRole("button", { name: "全画面表示", exact: true });
+	const reader = page.getByRole("button", { name: "全画面で読む" });
 	// クリックするとボタンの位置 (本文の上端) までスクロールするため、スクロールせずにキーボードで押す
-	await enter.evaluate((e: HTMLElement) => e.focus({ preventScroll: true }));
+	await reader.evaluate((e: HTMLElement) => e.focus({ preventScroll: true }));
 	await page.keyboard.press("Enter");
-	await expect.poll(() => page.evaluate(() => document.fullscreenElement?.id)).toBe("body");
-	await expect(body).toHaveClass(/fullscreen/);
+	await expect(body).toHaveClass(/reader/);
+	await expect(reader).toHaveAttribute("aria-pressed", "true");
+	await expect(body.locator(".readerTitle")).toContainText(work.title);
 	await expect(body.getByRole("button", { name: "表示設定" })).toBeVisible();
-	const fullscreenProgress = () => page.evaluate(() => {
+	const slider = body.getByRole("slider", { name: "読んでいる位置" });
+	const readerProgress = () => page.evaluate(() => {
 		const body = document.getElementById("body")!;
 		const rect = document.querySelector("#content")!.getBoundingClientRect();
 
 		return (body.getBoundingClientRect().top - rect.top) / (rect.height - body.clientHeight);
 	});
-	expect(await fullscreenProgress()).toBeGreaterThan(0.35);
-	expect(await fullscreenProgress()).toBeLessThan(0.65);
-	await body.getByRole("button", { name: "全画面表示を終了" }).click();
-	await expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull();
-	await expect(body).not.toHaveClass(/fullscreen/);
-	await expect(page.locator("#body + ul.options, ul.options + #body")).toHaveCount(1);
-	expect(await progress()).toBeGreaterThan(0.35);
+	expect(await readerProgress()).toBeGreaterThan(0.35);
+	expect(await readerProgress()).toBeLessThan(0.65);
+	// スライダーは作品全体の位置を表す (2 ページの 2 ページ目の 50% → 150)
+	expect(Number(await slider.inputValue())).toBeGreaterThan(135);
+
+	// スライダーでほかのページへ移っても、全画面のまま移った先の位置から読める
+	await slider.fill("30");
+	await expect(page.getByText("1 ページ目 1 行目。", { exact: false })).toBeAttached();
+	await expect(body).toHaveClass(/reader/);
+	await expect.poll(readerProgress).toBeGreaterThan(0.2);
+	expect(await readerProgress()).toBeLessThan(0.4);
+	await body.getByRole("button", { name: "次のページ" }).click();
+	await expect(page.getByText("2 ページ目 1 行目。", { exact: false })).toBeAttached();
+	await expect(body).toHaveClass(/reader/);
+
+	// Esc で元の表示に戻り、ボタンも元の場所に戻る
+	await page.keyboard.press("Escape");
+	await expect(body).not.toHaveClass(/reader/);
+	await expect(page.locator("ul.options + #body")).toHaveCount(1);
+	await expect(body.locator(".readerHeader, .readerFooter")).toHaveCount(0);
 
 	assertNoDiagnostics(diagnostics);
 });

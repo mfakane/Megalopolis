@@ -420,8 +420,8 @@ $(function()
 		};
 		var resizeAction = function()
 		{
-			// 全画面では、枠の高さを CSS (.fullscreen) で画面に合わせる
-			if (fullscreen && fullscreen.isFullscreen())
+			// リーダーモードでは、枠の大きさを CSS (.reader) で画面に合わせる
+			if (reader && reader.isReader())
 				content.css("height", "");
 			else if (vertical.isVertical)
 				content.height(vertical.verticalBodyWidth ? vertical.verticalBodyWidth + 24 : $(window).height() - 256);
@@ -669,41 +669,154 @@ $(function()
 			.insertBefore(content);
 
 		/*
-		 * 本文の枠を全画面に広げる。全画面の間は、このボタンと表示設定も枠の中に移す
+		 * 本文の枠をブラウザの中で画面いっぱいに広げて読む (リーダーモード)
+		 * 題名と作者名を上に、読んでいる位置のスライダーとページの移動を下に置き、表示設定のボタンも枠の中に移す
 		 */
-		var fullscreen = (function()
+		var reader = (function()
 		{
-			var doc = document;
-			var enabled = doc.fullscreenEnabled || doc.webkitFullscreenEnabled;
-			var element = function() { return doc.fullscreenElement || doc.webkitFullscreenElement || null; };
-			var isFullscreen = function() { return element() == content[0]; };
-
-			if (!enabled || !content[0].requestFullscreen && !content[0].webkitRequestFullscreen)
-				return { isFullscreen: isFullscreen };
-
-			var button = $("<button />", { type: "button", "class": "fullscreenButton" });
+			var storageKey = "megalopolis.reader";
+			var entryId = content.data("entryId");
+			var page = content.data("page") - 0;
+			var pageCount = content.data("pageCount") - 0;
+			var active = false;
+			var dragging = false;
+			var isReader = function() { return active; };
+			var button = $("<button />", { type: "button", "class": "readerButton" });
 			var icon = $("<img />").appendTo(button);
-			var progress = null;
+			var header = $("<div />").addClass("readerHeader")
+				.append($("<p />").addClass("readerTitle")
+					.append($("<span />").addClass("title").text(content.data("title") || document.title))
+					.append(content.data("name") ? $("<span />").addClass("name").text(content.data("name")) : null));
+			var footer = null;
+			var slider = null;
+			var label = null;
+			var scale = 100;
+			var describe = function(p, r)
+			{
+				return (pageCount > 1 ? p + " / " + pageCount + " ページ　" : "") + Math.round(r * 100) + "%";
+			};
+			var split = function(value)
+			{
+				var p = Math.min(Math.floor(value / scale) + 1, pageCount);
+
+				return { p: p, r: Math.min(Math.max((value - (p - 1) * scale) / scale, 0), 1) };
+			};
+			var updateSlider = function()
+			{
+				if (!slider || dragging)
+					return;
+
+				var r = readingPosition.current();
+
+				slider.val(Math.round((page - 1 + r) * scale));
+				slider.attr("aria-valuetext", describe(page, r));
+				label.text(describe(page, r));
+			};
+			var setStored = function(on)
+			{
+				try
+				{
+					if (on)
+						window.sessionStorage.setItem(storageKey, entryId || "");
+					else
+						window.sessionStorage.removeItem(storageKey);
+				}
+				catch (e)
+				{
+				}
+			};
+
+			// ページを移っても続けて読めるよう、ページの移動と位置のスライダーは作品のページを表示しているときだけ置く
+			if (entryId && pageCount)
+			{
+				var go = function(p, r)
+				{
+					setStored(true);
+					readingPosition.goTo(p, r);
+				};
+
+				slider = $("<input />", { type: "range", min: 0, max: pageCount * scale, step: 1, "aria-label": "読んでいる位置" });
+				label = $("<output />", { "aria-hidden": "true" });
+				footer = $("<div />").addClass("readerFooter")
+					.append(pageCount > 1 ? $("<button />", { type: "button", "class": "previous", title: "前のページ", "aria-label": "前のページ" }).text("前").prop("disabled", page <= 1).click(function() { go(page - 1, 0); }) : null)
+					.append(slider)
+					.append(label)
+					.append(pageCount > 1 ? $("<button />", { type: "button", "class": "next", title: "次のページ", "aria-label": "次のページ" }).text("次").prop("disabled", page >= pageCount).click(function() { go(page + 1, 0); }) : null);
+
+				// ページの区切りに目盛りを付ける
+				if (pageCount > 1)
+				{
+					var ticks = $("<datalist />", { id: "readerPages" });
+
+					for (var i = 1; i < pageCount; i++)
+						ticks.append($("<option />", { value: i * scale }));
+
+					footer.append(ticks);
+					slider.attr("list", "readerPages");
+				}
+
+				slider
+					.on("input", function()
+					{
+						var target = split(slider.val() - 0);
+
+						dragging = true;
+						slider.attr("aria-valuetext", describe(target.p, target.r));
+						label.text(describe(target.p, target.r));
+
+						// 表示しているページの中ならその場で動かし、ほかのページは指を離したときに移る
+						if (target.p == page)
+							readingPosition.restore(target.r);
+					})
+					.on("change", function()
+					{
+						var target = split(slider.val() - 0);
+
+						dragging = false;
+
+						if (target.p != page)
+							go(target.p, target.r);
+					});
+				content.on("scroll", updateSlider);
+				wrapper.on("scroll", updateSlider);
+			}
+
 			var update = function()
 			{
-				var on = isFullscreen();
-				var label = on ? "全画面表示を終了" : "全画面表示";
+				var text = active ? "全画面を終了" : "全画面で読む";
 
-				button.attr("title", label);
-				icon.attr({ src: basePath + (on ? "fullscreenExitIcon.png" : "fullscreenIcon.png"), alt: label });
+				button.attr({ title: text, "aria-pressed": active ? "true" : "false" });
+				icon.attr({ src: basePath + (active ? "fullscreenExitIcon.png" : "fullscreenIcon.png"), alt: "全画面で読む" });
 			};
-			var onChange = function()
+			var set = function(on)
 			{
-				var on = isFullscreen();
+				if (on == active)
+					return;
+
 				var focused = button.is(":focus");
+				var progress = readingPosition.current();
 
-				content.toggleClass("fullscreen", on);
+				active = on;
+				$("html").toggleClass("readerMode", on);
+				content.toggleClass("reader", on);
+				setStored(on);
 
-				// 枠の外に置いたボタンは全画面では見えないため、枠の中へ移す
+				// 枠の外に置いたボタンは見えなくなるため、枠の中の見出しへ移す
 				if (on)
-					options.prependTo(content);
+				{
+					header.append(options).prependTo(content);
+
+					if (footer)
+						footer.appendTo(content);
+				}
 				else
+				{
+					header.detach();
 					options.insertBefore(content);
+
+					if (footer)
+						footer.detach();
+				}
 
 				update();
 				resizeAction();
@@ -713,31 +826,37 @@ $(function()
 
 				// 読み始める前 (0) なら、題名から見えるよう位置を合わせない
 				if (progress)
-				{
 					readingPosition.restore(progress);
-					progress = null;
-				}
+				else if (on)
+					content.scrollTop(0);
+
+				updateSlider();
 			};
 
-			button.click(function()
+			button.click(function() { set(!active); });
+			$(document).on("keydown", function(e)
 			{
-				progress = readingPosition.current();
-
-				if (isFullscreen())
-					(doc.exitFullscreen || doc.webkitExitFullscreen).call(doc);
-				else
-				{
-					var request = (content[0].requestFullscreen || content[0].webkitRequestFullscreen).call(content[0]);
-
-					if (request && request.catch)
-						request.catch(function() { progress = null; });
-				}
+				if (active && e.key == "Escape" && !$(e.target).closest("details[open]").length && !e.isDefaultPrevented())
+					set(false);
 			});
-			$(doc).on("fullscreenchange webkitfullscreenchange", onChange);
 			update();
 			$("<li />").append(button).prependTo(options);
 
-			return { isFullscreen: isFullscreen };
+			return {
+				isReader: isReader,
+				// リーダーモードのままページを移ったときは、移った先でもリーダーモードで開く
+				restoreOnLoad: function()
+				{
+					try
+					{
+						if (entryId && window.sessionStorage.getItem(storageKey) == entryId)
+							set(true);
+					}
+					catch (e)
+					{
+					}
+				}
+			};
 		})();
 
 		/*
@@ -796,8 +915,8 @@ $(function()
 					return clamp((rect.right - frame.right) / Math.max(rect.width - frame.width, 1));
 				}
 
-				// 全画面では枠の中を、それ以外ではページをスクロールする
-				if (fullscreen.isFullscreen())
+				// リーダーモードでは枠の中を、それ以外ではページをスクロールする
+				if (reader.isReader())
 					return clamp((content[0].getBoundingClientRect().top - rect.top) / Math.max(rect.height - content[0].clientHeight, 1));
 
 				return clamp(-rect.top / Math.max(rect.height - $(window).height(), 1));
@@ -811,24 +930,34 @@ $(function()
 					var frame = wrapper[0].getBoundingClientRect();
 					var delta = progress * Math.max(rect.width - frame.width, 0) - Math.max(rect.right - frame.right, 0);
 
-					if (!fullscreen.isFullscreen())
+					if (!reader.isReader())
 						window.scrollTo(window.pageXOffset, content.offset().top - 8);
 
 					wrapper.scrollLeft(wrapper.scrollLeft() - delta);
 				}
-				else if (fullscreen.isFullscreen())
+				else if (reader.isReader())
 					content.scrollTop(content.scrollTop() + rect.top - content[0].getBoundingClientRect().top + progress * Math.max(rect.height - content[0].clientHeight, 0));
 				else
 					window.scrollTo(window.pageXOffset, rect.top + window.pageYOffset + progress * Math.max(rect.height - $(window).height(), 0));
 			};
 
+			var navigating = false;
+			// 指定したページの指定した位置へ移る
+			var goTo = function(p, r)
+			{
+				navigating = true;
+				clearTimeout(timer);
+				save({ p: p, r: Math.round(r * 1000) / 1000, n: pageCount, t: new Date().getTime(), done: false });
+				location.href = content.data("pageBase") + p + "#resume";
+			};
+			var timer = null;
+
 			if (!entryId || !$("#content").length)
-				return { current: current, restore: restore };
+				return { current: current, restore: restore, goTo: goTo };
 
 			var record = load()[entryId];
 			var navigation = window.performance && performance.getEntriesByType ? performance.getEntriesByType("navigation")[0] : null;
 			var restored = navigation && (navigation.type == "reload" || navigation.type == "back_forward");
-			var timer = null;
 			var tracking = false;
 			var record_ = function()
 			{
@@ -885,11 +1014,11 @@ $(function()
 			content.on("scroll", onScroll);
 			$(window).on("pagehide", function()
 			{
-				if (tracking)
+				if (tracking && !navigating)
 					record_();
 			});
 
-			return { current: current, restore: restore };
+			return { current: current, restore: restore, goTo: goTo };
 		})();
 		
 		// 縦書きでは、縦方向のホイールで横にスクロールする (右から左へ読み進めるため、下へ回すと左へ動かす)
@@ -917,6 +1046,8 @@ $(function()
 		
 		if (writingMode == 0 && megalopolis.mainCookie("Vertical") == "yes" || writingMode == 2)
 			toggleVertical(true, writingMode == 2 ? true : undefined);
+
+		reader.restoreOnLoad();
 	};
 	
 	loadAdminButtons();
