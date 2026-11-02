@@ -249,6 +249,7 @@ Visualizer::doctype();
 	<?php endif ?>
 	<?php if ($isEdit): ?>
 		<section class="notify info">
+			<span class="message">間違いが無ければ [送信] をクリックし投稿します。修正すべき箇所がある場合は [修正] をクリックし編集画面に戻ります</span>
 			<ul class="buttons">
 				<li>
 					<form id="resumeForm" action="<?php Visualizer::converted(App::$actionName == "new"
@@ -275,7 +276,6 @@ Visualizer::doctype();
 					</form>
 				</li>
 			</ul>
-			間違いが無ければ [送信] をクリックし投稿します。修正すべき箇所がある場合は [修正] をクリックし編集画面に戻ります
 		</section>
 	<?php else: ?>
 		<div id="links" data-default-evaluator="<?=$c->usePoints() && $c->useComments ? $c->defaultEvaluator : -1 ?>"></div>

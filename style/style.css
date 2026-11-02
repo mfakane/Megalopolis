@@ -413,29 +413,116 @@ body>footer>ul:first-child+a
 
 .notify.info
 {
-	background-image: url("infoIcon.png");
+	--notify-icon: url("infoIcon.png");
 }
 
 .notify.warning
 {
-	background-image: url("warningIcon.png");
+	--notify-icon: url("warningIcon.png");
 }
 
 .notify.error
 {
-	background-image: url("errorIcon.png");
+	--notify-icon: url("errorIcon.png");
 }
 
-ul.notify
+.notify
 {
-	padding-bottom: 0px;
+	background-image: var(--notify-icon, none);
 }
 
+/* 箇条書きのお知らせは、項目の間だけを空ける */
 .notify>li
 {
 	display: block;
-	margin: 0px 0px 8px 0px;
+	margin: 0px;
 	padding: 0px;
+}
+
+.notify>li+li
+{
+	margin-top: 8px;
+}
+
+/*
+ * ボタンのあるお知らせは、アイコン、文言 (.message)、ボタン (.buttons) の順に並べる。
+ * 文言の 1 行目とアイコンをボタンの上下の中央にそろえ、上下の余白をボタンの高さの分だけ詰めて、ボタンの無いお知らせと同じ高さにする。
+ * 幅が足りない場合は、文言を折り返し、さらに足りなければボタンを次の行の右に回す
+ */
+.notify
+{
+	--notify-line: 17px;
+	--notify-button: 24px;
+}
+
+.notify:has(> .buttons)
+{
+	--notify-padding: max(4px, calc(8px - (var(--notify-button) - var(--notify-line)) / 2));
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: 4px 8px;
+	padding: var(--notify-padding) 8px;
+	background-image: none;
+}
+
+/* アイコンは文言の 1 行目と同じ高さの行に置き、文言が折り返しても 1 行目の横に並べる */
+.notify:has(> .buttons)::before
+{
+	content: "";
+	flex: none;
+	margin-top: calc((var(--notify-button) - var(--notify-line)) / 2);
+	width: 16px;
+	height: var(--notify-line);
+	background: var(--notify-icon, none) no-repeat center;
+}
+
+.notify>.message
+{
+	flex: 1 1 12em;
+	margin-top: calc((var(--notify-button) - var(--notify-line)) / 2);
+	min-width: 0px;
+}
+
+.notify>.message>p
+{
+	margin: 0px;
+}
+
+.notify>.message>p+p
+{
+	margin-top: 8px;
+}
+
+.notify>.buttons
+{
+	display: flex;
+	flex: none;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin: 0px -4px 0px auto;
+	padding: 0px;
+	list-style: none;
+}
+
+.notify>.buttons>li
+{
+	display: block;
+	float: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+.notify>.buttons :is(form, div)
+{
+	display: flex;
+	margin: 0px;
+}
+
+.notify>.buttons :is(input, button)
+{
+	margin: 0px;
+	height: var(--notify-button);
 }
 
 .notes, .search section.filter
@@ -1848,36 +1935,6 @@ ul.buttons li,
 	text-align: right;
 }
 
-.read .notify.resume
-{
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 4px 8px;
-	padding-top: 4px;
-	padding-bottom: 4px;
-}
-
-.read .notify.resume .message
-{
-	flex: 1 1 auto;
-	min-width: 0px;
-}
-
-.read .notify.resume .buttons
-{
-	display: flex;
-	flex: none;
-	gap: 4px;
-	margin: 0px 0px 0px auto;
-}
-
-/* ボタンの下の余白 (フォーム向けの既定) を除き、文言とボタンを上下の中央にそろえる */
-.read .notify.resume .buttons input
-{
-	margin: 0px;
-}
-
 .read #body #summary
 {
 	margin: 0px -8px 24px -8px;
@@ -2323,9 +2380,7 @@ html.readerMode .read .notify.resume
 	padding: 0px;
 }
 
-.read .notify ul.buttons,
-.read #evaluateform .buttons,
-.read #commentform .notify .buttons
+.read #evaluateform>.buttons
 {
 	float: right;
 	margin-top: -4px;
@@ -2333,9 +2388,7 @@ html.readerMode .read .notify.resume
 	padding-left: 0px;
 }
 
-.read #evaluateform ul.buttons li,
-.read .notify ul.buttons li,
-.read #commentform .notify ul.buttons li
+.read #evaluateform>ul.buttons>li
 {
 	display: block;
 	float: left;
@@ -3092,14 +3145,14 @@ select {
 		border-radius: 0px;
 	}
 	
-	.read #evaluateform .buttons
+	.read #evaluateform>.buttons
 	{
 		float: none;
 		margin: 0px;
 		text-align: left;
 	}
 	
-	.read #evaluateform ul.buttons li
+	.read #evaluateform>ul.buttons>li
 	{
 		padding: 0px 8px 0px 0px;
 	}
@@ -3111,9 +3164,14 @@ select {
 		font-size: inherit;
 	}
 	
-	.read .notify ul.buttons button
+	/* お知らせのボタンを、指で押しやすい高さにする */
+	.responsive .notify
 	{
-		height: 36px;
+		--notify-button: 36px;
+	}
+
+	.responsive .notify>.buttons :is(input, button)
+	{
 		font-size: inherit;
 	}
 	
@@ -3645,8 +3703,8 @@ select {
 		border-radius: 0px;
 	}
 	
-	/* section のお知らせ欄は、左にアイコンの余白を残す */
-	.responsive section.notify
+	/* section のお知らせ欄は、左にアイコンの余白を残す (ボタンのあるお知らせは、アイコンを文言の横に並べる) */
+	.responsive section.notify:not(:has(> .buttons))
 	{
 		padding-left: 32px;
 		padding-right: 8px;

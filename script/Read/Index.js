@@ -14,6 +14,16 @@ $(function()
 	{
 		return action + (action.indexOf("?") >= 0 ? "&" : "?") + query;
 	};
+	/**
+	 * お知らせを作る。文言 (.message) を左に、ボタンがあれば右 (.buttons) に置く
+	 */
+	var notify = function(type, message, buttons)
+	{
+		return $("<div />")
+			.addClass("notify " + type)
+			.append($("<span />").addClass("message").text(message))
+			.append(buttons ? $("<span />").addClass("buttons").append(buttons) : null);
+	};
 	var loadPostButtons = function()
 	{
 		$("#resumeForm, #sendForm").find("button").click(function()
@@ -166,12 +176,8 @@ $(function()
 					},
 					success: function(data)
 					{
-						$("<div />")
-							.addClass("notify info")
-							.text("評価を受け付けました！" + (point == 0 ? "無評価" : point + "点"))
-							.prepend($("<span />")
-								.addClass("buttons")
-								.append($("<input />", { type: "button" })
+						notify("info", "評価を受け付けました！" + (point == 0 ? "無評価" : point + "点"),
+								$("<input />", { type: "button" })
 									.val("取り消す")
 									.one("click", function()
 									{
@@ -185,9 +191,7 @@ $(function()
 											data: {},
 											success: function()
 											{
-												$("<div />")
-													.addClass("notify info")
-													.text("評価を取り消しました")
+												notify("info", "評価を取り消しました")
 													.hide()
 													.prependTo(form)
 													.slideDown(250);
@@ -197,7 +201,7 @@ $(function()
 										});
 										
 										return false;
-									})))
+									}))
 							.hide()
 							.prependTo(form)
 							.slideDown(250);
@@ -261,12 +265,8 @@ $(function()
 						if (!data.name || data.name.length == 0)
 							data.name = defaultName;
 						
-						$("<div />")
-							.addClass("notify info")
-							.text("コメントを受け付けました！" + ($("#point").val() == 0 ? "無評価" : $("#point").val() + "点"))
-							.prepend($("<span />")
-								.addClass("buttons")
-								.append($("<input />", { type: "button" })
+						notify("info", "コメントを受け付けました！" + ($("#point").val() == 0 ? "無評価" : $("#point").val() + "点"),
+								$("<input />", { type: "button" })
 									.val("取り消す")
 									.one("click", function()
 									{
@@ -284,12 +284,8 @@ $(function()
 											success: function()
 											{
 												$("#comment" + data.num + ", #comment" + data.num + "+dd").remove();
-												$("<div />")
-													.addClass("notify info")
-													.text("コメントを取り消しました")
-													.prepend($("<span />")
-														.addClass("buttons")
-														.append($("<input />", { type: "button" })
+												notify("info", "コメントを取り消しました",
+														$("<input />", { type: "button" })
 															.val("元に戻す")
 															.one("click", function()
 															{
@@ -302,7 +298,7 @@ $(function()
 																	postPassword: $("#postPassword2").val(),
 																	point: data.evaluation ? data.evaluation : 0
 																});
-															})))
+															}))
 													.hide()
 													.prependTo(form)
 													.slideDown(250);
@@ -310,7 +306,7 @@ $(function()
 										});
 										
 										return false;
-									})))
+									}))
 							.hide()
 							.prependTo(form)
 							.slideDown(250);
@@ -1215,14 +1211,10 @@ $(function()
 			}
 			else if (record && !record.done && !restored && (record.p != page || record.r > 0.05))
 			{
-				// 文言はアイコンの隣に、ボタンはその右 (狭い画面では次の行の右) に置く
-				var notice = $("<div />")
-					.addClass("notify info resume")
-					.append($("<span />").addClass("message").text(record.r < 0.05
+				var notice = notify("info resume", record.r < 0.05
 						? "前回は " + record.p + " ページ目を読んでいました"
-						: "前回は " + (record.n > 1 ? record.p + " ページ目の " : "") + Math.round(record.r * 100) + "% まで読みました"))
-					.append($("<span />").addClass("buttons")
-						.append($("<input />", { type: "button", value: "続きから読む" }).click(function()
+						: "前回は " + (record.n > 1 ? record.p + " ページ目の " : "") + Math.round(record.r * 100) + "% まで読みました", [
+						$("<input />", { type: "button", value: "続きから読む" }).click(function()
 						{
 							notice.remove();
 
@@ -1230,11 +1222,12 @@ $(function()
 								restore(record.r);
 							else
 								location.href = content.data("pageBase") + record.p + "#resume";
-						}))
-						.append($("<input />", { type: "button", value: "閉じる" }).click(function()
+						})[0],
+						$("<input />", { type: "button", value: "閉じる" }).click(function()
 						{
 							notice.remove();
-						})))
+						})[0]
+					])
 					.insertBefore(options);
 			}
 
