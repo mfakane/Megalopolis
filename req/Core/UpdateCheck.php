@@ -3,7 +3,8 @@ namespace Megalopolis;
 
 /**
  * GitHub のリリースから新しいバージョンが公開されているかを調べる。
- * 問い合わせの結果は 1 日分保存し、失敗した場合も次の問い合わせまで同じだけ待つ
+ * 問い合わせの結果は 1 日分保存し、失敗した場合も次の問い合わせまで同じだけ待つ。
+ * 失敗した場合は、前回分かっていたリリースをそのまま使う
  */
 class UpdateCheck
 {
@@ -49,7 +50,10 @@ class UpdateCheck
 			if (!is_array($cache) || !is_int($cache["checkedAt"] ?? null) || $cache["checkedAt"] > $now || $now - $cache["checkedAt"] >= self::INTERVAL) {
 				$json = $fetch();
 				$release = $json === null ? null : self::parseRelease($json);
-				$cache = array("checkedAt" => $now) + ($release ?? array());
+				$previous = is_array($cache) && is_int($cache["version"] ?? null) && is_string($cache["url"] ?? null)
+					? array("version" => $cache["version"], "url" => $cache["url"])
+					: array();
+				$cache = array("checkedAt" => $now) + ($release ?? $previous);
 
 				ftruncate($fp, 0);
 				rewind($fp);

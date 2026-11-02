@@ -92,6 +92,27 @@ final class UpdateCheckTest extends TestCase
         self::assertStringStartsWith(UpdateCheck::CACHE_FILE_HEADER, (string)file_get_contents($this->directory . '/' . UpdateCheck::CACHE_FILE));
     }
 
+    public function testFailureKeepsPreviousRelease(): void
+    {
+        $newer = App::VERSION + 1;
+        self::assertSame($newer, UpdateCheck::getNewerRelease(fn() => self::release("r{$newer}"), $this->directory, 1000)['version'] ?? null);
+
+        // 問い合わせに失敗しても、前回分かっていたリリースを表示し続ける
+        $calls = 0;
+        $fail = function () use (&$calls) {
+            $calls++;
+
+            return null;
+        };
+        self::assertSame($newer, UpdateCheck::getNewerRelease($fail, $this->directory, 1000 + UpdateCheck::INTERVAL)['version'] ?? null);
+        self::assertSame($newer, UpdateCheck::getNewerRelease($fail, $this->directory, 1000 + UpdateCheck::INTERVAL + 1)['version'] ?? null);
+        self::assertSame(1, $calls);
+
+        // 問い合わせに成功すれば、その結果で置き換える
+        self::assertNull(UpdateCheck::getNewerRelease(fn() => self::release('r' . App::VERSION), $this->directory, 1000 + UpdateCheck::INTERVAL * 2));
+        self::assertNull(UpdateCheck::getNewerRelease($fail, $this->directory, 1000 + UpdateCheck::INTERVAL * 3));
+    }
+
     public function testUnwritableDirectoryShowsNothing(): void
     {
         self::assertNull(UpdateCheck::getNewerRelease(fn() => self::fail('should not fetch'), $this->directory . '/missing', 1000));
