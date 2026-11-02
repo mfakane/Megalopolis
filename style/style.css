@@ -3881,22 +3881,16 @@ select {
 	}
 
 	/*
-	 * ドロップダウンのアイコンは、左の列が白地に矢印を抜いた画像のため、
-	 * 暗い背景では右の列 (透明な地に白い矢印) を緑の地に重ねて使う
+	 * ヘッダのメニューのアイコンとドロップダウンの矢印は、白地から形を抜いた画像を緑の地に重ねている。
+	 * 暗い背景では白地が枠に見えるため、色を反転して白地を黒にし、screen で背景になじませる。
+	 * 抜いた形は、緑の地を反転して色相を戻した明るい緑になる
 	 */
-	.dropDown .button
+	body>header nav ul li a img,
+	.dropDown:not(.open) .button,
+	.dropDown ul li.selected:not(:hover) .button
 	{
-		background-position: -18px -18px;
-	}
-
-	.dropDown.ascending .button
-	{
-		background-position: -18px 0px;
-	}
-
-	.dropDown ul li.selected .button
-	{
-		background-position: -18px -36px;
+		filter: invert(1) hue-rotate(180deg);
+		mix-blend-mode: screen;
 	}
 
 	/* 虫眼鏡のアイコンは白地の画像のため、白を入力欄の暗い色に近づける */
