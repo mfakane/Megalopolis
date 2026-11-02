@@ -1856,8 +1856,6 @@ ul.buttons li,
 	gap: 4px 8px;
 	padding-top: 4px;
 	padding-bottom: 4px;
-	/* 折り返したときも、アイコンは 1 行目 (ボタンの高さ) の中央に置く */
-	background-position: 8px 12px;
 }
 
 .read .notify.resume .message
@@ -1872,6 +1870,12 @@ ul.buttons li,
 	flex: none;
 	gap: 4px;
 	margin: 0px 0px 0px auto;
+}
+
+/* ボタンの下の余白 (フォーム向けの既定) を除き、文言とボタンを上下の中央にそろえる */
+.read .notify.resume .buttons input
+{
+	margin: 0px;
 }
 
 .read #body #summary
