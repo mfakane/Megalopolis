@@ -405,6 +405,9 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	// 移った先では本文の領域にフォーカスを置き、何ページ目かをスクリーンリーダーに伝える
 	await expect(page.locator("#verticalWrapper")).toBeFocused();
 	await expect(body.getByRole("status")).toHaveText("2 ページ中 2 ページ目");
+	// ホイールやタッチで移ったときはフォーカスの枠を出さない
+	const outline = () => page.locator("#verticalWrapper").evaluate(e => getComputedStyle(e).outlineStyle);
+	expect(await outline()).toBe("none");
 
 	// キーボードでも、先頭からいったん止めて PageUp を 2 回押すと前のページの最後へ移る
 	await page.locator("#verticalWrapper").focus();
@@ -415,6 +418,9 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await page.keyboard.press("PageUp");
 	await expect(page.getByText("1 ページ目 1 行目。", { exact: false })).toBeAttached();
 	await expect(body).toHaveClass(/reader/);
+	// キーボードで移ったときはフォーカスの枠を出す
+	await expect(page.locator("#verticalWrapper")).toBeFocused();
+	expect(await outline()).not.toBe("none");
 	await expect.poll(readerProgress).toBeGreaterThan(0.9);
 	await body.getByRole("button", { name: "次のページ" }).click();
 	await expect(page.getByText("2 ページ目 1 行目。", { exact: false })).toBeAttached();

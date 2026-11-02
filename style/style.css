@@ -2003,6 +2003,12 @@ html.readerMode body
 	overflow: hidden;
 }
 
+/* タッチやマウスで全画面のままページを移ったときは、移った先の本文の領域にフォーカスの枠を出さない */
+.read #verticalWrapper.noFocusRing:focus
+{
+	outline: none;
+}
+
 /* 上下の帯の間をまるごとスクロールする領域にし、余白はその内側に取る (スクロールバーは画面の端に出る) */
 .read #body.reader #verticalWrapper
 {

@@ -682,6 +682,9 @@ $(function()
 		var reader = (function()
 		{
 			var storageKey = "megalopolis.reader";
+			// キーボードでページを移ったかを、移った先に伝える
+			var keyboardKey = "megalopolis.readerKeyboard";
+			var usedKeyboard = false;
 			var entryId = content.data("entryId");
 			var page = content.data("page") - 0;
 			var pageCount = content.data("pageCount") - 0;
@@ -743,6 +746,23 @@ $(function()
 				{
 				}
 			};
+
+			$(document)
+				.on("keydown", function(e) { usedKeyboard = !e.ctrlKey && !e.metaKey && !e.altKey; })
+				.on("pointerdown wheel", function() { usedKeyboard = false; });
+			$(window).on("pagehide", function()
+			{
+				try
+				{
+					if (active && usedKeyboard && entryId)
+						window.sessionStorage.setItem(keyboardKey, entryId);
+					else
+						window.sessionStorage.removeItem(keyboardKey);
+				}
+				catch (e)
+				{
+				}
+			});
 
 			// ページを移っても続けて読めるよう、ページの移動と位置のスライダーは作品のページを表示しているときだけ置く
 			if (entryId && pageCount)
@@ -1111,6 +1131,17 @@ $(function()
 							set(true);
 
 							// 続けてキーボードでスクロールできるよう、本文の領域に移る
+							// フォーカスの枠は、キーボードで移ってきたときか、移った先でキーを押したときだけ表示する
+							var keyboard = window.sessionStorage.getItem(keyboardKey) == entryId;
+
+							window.sessionStorage.removeItem(keyboardKey);
+
+							if (!keyboard)
+								wrapper.addClass("noFocusRing").on("keydown.noFocusRing blur.noFocusRing", function()
+								{
+									wrapper.removeClass("noFocusRing").off(".noFocusRing");
+								});
+
 							wrapper[0].focus({ preventScroll: true });
 
 							// 全画面のままページを移ってきたときは、何ページ目かを伝える
