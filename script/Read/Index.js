@@ -1215,12 +1215,13 @@ $(function()
 			}
 			else if (record && !record.done && !restored && (record.p != page || record.r > 0.05))
 			{
+				// 文言はアイコンの隣に、ボタンはその右 (狭い画面では次の行の右) に置く
 				var notice = $("<div />")
 					.addClass("notify info resume")
-					.text(record.r < 0.05
+					.append($("<span />").addClass("message").text(record.r < 0.05
 						? "前回は " + record.p + " ページ目を読んでいました"
-						: "前回は " + (record.n > 1 ? record.p + " ページ目の " : "") + Math.round(record.r * 100) + "% まで読みました")
-					.prepend($("<span />").addClass("buttons")
+						: "前回は " + (record.n > 1 ? record.p + " ページ目の " : "") + Math.round(record.r * 100) + "% まで読みました"))
+					.append($("<span />").addClass("buttons")
 						.append($("<input />", { type: "button", value: "続きから読む" }).click(function()
 						{
 							notice.remove();

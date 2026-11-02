@@ -1848,9 +1848,30 @@ ul.buttons li,
 	text-align: right;
 }
 
-.read .resume .buttons input + input
+.read .notify.resume
 {
-	margin-left: 4px;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 8px;
+	padding-top: 4px;
+	padding-bottom: 4px;
+	/* 折り返したときも、アイコンは 1 行目 (ボタンの高さ) の中央に置く */
+	background-position: 8px 12px;
+}
+
+.read .notify.resume .message
+{
+	flex: 1 1 auto;
+	min-width: 0px;
+}
+
+.read .notify.resume .buttons
+{
+	display: flex;
+	flex: none;
+	gap: 4px;
+	margin: 0px 0px 0px auto;
 }
 
 .read #body #summary
