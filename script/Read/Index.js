@@ -686,6 +686,7 @@ $(function()
 			var page = content.data("page") - 0;
 			var pageCount = content.data("pageCount") - 0;
 			var active = false;
+			var prefetched = false;
 			var dragging = false;
 			var isReader = function() { return active; };
 			var button = $("<button />", { type: "button", "class": "readerButton" });
@@ -1015,6 +1016,18 @@ $(function()
 				$("html").toggleClass("readerMode", on);
 				content.toggleClass("reader", on);
 				setStored(on);
+
+				// 全画面では続けて次のページへ移ることが多いため、次のページを先に読み込んでおく。
+				// 移るときの URL (#resume 付き) と同じ URL を指定しないと、読み込んだ結果が使われない
+				if (on && entryId && page < pageCount && !prefetched && window.HTMLScriptElement && HTMLScriptElement.supports && HTMLScriptElement.supports("speculationrules"))
+				{
+					var rules = document.createElement("script");
+
+					prefetched = true;
+					rules.type = "speculationrules";
+					rules.textContent = JSON.stringify({ prefetch: [{ source: "list", urls: [content.data("pageBase") + (page + 1) + "#resume"] }] });
+					document.head.appendChild(rules);
+				}
 
 				// 本文をスクロールする領域を、キーボードの矢印でも動かせるようにする
 				if (on)

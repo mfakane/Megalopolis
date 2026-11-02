@@ -373,9 +373,10 @@ $config->head = trim
 // - false						送信しません。
 // head、notes、footers にアクセス解析などのスクリプトや外部のウィジェットを追加している場合、
 // 既定の設定ではそれらが動作しなくなります。その場合は既定の設定を元に許可する取得先を追加してください。既定の設定は以下の通りです:
-// "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src * data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+// "default-src 'self'; script-src 'self' 'inline-speculation-rules'; style-src 'self' 'unsafe-inline'; img-src * data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
 // 例えば head に <script> タグを直接書いている場合は script-src に 'unsafe-inline' を、
 // 外部のスクリプトを読み込んでいる場合はその取得先 (例: https://www.googletagmanager.com) を追加します
+// 'inline-speculation-rules' は、全画面で読んでいるときに次のページを先に読み込むための指定です (スクリプトの埋め込みは許可しません)
 $config->contentSecurityPolicy = null;
 
 // OGP および Twitter Card で共有時に表示する画像 (文字列)

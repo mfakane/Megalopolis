@@ -1134,7 +1134,7 @@ class Visualizer
 	 * 管理者が config.php で追加する HTML (head, notes, footers) の外部スクリプトなどは
 	 * $config->contentSecurityPolicy で許可する
 	 */
-	const string DEFAULT_CONTENT_SECURITY_POLICY = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src * data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'";
+	const string DEFAULT_CONTENT_SECURITY_POLICY = "default-src 'self'; script-src 'self' 'inline-speculation-rules'; style-src 'self' 'unsafe-inline'; img-src * data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'";
 	
 	private static function defaultHeaders(): void
 	{

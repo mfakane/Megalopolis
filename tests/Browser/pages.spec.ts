@@ -368,6 +368,9 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await expect(body).toHaveClass(/reader/);
 	await expect.poll(readerProgress).toBeGreaterThan(0.2);
 	expect(await readerProgress()).toBeLessThan(0.4);
+	// 全画面では次のページを先に読み込む (移るときと同じ #resume 付きの URL を指定する)
+	const speculationUrls = () => page.evaluate(() => Array.from(document.querySelectorAll("script[type=speculationrules]"), (e) => JSON.parse(e.textContent ?? "{}").prefetch?.[0]?.urls?.[0] ?? ""));
+	await expect.poll(speculationUrls).toEqual([expect.stringMatching(/2#resume$/)]);
 
 	// 切り替えたアイコンの読み込みを、次の切り替えや移動で打ち切らないよう、読み込みを待つ
 	const iconLoaded = () => reader.locator("img").evaluate((e: HTMLImageElement) => e.complete);
