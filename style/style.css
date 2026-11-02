@@ -2237,6 +2237,20 @@ html.readerMode body
 	padding: 0px;
 }
 
+/* ページを移ったことをスクリーンリーダーに伝える欄は、画面には表示しない */
+.read #body.reader .readerStatus
+{
+	position: absolute;
+	margin: -1px;
+	padding: 0px;
+	border: 0px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
 /* リーダーモードで開いたときの「続きから読む」は、枠の上に重ねて出す */
 html.readerMode .read .notify.resume
 {

@@ -687,6 +687,8 @@ $(function()
 			var pageCount = content.data("pageCount") - 0;
 			var active = false;
 			var prefetched = false;
+			// ページを移ったことをスクリーンリーダーに伝える (画面には表示しない)
+			var status = $("<p />", { "class": "readerStatus", role: "status" });
 			var dragging = false;
 			var isReader = function() { return active; };
 			var button = $("<button />", { type: "button", "class": "readerButton" });
@@ -1045,6 +1047,8 @@ $(function()
 
 					if (overscroll)
 						overscroll.hint.appendTo(content);
+
+					status.appendTo(content);
 				}
 				else
 				{
@@ -1056,6 +1060,8 @@ $(function()
 
 					if (overscroll)
 						overscroll.hint.detach();
+
+					status.text("").detach();
 				}
 
 				update();
@@ -1101,7 +1107,16 @@ $(function()
 						var direct = !location.hash || location.hash == "#resume" || location.hash == "#body";
 
 						if (entryId && (stored == entryId || stored != "!" + entryId && direct && megalopolis.mainCookie("OpenMode") == "reader"))
+						{
 							set(true);
+
+							// 続けてキーボードでスクロールできるよう、本文の領域に移る
+							wrapper[0].focus({ preventScroll: true });
+
+							// 全画面のままページを移ってきたときは、何ページ目かを伝える
+							if (stored == entryId && pageCount > 1)
+								setTimeout(function() { status.text(pageCount + " ページ中 " + page + " ページ目"); }, 500);
+						}
 					}
 					catch (e)
 					{
