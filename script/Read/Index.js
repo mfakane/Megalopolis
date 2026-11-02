@@ -879,7 +879,8 @@ $(function()
 						var setRatio = function(edge, value, touching)
 						{
 							edge.ratio = Math.min(Math.max(value, 0), 1);
-							edge.hint.find(".bar span").css("width", edge.ratio * 100 + "%");
+							// 縦書きでは案内も縦向きになるため、文字の方向に沿った長さ (inline-size) で表す
+							edge.hint.find(".bar span").css("inline-size", edge.ratio * 100 + "%");
 							edge.hint.find(".label").text(fired || edge.ratio >= 1 && !touching
 								? edge.label + "へ移ります"
 								: edge.ratio >= 1

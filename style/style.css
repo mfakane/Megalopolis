@@ -2170,8 +2170,8 @@ html.readerMode body
 .read #body.reader .readerEdge .bar
 {
 	display: block;
-	width: 10em;
-	height: 4px;
+	inline-size: 10em;
+	block-size: 4px;
 	border-radius: 2px;
 	background: var(--border-disabled);
 	overflow: hidden;
@@ -2180,8 +2180,8 @@ html.readerMode body
 .read #body.reader .readerEdge .bar span
 {
 	display: block;
-	width: 0%;
-	height: 100%;
+	inline-size: 0%;
+	block-size: 100%;
 	background: var(--accent-fill);
 }
 
@@ -2192,11 +2192,13 @@ html.readerMode body
 	bottom: auto;
 }
 
-/* 縦書きでは、次のページへは読み終わる側 (左) に、前のページへは先頭の側 (右) に出す */
+/* 縦書きでは、次のページへは読み終わる側 (左) に、前のページへは先頭の側 (右) に、本文と同じ縦向きで出す */
 .read #body.vertical.reader .readerEdge
 {
 	top: 50%;
 	bottom: auto;
+	padding: 16px 8px;
+	writing-mode: vertical-rl;
 	transform: translateY(-50%);
 }
 
@@ -2245,7 +2247,7 @@ html.readerMode body
 
 .read #body.vertical.reader #verticalWrapper
 {
-	padding-left: 196px;
+	padding-left: 84px;
 }
 
 .read #body.reader #contentWrapper
