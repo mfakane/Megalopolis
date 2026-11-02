@@ -922,6 +922,18 @@ $(function()
 
 						$.each(edges, function(k, edge) { byName[edge.name] = edge; });
 						wrapper.on("scroll", check);
+						// 移った後に戻るで表示し直されたページ (bfcache) は移ったときの状態のままなので、数え直せるよう戻す
+						$(window).on("pageshow", function(e)
+						{
+							if (!e.originalEvent.persisted)
+								return;
+
+							clearTimeout(decay);
+							fired = false;
+							armed = false;
+							touch = null;
+							reset();
+						});
 						// 端でさらに読み進める (戻す) 操作を数える。amount が 1 に達すると移る
 						var push = function(direction, amount, wait)
 						{

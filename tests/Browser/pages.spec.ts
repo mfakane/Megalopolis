@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page, type Route } from "@playwright/test";
 
 const adminPassword = "browser-admin";
 let workSequence = 0;
@@ -495,6 +495,47 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await expect(page.locator("#body")).not.toHaveClass(/reader/);
 
 	assertNoDiagnostics(diagnostics);
+});
+
+test("全画面でページを移った後に戻るで表示し直されても、もう一度移れる", async ({ page }) => {
+	const work = makeWork("bfcache");
+	const lines = (label: string) => Array.from({ length: 80 }, (_, i) => `${label} ${i + 1} 行目。`).join("\n");
+	work.body = `${lines("1 ページ目")}\n<split />\n${lines("2 ページ目")}`;
+	// 先読みした結果では移る操作を止められないため、先読みしない
+	await page.addInitScript(() => { HTMLScriptElement.supports = () => false; });
+	await createWork(page, work);
+
+	const body = page.locator("#body");
+	const wrapper = page.locator("#verticalWrapper");
+	const hint = body.locator(".readerEdge.next .label");
+	await page.getByRole("button", { name: "全画面で読む" }).evaluate((e: HTMLElement) => e.focus({ preventScroll: true }));
+	await page.keyboard.press("Enter");
+	await expect(body).toHaveClass(/reader/);
+
+	const overscroll = async () => {
+		await wrapper.evaluate(e => { e.scrollTop = e.scrollHeight; });
+		await page.waitForTimeout(400);
+		const box = (await wrapper.boundingBox())!;
+		await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+		for (let i = 0; i < 3; i++) {
+			await page.mouse.wheel(0, 100);
+			await page.waitForTimeout(50);
+		}
+	};
+
+	// 次のページへ移ったまま戻ってきた状態にするため、移る先を読み込ませない
+	const stay = (route: Route) => route.request().isNavigationRequest() ? route.fulfill({ status: 204 }) : route.fallback();
+	await page.route("**/*", stay);
+	await overscroll();
+	await expect(hint).toHaveText("次のページへ移ります");
+
+	// 戻るで表示し直されたページ (bfcache) では、案内を戻し、もう一度移れる
+	await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true })));
+	await expect(hint).not.toHaveText("次のページへ移ります");
+	await page.unroute("**/*", stay);
+	await overscroll();
+	await expect(page.getByText("2 ページ目 1 行目。", { exact: false })).toBeAttached();
+	await expect(body).toHaveClass(/reader/);
 });
 
 test("管理用ツールで store/ 以下が Web から開けるときだけ警告する", async ({ page }) => {
