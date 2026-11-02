@@ -120,6 +120,15 @@
 	  - 縦書きで、半角の 1〜2 桁の数字と感嘆符・疑問符を縦中横にします
 	  - 縦書きで、古い Internet Explorer 向けの縦書き用フォント (@メイリオ など) の指定と字間の調整をやめ、字詰めをしないようにしました
 	  - 縦書きの本文を、キーボードの矢印でもスクロールできるようにしました
+	* script/Read/Index.js,
+	  style/style.css,
+	  style/fullscreenIcon.png,
+	  style/fullscreenExitIcon.png,
+	  style/alt/fullscreenIcon.png,
+	  style/alt/fullscreenExitIcon.png: 本文の枠を全画面に広げるボタンを追加
+	  - 表示設定のボタンの横に置き、全画面の間もこの 2 つのボタンは枠の右上に表示します
+	  - 横書きでは、1 行が長くなりすぎないよう、文字の大きさに合わせた幅で中央に表示します
+	  - 全画面に切り替えても、読んでいた位置を保ちます。全画面に対応していないブラウザ (iPhone の Safari など) ではボタンを表示しません
 	* config.php,
 	  req/Core/Visualizer.php: 既定の Content-Security-Policy から platform.twitter.com を外す
 	* req/Core/App.php,

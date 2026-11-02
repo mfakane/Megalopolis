@@ -420,7 +420,10 @@ $(function()
 		};
 		var resizeAction = function()
 		{
-			if (vertical.isVertical)
+			// 全画面では、枠の高さを CSS (.fullscreen) で画面に合わせる
+			if (fullscreen && fullscreen.isFullscreen())
+				content.css("height", "");
+			else if (vertical.isVertical)
 				content.height(vertical.verticalBodyWidth ? vertical.verticalBodyWidth + 24 : $(window).height() - 256);
 			else
 				content.height("auto");
@@ -666,6 +669,78 @@ $(function()
 			.insertBefore(content);
 
 		/*
+		 * 本文の枠を全画面に広げる。全画面の間は、このボタンと表示設定も枠の中に移す
+		 */
+		var fullscreen = (function()
+		{
+			var doc = document;
+			var enabled = doc.fullscreenEnabled || doc.webkitFullscreenEnabled;
+			var element = function() { return doc.fullscreenElement || doc.webkitFullscreenElement || null; };
+			var isFullscreen = function() { return element() == content[0]; };
+
+			if (!enabled || !content[0].requestFullscreen && !content[0].webkitRequestFullscreen)
+				return { isFullscreen: isFullscreen };
+
+			var button = $("<button />", { type: "button", "class": "fullscreenButton" });
+			var icon = $("<img />").appendTo(button);
+			var progress = null;
+			var update = function()
+			{
+				var on = isFullscreen();
+				var label = on ? "全画面表示を終了" : "全画面表示";
+
+				button.attr("title", label);
+				icon.attr({ src: basePath + (on ? "fullscreenExitIcon.png" : "fullscreenIcon.png"), alt: label });
+			};
+			var onChange = function()
+			{
+				var on = isFullscreen();
+				var focused = button.is(":focus");
+
+				content.toggleClass("fullscreen", on);
+
+				// 枠の外に置いたボタンは全画面では見えないため、枠の中へ移す
+				if (on)
+					options.prependTo(content);
+				else
+					options.insertBefore(content);
+
+				update();
+				resizeAction();
+
+				if (focused)
+					button.focus();
+
+				// 読み始める前 (0) なら、題名から見えるよう位置を合わせない
+				if (progress)
+				{
+					readingPosition.restore(progress);
+					progress = null;
+				}
+			};
+
+			button.click(function()
+			{
+				progress = readingPosition.current();
+
+				if (isFullscreen())
+					(doc.exitFullscreen || doc.webkitExitFullscreen).call(doc);
+				else
+				{
+					var request = (content[0].requestFullscreen || content[0].webkitRequestFullscreen).call(content[0]);
+
+					if (request && request.catch)
+						request.catch(function() { progress = null; });
+				}
+			});
+			$(doc).on("fullscreenchange webkitfullscreenchange", onChange);
+			update();
+			$("<li />").append(button).prependTo(options);
+
+			return { isFullscreen: isFullscreen };
+		})();
+
+		/*
 		 * 作品ごとに読んでいたページと位置を記録し、次に開いたときに続きから読めるようにする
 		 */
 		var readingPosition = (function()
@@ -721,6 +796,10 @@ $(function()
 					return clamp((rect.right - frame.right) / Math.max(rect.width - frame.width, 1));
 				}
 
+				// 全画面では枠の中を、それ以外ではページをスクロールする
+				if (fullscreen.isFullscreen())
+					return clamp((content[0].getBoundingClientRect().top - rect.top) / Math.max(rect.height - content[0].clientHeight, 1));
+
 				return clamp(-rect.top / Math.max(rect.height - $(window).height(), 1));
 			};
 			var restore = function(progress)
@@ -732,9 +811,13 @@ $(function()
 					var frame = wrapper[0].getBoundingClientRect();
 					var delta = progress * Math.max(rect.width - frame.width, 0) - Math.max(rect.right - frame.right, 0);
 
-					window.scrollTo(window.pageXOffset, content.offset().top - 8);
+					if (!fullscreen.isFullscreen())
+						window.scrollTo(window.pageXOffset, content.offset().top - 8);
+
 					wrapper.scrollLeft(wrapper.scrollLeft() - delta);
 				}
+				else if (fullscreen.isFullscreen())
+					content.scrollTop(content.scrollTop() + rect.top - content[0].getBoundingClientRect().top + progress * Math.max(rect.height - content[0].clientHeight, 0));
 				else
 					window.scrollTo(window.pageXOffset, rect.top + window.pageYOffset + progress * Math.max(rect.height - $(window).height(), 0));
 			};
@@ -799,6 +882,7 @@ $(function()
 			setTimeout(function() { tracking = true; }, 1000);
 			$(window).on("scroll", onScroll);
 			wrapper.on("scroll", onScroll);
+			content.on("scroll", onScroll);
 			$(window).on("pagehide", function()
 			{
 				if (tracking)

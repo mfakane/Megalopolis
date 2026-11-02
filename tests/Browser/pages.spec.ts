@@ -328,6 +328,29 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await expect.poll(progress).toBeGreaterThan(0.4);
 	expect(await progress()).toBeLessThan(0.6);
 
+	// 本文の枠を全画面にすると、表示設定のボタンも枠の中に移り、読んでいた位置を保つ
+	const body = page.locator("#body");
+	const enter = page.getByRole("button", { name: "全画面表示", exact: true });
+	// クリックするとボタンの位置 (本文の上端) までスクロールするため、スクロールせずにキーボードで押す
+	await enter.evaluate((e: HTMLElement) => e.focus({ preventScroll: true }));
+	await page.keyboard.press("Enter");
+	await expect.poll(() => page.evaluate(() => document.fullscreenElement?.id)).toBe("body");
+	await expect(body).toHaveClass(/fullscreen/);
+	await expect(body.getByRole("button", { name: "表示設定" })).toBeVisible();
+	const fullscreenProgress = () => page.evaluate(() => {
+		const body = document.getElementById("body")!;
+		const rect = document.querySelector("#content")!.getBoundingClientRect();
+
+		return (body.getBoundingClientRect().top - rect.top) / (rect.height - body.clientHeight);
+	});
+	expect(await fullscreenProgress()).toBeGreaterThan(0.35);
+	expect(await fullscreenProgress()).toBeLessThan(0.65);
+	await body.getByRole("button", { name: "全画面表示を終了" }).click();
+	await expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull();
+	await expect(body).not.toHaveClass(/fullscreen/);
+	await expect(page.locator("#body + ul.options, ul.options + #body")).toHaveCount(1);
+	expect(await progress()).toBeGreaterThan(0.35);
+
 	assertNoDiagnostics(diagnostics);
 });
 

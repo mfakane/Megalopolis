@@ -1692,7 +1692,7 @@ ul.buttons li,
 	position: relative;
 }
 
-.read ul.options button.readingSettingsButton
+.read ul.options li > button
 {
 	display: block;
 	margin: 0px;
@@ -1705,7 +1705,7 @@ ul.buttons li,
 	cursor: pointer;
 }
 
-.read ul.options button.readingSettingsButton img
+.read ul.options li > button img
 {
 	display: block;
 	margin: 0px;
@@ -1714,7 +1714,7 @@ ul.buttons li,
 	background: none;
 }
 
-.read ul.options button.readingSettingsButton:hover img,
+.read ul.options li > button:hover img,
 .read ul.options button.readingSettingsButton[aria-expanded="true"] img
 {
 	opacity: 0.7;
@@ -1893,6 +1893,48 @@ ul.buttons li,
 	margin: 8px -8px 0px -8px;
 	padding: 0px;
 	text-align: right;
+}
+
+/* 全画面表示 (script/Read/Index.js)。表示設定のボタンは枠の中の右上に置く */
+.read #body.fullscreen
+{
+	box-sizing: border-box;
+	margin: 0px;
+	padding: 40px 32px 16px 32px;
+	border: none;
+	border-radius: 0px;
+	height: 100%;
+	overflow: auto;
+}
+
+.read #body.fullscreen ul.options
+{
+	position: fixed;
+	top: 12px;
+	right: 16px;
+	float: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+/* 横書きでは、1 行が長くなりすぎないよう、文字の大きさに合わせた幅で中央に置く */
+.read #body.fullscreen:not(.vertical) #verticalWrapper
+{
+	margin: 0px auto;
+	max-width: 40em;
+}
+
+.read #body.vertical.fullscreen
+{
+	height: 100%;
+}
+
+.read #body.vertical.fullscreen #verticalWrapper
+{
+	top: 40px;
+	right: 32px;
+	width: calc(100% - 64px);
+	height: calc(100% - 56px);
 }
 
 /* 横書きでは、共有ボタンがあとがきの枠の右下に接しないよう余白を空ける */
@@ -2722,7 +2764,7 @@ select {
 		height: auto;
 	}
 	
-	.read ul.options button.readingSettingsButton
+	.read ul.options li > button
 	{
 		padding: 12px;
 		height: auto;
