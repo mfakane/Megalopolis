@@ -369,6 +369,9 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await expect.poll(readerProgress).toBeGreaterThan(0.2);
 	expect(await readerProgress()).toBeLessThan(0.4);
 
+	// 切り替えたアイコンの読み込みを、次の切り替えや移動で打ち切らないよう、読み込みを待つ
+	const iconLoaded = () => reader.locator("img").evaluate((e: HTMLImageElement) => e.complete);
+
 	// 最後まで読んでから、いったん止めてさらにスクロールすると次のページへ移る
 	await page.locator("#verticalWrapper").evaluate(e => { e.scrollTop = e.scrollHeight; });
 	await expect(body.locator(".readerEdge.next")).toHaveClass(/visible/);
@@ -387,8 +390,6 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await body.getByRole("button", { name: "次のページ" }).click();
 	await expect(page.getByText("2 ページ目 1 行目。", { exact: false })).toBeAttached();
 	await expect(body).toHaveClass(/reader/);
-	// 最後のページでは次のページへの案内を出さない
-	await expect(body.locator(".readerEdge.next")).toHaveCount(0);
 
 	// 先頭から、いったん止めてさらに上へスクロールすると、前のページの最後へ移る
 	await page.locator("#verticalWrapper").evaluate(e => { e.scrollTop = 0; });
@@ -404,15 +405,35 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await expect(body).toHaveClass(/reader/);
 	await expect.poll(readerProgress).toBeGreaterThan(0.9);
 
-	// Esc で元の表示に戻り、ボタンも元の場所に戻る
+	// 最後のページの最後から、いったん止めてさらにスクロールすると、全画面を抜けてコメント欄へ移る
+	await body.getByRole("button", { name: "次のページ" }).click();
+	await expect(page.getByText("2 ページ目 1 行目。", { exact: false })).toBeAttached();
+	await page.locator("#verticalWrapper").evaluate(e => { e.scrollTop = e.scrollHeight; });
+	await expect(body.locator(".readerEdge.next")).toHaveClass(/visible/);
+	await expect(body.locator(".readerEdge.next")).toContainText("コメント欄");
+	await page.waitForTimeout(400);
+	await page.mouse.move(center!.x + center!.width / 2, center!.y + center!.height / 2);
+	for (let i = 0; i < 3; i++) {
+		await page.mouse.wheel(0, 100);
+		await page.waitForTimeout(50);
+	}
+	await expect(body).not.toHaveClass(/reader/);
+	await expect(page.locator("html")).not.toHaveClass(/readerMode/);
+	await expect(page.locator("#commentformHeadding, #evaluateformHeadding").first()).toBeInViewport();
+	await expect(page.locator("#commentformHeadding, #evaluateformHeadding").filter({ has: page.locator(":scope:focus") })).toHaveCount(1);
+	await expect.poll(iconLoaded).toBe(true);
+
+	// もう一度全画面にして、Esc で元の表示に戻り、ボタンも元の場所に戻る
+	await reader.evaluate((e: HTMLElement) => e.focus({ preventScroll: true }));
+	await page.keyboard.press("Enter");
+	await expect(body).toHaveClass(/reader/);
+	await expect.poll(iconLoaded).toBe(true);
 	await page.keyboard.press("Escape");
 	await expect(body).not.toHaveClass(/reader/);
 	await expect(page.locator("ul.options + #body")).toHaveCount(1);
 	await expect(body.locator(".readerHeader, .readerFooter")).toHaveCount(0);
 
 	// 左上の矢印で作品集に戻り、作品を開き直したときは全画面にしない
-	// (切り替えたアイコンの読み込みを、次の切り替えや移動で打ち切らないよう、読み込みを待つ)
-	const iconLoaded = () => reader.locator("img").evaluate((e: HTMLImageElement) => e.complete);
 	await expect.poll(iconLoaded).toBe(true);
 	await reader.evaluate((e: HTMLElement) => e.focus({ preventScroll: true }));
 	await page.keyboard.press("Enter");

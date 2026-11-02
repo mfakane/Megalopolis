@@ -790,25 +790,48 @@ $(function()
 				wrapper.on("scroll", updateSlider);
 
 				// ページの最後からさらにスクロールすると次のページへ、先頭からさらに戻すと前のページ (の最後) へ移る
-				if (pageCount > 1)
+				// 最後のページの最後からさらにスクロールすると、全画面を抜けてコメント欄へ移る
+				var comments = $("#links:not(:empty), #evaluateformHeadding, #commentformHeadding, #comments");
+
+				if (pageCount > 1 || comments.length)
 					overscroll = (function()
 					{
-						var makeEdge = function(name, target, progress, label)
+						var makeEdge = function(name, label, action)
 						{
 							return {
 								name: name,
-								target: target,
-								progress: progress,
 								label: label,
+								action: action,
 								hint: $("<div />", { "class": "readerEdge " + name, "aria-hidden": "true" })
 									.append($("<span />").addClass("label"))
 									.append($("<span />").addClass("bar").append($("<span />"))),
 								ratio: 0
 							};
 						};
+						var toComments = function()
+						{
+							// 評価やコメントの欄は切り替えで隠れていることがあるため、見えているものを選ぶ
+							var target = comments.filter(":visible").first();
+							var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+							set(false);
+
+							if (target.length)
+							{
+								target[0].scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+
+								// 続けてキーボードで操作できるよう、選ばれている評価やコメントの見出しに移る
+								var focusable = target.is("a") ? target : target.find("a:not(.inactive)").first();
+
+								if (focusable.length)
+									focusable[0].focus({ preventScroll: true });
+							}
+						};
 						var edges = $.grep([
-							page < pageCount ? makeEdge("next", page + 1, 0, "次のページ") : null,
-							page > 1 ? makeEdge("previous", page - 1, 1, "前のページ") : null
+							page < pageCount
+								? makeEdge("next", "次のページ", function() { go(page + 1, 0); })
+								: comments.length ? makeEdge("next", "コメント欄", toComments) : null,
+							page > 1 ? makeEdge("previous", "前のページ", function() { go(page - 1, 1); }) : null
 						], function(i) { return i; });
 						var byName = {};
 						var armed = false;
@@ -850,7 +873,15 @@ $(function()
 						{
 							fired = true;
 							setRatio(edge, 1);
-							go(edge.target, edge.progress);
+							edge.action();
+
+							// ページを移らずに全画面を抜けた場合は、もう一度全画面にしたときに使えるよう戻しておく
+							if (!active)
+							{
+								fired = false;
+								armed = false;
+								reset();
+							}
 						};
 						var check = function()
 						{
