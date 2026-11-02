@@ -899,20 +899,13 @@ $(function()
 
 						$.each(edges, function(k, edge) { byName[edge.name] = edge; });
 						wrapper.on("scroll", check);
-						wrapper.on("wheel", function(e)
+						// 端でさらに読み進める (戻す) 操作を数える。amount が 1 に達すると移る
+						var push = function(direction, amount, wait)
 						{
-							var ev = e.originalEvent;
-
-							if (!active || fired)
-								return;
-
-							// 読み進める向きの量 (縦書きでは、縦のホイールと左への横スクロール)
-							var forward = vertical.isVertical && Math.abs(ev.deltaX) > Math.abs(ev.deltaY) ? -ev.deltaX : ev.deltaY;
 							var now = new Date().getTime();
 							var idle = now - lastWheel;
-							var edge = forward > 0 ? byName.next : forward < 0 ? byName.previous : null;
+							var edge = direction > 0 ? byName.next : direction < 0 ? byName.previous : null;
 
-							forward *= ev.deltaMode == 1 ? 40 : ev.deltaMode == 2 ? wrapper.height() : 1;
 							lastWheel = now;
 
 							if (!edge || !at(edge.name))
@@ -931,11 +924,41 @@ $(function()
 							}
 
 							clearTimeout(decay);
-							decay = setTimeout(reset, 800);
-							setRatio(edge, edge.ratio + Math.abs(forward) / 300);
+							decay = setTimeout(reset, wait);
+							setRatio(edge, edge.ratio + amount);
 
 							if (edge.ratio >= 1)
 								fire(edge);
+						};
+
+						wrapper.on("wheel", function(e)
+						{
+							var ev = e.originalEvent;
+
+							if (!active || fired)
+								return;
+
+							// 読み進める向きの量 (縦書きでは、縦のホイールと左への横スクロール)
+							var forward = vertical.isVertical && Math.abs(ev.deltaX) > Math.abs(ev.deltaY) ? -ev.deltaX : ev.deltaY;
+
+							forward *= ev.deltaMode == 1 ? 40 : ev.deltaMode == 2 ? wrapper.height() : 1;
+							push(forward, Math.abs(forward) / 300, 800);
+						});
+						// キーボードでは、端に着いてから Space や PageDown などを 2 回押すと移る
+						$(document).on("keydown", function(e)
+						{
+							if (!active || fired || e.isDefaultPrevented() || e.altKey || e.ctrlKey || e.metaKey || $(e.target).is("input, textarea, select, button, a, [contenteditable]"))
+								return;
+
+							var forwardKeys = vertical.isVertical ? ["PageDown", "ArrowLeft", "ArrowDown"] : ["PageDown", "ArrowDown"];
+							var backwardKeys = vertical.isVertical ? ["PageUp", "ArrowRight", "ArrowUp"] : ["PageUp", "ArrowUp"];
+							var direction = e.key == " " ? (e.shiftKey ? -1 : 1)
+								: $.inArray(e.key, forwardKeys) >= 0 ? 1
+								: $.inArray(e.key, backwardKeys) >= 0 ? -1
+								: 0;
+
+							if (direction)
+								push(direction, 0.5, 1500);
 						});
 						wrapper.on("touchstart", function(e)
 						{

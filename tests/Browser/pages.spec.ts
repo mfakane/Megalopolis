@@ -385,8 +385,16 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await expect(page.getByText("2 ページ目 1 行目。", { exact: false })).toBeAttached();
 	await expect(body).toHaveClass(/reader/);
 
-	await body.getByRole("button", { name: "前のページ" }).click();
+	// キーボードでも、先頭からいったん止めて PageUp を 2 回押すと前のページの最後へ移る
+	await page.locator("#verticalWrapper").focus();
+	await page.locator("#verticalWrapper").evaluate(e => { e.scrollTop = 0; });
+	await page.waitForTimeout(400);
+	await page.keyboard.press("PageUp");
+	await expect(body.locator(".readerEdge.previous")).toHaveClass(/visible/);
+	await page.keyboard.press("PageUp");
 	await expect(page.getByText("1 ページ目 1 行目。", { exact: false })).toBeAttached();
+	await expect(body).toHaveClass(/reader/);
+	await expect.poll(readerProgress).toBeGreaterThan(0.9);
 	await body.getByRole("button", { name: "次のページ" }).click();
 	await expect(page.getByText("2 ページ目 1 行目。", { exact: false })).toBeAttached();
 	await expect(body).toHaveClass(/reader/);
