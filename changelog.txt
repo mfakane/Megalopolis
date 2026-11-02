@@ -106,6 +106,7 @@
 	    PC でも共有シートが使えるブラウザでは、メニューに「その他のアプリで共有…」を加えます
 	  - スクリプトが動かない環境でも、X、Bluesky、はてなブックマークへのリンクはメニューから使えます
 	  - $config->shareServices で、共有先ごとに使うかどうかを指定できます
+	  - 共有ボタンにアイコンを付け、横書きではあとがきの枠の右下に余白を空けて表示します
 	* config.php,
 	  req/Core/Visualizer.php: 既定の Content-Security-Policy から platform.twitter.com を外す
 	* req/Core/App.php,

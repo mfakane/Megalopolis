@@ -485,7 +485,9 @@ ul.notify
 /* 共有ボタンは、ほかのボタンと同じ見た目にする */
 .shareMenu summary
 {
-	display: inline-block;
+	display: inline-flex;
+	gap: 4px;
+	align-items: center;
 	padding: 2px 8px 2px 8px;
 	border: var(--border) 1px solid;
 	border-radius: 4px;
@@ -500,6 +502,12 @@ ul.notify
 	cursor: pointer;
 	list-style: none;
 	user-select: none;
+}
+
+.shareMenu summary svg
+{
+	flex: none;
+	fill: currentColor;
 }
 
 .shareMenu summary::-webkit-details-marker
@@ -1720,6 +1728,13 @@ ul.buttons li,
 	margin: 8px -8px 0px -8px;
 	padding: 0px;
 	text-align: right;
+}
+
+/* 横書きでは、共有ボタンがあとがきの枠の右下に接しないよう余白を空ける */
+.read #body:not(.vertical) #afterword footer
+{
+	margin: 8px 0px 0px 0px;
+	padding: 0px 0px 8px 0px;
 }
 
 .read #afterword
