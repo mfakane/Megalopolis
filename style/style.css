@@ -3181,9 +3181,9 @@ select {
 		margin: 0px 0px -1px 0px;
 	}
 
+	/* 選んでいないほうの下線は、枠の上の線と重ねる */
 	.read #links:has(> .tab) > .tab.inactive
 	{
-		margin-bottom: 0px;
 		height: 32px;
 		line-height: 32px;
 	}
