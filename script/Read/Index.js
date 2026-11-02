@@ -620,6 +620,7 @@ $(function()
 
 			toggleVertical(false, setVertical);
 			readingPosition.restore(progress);
+			reader.refresh();
 		});
 
 		if (writingMode != 0)
@@ -691,6 +692,7 @@ $(function()
 					.append($("<span />").addClass("title").text(content.data("title") || document.title))
 					.append(content.data("name") ? $("<span />").addClass("name").text(content.data("name")) : null));
 			var footer = null;
+			var overscroll = null;
 			var slider = null;
 			var label = null;
 			var scale = 100;
@@ -781,6 +783,132 @@ $(function()
 							go(target.p, target.r);
 					});
 				wrapper.on("scroll", updateSlider);
+
+				// 最後まで読んでからさらにスクロールすると、次のページへ移る
+				if (page < pageCount)
+					overscroll = (function()
+					{
+						var hint = $("<div />", { "class": "readerNext", "aria-hidden": "true" })
+							.append($("<span />").addClass("label"))
+							.append($("<span />").addClass("bar").append($("<span />")));
+						var ratio = 0;
+						var armed = false;
+						var fired = false;
+						var lastWheel = 0;
+						var decay = null;
+						var touch = null;
+						var atEnd = function()
+						{
+							var w = wrapper[0];
+
+							// 縦書きでは左端が終わり。scrollLeft の符号はブラウザで異なるため絶対値で比べる
+							if (vertical.isVertical)
+								return Math.abs(w.scrollLeft) >= w.scrollWidth - w.clientWidth - 2;
+
+							return w.scrollTop >= w.scrollHeight - w.clientHeight - 2;
+						};
+						var setRatio = function(value, touching)
+						{
+							ratio = Math.min(Math.max(value, 0), 1);
+							hint.find(".bar span").css("width", ratio * 100 + "%");
+							hint.find(".label").text(fired || ratio >= 1 && !touching
+								? "次のページへ移ります"
+								: ratio >= 1
+									? "指を離すと次のページへ移ります"
+									: "さらにスクロールすると次のページへ");
+						};
+						var fire = function()
+						{
+							fired = true;
+							setRatio(1);
+							go(page + 1, 0);
+						};
+						var check = function()
+						{
+							var end = active && atEnd();
+
+							// 終わりに着いたときのスクロールの勢いでは移らないよう、いったん止まるまでは数えない
+							if (!end)
+							{
+								armed = false;
+
+								if (!fired)
+									setRatio(0);
+							}
+
+							hint.toggleClass("visible", end || fired);
+						};
+
+						wrapper.on("scroll", check);
+						wrapper.on("wheel", function(e)
+						{
+							var ev = e.originalEvent;
+
+							if (!active || fired)
+								return;
+
+							// 読み進める向きの量 (縦書きでは、縦のホイールと左への横スクロール)
+							var forward = vertical.isVertical && Math.abs(ev.deltaX) > Math.abs(ev.deltaY) ? -ev.deltaX : ev.deltaY;
+							var now = new Date().getTime();
+							var idle = now - lastWheel;
+
+							forward *= ev.deltaMode == 1 ? 40 : ev.deltaMode == 2 ? wrapper.height() : 1;
+							lastWheel = now;
+
+							if (!atEnd())
+								return;
+
+							if (!armed)
+							{
+								armed = idle > 300;
+
+								if (!armed)
+									return;
+							}
+
+							if (forward <= 0)
+							{
+								setRatio(0);
+
+								return;
+							}
+
+							clearTimeout(decay);
+							decay = setTimeout(function() { if (!fired) setRatio(0); }, 800);
+							setRatio(ratio + forward / 300);
+
+							if (ratio >= 1)
+								fire();
+						});
+						wrapper.on("touchstart", function(e)
+						{
+							var t = e.originalEvent.touches[0];
+
+							touch = active && !fired && atEnd() && e.originalEvent.touches.length == 1 ? { x: t.clientX, y: t.clientY } : null;
+						});
+						wrapper.on("touchmove", function(e)
+						{
+							if (!touch)
+								return;
+
+							var t = e.originalEvent.touches[0];
+
+							// 縦書きでは右へ、横書きでは上へ引っ張る
+							setRatio((vertical.isVertical ? t.clientX - touch.x : touch.y - t.clientY) / 120, true);
+						});
+						wrapper.on("touchend touchcancel", function(e)
+						{
+							if (touch && e.type == "touchend" && ratio >= 1)
+								fire();
+							else if (!fired)
+								setRatio(0);
+
+							touch = null;
+						});
+						setRatio(0);
+
+						return { hint: hint, check: check };
+					})();
 			}
 
 			var update = function()
@@ -816,6 +944,9 @@ $(function()
 
 					if (footer)
 						footer.appendTo(content);
+
+					if (overscroll)
+						overscroll.hint.appendTo(content);
 				}
 				else
 				{
@@ -824,6 +955,9 @@ $(function()
 
 					if (footer)
 						footer.detach();
+
+					if (overscroll)
+						overscroll.hint.detach();
 				}
 
 				update();
@@ -833,8 +967,10 @@ $(function()
 					button.focus();
 
 				readingPosition.restore(progress);
-
 				updateSlider();
+
+				if (overscroll)
+					overscroll.check();
 			};
 
 			button.click(function() { set(!active); });
@@ -848,6 +984,14 @@ $(function()
 
 			return {
 				isReader: isReader,
+				// 方向を切り替えたあとなどに、位置の表示と次のページへの案内を合わせ直す
+				refresh: function()
+				{
+					updateSlider();
+
+					if (overscroll)
+						overscroll.check();
+				},
 				// リーダーモードのままページを移ったときは、移った先でもリーダーモードで開く
 				restoreOnLoad: function()
 				{

@@ -365,9 +365,27 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await expect(body).toHaveClass(/reader/);
 	await expect.poll(readerProgress).toBeGreaterThan(0.2);
 	expect(await readerProgress()).toBeLessThan(0.4);
+
+	// 最後まで読んでから、いったん止めてさらにスクロールすると次のページへ移る
+	await page.locator("#verticalWrapper").evaluate(e => { e.scrollTop = e.scrollHeight; });
+	await expect(body.locator(".readerNext")).toHaveClass(/visible/);
+	await page.waitForTimeout(400);
+	const center = await page.locator("#verticalWrapper").boundingBox();
+	await page.mouse.move(center!.x + center!.width / 2, center!.y + center!.height / 2);
+	for (let i = 0; i < 3; i++) {
+		await page.mouse.wheel(0, 100);
+		await page.waitForTimeout(50);
+	}
+	await expect(page.getByText("2 ページ目 1 行目。", { exact: false })).toBeAttached();
+	await expect(body).toHaveClass(/reader/);
+
+	await body.getByRole("button", { name: "前のページ" }).click();
+	await expect(page.getByText("1 ページ目 1 行目。", { exact: false })).toBeAttached();
 	await body.getByRole("button", { name: "次のページ" }).click();
 	await expect(page.getByText("2 ページ目 1 行目。", { exact: false })).toBeAttached();
 	await expect(body).toHaveClass(/reader/);
+	// 最後のページでは次のページへの案内を出さない
+	await expect(body.locator(".readerNext")).toHaveCount(0);
 
 	// Esc で元の表示に戻り、ボタンも元の場所に戻る
 	await page.keyboard.press("Escape");
