@@ -92,6 +92,10 @@
 	  - 外部へ接続できない場合は何も表示しません
 	  - 管理者が設定情報を開くと、最後に確認した日時と、分かっている最新のバージョン、前回の問い合わせに失敗したかを表示します
 	* req/Core/Configuration.php: 確認するかどうか $config->checkForUpdates を追加
+	* req/Handler/Util.php,
+	  req/Visualizer/Util/Index.php: 管理用設定ツールを無効 ($config->utilsEnabled = false) にしていると、
+	  管理者でも管理用ツールのトップを開けず、フッタの「管理用ツール」のリンクがエラーになるのを修正
+	  無効のときも、管理者はトップで移行処理や新しいバージョンのお知らせ、公開されているファイルの警告を確認し、ホスト検索を使えます
 	* req/Visualizer/Util/Index.php,
 	  script/Util/Index.js: 管理用ツールのページで、store/ 以下やデータベースのファイルが Web から開ける場合に警告を表示するように
 	  管理者のブラウザから実際に取得できるかを確かめるため、サーバの種類や設定によらず確認できます

@@ -16,9 +16,7 @@ class UtilHandler extends Handler
 	{
 		Auth::$caption = "管理者ログイン";
 
-		if (!Configuration::$instance->utilsEnabled)
-			Auth::loginError("管理者パスワードが一致しません");
-
+		// 管理用設定ツールが無効でも、管理者は移行処理や新しいバージョンのお知らせ、ホスト検索のために開ける
 		Auth::loginAsAdmin();
 
 		Visualizer::$data = array(

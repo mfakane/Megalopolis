@@ -60,7 +60,11 @@ Visualizer::doctype();
 			<?php foreach (Visualizer::$data["notices"] as $i): ?>
 				<li>
 					<?=Visualizer::escapeOutput($i["message"]) ?>
-					<a href="<?=Visualizer::escapeOutput(Visualizer::actionHref("util", $i["action"])) ?>"><?=$i["action"] == "charset" ? "データベースの文字コードの変換へ" : "検索インデックスの再生成へ" ?></a>
+					<?php if ($c->utilsEnabled): ?>
+						<a href="<?=Visualizer::escapeOutput(Visualizer::actionHref("util", $i["action"])) ?>"><?=$i["action"] == "charset" ? "データベースの文字コードの変換へ" : "検索インデックスの再生成へ" ?></a>
+					<?php else: ?>
+						(config.php の $config->utilsEnabled を true にすると、<?=$i["action"] == "charset" ? "データベースの文字コードの変換" : "検索インデックスの再生成" ?>を実行できます)
+					<?php endif ?>
 				</li>
 			<?php endforeach ?>
 		</ul>
