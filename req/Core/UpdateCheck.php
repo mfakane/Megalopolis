@@ -53,7 +53,7 @@ class UpdateCheck
 				$previous = is_array($cache) && is_int($cache["version"] ?? null) && is_string($cache["url"] ?? null)
 					? array("version" => $cache["version"], "url" => $cache["url"])
 					: array();
-				$cache = array("checkedAt" => $now) + ($release ?? $previous);
+				$cache = array("checkedAt" => $now) + ($release ?? $previous) + ($release === null ? array("failed" => true) : array());
 
 				ftruncate($fp, 0);
 				rewind($fp);
@@ -69,6 +69,22 @@ class UpdateCheck
 		return is_int($cache["version"] ?? null) && is_string($cache["url"] ?? null)
 			? array("version" => $cache["version"], "url" => $cache["url"])
 			: null;
+	}
+
+	/**
+	 * 保存してある確認の結果を、問い合わせずに返す (設定情報の表示用)
+	 * @return array{checkedAt: ?int, version: ?int, failed: bool}
+	 */
+	static function getStatus(string $directory = Constant::DATA_DIR): array
+	{
+		$content = @file_get_contents(rtrim($directory, "/") . "/" . self::CACHE_FILE);
+		$cache = $content === false ? null : json_decode(substr($content, strlen(self::CACHE_FILE_HEADER)), true);
+
+		return array(
+			"checkedAt" => is_array($cache) && is_int($cache["checkedAt"] ?? null) ? $cache["checkedAt"] : null,
+			"version" => is_array($cache) && is_int($cache["version"] ?? null) ? $cache["version"] : null,
+			"failed" => is_array($cache) && !empty($cache["failed"]),
+		);
 	}
 
 	/**

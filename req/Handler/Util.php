@@ -78,6 +78,25 @@ class UtilHandler extends Handler
 	}
 
 	/**
+	 * 新しいバージョンの確認の状況。通知が出ないときに、確認できているかを調べられるようにする
+	 * @return array<string, string|bool>
+	 */
+	private static function getUpdateStatus(): array
+	{
+		if (!Configuration::$instance->checkForUpdates)
+			return array("checkForUpdates" => false);
+
+		$status = UpdateCheck::getStatus();
+
+		return array(
+			"checkForUpdates" => true,
+			"updateCheckedAt" => $status["checkedAt"] === null ? "未確認" : date("Y-m-d H:i:s", $status["checkedAt"]),
+			"latestRelease" => ($status["version"] === null ? ($status["checkedAt"] === null ? "未確認" : "不明") : App::VERSION_PREFIX . $status["version"])
+				. ($status["failed"] ? " (前回の問い合わせに失敗しました)" : ""),
+		);
+	}
+
+	/**
 	 * 失敗したテーブルの構造の更新を、管理者が再実行する。管理用ツールが無効でも使えるようにする
 	 */
 	function migrate(): bool
@@ -744,7 +763,7 @@ class UtilHandler extends Handler
 				"pdoDriver" => $idb->getAttribute(PDO::ATTR_DRIVER_NAME),
 				"currentSearch" => SearchIndex::isUpgradeRequired($idb) ? "classic" : strtolower(SearchIndex::getAvailableType()),
 				"availableSearch" => strtolower(SearchIndex::getAvailableType()),
-			) : array()),
+			) + self::getUpdateStatus() : array()),
 			"configuration" => array(
 				"title" =>
 				array("タイトル", $c->title),

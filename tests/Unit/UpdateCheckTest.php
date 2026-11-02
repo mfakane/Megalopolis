@@ -108,9 +108,18 @@ final class UpdateCheckTest extends TestCase
         self::assertSame($newer, UpdateCheck::getNewerRelease($fail, $this->directory, 1000 + UpdateCheck::INTERVAL + 1)['version'] ?? null);
         self::assertSame(1, $calls);
 
+        self::assertSame(['checkedAt' => 1000 + UpdateCheck::INTERVAL, 'version' => $newer, 'failed' => true], UpdateCheck::getStatus($this->directory));
+
         // 問い合わせに成功すれば、その結果で置き換える
         self::assertNull(UpdateCheck::getNewerRelease(fn() => self::release('r' . App::VERSION), $this->directory, 1000 + UpdateCheck::INTERVAL * 2));
         self::assertNull(UpdateCheck::getNewerRelease($fail, $this->directory, 1000 + UpdateCheck::INTERVAL * 3));
+    }
+
+    public function testStatusWithoutCheck(): void
+    {
+        self::assertSame(['checkedAt' => null, 'version' => null, 'failed' => false], UpdateCheck::getStatus($this->directory));
+        UpdateCheck::getNewerRelease(fn() => self::release('r' . App::VERSION), $this->directory, 1000);
+        self::assertSame(['checkedAt' => 1000, 'version' => App::VERSION, 'failed' => false], UpdateCheck::getStatus($this->directory));
     }
 
     public function testUnwritableDirectoryShowsNothing(): void

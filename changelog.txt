@@ -197,6 +197,7 @@
 	  - GitHub (api.github.com) に最新のリリースを問い合わせ、新しければリリースのページへのリンクを表示します。自動で更新はしません
 	  - 問い合わせは 1 日に 1 回までで、結果は store/updatecheck.php に保存します。問い合わせに失敗した場合も 1 日待ち、その間は前回分かっていたリリースを使います
 	  - 外部へ接続できない場合は何も表示しません
+	  - 管理者が設定情報を開くと、最後に確認した日時と、分かっている最新のバージョン、前回の問い合わせに失敗したかを表示します
 	* req/Core/Configuration.php: 確認するかどうか $config->checkForUpdates を追加
 	* req/Visualizer/Exception.php,
 	  req/Visualizer/Read/Index.php,
