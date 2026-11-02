@@ -338,10 +338,15 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await page.waitForTimeout(800);
 	await page.goto(detailUrl);
 	await expect(page.getByText("前回は 2 ページ目の 50% まで読みました")).toBeVisible();
+	// 読み込んでからしばらくたって押しても、移る前のページの位置で記録を上書きしない
+	await page.waitForTimeout(1200);
 	await page.getByRole("button", { name: "続きから読む" }).click();
 	await expect(page.getByText("2 ページ目 1 行目。", { exact: false })).toBeAttached();
 	await expect.poll(progress).toBeGreaterThan(0.4);
 	expect(await progress()).toBeLessThan(0.6);
+	// 移る前のページの位置で記録を上書きしないので、移った先で続きの案内を出さない
+	await page.waitForTimeout(1200);
+	await expect(page.locator(".notify.resume")).toHaveCount(0);
 
 	// 全画面で読むと、題名と表示設定のボタンを枠の中に出し、読んでいた位置を保つ
 	const body = page.locator("#body");

@@ -1312,10 +1312,11 @@ $(function()
 						{
 							notice.remove();
 
+							// ほかのページへは、移る前にこのページの位置で記録を上書きしないよう goTo で移る
 							if (record.p == page)
 								restore(record.r);
 							else
-								location.href = content.data("pageBase") + record.p + "#resume";
+								goTo(record.p, record.r);
 						})[0],
 						$("<input />", { type: "button", value: "閉じる" }).click(function()
 						{
