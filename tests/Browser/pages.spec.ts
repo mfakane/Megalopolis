@@ -339,11 +339,20 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await expect(body.locator(".readerTitle")).toContainText(work.title);
 	await expect(body.getByRole("button", { name: "表示設定" })).toBeVisible();
 	const slider = body.getByRole("slider", { name: "読んでいる位置" });
+	// 上下の帯の間を、画面の端から端までスクロールする領域にする
+	const scroller = await page.locator("#verticalWrapper").evaluate(e => {
+		const rect = e.getBoundingClientRect();
+
+		return { left: rect.left, right: rect.right, width: window.innerWidth, scrollable: e.scrollHeight > e.clientHeight };
+	});
+	expect(scroller.left).toBe(0);
+	expect(scroller.right).toBe(scroller.width);
+	expect(scroller.scrollable).toBe(true);
 	const readerProgress = () => page.evaluate(() => {
-		const body = document.getElementById("body")!;
+		const wrapper = document.getElementById("verticalWrapper")!;
 		const rect = document.querySelector("#content")!.getBoundingClientRect();
 
-		return (body.getBoundingClientRect().top - rect.top) / (rect.height - body.clientHeight);
+		return (wrapper.getBoundingClientRect().top - rect.top) / (rect.height - wrapper.clientHeight);
 	});
 	expect(await readerProgress()).toBeGreaterThan(0.35);
 	expect(await readerProgress()).toBeLessThan(0.65);

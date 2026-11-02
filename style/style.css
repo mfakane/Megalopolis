@@ -1910,12 +1910,28 @@ html.readerMode body
 	position: fixed;
 	inset: 0px;
 	z-index: 1000;
+	display: flex;
+	flex-direction: column;
 	box-sizing: border-box;
 	margin: 0px;
-	padding: 64px 32px 72px 32px;
+	padding: 0px;
 	border: none;
 	border-radius: 0px;
 	height: auto;
+	overflow: hidden;
+}
+
+/* 上下の帯の間をまるごとスクロールする領域にし、余白はその内側に取る (スクロールバーは画面の端に出る) */
+.read #body.reader #verticalWrapper
+{
+	position: static;
+	flex: 1 1 auto;
+	box-sizing: border-box;
+	margin: 0px;
+	padding: 24px 32px;
+	width: auto;
+	height: auto;
+	min-height: 0px;
 	overflow: auto;
 	overscroll-behavior: contain;
 }
@@ -1923,10 +1939,7 @@ html.readerMode body
 .read #body.reader .readerHeader,
 .read #body.reader .readerFooter
 {
-	position: fixed;
-	left: 0px;
-	right: 0px;
-	z-index: 2;
+	flex: none;
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -1940,14 +1953,12 @@ html.readerMode body
 
 .read #body.reader .readerHeader
 {
-	top: 0px;
 	height: 48px;
 	border-bottom: var(--border-disabled) 1px solid;
 }
 
 .read #body.reader .readerFooter
 {
-	bottom: 0px;
 	height: 56px;
 	border-top: var(--border-disabled) 1px solid;
 }
@@ -2023,16 +2034,19 @@ html.readerMode body
 /* 横書きでは、1 行が長くなりすぎないよう、文字の大きさに合わせた幅で中央に置く */
 .read #body.reader:not(.vertical) #verticalWrapper
 {
-	margin: 0px auto;
-	max-width: 40em;
+	padding-left: max(32px, calc((100% - 40em) / 2));
+	padding-right: max(32px, calc((100% - 40em) / 2));
 }
 
 .read #body.vertical.reader #verticalWrapper
 {
-	top: 64px;
-	right: 32px;
-	width: calc(100% - 64px);
-	height: calc(100% - 136px);
+	height: auto;
+}
+
+.read #body.reader #contentWrapper
+{
+	margin: 0px;
+	padding: 0px;
 }
 
 /* リーダーモードで開いたときの「続きから読む」は、枠の上に重ねて出す */
@@ -2887,9 +2901,9 @@ select {
 		right: 0px;
 	}
 
-	.read #body.reader
+	.read #body.reader #verticalWrapper
 	{
-		padding: 64px 16px 72px 16px;
+		padding: 16px;
 	}
 
 	.read #body.reader .readerHeader
@@ -2900,12 +2914,6 @@ select {
 	.read #body.reader .readerFooter output
 	{
 		min-width: 0px;
-	}
-
-	.read #body.vertical.reader #verticalWrapper
-	{
-		right: 16px;
-		width: calc(100% - 32px);
 	}
 	
 	.read #body

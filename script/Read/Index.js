@@ -540,7 +540,10 @@ $(function()
 				else
 				{
 					$("#body").removeClass("vertical");
-					wrapper.removeAttr("tabindex role aria-label");
+
+					// リーダーモードでは横書きでも枠の中でスクロールするため、そのままにする
+					if (!reader.isReader())
+						wrapper.removeAttr("tabindex role aria-label");
 					
 					if (vertical.originalHtml)
 						$.each(vertical.originalHtml, function(k, v)
@@ -777,7 +780,6 @@ $(function()
 						if (target.p != page)
 							go(target.p, target.r);
 					});
-				content.on("scroll", updateSlider);
 				wrapper.on("scroll", updateSlider);
 			}
 
@@ -800,6 +802,12 @@ $(function()
 				$("html").toggleClass("readerMode", on);
 				content.toggleClass("reader", on);
 				setStored(on);
+
+				// 本文をスクロールする領域を、キーボードの矢印でも動かせるようにする
+				if (on)
+					wrapper.attr({ tabindex: 0, role: "region", "aria-label": "本文" });
+				else if (!vertical.isVertical)
+					wrapper.removeAttr("tabindex role aria-label");
 
 				// 枠の外に置いたボタンは見えなくなるため、枠の中の見出しへ移す
 				if (on)
@@ -824,11 +832,7 @@ $(function()
 				if (focused)
 					button.focus();
 
-				// 読み始める前 (0) なら、題名から見えるよう位置を合わせない
-				if (progress)
-					readingPosition.restore(progress);
-				else if (on)
-					content.scrollTop(0);
+				readingPosition.restore(progress);
 
 				updateSlider();
 			};
@@ -915,15 +919,26 @@ $(function()
 					return clamp((rect.right - frame.right) / Math.max(rect.width - frame.width, 1));
 				}
 
-				// リーダーモードでは枠の中を、それ以外ではページをスクロールする
+				// リーダーモードでは枠の中 (#verticalWrapper) を、それ以外ではページをスクロールする
 				if (reader.isReader())
-					return clamp((content[0].getBoundingClientRect().top - rect.top) / Math.max(rect.height - content[0].clientHeight, 1));
+					return clamp((wrapper[0].getBoundingClientRect().top - rect.top) / Math.max(rect.height - wrapper[0].clientHeight, 1));
 
 				return clamp(-rect.top / Math.max(rect.height - $(window).height(), 1));
 			};
 			var restore = function(progress)
 			{
 				var rect = $("#content")[0].getBoundingClientRect();
+
+				// 読み始める前は、本文の前にある題名や概要から見えるよう、枠の先頭に合わせる
+				if (progress <= 0)
+				{
+					if (isVerticalNow())
+						wrapper.scrollLeft(0);
+					else if (reader.isReader())
+						wrapper.scrollTop(0);
+
+					return;
+				}
 
 				if (isVerticalNow())
 				{
@@ -936,7 +951,7 @@ $(function()
 					wrapper.scrollLeft(wrapper.scrollLeft() - delta);
 				}
 				else if (reader.isReader())
-					content.scrollTop(content.scrollTop() + rect.top - content[0].getBoundingClientRect().top + progress * Math.max(rect.height - content[0].clientHeight, 0));
+					wrapper.scrollTop(wrapper.scrollTop() + rect.top - wrapper[0].getBoundingClientRect().top + progress * Math.max(rect.height - wrapper[0].clientHeight, 0));
 				else
 					window.scrollTo(window.pageXOffset, rect.top + window.pageYOffset + progress * Math.max(rect.height - $(window).height(), 0));
 			};
@@ -1011,7 +1026,6 @@ $(function()
 			setTimeout(function() { tracking = true; }, 1000);
 			$(window).on("scroll", onScroll);
 			wrapper.on("scroll", onScroll);
-			content.on("scroll", onScroll);
 			$(window).on("pagehide", function()
 			{
 				if (tracking && !navigating)
