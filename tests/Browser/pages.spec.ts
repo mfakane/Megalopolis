@@ -445,6 +445,20 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await page.goto(workUrl);
 	await expect(page.locator("#body")).not.toHaveClass(/reader/);
 
+	// 表示設定で「作品を開くとき」を全画面にすると、作品を開いたときに全画面で開く
+	await settings.click();
+	await page.getByRole("dialog", { name: "表示設定" }).getByText("全画面", { exact: true }).click();
+	await page.keyboard.press("Escape");
+	// (同じ URL への goto はページ内の移動になるため、読み込み直す)
+	await page.reload();
+	await expect(page.locator("#body")).toHaveClass(/reader/);
+	// その作品で全画面をやめたあとは、ページを開き直しても通常の表示のまま
+	await expect.poll(iconLoaded).toBe(true);
+	await page.keyboard.press("Escape");
+	await expect(page.locator("#body")).not.toHaveClass(/reader/);
+	await page.reload();
+	await expect(page.locator("#body")).not.toHaveClass(/reader/);
+
 	assertNoDiagnostics(diagnostics);
 });
 

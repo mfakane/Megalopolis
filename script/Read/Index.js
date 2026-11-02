@@ -626,16 +626,23 @@ $(function()
 		if (writingMode != 0)
 			directionGroup.append($("<p />").addClass("note").text("この作品は作者が" + (writingMode == 2 ? "縦書き" : "横書き") + "を指定しています。切り替えはこの作品を開いている間だけ有効です"));
 
+		var openModes = [{ value: "normal", label: "通常" }, { value: "reader", label: "全画面" }];
+		var openModeGroup = radioGroup("readingOpenMode", "作品を開くとき", openModes, megalopolis.mainCookie("OpenMode") == "reader" ? "reader" : "normal", function(v)
+		{
+			megalopolis.mainCookie("OpenMode", v == "normal" ? null : v);
+		});
+
 		panel
 			.append(directionGroup)
+			.append(openModeGroup)
 			.append($("<div />").addClass("actions").append($("<button />", { type: "button" }).text("初期設定に戻す").click(function()
 			{
 				settings.fontSize = 100;
 				settings.lineHeight = "1.8";
 				settings.fontFamily = "sans";
-				$.each(["FontSize", "LineHeight", "FontFamily"], function(k, v) { megalopolis.mainCookie(v, null); });
+				$.each(["FontSize", "LineHeight", "FontFamily", "OpenMode"], function(k, v) { megalopolis.mainCookie(v, null); });
 				fontSizeOutput.text("100%");
-				panel.find("input[name=readingLineHeight][value='1.8'], input[name=readingFontFamily][value=sans]").prop("checked", true);
+				panel.find("input[name=readingLineHeight][value='1.8'], input[name=readingFontFamily][value=sans], input[name=readingOpenMode][value=normal]").prop("checked", true);
 				applySettings();
 			})));
 
@@ -689,10 +696,10 @@ $(function()
 			var icon = $("<img />").appendTo(button);
 			var contents = $("link[rel=contents]").attr("href");
 			var header = $("<div />").addClass("readerHeader")
-				// 作品集の一覧へ戻る。戻った先から作品を開き直したときは、全画面にしない
+				// 作品集の一覧へ戻る。戻った先から作品を開き直したときは、表示設定の「作品を開くとき」に従う
 				.append(contents ? $("<a />", { href: contents, "class": "readerBack", title: "作品集に戻る" })
 					.append($("<img />", { src: basePath + "readerBackIcon.png", alt: "作品集に戻る" }))
-					.click(function() { setStored(false); }) : null)
+					.click(function() { setStored(null); }) : null)
 				.append($("<p />").addClass("readerTitle")
 					.append($("<span />").addClass("title").text(content.data("title") || document.title))
 					.append(content.data("name") ? $("<span />").addClass("name").text(content.data("name")) : null));
@@ -722,14 +729,16 @@ $(function()
 				slider.attr("aria-valuetext", describe(page, r));
 				label.text(describe(page, r));
 			};
+			// この作品を全画面で読んでいるか (作品の ID)、全画面をやめたか (! と作品の ID) を、タブを閉じるまで覚えておく
+			// null の場合は忘れ、次に作品を開いたときは表示設定の「作品を開くとき」に従う
 			var setStored = function(on)
 			{
 				try
 				{
-					if (on)
-						window.sessionStorage.setItem(storageKey, entryId || "");
-					else
+					if (on === null || !entryId)
 						window.sessionStorage.removeItem(storageKey);
+					else
+						window.sessionStorage.setItem(storageKey, (on ? "" : "!") + entryId);
 				}
 				catch (e)
 				{
@@ -1050,11 +1059,16 @@ $(function()
 						overscroll.check();
 				},
 				// リーダーモードのままページを移ったときは、移った先でもリーダーモードで開く
+				// 作品を開いたときは、表示設定で全画面を選んでいれば全画面で開く。
+				// ただし、この作品で全画面をやめた後や、コメントなどへのリンクから開いたときは開かない
 				restoreOnLoad: function()
 				{
 					try
 					{
-						if (entryId && window.sessionStorage.getItem(storageKey) == entryId)
+						var stored = entryId ? window.sessionStorage.getItem(storageKey) : null;
+						var direct = !location.hash || location.hash == "#resume" || location.hash == "#body";
+
+						if (entryId && (stored == entryId || stored != "!" + entryId && direct && megalopolis.mainCookie("OpenMode") == "reader"))
 							set(true);
 					}
 					catch (e)
