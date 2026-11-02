@@ -30,6 +30,8 @@
 	--on-accent: #ffffff;
 	--button-background: #fcfcfc;
 	--button-hover: #ffffff;
+	/* ボタンの下半分に、下へ向かって濃くなる影を付ける */
+	--button-gradient: linear-gradient(rgba(128, 128, 128, 0) 50%, rgba(128, 128, 128, 0.13) 50%, rgba(128, 128, 128, 0.48));
 	--button-icon: #999999;
 	--bevel: #ffffff;
 	--notify-border: #ffbb00;
@@ -113,8 +115,7 @@ input[type="submit"], input[type="reset"], input[type="button"], button
 	border: var(--border) 1px solid;
 	border-radius: 4px;
 	height: 24px;
-	/* 下半分に、下へ向かって濃くなる影を付ける */
-	background: var(--button-background) linear-gradient(rgba(128, 128, 128, 0) 50%, rgba(128, 128, 128, 0.13) 50%, rgba(128, 128, 128, 0.48));
+	background: var(--button-background) var(--button-gradient);
 	font: inherit;
 	font-size: 9pt;
 	text-shadow: 1px 1px 0px var(--bevel);
@@ -578,7 +579,7 @@ body>footer>ul:first-child+a
 	border: var(--border) 1px solid;
 	border-radius: 4px;
 	height: 24px;
-	background: var(--button-background) linear-gradient(rgba(128, 128, 128, 0) 50%, rgba(128, 128, 128, 0.13) 50%, rgba(128, 128, 128, 0.48));
+	background: var(--button-background) var(--button-gradient);
 	color: var(--text);
 	font-size: 9pt;
 	line-height: 18px;
@@ -3866,6 +3867,8 @@ select {
 		--on-accent: #ffffff;
 		--button-background: #2c2e2d;
 		--button-hover: #363937;
+		/* 暗い地では灰色の影が明るく見えるため、上半分を白で明るくし、下半分を黒で暗くして立体感を出す */
+		--button-gradient: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.3));
 		--button-icon: #5d615e;
 		--bevel: rgba(255, 255, 255, 0.06);
 		--notify-border: #8a6d1a;
