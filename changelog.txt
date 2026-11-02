@@ -114,6 +114,7 @@
 	  req/Visualizer/Util/Track.php,
 	  script/Read/Edit.js: ラベルの無かった入力欄 (コメント欄、検索の範囲の終わり、管理者の選択欄など) と色の見本に名前を付ける
 	* style/style.css: 一覧の日時などの薄い灰色を、白地でも読みやすい濃さ (コントラスト比 4.5:1 以上) にする
+	* style/style.css: 幅の狭い画面では、簡易評価とコメントのタブと「ページの先頭へ」を指で押しやすい大きさにする
 	* req/Core/App.php,
 	  req/Core/Util.php: 他のサイトから送信された POST を拒否する確認が働いていなかったのを修正
 	  Referer の比較が誤っており、Referer が無い場合しか拒否されていませんでした
