@@ -687,7 +687,12 @@ $(function()
 			var isReader = function() { return active; };
 			var button = $("<button />", { type: "button", "class": "readerButton" });
 			var icon = $("<img />").appendTo(button);
+			var contents = $("link[rel=contents]").attr("href");
 			var header = $("<div />").addClass("readerHeader")
+				// 作品集の一覧へ戻る。戻った先から作品を開き直したときは、全画面にしない
+				.append(contents ? $("<a />", { href: contents, "class": "readerBack", title: "作品集に戻る" })
+					.append($("<img />", { src: basePath + "readerBackIcon.png", alt: "作品集に戻る" }))
+					.click(function() { setStored(false); }) : null)
 				.append($("<p />").addClass("readerTitle")
 					.append($("<span />").addClass("title").text(content.data("title") || document.title))
 					.append(content.data("name") ? $("<span />").addClass("name").text(content.data("name")) : null));

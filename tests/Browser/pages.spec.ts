@@ -337,6 +337,9 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await expect(body).toHaveClass(/reader/);
 	await expect(reader).toHaveAttribute("aria-pressed", "true");
 	await expect(body.locator(".readerTitle")).toContainText(work.title);
+	const back = body.getByRole("link", { name: "作品集に戻る" });
+	await expect(back).toBeVisible();
+	await expect(back).toHaveAttribute("href", (await page.locator("link[rel=contents]").getAttribute("href"))!);
 	await expect(body.getByRole("button", { name: "表示設定" })).toBeVisible();
 	const slider = body.getByRole("slider", { name: "読んでいる位置" });
 	// 上下の帯の間を、画面の端から端までスクロールする領域にする
@@ -406,6 +409,20 @@ test("表示設定を保存し、作品ごとに読んでいた位置から続�
 	await expect(body).not.toHaveClass(/reader/);
 	await expect(page.locator("ul.options + #body")).toHaveCount(1);
 	await expect(body.locator(".readerHeader, .readerFooter")).toHaveCount(0);
+
+	// 左上の矢印で作品集に戻り、作品を開き直したときは全画面にしない
+	// (切り替えたアイコンの読み込みを、次の切り替えや移動で打ち切らないよう、読み込みを待つ)
+	const iconLoaded = () => reader.locator("img").evaluate((e: HTMLImageElement) => e.complete);
+	await expect.poll(iconLoaded).toBe(true);
+	await reader.evaluate((e: HTMLElement) => e.focus({ preventScroll: true }));
+	await page.keyboard.press("Enter");
+	await expect(body).toHaveClass(/reader/);
+	const workUrl = page.url();
+	await expect.poll(iconLoaded).toBe(true);
+	await back.click();
+	await expect(page).not.toHaveURL(workUrl);
+	await page.goto(workUrl);
+	await expect(page.locator("#body")).not.toHaveClass(/reader/);
 
 	assertNoDiagnostics(diagnostics);
 });

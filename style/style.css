@@ -1963,6 +1963,26 @@ html.readerMode body
 	border-top: var(--border-disabled) 1px solid;
 }
 
+.read #body.reader .readerBack
+{
+	flex: none;
+	display: block;
+	margin-left: -8px;
+	padding: 8px;
+	line-height: 0;
+}
+
+.read #body.reader .readerBack img
+{
+	display: block;
+	border: none;
+}
+
+.read #body.reader .readerBack:hover img
+{
+	opacity: 0.7;
+}
+
 .read #body.reader .readerTitle
 {
 	flex: 1;
@@ -2995,6 +3015,12 @@ select {
 	.read #body.reader .readerHeader
 	{
 		padding-right: 4px;
+	}
+
+	.read #body.reader .readerBack
+	{
+		margin-left: -12px;
+		padding: 12px;
 	}
 
 	.read #body.reader .readerFooter output
