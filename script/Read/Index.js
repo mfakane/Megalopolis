@@ -784,61 +784,79 @@ $(function()
 					});
 				wrapper.on("scroll", updateSlider);
 
-				// 最後まで読んでからさらにスクロールすると、次のページへ移る
-				if (page < pageCount)
+				// ページの最後からさらにスクロールすると次のページへ、先頭からさらに戻すと前のページ (の最後) へ移る
+				if (pageCount > 1)
 					overscroll = (function()
 					{
-						var hint = $("<div />", { "class": "readerNext", "aria-hidden": "true" })
-							.append($("<span />").addClass("label"))
-							.append($("<span />").addClass("bar").append($("<span />")));
-						var ratio = 0;
+						var makeEdge = function(name, target, progress, label)
+						{
+							return {
+								name: name,
+								target: target,
+								progress: progress,
+								label: label,
+								hint: $("<div />", { "class": "readerEdge " + name, "aria-hidden": "true" })
+									.append($("<span />").addClass("label"))
+									.append($("<span />").addClass("bar").append($("<span />"))),
+								ratio: 0
+							};
+						};
+						var edges = $.grep([
+							page < pageCount ? makeEdge("next", page + 1, 0, "次のページ") : null,
+							page > 1 ? makeEdge("previous", page - 1, 1, "前のページ") : null
+						], function(i) { return i; });
+						var byName = {};
 						var armed = false;
 						var fired = false;
 						var lastWheel = 0;
 						var decay = null;
 						var touch = null;
-						var atEnd = function()
+						var at = function(name)
 						{
 							var w = wrapper[0];
+							// 縦書きでは右端が先頭、左端が終わり。scrollLeft の符号はブラウザで異なるため絶対値で比べる
+							var position = vertical.isVertical ? Math.abs(w.scrollLeft) : w.scrollTop;
+							var max = vertical.isVertical ? w.scrollWidth - w.clientWidth : w.scrollHeight - w.clientHeight;
 
-							// 縦書きでは左端が終わり。scrollLeft の符号はブラウザで異なるため絶対値で比べる
-							if (vertical.isVertical)
-								return Math.abs(w.scrollLeft) >= w.scrollWidth - w.clientWidth - 2;
-
-							return w.scrollTop >= w.scrollHeight - w.clientHeight - 2;
+							return name == "next" ? position >= max - 2 : position <= 2;
 						};
-						var setRatio = function(value, touching)
+						var setRatio = function(edge, value, touching)
 						{
-							ratio = Math.min(Math.max(value, 0), 1);
-							hint.find(".bar span").css("width", ratio * 100 + "%");
-							hint.find(".label").text(fired || ratio >= 1 && !touching
-								? "次のページへ移ります"
-								: ratio >= 1
-									? "指を離すと次のページへ移ります"
-									: "さらにスクロールすると次のページへ");
+							edge.ratio = Math.min(Math.max(value, 0), 1);
+							edge.hint.find(".bar span").css("width", edge.ratio * 100 + "%");
+							edge.hint.find(".label").text(fired || edge.ratio >= 1 && !touching
+								? edge.label + "へ移ります"
+								: edge.ratio >= 1
+									? "指を離すと" + edge.label + "へ移ります"
+									: "さらにスクロールすると" + edge.label + "へ");
+							show(edge);
 						};
-						var fire = function()
+						var show = function(edge)
+						{
+							// 次のページへの案内は最後に着いたら出し、前のページへの案内は戻し始めたときだけ出す
+							edge.hint.toggleClass("visible", active && (fired || edge.ratio > 0 || edge.name == "next" && at("next")));
+						};
+						var reset = function()
+						{
+							if (!fired)
+								$.each(edges, function(k, edge) { setRatio(edge, 0); });
+						};
+						var fire = function(edge)
 						{
 							fired = true;
-							setRatio(1);
-							go(page + 1, 0);
+							setRatio(edge, 1);
+							go(edge.target, edge.progress);
 						};
 						var check = function()
 						{
-							var end = active && atEnd();
-
-							// 終わりに着いたときのスクロールの勢いでは移らないよう、いったん止まるまでは数えない
-							if (!end)
-							{
+							// 端に着いたときのスクロールの勢いでは移らないよう、いったん止まるまでは数えない
+							if (!at("next") && !at("previous"))
 								armed = false;
 
-								if (!fired)
-									setRatio(0);
-							}
-
-							hint.toggleClass("visible", end || fired);
+							reset();
 						};
 
+						$.each(edges, function(k, edge) { byName[edge.name] = edge; });
 						wrapper.on("scroll", check);
 						wrapper.on("wheel", function(e)
 						{
@@ -851,12 +869,17 @@ $(function()
 							var forward = vertical.isVertical && Math.abs(ev.deltaX) > Math.abs(ev.deltaY) ? -ev.deltaX : ev.deltaY;
 							var now = new Date().getTime();
 							var idle = now - lastWheel;
+							var edge = forward > 0 ? byName.next : forward < 0 ? byName.previous : null;
 
 							forward *= ev.deltaMode == 1 ? 40 : ev.deltaMode == 2 ? wrapper.height() : 1;
 							lastWheel = now;
 
-							if (!atEnd())
+							if (!edge || !at(edge.name))
+							{
+								reset();
+
 								return;
+							}
 
 							if (!armed)
 							{
@@ -866,25 +889,18 @@ $(function()
 									return;
 							}
 
-							if (forward <= 0)
-							{
-								setRatio(0);
-
-								return;
-							}
-
 							clearTimeout(decay);
-							decay = setTimeout(function() { if (!fired) setRatio(0); }, 800);
-							setRatio(ratio + forward / 300);
+							decay = setTimeout(reset, 800);
+							setRatio(edge, edge.ratio + Math.abs(forward) / 300);
 
-							if (ratio >= 1)
-								fire();
+							if (edge.ratio >= 1)
+								fire(edge);
 						});
 						wrapper.on("touchstart", function(e)
 						{
 							var t = e.originalEvent.touches[0];
 
-							touch = active && !fired && atEnd() && e.originalEvent.touches.length == 1 ? { x: t.clientX, y: t.clientY } : null;
+							touch = active && !fired && e.originalEvent.touches.length == 1 ? { x: t.clientX, y: t.clientY, next: at("next"), previous: at("previous") } : null;
 						});
 						wrapper.on("touchmove", function(e)
 						{
@@ -892,22 +908,27 @@ $(function()
 								return;
 
 							var t = e.originalEvent.touches[0];
+							// 読み進める向きに引っ張った量 (横書きでは上へ、縦書きでは右へ)
+							var pull = vertical.isVertical ? t.clientX - touch.x : touch.y - t.clientY;
 
-							// 縦書きでは右へ、横書きでは上へ引っ張る
-							setRatio((vertical.isVertical ? t.clientX - touch.x : touch.y - t.clientY) / 120, true);
+							touch.edge = pull > 0 && touch.next ? byName.next : pull < 0 && touch.previous ? byName.previous : null;
+							$.each(edges, function(k, edge)
+							{
+								setRatio(edge, edge == touch.edge ? Math.abs(pull) / 120 : 0, true);
+							});
 						});
 						wrapper.on("touchend touchcancel", function(e)
 						{
-							if (touch && e.type == "touchend" && ratio >= 1)
-								fire();
-							else if (!fired)
-								setRatio(0);
+							if (touch && touch.edge && e.type == "touchend" && touch.edge.ratio >= 1)
+								fire(touch.edge);
+							else
+								reset();
 
 							touch = null;
 						});
-						setRatio(0);
+						reset();
 
-						return { hint: hint, check: check };
+						return { hint: $($.map(edges, function(edge) { return edge.hint[0]; })), check: check };
 					})();
 			}
 

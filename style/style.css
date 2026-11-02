@@ -2025,8 +2025,8 @@ html.readerMode body
 	width: auto;
 }
 
-/* 最後まで読んでからさらにスクロールすると次のページへ移ることの案内と、引っ張った量 */
-.read #body.reader .readerNext
+/* ページの端からさらにスクロールすると前後のページへ移ることの案内と、引っ張った量 */
+.read #body.reader .readerEdge
 {
 	position: absolute;
 	left: 50%;
@@ -2053,13 +2053,13 @@ html.readerMode body
 	transition: opacity 0.2s, visibility 0.2s;
 }
 
-.read #body.reader .readerNext.visible
+.read #body.reader .readerEdge.visible
 {
 	opacity: 1;
 	visibility: visible;
 }
 
-.read #body.reader .readerNext .bar
+.read #body.reader .readerEdge .bar
 {
 	display: block;
 	width: 10em;
@@ -2069,7 +2069,7 @@ html.readerMode body
 	overflow: hidden;
 }
 
-.read #body.reader .readerNext .bar span
+.read #body.reader .readerEdge .bar span
 {
 	display: block;
 	width: 0%;
@@ -2077,18 +2077,35 @@ html.readerMode body
 	background: var(--accent-fill);
 }
 
-/* 縦書きでは、読み終わる側 (左) に出す */
-.read #body.vertical.reader .readerNext
+/* 前のページへの案内は先頭の側 (上) に出す */
+.read #body.reader .readerEdge.previous
 {
-	left: 16px;
+	top: 60px;
+	bottom: auto;
+}
+
+/* 縦書きでは、次のページへは読み終わる側 (左) に、前のページへは先頭の側 (右) に出す */
+.read #body.vertical.reader .readerEdge
+{
 	top: 50%;
 	bottom: auto;
 	transform: translateY(-50%);
 }
 
+.read #body.vertical.reader .readerEdge.next
+{
+	left: 16px;
+}
+
+.read #body.vertical.reader .readerEdge.previous
+{
+	left: auto;
+	right: 16px;
+}
+
 @media (prefers-reduced-motion: reduce)
 {
-	.read #body.reader .readerNext
+	.read #body.reader .readerEdge
 	{
 		transition: none;
 	}
