@@ -28,6 +28,11 @@ $config->requirePassword = array(
 	Configuration::ON_COMMENT => true,
 );
 $config->maxTags = 10;
+$config->showTweetButton = array(
+	Configuration::ON_AUTHOR => true,
+	Configuration::ON_TAG => true,
+	Configuration::ON_ENTRY => true,
+);
 
 $config->notes = "Hello!";
 $config->footers = array(

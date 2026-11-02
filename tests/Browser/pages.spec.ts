@@ -239,6 +239,43 @@ test("一覧の並べ替えと表示形式をキーボードで操作できる",
 	assertNoDiagnostics(diagnostics);
 });
 
+test("共有ボタンは PC では共有先のメニューを、タッチ端末では共有シートを開く", async ({ page, browser }) => {
+	const diagnostics = attachDiagnostics(page);
+	const work = makeWork("share");
+	const detailUrl = await createWork(page, work);
+
+	const share = page.locator("summary", { hasText: "共有" });
+	await share.click();
+	const x = page.getByRole("link", { name: "X でポスト" });
+	await expect(x).toBeVisible();
+	const intent = new URL((await x.getAttribute("href")) ?? "");
+	expect(intent.origin + intent.pathname).toBe("https://x.com/intent/post");
+	expect(intent.searchParams.get("url")).toBe(detailUrl);
+	expect(intent.searchParams.get("text")).toContain(work.title);
+	const bluesky = new URL((await page.getByRole("link", { name: "Bluesky に投稿" }).getAttribute("href")) ?? "");
+	expect(bluesky.searchParams.get("text")).toContain(detailUrl);
+	const hatena = new URL((await page.getByRole("link", { name: "はてなブックマークに追加" }).getAttribute("href")) ?? "");
+	expect(hatena.searchParams.get("url")).toBe(detailUrl);
+	await expect(page.getByRole("button", { name: "リンクをコピー" })).toBeVisible();
+	await page.keyboard.press("Escape");
+	await expect(x).toBeHidden();
+	await expect(share).toBeFocused();
+
+	// タッチ端末で共有シートが使えるときは、メニューを開かずに共有シートを開く
+	const mobile = await browser.newContext({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
+	await mobile.addInitScript(() => {
+		Object.defineProperty(navigator, "share", { value: (data: ShareData) => { (window as unknown as { shared: ShareData }).shared = data; return Promise.resolve(); } });
+	});
+	const mobilePage = await mobile.newPage();
+	await mobilePage.goto(detailUrl);
+	await mobilePage.locator("summary", { hasText: "共有" }).tap();
+	await expect.poll(() => mobilePage.evaluate(() => (window as unknown as { shared?: ShareData }).shared?.url)).toBe(detailUrl);
+	await expect(mobilePage.getByRole("link", { name: "X でポスト" })).toBeHidden();
+	await mobile.close();
+
+	assertNoDiagnostics(diagnostics);
+});
+
 test("管理用ツールで store/ 以下が Web から開けるときだけ警告する", async ({ page }) => {
 	const diagnostics = attachDiagnostics(page);
 

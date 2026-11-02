@@ -377,31 +377,75 @@ class Visualizer
 	}
 	
 	/**
-	 * X へのポストと、端末の共有機能 (Web Share API) で共有するボタンを出力する。
-	 * 外部のスクリプトを読み込まないよう、X へはリンクで投稿画面を開く
+	 * 共有ボタンを出力する。
+	 * 共有シート (Web Share API) が使えるタッチ端末ではシートを開き、それ以外では共有先のメニューを開く。
+	 * 外部のスクリプトを読み込まないよう、各サービスへはリンクで投稿画面を開く。
+	 * スクリプトが動かない環境でも、リンクの共有先はメニューから使える
 	 * @param string[] $keywords
 	 * @param string $title テキストが指定されていない場合に使うテキスト (ページのタイトル)
 	 */
 	static function tweetButton(string $url = "", ?string $text = null, ?string $hashtags = null, array $keywords = array(), string $title = ""): void
 	{
+		$c = Configuration::$instance;
+		$enabled = fn(string $service): bool => (bool)($c->shareServices[$service] ?? true);
 		$text = strtr($text ?? "", $keywords);
 
 		if (Util::isEmpty($text))
 			$text = $title;
 
-		$params = array_filter(array
-		(
-			"text" => $text,
-			"url" => strtr($url, $keywords),
-			"hashtags" => strtr($hashtags ?? "", $keywords),
-		));
-		
+		$url = strtr($url, $keywords);
+		$hashtags = array_values(array_filter(array_map("trim", explode(",", strtr($hashtags ?? "", $keywords))), fn($i) => $i != ""));
+		$query = fn(array $params): string => http_build_query(array_filter($params, fn($i) => $i != ""), "", "&", PHP_QUERY_RFC3986);
+		$links = array();
+
+		if ($enabled(Configuration::SHARE_X))
+			$links["X でポスト"] = "https://x.com/intent/post?" . $query(array
+			(
+				"text" => $text,
+				"url" => $url,
+				"hashtags" => implode(",", $hashtags),
+			));
+
+		// Bluesky には URL やハッシュタグの項目がないため、本文に含める
+		if ($enabled(Configuration::SHARE_BLUESKY))
+			$links["Bluesky に投稿"] = "https://bsky.app/intent/compose?" . $query(array
+			(
+				"text" => implode(" ", array_filter(array_merge(array($text, $url), array_map(fn($i) => "#" . $i, $hashtags)), fn($i) => $i != "")),
+			));
+
+		if ($enabled(Configuration::SHARE_HATENA))
+			$links["はてなブックマークに追加"] = "https://b.hatena.ne.jp/add?" . $query(array
+			(
+				"mode" => "confirm",
+				"url" => $url,
+				"title" => Util::isEmpty($title) ? $text : $title,
+			));
+
+		$copy = $enabled(Configuration::SHARE_COPY);
+		$native = $enabled(Configuration::SHARE_NATIVE);
+
+		if (!$links && !$copy && !$native)
+			return;
+
 		?>
-		<span class="shareButtons">
-			<a href="https://x.com/intent/post?<?php self::converted(implode("&", array_map(fn($k, $v) => rawurlencode($k) . "=" . rawurlencode($v), array_keys($params), array_values($params)))) ?>" class="shareButton" target="_blank" rel="noopener">X でポスト</a>
-			<?php // 端末の共有機能が使える場合だけ、script/base.js で表示する ?>
-			<button type="button" class="shareButton nativeShare" hidden data-url="<?php self::converted($params["url"] ?? "") ?>" data-text="<?php self::converted($text) ?>">共有</button>
-		</span>
+		<div class="shareButtons">
+			<details class="shareMenu" data-url="<?php self::converted($url) ?>" data-text="<?php self::converted($text) ?>"<?php if ($native): ?> data-native="true"<?php endif ?>>
+				<summary class="shareButton">共有</summary>
+				<ul>
+					<?php foreach ($links as $label => $href): ?>
+						<li><a href="<?php self::converted($href) ?>" target="_blank" rel="noopener"><?php self::converted($label) ?></a></li>
+					<?php endforeach ?>
+					<?php // 以下はスクリプトが必要なため、script/base.js で表示する ?>
+					<?php if ($copy): ?>
+						<li class="copyLink" hidden><button type="button">リンクをコピー</button></li>
+					<?php endif ?>
+					<?php if ($native): ?>
+						<li class="nativeShare" hidden><button type="button">その他のアプリで共有…</button></li>
+					<?php endif ?>
+				</ul>
+			</details>
+			<span class="shareStatus" role="status"></span>
+		</div>
 		<?php
 	}
 

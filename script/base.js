@@ -1,6 +1,123 @@
 var megalopolis =
 {
 	/**
+	 * 共有ボタンを動かす。
+	 * 共有シートが使えるタッチ端末ではシートを開き、それ以外では共有先のメニューを開く
+	 */
+	shareMenu: function(menus)
+	{
+		var canShare = !!navigator.share;
+		var touch = !!window.matchMedia && window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+		var copyText = function(text)
+		{
+			if (navigator.clipboard && window.isSecureContext)
+				return navigator.clipboard.writeText(text);
+
+			// http で公開されている場合はクリップボードの API が使えないため、選択してコピーする
+			return new Promise(function(resolve, reject)
+			{
+				var textarea = $("<textarea readonly />").val(text).css({ position: "fixed", top: 0, left: 0, opacity: 0 }).appendTo(document.body);
+
+				textarea[0].select();
+
+				var copied = false;
+
+				try
+				{
+					copied = document.execCommand("copy");
+				}
+				catch (e)
+				{
+				}
+
+				textarea.remove();
+				(copied ? resolve : reject)();
+			});
+		};
+
+		menus.each(function()
+		{
+			var details = this;
+			var menu = $(this);
+			var summary = menu.children("summary");
+			var status = menu.siblings(".shareStatus");
+			var native = canShare && menu.data("native") === true;
+			var statusTimer = null;
+			var data = { title: $.trim(document.title), url: menu.data("url") };
+			var close = function()
+			{
+				details.open = false;
+			};
+			var share = function()
+			{
+				// 共有シートを閉じたときも reject されるため、エラーは無視する
+				navigator.share(data).catch(function() { });
+			};
+			var showStatus = function(text)
+			{
+				clearTimeout(statusTimer);
+				status.text(text);
+				statusTimer = setTimeout(function() { status.text(""); }, 3000);
+			};
+
+			// テキストがタイトルと同じ場合は、共有先で二重に表示されないよう省く
+			if (menu.data("text") && menu.data("text") != data.title)
+				data.text = String(menu.data("text"));
+
+			menu.find(".copyLink").prop("hidden", false).find("button").click(function()
+			{
+				close();
+				copyText(String(data.url)).then(function()
+				{
+					showStatus("リンクをコピーしました");
+				}, function()
+				{
+					showStatus("コピーできませんでした");
+				});
+			});
+
+			if (native)
+				menu.find(".nativeShare").prop("hidden", false).find("button").click(function()
+				{
+					close();
+					share();
+				});
+
+			// メニューに出せるものがなく、共有シートも開けない場合は、ボタンごと隠す
+			if (!menu.find("li:not([hidden])").length && !(native && touch))
+			{
+				menu.parent().prop("hidden", true);
+
+				return;
+			}
+
+			summary.click(function(e)
+			{
+				if (native && touch)
+				{
+					e.preventDefault();
+					share();
+				}
+			});
+			menu.find("a").click(close);
+			menu.keydown(function(e)
+			{
+				if (e.key == "Escape" && details.open)
+				{
+					close();
+					summary.focus();
+
+					return false;
+				}
+			});
+			$(document).on("click", function(e)
+			{
+				if (details.open && !$.contains(details, e.target))
+					close();
+			});
+		});
+	},
+	/**
 	 * マウスで開くドロップダウン (.dropDown) を、キーボードとスクリーンリーダーでも使えるようにする
 	 * - Tab でフォーカスすると開き、フォーカスが外れると閉じる
 	 * - Enter / Space で選ぶ (ドロップダウン自体では、マウスのクリックと同じ動作)、上下の矢印で項目を移動、Esc で閉じる
@@ -310,24 +427,7 @@ $(function()
 		return false;
 	});
 
-	// 端末の共有機能 (Web Share API) が使える場合だけ、共有ボタンを表示する
-	if (navigator.share)
-		$(".nativeShare").each(function()
-		{
-			var button = $(this);
-
-			button.prop("hidden", false).click(function()
-			{
-				var data = { title: $.trim(document.title), url: button.data("url") };
-
-				// テキストがタイトルと同じ場合は、共有先で二重に表示されないよう省く
-				if (button.data("text") && button.data("text") != data.title)
-					data.text = button.data("text");
-
-				// 共有の画面を閉じたときも reject されるため、エラーは無視する
-				navigator.share(data).catch(function() { });
-			});
-		});
+	megalopolis.shareMenu($("details.shareMenu"));
 });
 
 /*!{id:"uupaa.js",ver:0.7,license:"MIT",author:"uupaa.js@gmail.com"}*/

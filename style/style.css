@@ -462,12 +462,28 @@ ul.notify
 .shareButtons
 {
 	display: inline-flex;
-	gap: 4px;
+	gap: 8px;
 	align-items: center;
+	flex-direction: row-reverse;
+	/* 縦書きの本文の中でも、ボタンとメニューは横書きで表示する */
+	writing-mode: horizontal-tb;
 }
 
-/* X へのリンクも、共有のボタンと同じ見た目にする */
-a.shareButton
+.shareButtons[hidden],
+.shareMenu [hidden]
+{
+	display: none;
+}
+
+.shareMenu
+{
+	position: relative;
+	display: inline-block;
+	text-align: left;
+}
+
+/* 共有ボタンは、ほかのボタンと同じ見た目にする */
+.shareMenu summary
 {
 	display: inline-block;
 	padding: 2px 8px 2px 8px;
@@ -481,22 +497,87 @@ a.shareButton
 	text-shadow: 1px 1px 0px var(--bevel);
 	box-sizing: border-box;
 	box-shadow: 1px 1px 0px var(--bevel) inset, -1px 1px 0px var(--bevel) inset, -1px -1px 0px var(--bevel) inset, 1px -1px 0px var(--bevel) inset;
+	cursor: pointer;
+	list-style: none;
+	user-select: none;
 }
 
-a.shareButton:hover
+.shareMenu summary::-webkit-details-marker
+{
+	display: none;
+}
+
+.shareMenu summary:hover,
+.shareMenu[open] summary
 {
 	border-color: var(--accent-soft);
 	color: var(--accent-text);
 	background-color: var(--button-hover);
+}
+
+.shareMenu ul
+{
+	position: absolute;
+	top: 28px;
+	right: 0px;
+	z-index: 10;
+	margin: 0px;
+	padding: 4px 0px 4px 0px;
+	min-width: 12em;
+	border: var(--border) 1px solid;
+	border-radius: 4px;
+	background: var(--surface);
+	box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.25);
+	list-style: none;
+	white-space: nowrap;
+}
+
+.shareMenu li a,
+.shareMenu li button
+{
+	display: block;
+	margin: 0px;
+	padding: 4px 12px 4px 12px;
+	border: none;
+	border-radius: 0px;
+	width: 100%;
+	height: auto;
+	background: none;
+	box-shadow: none;
+	color: var(--text);
+	font-size: 9pt;
+	line-height: 18px;
+	text-align: left;
+	text-shadow: none;
+	text-decoration: none;
+	box-sizing: border-box;
+	cursor: pointer;
+}
+
+.shareMenu li a:hover,
+.shareMenu li a:focus-visible,
+.shareMenu li button:hover,
+.shareMenu li button:focus-visible
+{
+	background: var(--surface-hover);
+	color: var(--accent-text);
 	text-decoration: none;
 }
 
-.shareButtons button.shareButton
+/* 縦書きでは共有ボタンが本文の枠の下端にあり、下に開くと枠で切れるため、上に開く */
+.read #body.vertical .shareMenu ul
 {
-	margin: 0px;
+	top: auto;
+	bottom: 28px;
 }
 
-.shareButtons [hidden]
+.shareStatus
+{
+	color: var(--text-muted);
+	font-size: 9pt;
+}
+
+.shareStatus:empty
 {
 	display: none;
 }

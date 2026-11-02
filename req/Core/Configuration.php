@@ -22,6 +22,11 @@ class Configuration
 	const string ON_SUBJECT = "Subject";
 	const string ON_AUTHOR = "Author";
 	const string ON_TAG = "Tag";
+	const string SHARE_X = "X";
+	const string SHARE_BLUESKY = "Bluesky";
+	const string SHARE_HATENA = "Hatena";
+	const string SHARE_COPY = "Copy";
+	const string SHARE_NATIVE = "Native";
 	const int LIST_DOUBLE = 0;
 	const int LIST_SINGLE = 1;
 	const int EVAL_BOTH = -1;
@@ -401,6 +406,15 @@ class Configuration
 	);
 	/** @var bool[]|null */
 	public ?array $showTweetButton = null;
+	/** @var bool[] 指定のない共有先は有効として扱う */
+	public array $shareServices = array
+	(
+		self::SHARE_X => true,
+		self::SHARE_BLUESKY => true,
+		self::SHARE_HATENA => true,
+		self::SHARE_COPY => true,
+		self::SHARE_NATIVE => true,
+	);
 	public ?string $entryTweetButtonText = null;
 	public ?string $entryTweetButtonHashtags = null;
 	public ?string $tagTweetButtonText = null;

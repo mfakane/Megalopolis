@@ -486,13 +486,25 @@ $config->showPages = array
 	Configuration::ON_ENTRY => true,		// 作品に表示するか
 );
 
-// 共有ボタン (X でポスト、端末の共有機能) を表示するか (true/false)
+// 共有ボタンを表示するか (true/false)
+// スマートフォンなどでは端末の共有シートを、それ以外では共有先のメニューを開きます
 // 設定名は以前の Tweet Button のままです
 $config->showTweetButton = array
 (
 	Configuration::ON_AUTHOR => true,		// 作者別一覧に表示するか
 	Configuration::ON_TAG => true,			// タグ別一覧に表示するか
 	Configuration::ON_ENTRY => true,		// 作品に表示するか
+);
+
+// 共有ボタンで使う共有先 (true/false)
+// 項目を省略した共有先は有効になります
+$config->shareServices = array
+(
+	Configuration::SHARE_X => true,			// X でポスト
+	Configuration::SHARE_BLUESKY => true,	// Bluesky に投稿
+	Configuration::SHARE_HATENA => true,	// はてなブックマークに追加
+	Configuration::SHARE_COPY => true,		// リンクをコピー
+	Configuration::SHARE_NATIVE => true,	// 端末の共有シート (対応する環境のみ)
 );
 
 // 作品の共有ボタンのテキスト (文字列)

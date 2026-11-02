@@ -97,6 +97,16 @@
 	  - テキストが指定されていない場合は、これまでと同じくページのタイトルを使います
 	  - 設定名 ($config->showTweetButton など) は変わりません
 	* config.php,
+	  req/Core/Configuration.php,
+	  req/Core/Visualizer.php,
+	  script/base.js,
+	  style/style.css: 共有ボタンを「共有」ボタン 1 つにまとめ、共有先を選べるように
+	  - スマートフォンなど、共有シートが使えるタッチ端末では、端末の共有シートを開きます
+	  - それ以外では「X でポスト」「Bluesky に投稿」「はてなブックマークに追加」「リンクをコピー」のメニューを開きます
+	    PC でも共有シートが使えるブラウザでは、メニューに「その他のアプリで共有…」を加えます
+	  - スクリプトが動かない環境でも、X、Bluesky、はてなブックマークへのリンクはメニューから使えます
+	  - $config->shareServices で、共有先ごとに使うかどうかを指定できます
+	* config.php,
 	  req/Core/Visualizer.php: 既定の Content-Security-Policy から platform.twitter.com を外す
 	* req/Core/App.php,
 	  req/Core/Util.php: 他のサイトから送信された POST を拒否する確認が働いていなかったのを修正
