@@ -486,7 +486,6 @@ ul.notify
 .shareMenu summary
 {
 	display: inline-flex;
-	gap: 4px;
 	align-items: center;
 	padding: 2px 8px 2px 8px;
 	border: var(--border) 1px solid;
@@ -504,10 +503,24 @@ ul.notify
 	user-select: none;
 }
 
-.shareMenu summary svg
+/* アイコンは、ほかのボタン (button img) と同じく左端の区切られた領域に表示する */
+.shareMenu summary img
 {
-	flex: none;
-	fill: currentColor;
+	align-self: stretch;
+	margin: -2px 8px -2px -8px;
+	padding: 0px 4px 0px 3px;
+	border-right: var(--bevel) 1px solid;
+	border-radius: 3px 0px 0px 3px;
+	width: 16px;
+	height: auto;
+	background-color: var(--button-icon);
+	object-fit: none;
+}
+
+.shareMenu summary:hover img,
+.shareMenu[open] summary img
+{
+	background-color: var(--accent-soft);
 }
 
 .shareMenu summary::-webkit-details-marker

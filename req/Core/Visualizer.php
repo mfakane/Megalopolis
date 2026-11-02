@@ -430,7 +430,7 @@ class Visualizer
 		?>
 		<div class="shareButtons">
 			<details class="shareMenu" data-url="<?php self::converted($url) ?>" data-text="<?php self::converted($text) ?>"<?php if ($native): ?> data-native="true"<?php endif ?>>
-				<summary class="shareButton"><svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 0.3 4.1 4.2l1.1 1.1 2-2V10.5h1.6V3.3l2 2 1.1-1.1z" /><path d="M2.5 6h3v1.5H4v6.5h8V7.5h-1.5V6h3v9.5h-11z" /></svg>共有</summary>
+				<summary class="shareButton"><img src="<?php self::converted(self::actionHref("style", "shareButtonIcon.png")) ?>" alt="" />共有</summary>
 				<ul>
 					<?php foreach ($links as $label => $href): ?>
 						<li><a href="<?php self::converted($href) ?>" target="_blank" rel="noopener"><?php self::converted($label) ?></a></li>
