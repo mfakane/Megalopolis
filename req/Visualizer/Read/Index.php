@@ -166,7 +166,7 @@ Visualizer::doctype();
 	<?php else: ?>
 		<?php Visualizer::pager($h->page ?? 1, $h->entry->pageCount, 10, array(Visualizer::actionHref($h->subject, $h->entry->id) . "/", "#body")) ?>
 	<?php endif ?>
-	<section id="body"<?php if ($authorColors): ?> class="authorColors"<?php endif ?> data-style-path="<?=Visualizer::escapeOutput(Visualizer::$basePath) ?>style/<?=Visualizer::escapeOutput($c->skin !== null && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null) ?>" data-writing-mode="<?=intval($h->thread->writingMode) ?>">
+	<section id="body"<?php if ($authorColors): ?> class="authorColors"<?php endif ?> data-style-path="<?=Visualizer::escapeOutput(Visualizer::$basePath) ?>style/<?=Visualizer::escapeOutput($c->skin !== null && is_file("style/{$c->skin}/horizontalIcon.png") ? "{$c->skin}/" : null) ?>" data-writing-mode="<?=intval($h->thread->writingMode) ?>"<?php if (App::$actionName == "index"): ?> data-entry-id="<?=Visualizer::escapeOutput($h->entry->id) ?>" data-page="<?=intval($h->page ?? 1) ?>" data-page-count="<?=intval($h->entry->pageCount) ?>" data-page-base="<?=Visualizer::escapeOutput(Visualizer::actionHref($h->subject, $h->entry->id) . "/") ?>" data-reading-scope="<?=Visualizer::escapeOutput(Visualizer::$basePath) ?>"<?php endif ?>>
 		<div id="verticalWrapper">
 			<div id="contentWrapper">
 				<?php if ($h->page == 1 && $c->showHeaderInsideBorder): ?>

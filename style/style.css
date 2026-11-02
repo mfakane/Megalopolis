@@ -1617,7 +1617,13 @@ ul.buttons li,
 
 .read #body #contentWrapper
 {
-	line-height: 1.8;
+	/* 行間は表示設定 (script/Read/Index.js) で変えられる */
+	line-height: var(--reading-line-height, 1.8);
+}
+
+.read #body.serif #contentWrapper
+{
+	font-family: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", "Noto Serif CJK JP", serif;
 }
 
 .read #body h1
@@ -1681,23 +1687,170 @@ ul.buttons li,
 	height: 16px;
 }
 
-.read ul.options li.split
+.read ul.options li
 {
-	padding-left: 4px;
-	border-left: var(--border) 1px solid;
+	position: relative;
 }
 
-.read .hint
+.read ul.options button.readingSettingsButton
+{
+	display: block;
+	margin: 0px;
+	padding: 0px;
+	border: none;
+	width: auto;
+	height: 16px;
+	background: none;
+	box-shadow: none;
+	cursor: pointer;
+}
+
+.read ul.options button.readingSettingsButton img
+{
+	display: block;
+	margin: 0px;
+	padding: 0px;
+	border: none;
+	background: none;
+}
+
+.read ul.options button.readingSettingsButton:hover img,
+.read ul.options button.readingSettingsButton[aria-expanded="true"] img
+{
+	opacity: 0.7;
+}
+
+/* 表示設定のパネル */
+.read .readingSettings
 {
 	position: absolute;
-	right: 4px;
-	top: 4px;
-	padding: 4px;
-	border: var(--notify-border) 1px solid;
+	top: 22px;
+	right: -4px;
+	z-index: 10;
+	padding: 8px 12px 12px 12px;
+	width: 20em;
+	border: var(--border) 1px solid;
 	border-radius: 4px;
+	background: var(--surface);
+	box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.25);
 	color: var(--text);
-	background-color: var(--notify-background);
+	font-size: 9pt;
+	line-height: 1.5;
+	text-align: left;
+}
+
+.read .readingSettings[hidden]
+{
+	display: none;
+}
+
+.read .readingSettings fieldset
+{
+	margin: 0px 0px 8px 0px;
+	padding: 0px;
+	border: none;
+}
+
+.read .readingSettings legend
+{
+	margin: 0px 0px 4px 0px;
+	padding: 0px;
+	color: var(--text-muted);
+	font-weight: bold;
+}
+
+.read .readingSettings .stepper
+{
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.read .readingSettings .stepper output
+{
+	min-width: 4em;
+	text-align: center;
+}
+
+.read .readingSettings button
+{
+	margin: 0px;
+	min-width: 32px;
+}
+
+/* 選択肢は、つながったボタンのように並べる */
+.read .readingSettings .segmented
+{
+	display: flex;
+}
+
+.read .readingSettings .segmented label
+{
+	flex: 1;
+	position: relative;
+	margin: 0px 0px 0px -1px;
+	padding: 3px 4px 3px 4px;
+	border: var(--border) 1px solid;
+	background: var(--button-background);
+	text-align: center;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.read .readingSettings .segmented label:first-child
+{
+	margin-left: 0px;
+	border-radius: 4px 0px 0px 4px;
+}
+
+.read .readingSettings .segmented label:last-child
+{
+	border-radius: 0px 4px 4px 0px;
+}
+
+.read .readingSettings .segmented label:hover
+{
+	background-color: var(--button-hover);
+	color: var(--accent-text);
+}
+
+.read .readingSettings .segmented input
+{
+	position: absolute;
+	margin: 0px;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.read .readingSettings .segmented label:has(input:checked)
+{
 	z-index: 1;
+	border-color: var(--accent-border);
+	background: var(--accent-fill);
+	color: var(--on-accent);
+}
+
+.read .readingSettings .segmented label:has(input:focus-visible)
+{
+	z-index: 2;
+	outline: 2px solid var(--accent-soft);
+	outline-offset: 1px;
+}
+
+.read .readingSettings .note
+{
+	margin: 4px 0px 0px 0px;
+	color: var(--text-muted);
+}
+
+.read .readingSettings .actions
+{
+	text-align: right;
+}
+
+.read .resume .buttons input + input
+{
+	margin-left: 4px;
 }
 
 .read #body #summary
@@ -1720,7 +1873,6 @@ ul.buttons li,
 	margin: 0px;
 	padding: 0px;
 	width: 100%;
-	font-family: "@MeiryoKe_Gothic", "@メイリオ", "@ＭＳ ゴシック", monospace;
 	overflow: auto;
 }
 
@@ -2285,9 +2437,15 @@ body>header form input[type="submit"] {
 .read #body.vertical #verticalWrapper {
 	writing-mode: vertical-rl;
 	text-orientation: mixed;
-	letter-spacing: 1px;
-	line-height: 130%;
+	/* 横書き用の字詰め (カーニング) は縦書きでは字間が不揃いになるため使わず、約物の空きも詰めない */
+	font-kerning: none;
+	text-spacing-trim: space-all;
 	height: 100%;
+}
+
+/* 縦中横 (script/Read/Index.js で、短い数字や感嘆符を囲む) */
+.read #body.vertical .tcy {
+	text-combine-upright: all;
 }
 
 .read #body.vertical h1 {
@@ -2564,15 +2722,16 @@ select {
 		height: auto;
 	}
 	
-	.read ul.options li a
+	.read ul.options button.readingSettingsButton
 	{
-		display: block;
 		padding: 12px;
+		height: auto;
 	}
 	
-	.read ul.options li a img
+	.read .readingSettings
 	{
-		display: block;
+		top: 44px;
+		right: 0px;
 	}
 	
 	.read #body

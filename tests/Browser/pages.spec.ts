@@ -276,6 +276,61 @@ test("共有ボタンは PC では共有先のメニューを、タッチ端末�
 	assertNoDiagnostics(diagnostics);
 });
 
+test("表示設定を保存し、作品ごとに読んでいた位置から続きを読める", async ({ page }) => {
+	const diagnostics = attachDiagnostics(page);
+	const work = makeWork("reading");
+	const lines = (label: string) => Array.from({ length: 80 }, (_, i) => `${label} ${i + 1} 行目。12月25日、彼女は「本当に!?」と叫んだ。`).join("\n");
+	work.body = `${lines("1 ページ目")}\n<split />\n${lines("2 ページ目")}`;
+	const detailUrl = await createWork(page, work);
+
+	// 行間を変えると本文に反映され、読み込み直しても保たれる
+	const settings = page.getByRole("button", { name: "表示設定" });
+	await settings.click();
+	await expect(page.getByRole("dialog", { name: "表示設定" })).toBeVisible();
+	const lineHeight = () => page.locator("#contentWrapper").evaluate(e => parseFloat(getComputedStyle(e).lineHeight) / parseFloat(getComputedStyle(e).fontSize));
+	expect(await lineHeight()).toBeCloseTo(1.8, 1);
+	await page.getByText("とても広い", { exact: true }).click();
+	expect(await lineHeight()).toBeCloseTo(2.4, 1);
+	await page.keyboard.press("Escape");
+	await expect(page.getByRole("dialog", { name: "表示設定" })).toBeHidden();
+	await expect(settings).toBeFocused();
+	await page.reload();
+	expect(await lineHeight()).toBeCloseTo(2.4, 1);
+
+	// 縦書きでは短い数字や感嘆符を縦中横にし、横書きに戻すと元に戻す
+	await settings.click();
+	await page.getByText("縦書き", { exact: true }).click();
+	await expect(page.locator("#body")).toHaveClass(/vertical/);
+	expect(await page.locator("#contentBody .tcy").count()).toBeGreaterThan(0);
+	await page.getByText("横書き", { exact: true }).click();
+	await expect(page.locator("#body")).not.toHaveClass(/vertical/);
+	await expect(page.locator("#contentBody .tcy")).toHaveCount(0);
+	await page.keyboard.press("Escape");
+
+	// 2 ページ目の途中まで読んでから作品を開き直すと、続きから読める
+	await page.locator(".pager").first().getByRole("link", { name: "2", exact: true }).click();
+	await expect(page.getByText("2 ページ目 1 行目。", { exact: false })).toBeVisible();
+	await page.waitForTimeout(1200);
+	const progress = () => page.evaluate(() => {
+		const rect = document.querySelector("#content")!.getBoundingClientRect();
+
+		return -rect.top / (rect.height - window.innerHeight);
+	});
+	await page.evaluate(() => {
+		const rect = document.querySelector("#content")!.getBoundingClientRect();
+		window.scrollTo(0, rect.top + window.scrollY + (rect.height - window.innerHeight) * 0.5);
+	});
+	await page.waitForTimeout(800);
+	await page.goto(detailUrl);
+	await expect(page.getByText("前回は 2 ページ目の 50% まで読みました")).toBeVisible();
+	await page.getByRole("button", { name: "続きから読む" }).click();
+	await expect(page.getByText("2 ページ目 1 行目。", { exact: false })).toBeAttached();
+	await expect.poll(progress).toBeGreaterThan(0.4);
+	expect(await progress()).toBeLessThan(0.6);
+
+	assertNoDiagnostics(diagnostics);
+});
+
 test("管理用ツールで store/ 以下が Web から開けるときだけ警告する", async ({ page }) => {
 	const diagnostics = attachDiagnostics(page);
 

@@ -334,7 +334,7 @@ var megalopolis =
 	 */
 	mergeMainCookies: function(values)
 	{
-		var scriptKeys = ["FontSize", "Vertical", "ListType", "ListVisibility", "MobileVertical", "Sort"];
+		var scriptKeys = ["FontSize", "LineHeight", "FontFamily", "Vertical", "ListType", "ListVisibility", "MobileVertical", "Sort"];
 		var data = megalopolis.parseMainCookie(values[0]);
 		var set = [];
 

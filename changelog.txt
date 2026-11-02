@@ -107,6 +107,19 @@
 	  - スクリプトが動かない環境でも、X、Bluesky、はてなブックマークへのリンクはメニューから使えます
 	  - $config->shareServices で、共有先ごとに使うかどうかを指定できます
 	  - 共有ボタンにアイコンを付け、横書きではあとがきの枠の右下に余白を空けて表示します
+	* req/Visualizer/Read/Index.php,
+	  script/base.js,
+	  script/Read/Index.js,
+	  style/style.css,
+	  style/readingIcon.png,
+	  style/alt/readingIcon.png: 作品の表示設定をまとめ、読んでいた位置から続きを読めるように
+	  - 文字の拡大・縮小と文字方向の切り替えのボタンを「表示設定」のボタン 1 つにまとめ、押すと開くパネルで設定します
+	  - 文字の大きさ、行間 (狭い / 標準 / 広い / とても広い)、書体 (ゴシック / 明朝)、文字の方向を選べます
+	  - 作品ごとに読んでいたページと位置をブラウザーに記録し、次に開いたときに「続きから読む」を表示します
+	    再読み込みや戻る・進むで開いたとき、最後まで読んだ作品では表示しません
+	  - 縦書きで、半角の 1〜2 桁の数字と感嘆符・疑問符を縦中横にします
+	  - 縦書きで、古い Internet Explorer 向けの縦書き用フォント (@メイリオ など) の指定と字間の調整をやめ、字詰めをしないようにしました
+	  - 縦書きの本文を、キーボードの矢印でもスクロールできるようにしました
 	* config.php,
 	  req/Core/Visualizer.php: 既定の Content-Security-Policy から platform.twitter.com を外す
 	* req/Core/App.php,
