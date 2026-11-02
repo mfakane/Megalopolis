@@ -1,112 +1,6 @@
-﻿2026-11-01 COAH96KoxU <queue glasscore.net>
+﻿2026-11-02 COAH96KoxU <queue glasscore.net>
 
-	* req/Core/App.php: release 51
-	* req/Visualizer/Auth.php,
-	  req/Visualizer/Exception.php,
-	  req/Visualizer/Index/*.php,
-	  req/Visualizer/Read/*.php,
-	  req/Visualizer/Util/Config.php,
-	  req/Visualizer/Util/Track.php,
-	  style/style.css,
-	  style/alt/style.css: 通常表示を幅の狭い画面 (スマートフォン) に対応
-	  - 幅 600px 以下では、ヘッダやフォームを縦に並べ、左右の余白と枠線をなくして画面の幅いっぱいに表示します
-	  - 作品一覧は作品を 1 列に並べ、テーブル表示も 1 作品ずつのカードにして表示します
-	  - 管理用ツールはホスト検索のみ対応しています
-	* req/Core/Visualizer.php: スマートフォン (iPhone、Android) では自動判定で簡易表示ではなく通常表示を使うように
-	  スマートフォンではフッタに簡易表示へのリンクを表示します
-	* script/Index/Index.js: 一覧の表示形式の「二列表示」を「並べて表示」に改称
-	  タッチ操作で並べ替えのメニューを開いたときに並び順が反転するのを修正
-	* script/Index/Search.js,
-	  script/Read/Edit.js: 幅の狭い画面では入力欄の幅をスクリプトで指定しないように
-	* script/base.js: https のサイトでクッキーのパスが壊れ、縦書き・横書きの切り替えが効かないのを修正
-	  スクリプトで書いたクッキーのパスがサーバーとずれ、閲覧履歴などが更新されなくなるのを修正
-	  - 以前のパスに残ったクッキーは、ページを開いたときにまとめて書き直します
-	* script/Read/Index.js: 方向が指定された作品で文字方向を切り替えたとき、全作品共通の設定を書き換えないように
-	  オプションボタンの処理で例外が出ると、以後ボタンが反応しなくなるのを修正
-	* style/style.css: 縦書きの text-orientation を無効な値 upright-right から mixed に修正
-	  作品の削除欄にスタイルが当たらなくなっていたのを修正
-	  高さの違うボタンでアイコンの領域がずれるのを修正
-	  色パレットの見本を正方形にし、無指定の欄の斜線が枠と接しないように
-	* style/*.png,
-	  style/alt/background.png: ボタン、ヘッダ、状態表示などの背景画像を CSS のグラデーションに置き換えて削除
-	  (background.png, buttonBackground.png, buttonGradation.png, defaultColorIcon.png, infoBackground.png)
-	* req/Core/Visualizer.php,
-	  req/Visualizer/Index/Index.php,
-	  req/Visualizer/Read/Index.php: 作品と作品一覧に OGP と Twitter Card のメタタグを出力するように
-	  作品では作品名と概要を、一覧ではページのタイトルを使用します
-	* config.php,
-	  req/Core/Configuration.php: OGP と Twitter Card の画像を指定する $config->ogImage を追加
-	  既定では画像を指定しません。指定すると Twitter Card は大きな画像の形式になります
-	* req/Core/Visualizer.php: Content-Security-Policy を標準のヘッダー名で送るように
-	  これまでは現在のブラウザが解釈しない X-Content-Security-Policy などで送っていたため、効いていませんでした
-	  - Referrer-Policy: strict-origin-when-cross-origin を送るように
-	  - Internet Explorer 向けの X-UA-Compatible を送らないように
-	* config.php,
-	  req/Core/Configuration.php: Content-Security-Policy を変更または無効にする $config->contentSecurityPolicy を追加
-	  head、notes、footers にアクセス解析などのスクリプトを追加している場合、更新後はこの設定でスクリプトを許可する必要があります
-	* req/Core/Cookie.php,
-	  req/Core/Visualizer.php,
-	  script/base.js: 名前や閲覧履歴、表示モードのクッキーに SameSite=Lax を付け、https では Secure を付けるように
-	  表示モードのクッキーはスクリプトから読まないため HttpOnly にしました
-	* req/Core/Auth.php: https ではセッションのクッキーに Secure を付けるように
-	* req/Core/Util.php: HTTPS が on 以外の値 (1 など) で渡されるサーバーでも https と判定するように
-	* req/Core/App.php,
-	  config.php,
-	  req/Core/Configuration.php: サービスが終了した BBQ による公開プロキシ規制を廃止
-	  有効にしていると、応答のない DNS の問い合わせで閲覧や送信が遅くなっていました
-	  $config->useBBQ は以前の設定ファイルとの互換性のために残していますが、使用されません
-	* req/Core/Util.php: 管理者パスワード、編集キー、削除キーのハッシュを password_hash() (bcrypt) で作るように
-	  以前の形式のハッシュも引き続き使用できます
-	  - Megalith 形式 (SHA-1) のハッシュを緩い比較で確かめていたため、特定の値どうしが一致とみなされることがあったのを修正
-	* req/Handler/Read.php: 以前の形式で保存された編集キーで作品を編集したとき、編集キーを新しい形式で保存し直すように
-	  あわせて、編集キーの形式が古いことを知らせる表示をなくしました
-	* config.php,
-	  req/Visualizer/Util/Hash.php,
-	  readme.txt: 管理用設定ツールのハッシュ算出で config.php に書く行をそのまま表示するように
-	  新しい形式のハッシュには $ が含まれるため、" ではなく ' で囲む必要があります
-	  既定の管理者パスワード (passwd) のハッシュも新しい形式にしました
-	* req/Core/Auth.php: 管理者パスワード、編集キー、削除キーの照合に続けて失敗した接続元からの受け付けを一時的に停止するように
-	  既定では 15 分間に 10 回失敗すると、その後 15 分ほどは正しいパスワードでも受け付けません
-	  失敗の記録は store/loginfailures.php に保存し、Web から開かれても中身を返さないようにしています
-	* config.php,
-	  req/Core/Configuration.php: 停止するまでの回数 $config->loginFailureLimit と期間 $config->loginLockMinutes を追加
-	* .htaccess,
-	  store/.htaccess: store/ 以下へのアクセスをすべて拒否するように
-	  これまでは .htaccess で *.sqlite を拒否しているだけで、Apache 2.4 以降の書き方にも対応していませんでした
-	  - Apache 2.4 以降では Require all denied を、2.2 では Order と Deny を使用します
-	  - mod_rewrite が使える場合は、store/.htaccess が無くても store/ 以下を拒否します
-	  更新の際は store/.htaccess を置き、.htaccess を書き換えてください
-	* readme.txt: nginx など .htaccess を使用しないサーバで store/ 以下を拒否する設定例を追加
-	* req/Visualizer/Util/Index.php,
-	  script/Util/Index.js: 管理用ツールのページで、store/ 以下やデータベースのファイルが Web から開ける場合に警告を表示するように
-	  管理者のブラウザから実際に取得できるかを確かめるため、サーバの種類や設定によらず確認できます
-	* style/style.css: OS やブラウザの設定 (prefers-color-scheme) に合わせてダークモードで表示するように
-	  配色を CSS 変数にまとめ、ダークモードでは変数の値だけを置き換えます。通常の表示は変わりません
-	* req/Visualizer/Read/Index.php,
-	  script/Read/Edit.js: 作者が文字色、背景色、背景画像を指定した作品や、本文で文字の色を指定している作品は、
-	  ダークモードでも本文の枠の中だけを明るい配色で表示するように
-	  背景色だけが指定された作品でも文字が読めるよう、指定されていない色は明るい配色の既定値で補います
-	* style/alt/style.css: 赤ベースの見た目 ($config->skin = "alt") もダークモードに対応
-	* req/Core/Visualizer.php,
-	  req/Visualizer/Index/Index.php,
-	  req/Visualizer/Read/Index.php,
-	  script/base.js,
-	  style/style.css: Tweet Button を「X でポスト」のリンクと、端末の共有機能 (Web Share API) を使う「共有」ボタンに置き換え
-	  Twitter のスクリプト (widgets.js) と埋め込みを読み込まないため、表示が速くなり、閲覧が外部に伝わらなくなります
-	  - 「共有」ボタンは、共有機能に対応したブラウザ (主にスマートフォン) でだけ表示します
-	  - テキストが指定されていない場合は、これまでと同じくページのタイトルを使います
-	  - 設定名 ($config->showTweetButton など) は変わりません
-	* config.php,
-	  req/Core/Configuration.php,
-	  req/Core/Visualizer.php,
-	  script/base.js,
-	  style/style.css: 共有ボタンを「共有」ボタン 1 つにまとめ、共有先を選べるように
-	  - スマートフォンなど、共有シートが使えるタッチ端末では、端末の共有シートを開きます
-	  - それ以外では「X でポスト」「Bluesky に投稿」「はてなブックマークに追加」「リンクをコピー」のメニューを開きます
-	    PC でも共有シートが使えるブラウザでは、メニューに「その他のアプリで共有…」を加えます
-	  - スクリプトが動かない環境でも、X、Bluesky、はてなブックマークへのリンクはメニューから使えます
-	  - $config->shareServices で、共有先ごとに使うかどうかを指定できます
-	  - 共有ボタンにアイコンを付け、横書きではあとがきの枠の右下に余白を空けて表示します
+	* req/Core/App.php: release 52
 	* req/Visualizer/Read/Index.php,
 	  script/base.js,
 	  script/Read/Index.js,
@@ -147,33 +41,60 @@
 	  - 上下の帯の間を画面の端から端までスクロールする領域にし、余白はその内側に取ります
 	  - 横書きでは、1 行が長くなりすぎないよう、文字の大きさに合わせた幅で中央に表示します。縦書きでは、スライダーとページの移動を右から左に並べます
 	  - 全画面への切り替えでは、読んでいた位置を保ちます
+	* req/Visualizer/Exception.php,
+	  req/Visualizer/Read/Index.php,
+	  script/Read/Index.js,
+	  style/style.css: ボタンのあるお知らせ (評価やコメントの受け付け、続きから読む、投稿の確認など) の並べ方をそろえる
+	  - アイコン、文言、ボタンの順に 1 行に並べ、文言の 1 行目とアイコンをボタンの上下の中央にそろえます
+	  - ボタンのあるお知らせも、ボタンの無いお知らせと同じ高さにします
+	  - 幅が足りない場合は文言を折り返し、さらに足りなければボタンを次の行の右に回します
+	  - 幅の狭い画面では、お知らせのボタンを指で押しやすい高さにします
 	* config.php,
-	  req/Core/Visualizer.php: 既定の Content-Security-Policy から platform.twitter.com を外す
-	* req/Core/App.php,
-	  req/Core/Util.php: 他のサイトから送信された POST を拒否する確認が働いていなかったのを修正
-	  Referer の比較が誤っており、Referer が無い場合しか拒否されていませんでした
-	  - 新しいブラウザでは Sec-Fetch-Site で、対応していないブラウザでは Origin または Referer のホスト名で判断します
-	  - リバースプロキシが Host を書き換える環境でも、信頼するプロキシ ($config->trustedProxies) からの X-Forwarded-Host を使って判断します
+	  req/Core/Configuration.php,
+	  req/Core/Visualizer.php,
+	  req/Visualizer/Index/Index.php,
+	  req/Visualizer/Read/Index.php,
+	  script/base.js,
+	  style/style.css,
+	  style/shareButtonIcon.png: Tweet Button を、共有先を選べる「共有」ボタン 1 つに置き換え
+	  Twitter のスクリプト (widgets.js) と埋め込みを読み込まないため、表示が速くなり、閲覧が外部に伝わらなくなります
+	  - スマートフォンなど、共有シートが使えるタッチ端末では、端末の共有シートを開きます
+	  - それ以外では「X でポスト」「Bluesky に投稿」「はてなブックマークに追加」「リンクをコピー」のメニューを開きます
+	    PC でも共有シートが使えるブラウザでは、メニューに「その他のアプリで共有…」を加えます
+	  - スクリプトが動かない環境でも、X、Bluesky、はてなブックマークへのリンクはメニューから使えます
+	  - $config->shareServices で、共有先ごとに使うかどうかを指定できます
+	  - テキストが指定されていない場合は、これまでと同じくページのタイトルを使います
+	  - 設定名 ($config->showTweetButton など) は変わりません
+	  - 共有ボタンにアイコンを付け、横書きではあとがきの枠の右下に余白を空けて表示します
 	* req/Core/Visualizer.php,
-	  script/jquery-3.7.1.min.js: jQuery を 1.8.1 から 3.7.1 に更新し、外部 (code.jquery.com) から読み込まずに同梱するように
-	  jQuery 1.x の既知の脆弱性 (XSS) を解消し、既定の Content-Security-Policy でスクリプトをこのサイトのものだけに制限しました
-	* script/base.js,
-	  script/Index/Index.js,
-	  script/Read/Index.js: jQuery 3 で削除された $.browser、andSelf() などを使わないように
-	* script/mobile/*: 使われていない携帯電話向けのスクリプトを削除
-	* THIRD_PARTY_LICENSES.txt: jQuery のライセンスを追加
+	  req/Visualizer/Index/Index.php,
+	  req/Visualizer/Read/Index.php: 作品と作品一覧に OGP と Twitter Card のメタタグを出力するように
+	  作品では作品名と概要を、一覧ではページのタイトルを使用します
+	* config.php,
+	  req/Core/Configuration.php: OGP と Twitter Card の画像を指定する $config->ogImage を追加
+	  既定では画像を指定しません。指定すると Twitter Card は大きな画像の形式になります
+	* style/style.css: OS やブラウザの設定 (prefers-color-scheme) に合わせてダークモードで表示するように
+	  配色を CSS 変数にまとめ、ダークモードでは変数の値だけを置き換えます。通常の表示は変わりません
+	* req/Visualizer/Read/Index.php,
+	  script/Read/Edit.js: 作者が文字色、背景色、背景画像を指定した作品や、本文で文字の色を指定している作品は、
+	  ダークモードでも本文の枠の中だけを明るい配色で表示するように
+	  背景色だけが指定された作品でも文字が読めるよう、指定されていない色は明るい配色の既定値で補います
+	* style/alt/style.css: 赤ベースの見た目 ($config->skin = "alt") もダークモードに対応
 	* script/Read/Edit.js: ダークモードの編集画面で、文字色や背景色を「指定なし」に戻しても本文欄が明るい配色のままになるのを修正
-	* req/Core/Util.php: iPhone の LINE や X などのアプリ内ブラウザで、携帯電話向けの簡易表示になるのを修正
-	  端末の判定を、簡易表示やスマートフォン向けの表示の切り替えに使うものだけにしました
-	* req/Core/Visualizer.php: 以前の版の携帯表示 (mobile) が表示モードのクッキーに残っていても、自動判定に戻すように
-	* req/Visualizer/Index/Index.php,
-	  req/Visualizer/Read/Edit.php,
-	  req/Core/Visualizer.php: Internet Explorer 6、7 と Firefox 2 向けの警告やページ送りの処理を削除
-	* script/base.js,
-	  script/Read/Index.js: 縦書きで縦方向のホイールを横のスクロールにする処理を標準の wheel イベントに変更
-	  Firefox でも動作するようになり、トラックパッドの横方向の操作はブラウザに任せるようにしました
-	* style/style.css: 検索欄のプレースホルダーの色を、Firefox などでも指定どおりにするように
-	* config.php: 実装されていない契約者固有 ID による送信規制の説明を削除
+	* req/App.php,
+	  req/Core/UpdateCheck.php,
+	  req/Handler/Util.php,
+	  req/Visualizer/Util/Index.php,
+	  config.php,
+	  README.md: 管理用ツールのトップに、新しいバージョンが公開されていることを表示する
+	  - GitHub (api.github.com) に最新のリリースを問い合わせ、新しければリリースのページへのリンクを表示します。自動で更新はしません
+	  - 問い合わせは 1 日に 1 回までで、結果は store/updatecheck.php に保存します。問い合わせに失敗した場合も 1 日待ち、その間は前回分かっていたリリースを使います
+	  - 外部へ接続できない場合は何も表示しません
+	  - 管理者が設定情報を開くと、最後に確認した日時と、分かっている最新のバージョン、前回の問い合わせに失敗したかを表示します
+	* req/Core/Configuration.php: 確認するかどうか $config->checkForUpdates を追加
+	* req/Visualizer/Util/Index.php,
+	  script/Util/Index.js: 管理用ツールのページで、store/ 以下やデータベースのファイルが Web から開ける場合に警告を表示するように
+	  管理者のブラウザから実際に取得できるかを確かめるため、サーバの種類や設定によらず確認できます
 	* script/base.js,
 	  script/Index/Index.js: 一覧の並べ替えと表示形式のメニューをキーボードで操作できるように
 	  Tab で選ぶと開き、上下の矢印で項目を移動、Enter または Space で選択、Esc で閉じます
@@ -188,25 +109,105 @@
 	  req/Visualizer/Util/Track.php,
 	  script/Read/Edit.js: ラベルの無かった入力欄 (コメント欄、検索の範囲の終わり、管理者の選択欄など) と色の見本に名前を付ける
 	* style/style.css: 一覧の日時などの薄い灰色を、白地でも読みやすい濃さ (コントラスト比 4.5:1 以上) にする
-	* req/App.php,
-	  req/Core/UpdateCheck.php,
-	  req/Handler/Util.php,
-	  req/Visualizer/Util/Index.php,
+	* req/Core/App.php,
+	  req/Core/Util.php: 他のサイトから送信された POST を拒否する確認が働いていなかったのを修正
+	  Referer の比較が誤っており、Referer が無い場合しか拒否されていませんでした
+	  - 新しいブラウザでは Sec-Fetch-Site で、対応していないブラウザでは Origin または Referer のホスト名で判断します
+	  - リバースプロキシが Host を書き換える環境でも、信頼するプロキシ ($config->trustedProxies) からの X-Forwarded-Host を使って判断します
+	* req/Core/Visualizer.php: Content-Security-Policy を標準のヘッダー名で送るように
+	  これまでは現在のブラウザが解釈しない X-Content-Security-Policy などで送っていたため、効いていませんでした
+	  - Referrer-Policy: strict-origin-when-cross-origin を送るように
+	  - Internet Explorer 向けの X-UA-Compatible を送らないように
+	* config.php,
+	  req/Core/Configuration.php: Content-Security-Policy を変更または無効にする $config->contentSecurityPolicy を追加
+	  head、notes、footers にアクセス解析などのスクリプトを追加している場合、更新後はこの設定でスクリプトを許可する必要があります
+	* config.php,
+	  req/Core/Visualizer.php: 既定の Content-Security-Policy から platform.twitter.com を外す
+	* req/Core/Visualizer.php,
+	  script/jquery-3.7.1.min.js: jQuery を 1.8.1 から 3.7.1 に更新し、外部 (code.jquery.com) から読み込まずに同梱するように
+	  jQuery 1.x の既知の脆弱性 (XSS) を解消し、既定の Content-Security-Policy でスクリプトをこのサイトのものだけに制限しました
+	* req/Core/Cookie.php,
+	  req/Core/Visualizer.php,
+	  script/base.js: 名前や閲覧履歴、表示モードのクッキーに SameSite=Lax を付け、https では Secure を付けるように
+	  表示モードのクッキーはスクリプトから読まないため HttpOnly にしました
+	* req/Core/Auth.php: https ではセッションのクッキーに Secure を付けるように
+	* req/Core/Util.php: HTTPS が on 以外の値 (1 など) で渡されるサーバーでも https と判定するように
+	* req/Core/Util.php: 管理者パスワード、編集キー、削除キーのハッシュを password_hash() (bcrypt) で作るように
+	  以前の形式のハッシュも引き続き使用できます
+	  - Megalith 形式 (SHA-1) のハッシュを緩い比較で確かめていたため、特定の値どうしが一致とみなされることがあったのを修正
+	* req/Handler/Read.php: 以前の形式で保存された編集キーで作品を編集したとき、編集キーを新しい形式で保存し直すように
+	  あわせて、編集キーの形式が古いことを知らせる表示をなくしました
+	* config.php,
+	  req/Visualizer/Util/Hash.php,
+	  README.md: 管理用設定ツールのハッシュ算出で config.php に書く行をそのまま表示するように
+	  新しい形式のハッシュには $ が含まれるため、" ではなく ' で囲む必要があります
+	  既定の管理者パスワード (passwd) のハッシュも新しい形式にしました
+	* req/Core/Auth.php: 管理者パスワード、編集キー、削除キーの照合に続けて失敗した接続元からの受け付けを一時的に停止するように
+	  既定では 15 分間に 10 回失敗すると、その後 15 分ほどは正しいパスワードでも受け付けません
+	  失敗の記録は store/loginfailures.php に保存し、Web から開かれても中身を返さないようにしています
+	* config.php,
+	  req/Core/Configuration.php: 停止するまでの回数 $config->loginFailureLimit と期間 $config->loginLockMinutes を追加
+	* .htaccess,
+	  store/.htaccess: store/ 以下へのアクセスをすべて拒否するように
+	  これまでは .htaccess で *.sqlite を拒否しているだけで、Apache 2.4 以降の書き方にも対応していませんでした
+	  - Apache 2.4 以降では Require all denied を、2.2 では Order と Deny を使用します
+	  - mod_rewrite が使える場合は、store/.htaccess が無くても store/ 以下を拒否します
+	  更新の際は store/.htaccess を置き、.htaccess を書き換えてください
+	* README.md: nginx など .htaccess を使用しないサーバで store/ 以下を拒否する設定例を追加
+	* req/Core/App.php,
 	  config.php,
-	  readme.txt: 管理用ツールのトップに、新しいバージョンが公開されていることを表示する
-	  - GitHub (api.github.com) に最新のリリースを問い合わせ、新しければリリースのページへのリンクを表示します。自動で更新はしません
-	  - 問い合わせは 1 日に 1 回までで、結果は store/updatecheck.php に保存します。問い合わせに失敗した場合も 1 日待ち、その間は前回分かっていたリリースを使います
-	  - 外部へ接続できない場合は何も表示しません
-	  - 管理者が設定情報を開くと、最後に確認した日時と、分かっている最新のバージョン、前回の問い合わせに失敗したかを表示します
-	* req/Core/Configuration.php: 確認するかどうか $config->checkForUpdates を追加
-	* req/Visualizer/Exception.php,
-	  req/Visualizer/Read/Index.php,
-	  script/Read/Index.js,
-	  style/style.css: ボタンのあるお知らせ (評価やコメントの受け付け、続きから読む、投稿の確認など) の並べ方をそろえる
-	  - アイコン、文言、ボタンの順に 1 行に並べ、文言の 1 行目とアイコンをボタンの上下の中央にそろえます
-	  - ボタンのあるお知らせも、ボタンの無いお知らせと同じ高さにします
-	  - 幅が足りない場合は文言を折り返し、さらに足りなければボタンを次の行の右に回します
-	  - 幅の狭い画面では、お知らせのボタンを指で押しやすい高さにします
+	  req/Core/Configuration.php: サービスが終了した BBQ による公開プロキシ規制を廃止
+	  有効にしていると、応答のない DNS の問い合わせで閲覧や送信が遅くなっていました
+	  $config->useBBQ は以前の設定ファイルとの互換性のために残していますが、使用されません
+	* script/base.js,
+	  script/Index/Index.js,
+	  script/Read/Index.js: jQuery 3 で削除された $.browser、andSelf() などを使わないように
+	* script/mobile/*: 使われていない携帯電話向けのスクリプトを削除
+	* THIRD_PARTY_LICENSES.txt: jQuery のライセンスを追加
+	* req/Core/Util.php: iPhone の LINE や X などのアプリ内ブラウザで、携帯電話向けの簡易表示になるのを修正
+	  端末の判定を、簡易表示やスマートフォン向けの表示の切り替えに使うものだけにしました
+	* req/Core/Visualizer.php: 以前の版の携帯表示 (mobile) が表示モードのクッキーに残っていても、自動判定に戻すように
+	* req/Visualizer/Index/Index.php,
+	  req/Visualizer/Read/Edit.php,
+	  req/Core/Visualizer.php: Internet Explorer 6、7 と Firefox 2 向けの警告やページ送りの処理を削除
+	* script/base.js,
+	  script/Read/Index.js: 縦書きで縦方向のホイールを横のスクロールにする処理を標準の wheel イベントに変更
+	  Firefox でも動作するようになり、トラックパッドの横方向の操作はブラウザに任せるようにしました
+	* style/style.css: 検索欄のプレースホルダーの色を、Firefox などでも指定どおりにするように
+	* config.php: 実装されていない契約者固有 ID による送信規制の説明を削除
+
+2026-11-01 COAH96KoxU <queue glasscore.net>
+
+	* req/Core/App.php: release 51
+	* req/Visualizer/Auth.php,
+	  req/Visualizer/Exception.php,
+	  req/Visualizer/Index/*.php,
+	  req/Visualizer/Read/*.php,
+	  req/Visualizer/Util/Config.php,
+	  req/Visualizer/Util/Track.php,
+	  style/style.css,
+	  style/alt/style.css: 通常表示を幅の狭い画面 (スマートフォン) に対応
+	  - 幅 600px 以下では、ヘッダやフォームを縦に並べ、左右の余白と枠線をなくして画面の幅いっぱいに表示します
+	  - 作品一覧は作品を 1 列に並べ、テーブル表示も 1 作品ずつのカードにして表示します
+	  - 管理用ツールはホスト検索のみ対応しています
+	* req/Core/Visualizer.php: スマートフォン (iPhone、Android) では自動判定で簡易表示ではなく通常表示を使うように
+	  スマートフォンではフッタに簡易表示へのリンクを表示します
+	* script/Index/Index.js: 一覧の表示形式の「二列表示」を「並べて表示」に改称
+	  タッチ操作で並べ替えのメニューを開いたときに並び順が反転するのを修正
+	* script/Index/Search.js,
+	  script/Read/Edit.js: 幅の狭い画面では入力欄の幅をスクリプトで指定しないように
+	* script/base.js: https のサイトでクッキーのパスが壊れ、縦書き・横書きの切り替えが効かないのを修正
+	  スクリプトで書いたクッキーのパスがサーバーとずれ、閲覧履歴などが更新されなくなるのを修正
+	  - 以前のパスに残ったクッキーは、ページを開いたときにまとめて書き直します
+	* script/Read/Index.js: 方向が指定された作品で文字方向を切り替えたとき、全作品共通の設定を書き換えないように
+	  オプションボタンの処理で例外が出ると、以後ボタンが反応しなくなるのを修正
+	* style/style.css: 縦書きの text-orientation を無効な値 upright-right から mixed に修正
+	  作品の削除欄にスタイルが当たらなくなっていたのを修正
+	  高さの違うボタンでアイコンの領域がずれるのを修正
+	  色パレットの見本を正方形にし、無指定の欄の斜線が枠と接しないように
+	* style/*.png,
+	  style/alt/background.png: ボタン、ヘッダ、状態表示などの背景画像を CSS のグラデーションに置き換えて削除
+	  (background.png, buttonBackground.png, buttonGradation.png, defaultColorIcon.png, infoBackground.png)
 
 2026-10-27 COAH96KoxU <queue glasscore.net>
 

@@ -8,7 +8,7 @@ class App
 {
 	const string NAME = "Megalopolis";
 	const string VERSION_PREFIX = "r";
-	const int VERSION = 51;
+	const int VERSION = 52;
 	const int MEGALITH_VERSION = 50;
 
 	const string META_TABLE = "meta";
