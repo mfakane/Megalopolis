@@ -28,7 +28,7 @@ if (Auth::hasSession(true)) {
 				$exposureProbes[] = array(
 					"href" => $fileHref(preg_replace('#^(\./)+#', "", $directory) . "{$name}.sqlite"),
 					"signature" => "SQLite format 3",
-					"message" => "データベース ({$directory}{$name}.sqlite) が Web からダウンロードできます。作品やコメント、接続元の記録などが誰でも取得できる状態です。readme.txt の「注意」を参照し、直ちにアクセスを拒否してください",
+					"message" => "データベース ({$directory}{$name}.sqlite) が Web からダウンロードできます。作品やコメント、接続元の記録などが誰でも取得できる状態です。README.md の「インストール・セットアップ」を参照し、直ちにアクセスを拒否してください",
 				);
 	}
 }

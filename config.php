@@ -33,7 +33,7 @@ $config->loginFailureLimit = 10;
 $config->loginLockMinutes = 15;
 
 // 管理用設定ツールが使用可能か (true/false)
-// 詳細については、readme.txt を参照してください。
+// 詳細については、README.md を参照してください。
 // 公開された環境で使用する場合、false にすることを推奨します
 $config->utilsEnabled = true;
 

@@ -46,7 +46,7 @@ jobs:
             composer.lock \
             config.php \
             index.php \
-            readme.txt \
+            README.md \
             THIRD_PARTY_LICENSES.txt
           echo "Created $ZIP_NAME"
 
