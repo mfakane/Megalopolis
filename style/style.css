@@ -2237,6 +2237,17 @@ html.readerMode body
 	height: auto;
 }
 
+/* 読み終わる側に、次のページへの案内の分の余白を取り、あとがきの終わりに案内が重ならないようにする */
+.read #body.reader:not(.vertical) #verticalWrapper
+{
+	padding-bottom: 80px;
+}
+
+.read #body.vertical.reader #verticalWrapper
+{
+	padding-left: 196px;
+}
+
 .read #body.reader #contentWrapper
 {
 	margin: 0px;
