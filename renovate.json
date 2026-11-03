@@ -1,0 +1,11 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["github>mfakane/renovate-config"],
+  "packageRules": [
+    {
+      "description": "compat/ images reproduce legacy environments on purpose",
+      "matchFileNames": ["compat/**"],
+      "enabled": false
+    }
+  ]
+}
