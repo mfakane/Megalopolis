@@ -94,6 +94,15 @@ final class AuthSessionTest extends TestCase
         }
     }
 
+    // PHP turns "." and " " in the names of received cookies into "_", so a
+    // name made from a directory such as example.com could never be read back.
+    public function testCookieNameSurvivesPhpNameMangling(): void
+    {
+        $name = (new \ReflectionMethod(Auth::class, 'cookieName'))->invoke(null, 'MEGALOPOLIS_ADMIN_', 'megalopolis.example.net');
+        self::assertSame('MEGALOPOLIS_ADMIN_megalopolis_example_net', $name);
+        self::assertMatchesRegularExpression('/^MEGALOPOLIS_ADMIN_[A-Za-z0-9_-]+$/', $this->cookie());
+    }
+
     private function login(int $issued): void
     {
         Configuration::$instance->adminHash ??= 'hash';
@@ -103,7 +112,7 @@ final class AuthSessionTest extends TestCase
 
     private function cookie(): string
     {
-        return 'MEGALOPOLIS_ADMIN_' . basename(dirname(__DIR__, 2));
+        return (new \ReflectionMethod(Auth::class, 'cookieName'))->invoke(null, 'MEGALOPOLIS_ADMIN_');
     }
 
     private function fingerprint(): string

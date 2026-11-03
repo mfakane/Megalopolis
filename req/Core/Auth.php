@@ -131,12 +131,15 @@ class Auth
 	}
 
 	/**
+	 * 設置したディレクトリの名前を付けて、同じドメインに置いた別の Megalopolis と区別する。
+	 * PHP は受け取ったクッキーの名前の . や空白を _ に変えて $_COOKIE に入れるため、
+	 * ドメイン名のディレクトリ (example.com) に置くと送った名前で読めずログインできない。英数字と _ - 以外は _ にする
 	 * @param non-empty-string $prefix
 	 * @return non-empty-string
 	 */
-	private static function cookieName(string $prefix): string
+	private static function cookieName(string $prefix, ?string $dir = null): string
 	{
-		return $prefix . basename(dirname(dirname(dirname(__FILE__))));
+		return $prefix . preg_replace('/[^A-Za-z0-9_-]/', '_', $dir ?? basename(dirname(__DIR__, 2)));
 	}
 
 	/** 管理者のログインを覚えておくクッキーの署名に使う鍵 (リクエストごとに求める) */
