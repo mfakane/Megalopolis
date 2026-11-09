@@ -1,10 +1,16 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>mfakane/renovate-config"],
+  "extends": [
+    "github>mfakane/renovate-config"
+  ],
   "packageRules": [
     {
-      "description": "compat/ images reproduce legacy environments on purpose",
-      "matchFileNames": ["compat/**"],
+      "description": "compat/ and compose test/compat files reproduce legacy DB environments on purpose",
+      "matchFileNames": [
+        "compat/**",
+        "compose.test.yml",
+        "compose.compat.yml"
+      ],
       "enabled": false
     }
   ]
